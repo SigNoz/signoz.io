@@ -1,24 +1,35 @@
 ---
-date: 2026-08-03
+date: 2026-10-12
 title: K8s Infra - Install
-description: Install the k8s-infra OpenTelemetry collection agent to send Kubernetes metrics, logs, and traces to SigNoz.
+description: Install the k8s-infra OpenTelemetry collection agent on Kubernetes with Helm or Foundry to send cluster metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
-K8s-Infra is a set of observability components that help you monitor and gain insights into your Kubernetes clusters. This guide will walk you through the steps to deploy K8s-Infra using the official [Helm Chart](https://github.com/SigNoz/charts/tree/main/charts/k8s-infra) provided by SigNoz. By following these instructions, you'll be able to collect metrics, logs, and traces from your Kubernetes workloads and send them to your SigNoz backend for analysis.
 
-To add the SigNoz Helm repository to your helm client, run the following command:
+This guide explains how to install the k8s-infra collection agent on a Kubernetes cluster using the SigNoz `k8s-infra` Helm chart, with Foundry or with Helm directly.
+
+## Prerequisites
+
+- A Kubernetes cluster.
+- `kubectl` configured to reach the cluster, and Helm 3 installed on the same machine.
+- A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm" default>
+
+## Install K8s Infra
+
+### Step 1: Add the Helm repository
+
+Run this on the machine where you use `kubectl`:
 
 ```bash
 helm repo add signoz https://charts.signoz.io
-```
-
-If the chart is already present, update the chart to the latest version:
-
-```bash
 helm repo update
 ```
 
-Based on how you are running SigNoz (e.g. SigNoz Cloud, in an independent VM or Kubernetes cluster),
-you have to provide the address to send data from the above receivers.
+### Step 2: Create override-values.yaml
+
+Create a file named `override-values.yaml` with the values for your SigNoz plan and Kubernetes platform:
 
 <Tabs entityName="plans">
   <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
@@ -34,7 +45,7 @@ you have to provide the address to send data from the above receivers.
       cloud: others
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
     presets:
@@ -56,7 +67,7 @@ you have to provide the address to send data from the above receivers.
       cloud: aws
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
     presets:
@@ -82,7 +93,7 @@ you have to provide the address to send data from the above receivers.
       cloud: gcp
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
     presets:
@@ -108,7 +119,7 @@ you have to provide the address to send data from the above receivers.
       cloud: gcp/autogke
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
     presets:
@@ -137,7 +148,7 @@ you have to provide the address to send data from the above receivers.
       cloud: aks
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
     presets:
@@ -163,7 +174,7 @@ you have to provide the address to send data from the above receivers.
       cloud: aws
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
     presets:
@@ -378,13 +389,346 @@ Replace the placeholders with values for your environment:
 </TabItem>
 </Tabs>
 
+### Step 3: Install the chart
 
-To install the `k8s-infra` chart with the above configuration, run the following command:
+Run this from the directory that contains `override-values.yaml`:
 
 ```bash
 helm install my-release signoz/k8s-infra -f override-values.yaml
 ```
 
+Helm installs the release `my-release` into the namespace of your current `kubectl` context, `default` unless you set another.
+
+### Step 4: Verify the installation
+
+Check that the pods are running:
+
+```bash
+kubectl get pods
+```
+
+The output should look similar to the following, with one `otel-agent` pod per node. Pod suffixes vary:
+
+```output
+NAME                                                    READY   STATUS    RESTARTS   AGE
+my-release-k8s-infra-otel-agent-7xk2p                   1/1     Running   0          2m
+my-release-k8s-infra-otel-agent-q9m4d                   1/1     Running   0          2m
+my-release-k8s-infra-otel-deployment-6d9c7b8f5c-k2x9p   1/1     Running   0          2m
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm container logs and Kubernetes events are flowing.
+
+## Customize the installation
+
+Every change follows the same loop: edit `override-values.yaml`, then upgrade the release:
+
+```bash
+helm upgrade my-release signoz/k8s-infra -f override-values.yaml
+```
+
+- **Presets and collector config**: see [Configure K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/) for the presets, receivers, and pipelines you can set.
+- **Chart values**: see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a> for every setting.
+- **Chart version**: add `--version <chart-version>` to `helm install` and `helm upgrade`. Versions are listed in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+
+**Verify these values:**
+
+- `<chart-version>`: A `k8s-infra` chart version from the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>, for example `0.17.1`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### helm install fails
+
+Re-run the command with `--debug` for details. The error `cannot re-use a name that is still in use` means the release `my-release` already exists. Apply your changes with `helm upgrade` as shown under Customize the installation.
+
+### Pods stay Pending
+
+Describe the pod to see why it is unscheduled:
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+Replace `<pod-name>` with a pod name from the `kubectl get pods` output.
+
+The agent uses host ports `4317`, `4318`, `8888`, and `13133` on every node, so another collector that holds those ports keeps the agent pod Pending. A pod that reports insufficient CPU or memory needs more node capacity.
+
+After the fix, `kubectl get pods` shows the pod as `Running`.
+
+### A pod keeps restarting
+
+Check its logs:
+
+```bash
+kubectl logs <pod-name>
+```
+
+To see the logs from before the last restart, add `--previous`.
+
+</details>
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+## Install K8s Infra
+
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
+
+### Step 1: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` with two documents, one per collector. The first runs the agent on every node as a DaemonSet for node, pod, and container metrics, container logs, and OTLP from your applications; the second runs one deployment collector for cluster metrics and Kubernetes events.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+The `config.data` block in each document sends the ingestion key as the `signoz-ingestion-key` header to SigNoz Cloud. The key is a plain environment variable in the collector pod specs, readable by anyone who can read the DaemonSet and Deployment in the namespace.
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: <signoz-otlp-endpoint>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: <signoz-otlp-endpoint>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+```
+
+**Verify these values:**
+
+- `<signoz-otlp-endpoint>`: The OTLP/HTTP address of your SigNoz. For SigNoz installed in this cluster with Foundry, use `http://signoz-ingester.signoz.svc.cluster.local:4318`. For SigNoz installed with the Helm chart, use `http://signoz-otel-collector.signoz.svc.cluster.local:4318`. The second `signoz` in each address is the namespace SigNoz runs in. For a SigNoz outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+</TabItem>
+</Tabs>
+
+The agent sets `host.name` and `k8s.node.name` to the node's name, and the `k8sattributes` processor in both collectors adds pod, namespace, and workload attributes, such as `k8s.pod.uid` and `k8s.deployment.name`, to telemetry from your pods.
+
+For all options, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/helm" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Collection Agent Helm example</a>.
+
+<Admonition type="info" title="Change the namespace or pin the chart version" defaultCollapsed="true">
+Annotations under `metadata` set where the collectors are installed and which chart is used. Set them in both documents so both collectors land in the same namespace. The defaults are:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-namespace: signoz            # namespace to install into, created if missing
+    foundry.signoz.io/kubernetes-helm-chart: k8s-infra        # chart name, archive URL, or local path
+    foundry.signoz.io/kubernetes-helm-repo-url: https://charts.signoz.io
+    foundry.signoz.io/kubernetes-helm-chart-version: latest   # or a pinned version such as 0.17.1
+```
+
+The namespace defaults to `metadata.name`. The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/helm/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes each one.
+</Admonition>
+
+<Admonition type="warning" title="GKE Autopilot or Windows nodes">
+On GKE Autopilot, or on a cluster with Windows nodes, use the Helm tab. Its **GKE (Autopilot)** and **Kubernetes with Windows Hosts** values cover those clusters.
+</Admonition>
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+This installs the `k8s-infra` chart into the `signoz` namespace as two releases, `signoz-collector-agent` and `signoz-collector-deployment`, and creates the namespace when it is missing. Run the same command again after editing `casting.yaml` to apply the change.
+
+<Admonition type="tip" title="Run Helm yourself" defaultCollapsed="true">
+To run Helm directly, generate the values files and pass each one to Helm:
+
+```bash
+foundryctl forge -f casting.yaml   # writes one values.yaml per collector under pours/collectionagent/collector/
+helm repo add signoz https://charts.signoz.io
+helm repo update
+helm upgrade --install signoz-collector-agent signoz/k8s-infra \
+   --namespace signoz --create-namespace \
+   -f pours/collectionagent/collector/agent/values.yaml
+helm upgrade --install signoz-collector-deployment signoz/k8s-infra \
+   --namespace signoz \
+   -f pours/collectionagent/collector/deployment/values.yaml
+```
+</Admonition>
+
+### Step 4: Verify the installation
+
+Check that the pods are running:
+
+```bash
+kubectl get pods -n signoz
+```
+
+The output should look similar to the following, with one `signoz-collector-agent` pod per node. Pod suffixes vary, and if SigNoz runs in the same namespace its pods are listed too:
+
+```output
+NAME                                           READY   STATUS    RESTARTS   AGE
+signoz-collector-agent-7xk2p                   1/1     Running   0          2m
+signoz-collector-agent-q9m4d                   1/1     Running   0          2m
+signoz-collector-deployment-6d9c7b8f5c-k2x9p   1/1     Running   0          2m
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm container logs and Kubernetes events are flowing.
+
+## Send data to SigNoz
+
+Your applications send traces, metrics, and logs to the agent on their node, which forwards them to SigNoz. Inside the cluster, the agent listens at:
+
+```bash
+http://signoz-collector-agent.signoz.svc.cluster.local:4318
+```
+
+Use this address as the OTLP endpoint in your instrumentation, for example as the value of `OTEL_EXPORTER_OTLP_ENDPOINT`. For gRPC, use port `4317` instead. The Service routes each request to the agent on the sender's node. The second `signoz` in the address is the namespace.
+
+The agent also listens on host ports `4317` and `4318` of every node. To send to the node's IP instead, see [Send Data from Instrumented Applications](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#send-data-from-instrumented-applications).
+
+## Customize the installation
+
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again. Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data` in the document of the collector you change, keyed `collector/agent/agent.yaml` for the agent and `collector/deployment/deployment.yaml` for the deployment collector, the same way the SigNoz Cloud casting adds the ingestion key header. It is merged into the generated config. A list you set replaces the generated list, so restate the whole list, for example every receiver of a pipeline you add a receiver to.
+- **Chart values** (resources, tolerations, image): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` in that collector's document, against `collectionagent/collector/agent/values.yaml` for the agent or `collectionagent/collector/deployment/values.yaml` for the deployment collector.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### foundryctl fails
+
+Re-run the failing command with `--debug` for verbose logs.
+
+### Kubernetes views stay empty
+
+The SigNoz Kubernetes views need `k8s.cluster.name` on the telemetry and data from both collectors. Check that both documents in `casting.yaml` set `K8S_CLUSTER_NAME`, and that `kubectl get pods -n signoz` lists a `signoz-collector-deployment` pod. After a fix, run `foundryctl cast -f casting.yaml` again.
+
+### Pods stay Pending
+
+Describe the pod to see why it is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with a pod name from the `kubectl get pods -n signoz` output.
+
+The agent uses host ports `4317`, `4318`, `8888`, and `13133` on every node, so another collector that holds those ports, such as a `k8s-infra` release installed with Helm, keeps the agent pod Pending. A pod that reports insufficient CPU or memory needs more node capacity.
+
+After the fix, `kubectl get pods -n signoz` shows the pod as `Running`.
+
+### A pod keeps restarting
+
+Check its logs:
+
+```bash
+kubectl logs -n signoz <pod-name>
+```
+
+To see the logs from before the last restart, add `--previous`.
+
+</details>
+
+</TabItem>
+</Tabs>
 
 ## Video Walkthrough
 
@@ -400,8 +744,3 @@ If you are someone who understands things better through video implementation, h
 - [Monitor Multiple K8S Clusters](/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
-
-
-
-
-
