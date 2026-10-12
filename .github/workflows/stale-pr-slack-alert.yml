@@ -40,14 +40,29 @@ jobs:
               per_page: 100
             });
 
-            const stalePulls = pulls
-              .filter((pr) => !pr.draft)
-              .map((pr) => ({
-                ...pr,
-                ageDays: Math.floor((now - new Date(pr.created_at).getTime()) / DAY_MS)
-              }))
-              .filter((pr) => pr.ageDays >= STALE_DAYS)
-              .sort((a, b) => b.ageDays - a.ageDays);
+            const ageInDays = (date) => Math.floor((now - new Date(date).getTime()) / DAY_MS);
+
+            // The age of a PR starts when the PR last left draft. If the PR was never a draft, the age starts when it was opened.
+            // A PR cannot leave draft before it is opened. So the timeline lookup runs only for PRs that are stale by open date.
+            const candidates = pulls.filter((pr) => !pr.draft && ageInDays(pr.created_at) >= STALE_DAYS);
+            const stalePulls = [];
+
+            for (const pr of candidates) {
+              const events = await github.paginate(github.rest.issues.listEventsForTimeline, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                per_page: 100
+              });
+              const readyAt = events.filter((e) => e.event === 'ready_for_review').pop()?.created_at;
+              const ageDays = ageInDays(readyAt ?? pr.created_at);
+
+              if (ageDays >= STALE_DAYS) {
+                stalePulls.push({ ...pr, ageDays });
+              }
+            }
+
+            stalePulls.sort((a, b) => b.ageDays - a.ageDays);
 
             const repoName = `${context.repo.owner}/${context.repo.repo}`;
             const prListUrl = `${context.serverUrl}/${repoName}/pulls`;
@@ -58,7 +73,7 @@ jobs:
                 text: [
                   ':white_check_mark: Daily stale PR check',
                   `Repository: \`${repoName}\``,
-                  `No non-draft open PRs older than ${STALE_DAYS} days.`,
+                  `No open PRs ready for review for ${STALE_DAYS}+ days.`,
                   `<${prListUrl}|View open PRs>`
                 ].join('\n')
               });
@@ -90,7 +105,7 @@ jobs:
 
               payloads.push({
                 text: [
-                  `:warning: Daily stale PR check: *${stalePulls.length}* non-draft open PR(s) older than ${STALE_DAYS} days`,
+                  `:warning: Daily stale PR check: *${stalePulls.length}* open PR(s) ready for review for ${STALE_DAYS}+ days`,
                   `Repository: \`${repoName}\``,
                   `Creators with stale PRs: *${creators.length}*`,
                   `<${prListUrl}|View all open PRs>`
@@ -109,7 +124,7 @@ jobs:
                 const footer = `<${authorSearchUrl}|View open PRs by @${creator.login}>`;
                 const prLines = creator.prs.map(
                   (pr) =>
-                    `• <${pr.html_url}|#${pr.number}> ${escapeSlack(truncate(pr.title))} (${pr.ageDays}d old)`
+                    `• <${pr.html_url}|#${pr.number}> ${escapeSlack(truncate(pr.title))} (${pr.ageDays}d since ready for review)`
                 );
 
                 let part = 1;
