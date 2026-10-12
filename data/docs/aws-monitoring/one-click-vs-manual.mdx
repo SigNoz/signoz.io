@@ -1,5 +1,5 @@
 ---
-date: 2026-10-08
+date: 2026-10-12
 title: One-Click vs Manual AWS Integration
 meta_title: One-Click vs Manual AWS Integration
 description: Compare one-click, self-managed metric stream, and manual OpenTelemetry AWS integrations by setup, cost, dashboards, and control to pick the right approach.
@@ -85,7 +85,11 @@ Create the metric stream with **Custom setup with Firehose** and select the deli
 
 ### Dashboards
 
-Metrics ingested this way use the same `aws_` naming as the one-click integration (for example, `aws_RDS_CPUUtilization_max`), so the per-service pre-built dashboards work as-is. Import them manually as JSON from the <a href="https://github.com/SigNoz/dashboards" target="_blank" rel="noopener noreferrer nofollow">SigNoz dashboards repository</a>. Services without a pre-built dashboard need custom dashboards.
+Metrics ingested this way use the same `aws_` naming as the one-click integration (for example, `aws_RDS_CPUUtilization_max`), so the per-service pre-built dashboards work as-is. Import the dashboard JSON for each service from the <a href="https://github.com/SigNoz/signoz/tree/main/pkg/modules/cloudintegration/implcloudintegration/fs/definitions/aws" target="_blank" rel="noopener noreferrer nofollow">SigNoz repository</a>. Each service folder has an `assets/dashboards` directory. Services without a pre-built dashboard need custom dashboards.
+
+### Validate
+
+Metrics appear in SigNoz within a few minutes. Open **Metrics Explorer** and search for an `aws_` metric, such as `aws_RDS_CPUUtilization_max`. If nothing arrives, check the **Failed data only** S3 backup bucket for rejected records.
 
 ## Manual Setup (OpenTelemetry)
 
@@ -189,9 +193,9 @@ Manual setup minimizes AWS costs:
 
 ## Hybrid Approach
 
-You can combine both methods:
+You can combine the methods:
 
-1. Use **One-Click** for critical services where pre-built dashboards save time
+1. Use **One-Click** or **Self-Managed Metric Streams** for services where pre-built dashboards save time
 2. Use **Manual** for services where you need custom collection or cost control
 
-The data from both methods flows into the same SigNoz instance and can be queried together.
+The data from all methods flows into the same SigNoz instance and can be queried together.
