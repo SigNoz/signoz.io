@@ -1,5 +1,5 @@
 ---
-date: 2026-10-03
+date: 2026-10-12
 title: Missing Alerts in SigNoz
 description: Diagnose why alerts are not firing in SigNoz, covering evaluation pattern misconfiguration, threshold issues, and missing data points.
 doc_type: howto
@@ -75,12 +75,17 @@ Evaluation: All the time for 5 minutes
 
 ### Delayed Data Arrival
 
-**Problem:** A rule can only evaluate data that has already arrived in SigNoz and become queryable, so the notification is sent on the evaluation cycle after the data becomes visible, not at the time the event happened.
+**Problem:** An alert fires later than the spike that you see on a chart.
 
-**How to check:**
+**Cause:** A rule can only evaluate data that SigNoz has already ingested. By default, each evaluation window also ends 2 minutes before the evaluation time. Data that arrives late reaches the rule on a later evaluation.
 
-1. Compare the apparent spike time on the chart with the actual data point. Charts over a long time range render at a coarser automatic aggregation interval, so the timestamp of an apparent spike can differ from the underlying data point. Zoom into a narrower time range to read the real time.
-2. Open the record that breached the threshold and compare its event timestamp with its observed timestamp, which the collection agent populates when it reads the record. The difference between the two shows when the record was received relative to when the event occurred, and the rule can only fire once the record is queryable in SigNoz.
+**How to check:** Zoom into a narrower time range on the chart. A long time range uses a coarser aggregation interval, so the apparent spike time can differ from the real data point.
+
+**Solutions:**
+
+- Reduce the delay at the source. Check collector backpressure, batching settings, and network latency between your collector and SigNoz.
+- Use an evaluation window that is longer than your usual ingestion delay. Late records then fall inside a later evaluation window.
+- If data stops arriving, see [Missing Data Points](#missing-data-points).
 
 ### Incorrect Threshold Values
 
