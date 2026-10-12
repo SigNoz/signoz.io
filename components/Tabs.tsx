@@ -8,12 +8,15 @@ import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import type { TabItemProps } from './TabItem'
 import styles from './Tabs.module.css'
 
+const PILLS_THRESHOLD = 6
+
 interface TabsProps {
   children: React.ReactNode
   entityName?: string
   variant?: 'default' | 'pill'
   className?: string
   segmented?: boolean
+  layout?: 'auto' | 'tabs' | 'pills'
 }
 
 // Segmented button bar look for DS secondary tabs, shared with
@@ -44,6 +47,7 @@ const Tabs = ({
   variant = 'default',
   className,
   segmented = false,
+  layout = 'auto',
 }: TabsProps) => {
   const searchParams = useSearchParamsState()
   const pathname = usePathname()
@@ -115,6 +119,61 @@ const Tabs = ({
     return true
   })
 
+  const usePills =
+    layout === 'pills' || (layout === 'auto' && visibleChildren.length >= PILLS_THRESHOLD)
+
+  const panels = (
+    <div data-tab-panels="" className="[&>[data-tab-value]>*:first-child]:mt-0">
+      {visibleChildren.map((child) => {
+        const isActive = child.props.value === activeTab
+        const { value, label } = child.props
+        return (
+          <div
+            key={value as string}
+            data-tab-value={value}
+            hidden={!isActive}
+            role={usePills ? 'region' : undefined}
+            aria-label={
+              usePills ? (typeof label === 'string' ? label : (value as string)) : undefined
+            }
+          >
+            {child.props.children}
+          </div>
+        )
+      })}
+    </div>
+  )
+
+  if (usePills) {
+    return (
+      <div data-tabs-root="" className={className || 'w-full'}>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {visibleChildren.map((child) => {
+            const value = child.props.value as string
+            const isActive = value === activeTab
+            return (
+              <button
+                key={value}
+                type="button"
+                data-tab-value={value}
+                aria-pressed={isActive}
+                onClick={() => handleTabChange(value)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] ${
+                  isActive
+                    ? 'bg-[var(--primary-background)] text-[var(--primary-foreground)]'
+                    : 'bg-[var(--l3-background)] text-[var(--l2-foreground)] hover:bg-[var(--l3-background-hover)]'
+                }`}
+              >
+                {child.props.label}
+              </button>
+            )
+          })}
+        </div>
+        {panels}
+      </div>
+    )
+  }
+
   return (
     <TabsRoot
       className={`${styles.root} ${isSegmented ? styles.segmented : ''} ${
@@ -151,20 +210,7 @@ const Tabs = ({
           )
         })}
       </TabsList>
-      <div data-tab-panels="" className="[&>[data-tab-value]>*:first-child]:mt-0">
-        {visibleChildren.map((child) => {
-          const isActive = child.props.value === activeTab
-          return (
-            <div
-              key={child.props.value as string}
-              data-tab-value={child.props.value}
-              hidden={!isActive}
-            >
-              {child.props.children}
-            </div>
-          )
-        })}
-      </div>
+      {panels}
     </TabsRoot>
   )
 }

@@ -7,6 +7,7 @@ import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
+import RB2BLoader from '@/components/Analytics/RB2BLoader'
 import { AnonymousIdSetter } from './anonymous-id-setter'
 
 const inter = Inter({
@@ -101,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SpeedInsights />
         <Suspense fallback={null}>
           <PageViewTracker />
+          <RB2BLoader />
         </Suspense>
         <noscript>
           <iframe
