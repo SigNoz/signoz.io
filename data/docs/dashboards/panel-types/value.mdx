@@ -43,18 +43,18 @@ The following graph shows the combined average requests per second (req/s) for a
 
 <Figure
   src="/img/docs/dashboards/panel-types/value-config.webp"
-  alt="Number panel configuration options"
-  caption="Number panel configuration."
+  alt="Number config pane: Visualization and Formatting and Units sections"
+  caption="Visualization and Formatting & Units controls for a Number panel."
 />
 
 #### Visualization
 
-- **Panel Time Preference** — Override the global dashboard time range for this panel. Set to `Global Time` to use the dashboard's time picker, or choose a fixed time range.
+- **Time range** (formerly "Panel Time Preference"): Override the global dashboard time range for this panel. Keep `Global Time` to follow the dashboard time picker, or choose a fixed time range.
 
 #### Formatting & Units
 
-- **Unit** — The unit of the displayed value (for example, `Bytes`, `Percent`, `Requests/s`). The default is `None`.
-- **Decimal precision** — Choose how many decimals to show from compact tiles: `0`, `1`, `2`, `3`, `4`, or `Full` (the raw value, unrounded). A live **Shows as** preview beneath the tiles displays a sample value (for example `1,234.5`) formatted at the selected precision. The default is `2`.
+- **Unit**: The unit of the displayed value (for example, `Bytes`, `Percent`, `Requests/s`). The default is `None`.
+- **Decimal places** (formerly "Decimal precision"): Choose how many decimals to show from compact tiles: `0`, `1`, `2`, `3`, `4`, or `Full` (the raw value, unrounded). A live **Shows as** preview beneath the tiles displays a sample value formatted at the selected precision (for example `1,234.56` at `2`). The default is `2`.
 
 <Admonition type="info">
 When you create a new panel, the **Unit** is pre-filled with the unit of the selected metric, so the value matches how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
@@ -70,9 +70,9 @@ A Number panel shows a single value, so it renders only the first enabled query.
 A Number panel backed by a PromQL query reduces the resulting series to its **last** data point and displays that single value. For rate-style expressions such as `rate(...)`, "last" is the most recent evaluated point, not an average over the window. If you want a different aggregate, wrap the expression in a range function such as `avg_over_time(...)` so the query itself returns the value you want to display.
 </Admonition>
 
-#### Alerts
+#### Actions
 
-Link existing alert rules to this panel or create new alerts directly from the panel configuration.
+Select **Create alert** to open the alert editor in a new tab, with this panel's query pre-filled.
 
 #### Context Links
 
@@ -80,16 +80,16 @@ Add context links to enable click-through navigation from the panel to other das
 
 #### Thresholds
 
-Thresholds highlight the displayed value when it crosses a limit you set. Each saved threshold appears as a summary row that states the rule at a glance, for example `> 500 ms · Red background`.
+Thresholds highlight the displayed value when it crosses a limit you set. Each saved threshold appears as a summary row, for example `> 500 ms · Red background`.
 
-Select **Add threshold** to open the threshold editor. It is titled **New threshold** when you add one and **Edit threshold** when you modify an existing threshold, and it offers:
+Select **Add threshold** to open the threshold editor. It is titled **New threshold** when you add one and **Edit threshold** when you change one. It offers:
 
-- **Operator** — Pick the comparison (above, below, equal, and so on) from compact tiles that show the math symbol (`>`, `<`, `=`, and so on).
-- **Value** and **Unit** — Set side by side in one row. The unit list matches the panel's units, and a mismatch with the panel unit shows a warning.
-- **Color** — Choose from a row of color swatches, or use the custom-color swatch at the end to enter any color.
-- **Apply color to** — A tile picker for how the color is used: `Background` or `Text`. A live preview on a sample number updates as you choose.
+- **When the value is**: Pick the comparison from tiles that show the math symbol, such as `>`, `<`, or `=`.
+- **Value** and **Unit**: Set side by side in one row. The unit list matches the panel's units, and a mismatch with the panel unit shows a warning.
+- **Color**: Pick a swatch, or use the custom-color swatch at the end to enter any color.
+- **Apply color to**: `Background` or `Text`. A live preview on the sample number `512` updates as you choose.
 
-Select **Save** to keep the threshold, or **Cancel** (formerly "Discard") to drop your edits and return to the list.
+Select **Save** to keep the threshold, or **Cancel** (formerly "Discard") to drop your edits.
 
 Threshold edits preview live as you type, and thresholds carry over when you change the panel's visualization type. See [Panel editor behavior](https://signoz.io/docs/userguide/manage-dashboards/#panel-editor-behavior).
 
