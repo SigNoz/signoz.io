@@ -37,7 +37,7 @@ Once the drain is added, verify the logs in SigNoz under the Logs tab.
 ## Stream Heroku Logs to Self-Hosted SigNoz
 
 ### 1. Expose a Port in `docker-compose.yaml`
-Modify the Foundry-generated <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/docker/compose/pours/deployment/compose.yaml" target="_blank" rel="noopener noreferrer nofollow">`compose.yaml`</a> file to expose port `8081` for receiving logs:
+Modify the `docker-compose-minimal.yaml` file to expose port `8081` for receiving logs:
 
 ```yaml:/deploy/docker/docker-compose-minimal.yaml {8} 
 ...
@@ -52,7 +52,7 @@ otel-collector:
 ```
 
 ### 2. Configure `httplogreceiver`
-Add the **httplogreceiver** to the ingester config (`ingester.yaml`) with a <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">Foundry custom config file</a>:
+Add the **httplogreceiver** to your `otel-collector-config.yaml` file:
 
 ```yaml:/deploy/docker/otel-collector-config.yaml {2-4}
 receivers:
@@ -63,7 +63,7 @@ receivers:
 ```
 
 ### 3. Update the Pipeline Configuration
-Modify the pipeline in the same ingester config to include the new receiver:
+Modify the pipeline in the `otel-collector-config.yaml` file to include the new receiver:
 
 ```yaml:/deploy/docker/otel-collector-config.yaml {4}
 service:

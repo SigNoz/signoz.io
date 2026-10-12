@@ -89,7 +89,7 @@ Check the SigNoz UI for the exported logs.
 #### Scenario 1: SigNoz Running on the Same Host
 
 ##### 1. Modify Docker Compose File
-Update the Foundry-generated <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/docker/compose/pours/deployment/compose.yaml" target="_blank" rel="noopener noreferrer nofollow">`compose.yaml`</a> to mount your log files:
+Update `docker-compose-minimal.yaml` to mount your log files:
 
 ```yaml:/deploy/docker/docker-compose-minimal.yaml 
 otel-collector:
@@ -101,7 +101,7 @@ otel-collector:
 ```
 
 ##### 2. Add Filelog Receiver
-Update the ingester config (`ingester.yaml`) with a <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">Foundry custom config file</a> to include the filelog receiver:
+Update `otel-collector-config.yaml` to include the filelog receiver:
 
 ```yaml:/deploy/docker/otel-collector-config.yaml
 receivers:
@@ -120,7 +120,7 @@ receivers:
 ##### 3. Update Pipelines Configuration
 Modify the pipeline to include the filelog receiver:
 
-```yaml::/deploy/docker/otel-collector-config.yaml
+```yaml:/deploy/docker/otel-collector-config.yaml
 service:
   pipelines:
     logs:
