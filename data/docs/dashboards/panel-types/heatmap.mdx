@@ -1,6 +1,6 @@
 ---
 title: Heatmap Panel Type - Visualize Metric Distributions
-date: 2026-10-07
+date: 2026-10-13
 description: Use the Heatmap panel type in SigNoz dashboards to visualize histogram metric distributions over time with configurable buckets, color ramps, and axis scales.
 doc_type: reference
 ---
@@ -35,7 +35,7 @@ Heatmap panels do not accept logs or traces. The panel draws one query, and the 
 
 ### Create a heatmap panel
 
-1. In your dashboard, click **New Panel** and select **Heatmap**.
+1. In your dashboard, click **New Panel**. In the **New panel** drawer, select **Heatmap** under **Distributions**, then click the add button.
 2. In the query builder, select a metric. For a histogram metric, keep the **Count** aggregation.
 3. Click **Run Query**. The panel shows one column per time interval and a color bar labeled **COUNT** under the chart.
 4. Click **Save changes**.
@@ -61,23 +61,23 @@ The **Bounds** strip under the controls shows the first bucket edges before you 
 
 The **Chart appearance** section sets how counts map to colors. The **Preview** at the top shows the result, for example `lava · log · 64 steps`.
 
-- **Color mode**: **Palette** uses a multi-color ramp. **Opacity** uses one **Base color** and makes cells with higher counts more opaque. Pick one of the preset colors or **Custom**.
+- **Color mode**: **Palette** maps each count to a color on a multi-color ramp. **Opacity** uses one **Base color** and makes cells with higher counts more opaque. For the base color, pick **Group color** to give each group its own color, a preset color, or a custom color.
 - **Palette**: ice, moss, rust, graphite, ember, lagoon, orchid, verdant, lava (default), or beacon.
-- **Color scale**: **Log** (default), **Sqrt**, or **Linear**. Log keeps low counts visible when a few cells have very high counts.
+- **Color scale**: **Log** (default), **Square root**, or **Linear**. Log keeps low counts visible when a few cells have very high counts.
 - **Color steps**: 2 to 128 bands of color. The default is 64.
-- **Min count** and **Max count**: Fix the counts at the two ends of the ramp. Leave them empty to read the range from the data. Fixed values keep colors the same across time ranges.
+- **Count range**: Set **Min** and **Max** to fix the counts at the two ends of the ramp. Leave them empty to read the range from the data. Fixed values keep colors the same across time ranges. If **Min** is greater than **Max**, an error appears under the fields.
 
 <Figure
   src="/img/docs/dashboards/panel-types/heatmap-config.webp"
-  alt="Heatmap Chart appearance and Axes controls, showing the ramp preview, Color mode, the 10 palettes, Color scale, Color steps, Min count and Max count, and the Axes section with Y-axis scale set to Auto"
-  caption="Chart appearance and Axes controls for a Heatmap panel."
+  alt="Heatmap config pane: Chart appearance with the ramp preview, Color mode, the 10 palettes, Color scale, Color steps, and Count range, then Formatting and Units, Axes with Y-axis scale set to Auto, and Legend"
+  caption="Chart appearance, Formatting & Units, Axes, and Legend controls for a Heatmap panel."
 />
 
 ### Formatting, axes, and legend
 
-- **Formatting & Units**: The unit and decimals apply to the bucket bounds on the Y-axis. Counts have no unit.
-- **Axes**: **Y-axis scale** is **Auto** (default), **Linear**, **Log**, or **Symmetric log**. Auto uses Log when all bucket bounds are positive and Symmetric log when the bounds cross zero.
-- **Legend**: Sets the legend position.
+- **Formatting & Units**: **Unit** and **Decimal places** apply to the bucket bounds on the Y-axis. Counts have no unit.
+- **Axes**: **Y-axis scale** is **Auto** (default), **Linear**, **Log**, or **Symlog** (symmetric log). Auto uses Log when all bucket bounds are positive and Symlog when the bounds cross zero.
+- **Legend**: **Position** places the legend **Below chart** or **Right of chart**.
 
 ### Tooltip
 
