@@ -626,6 +626,28 @@ With more shards or replicas, each node's service gets its own constraint: `tele
 
 If `casting.yaml` already has a `spec.patches` list, add these entries to it.
 
+<Admonition type="warning" title="SQLite instead of PostgreSQL" defaultCollapsed="true">
+With `spec.metastore.kind: sqlite` there is no PostgreSQL service. SigNoz holds the database file under `/var/lib/foundry/signoz/metastore/sqlite/0`, so pin the SigNoz service instead of PostgreSQL:
+
+```yaml
+spec:
+  patches:
+    - target: deployment/signoz.tf.json
+      operations:
+        - op: add
+          path: /resource/aws_ecs_service/signoz_0/placement_constraints
+          value:
+            - type: memberOf
+              expression: ec2InstanceId == <signoz-instance-id>
+```
+
+**Verify these values:**
+
+- `<signoz-instance-id>`: The ID of the container instance that runs SigNoz, for example `i-0123456789abcdef3`.
+
+Use this entry in place of the PostgreSQL one. Forge stops on the PostgreSQL entry, because its target, `deployment/metastore.tf.json`, is not generated under SQLite.
+</Admonition>
+
 ### Step 4: Deploy
 
 Run this from the directory that contains `casting.yaml`:
