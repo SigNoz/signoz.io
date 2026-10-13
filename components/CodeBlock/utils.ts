@@ -2,6 +2,8 @@ import { isValidElement, type ReactElement, type ReactNode } from 'react'
 import type { HighlightKind, MinimapLineMeta } from './types'
 
 export const DEFAULT_COLLAPSE_THRESHOLD = 20
+// Blocks longer than this get a shorter collapsed preview.
+export const LONG_BLOCK_THRESHOLD = 30
 
 const REACT_LAZY_TYPE = Symbol.for('react.lazy')
 
