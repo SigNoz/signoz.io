@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-10-13
 title: LiteLLM Observability & Monitoring with OpenTelemetry
 description: Configure LiteLLM observability with OpenTelemetry to export traces, logs, and metrics to SigNoz for real-time LiteLLM monitoring of SDK and Proxy.
 doc_type: howto
@@ -7,9 +7,11 @@ doc_type: howto
 
 ## What is LiteLLM Observability?
 
-LiteLLM observability with <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> gives you full visibility into your LiteLLM SDK and Proxy Server by capturing traces, logs, and metrics. This guide covers how to instrument LiteLLM and export telemetry data to SigNoz, enabling real-time visibility into model performance, request/response details, latency, error rates, and usage trends.
+LiteLLM observability with <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> captures traces, logs, and metrics from the LiteLLM SDK and Proxy Server. This guide shows you how to instrument LiteLLM and send telemetry to SigNoz. In SigNoz, you see model performance, request and response details, latency, error rates, and usage trends.
 
-With full LiteLLM observability in SigNoz, you can correlate traces, logs, and metrics in unified dashboards and configure alerts for LiteLLM monitoring. This makes it easier to debug issues, optimize performance, and improve reliability across your AI workflows.
+In SigNoz, you can correlate traces, logs, and metrics on dashboards and set alerts on LiteLLM data.
+
+LiteLLM v1.105.0 and later include a `signoz` callback. You configure it with two environment variables or in the LiteLLM Admin UI. The callback sends traces only. To also send logs and metrics, use the OpenTelemetry steps in this guide.
 
 <YouTube id="x7WPGD0TLjQ" mute="false" />
 
@@ -18,26 +20,28 @@ With full LiteLLM observability in SigNoz, you can correlate traces, logs, and m
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
 - Internet access to send telemetry data to SigNoz Cloud
 - <a href="https://www.litellm.ai/" target="_blank" rel="noopener noreferrer nofollow">LiteLLM</a> SDK or Proxy integration
-- For Python: `pip` installed for managing Python packages and _(optional but recommended)_ a Python virtual environment to isolate dependencies
+- LiteLLM v1.105.0 or later, if you use the `signoz` callback
+- For Python: `pip`. A Python virtual environment is optional.
 
-## Instrumenting LiteLLM with OpenTelemetry
+## Instrument LiteLLM with OpenTelemetry
 
-LiteLLM can be monitored in two ways: using the **LiteLLM SDK** (directly embedded in your Python application code for programmatic LLM calls) or the **LiteLLM Proxy Server** (a standalone server that acts as a centralized gateway for managing and routing LLM requests across your infrastructure).
+You can monitor LiteLLM in two ways. The LiteLLM SDK runs inside your Python application. The LiteLLM Proxy Server is a separate gateway that routes LLM requests for your applications.
 
 <Tabs entityName="setup">
 <TabItem value="LiteLLM SDK" label="LiteLLM SDK" default>
 
-For more detailed info on instrumenting your LiteLLM SDK applications, see the <a href="https://docs.litellm.ai/docs/observability/opentelemetry_integration" target="_blank" rel="noopener noreferrer nofollow">LiteLLM OpenTelemetry integration docs</a>.
+For more information about SDK instrumentation, see the <a href="https://docs.litellm.ai/docs/observability/opentelemetry_integration" target="_blank" rel="noopener noreferrer nofollow">LiteLLM OpenTelemetry integration docs</a>.
 
-<Tabs entityName="language">
-<TabItem value="python" label="Python" default>
+<Admonition type="info">
+  If you need traces only, you can use the `signoz` callback (LiteLLM v1.105.0 or later) instead of the steps below. Install `opentelemetry-api`, `opentelemetry-sdk`, and `opentelemetry-exporter-otlp`, then set `litellm.callbacks = ["signoz"]` and the two `SIGNOZ_INGESTION_*` variables from the **LiteLLM Proxy Server** tab. If your app already sets a global tracer provider, the callback sends no spans.
+</Admonition>
 
 <Tabs entityName="instrumentation">
-<TabItem value="No Code" label="No Code(Recommended)" default>
+<TabItem value="No Code" label="No Code (Recommended)" default>
 
-No-code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries.
+Use no-code auto-instrumentation for a quick setup. You do not change your application code.
 
-**Step 1:** Install the necessary packages in your Python environment.
+**Step 1:** Install these packages in your Python environment.
 
 ```bash
 pip install \
@@ -49,7 +53,7 @@ pip install \
   litellm
 ```
 
-**Step 2:** Add Automatic Instrumentation
+**Step 2:** Install the automatic instrumentation libraries:
 
 ```bash
 opentelemetry-bootstrap --action=install
@@ -57,7 +61,7 @@ opentelemetry-bootstrap --action=install
 
 **Step 3:** Instrument your LiteLLM SDK application
 
-Initialize LiteLLM SDK instrumentation by calling `litellm.callbacks = ["otel"]`:
+Set `litellm.callbacks = ["otel"]` to turn on LiteLLM SDK instrumentation. Set it before your first LiteLLM call:
 
 ```python
 from litellm import litellm
@@ -65,9 +69,7 @@ from litellm import litellm
 litellm.callbacks = ["otel"]
 ```
 
-This call enables automatic tracing, logs, and metrics collection for all LiteLLM SDK calls in your application.
-
-> 📌 Note: Ensure this is called before any LiteLLM related calls to properly configure instrumentation of your application
+LiteLLM then sends traces, logs, and metrics for all SDK calls in your application.
 
 **Step 4:** Run an example
 
@@ -84,7 +86,7 @@ response = completion(
 print(response)
 ```
 
-> 📌 Note: LiteLLM supports a <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer nofollow">variety of model providers</a> for LLMs. In this example, we're using OpenAI. Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+LiteLLM supports many <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer nofollow">model providers</a>. This example uses OpenAI. Before you run it, set the `OPENAI_API_KEY` environment variable.
 
 **Step 5:** Run your application with auto-instrumentation
 
@@ -102,12 +104,14 @@ OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=openai \
 opentelemetry-instrument <your_run_command>
 ```
 
-> 📌 Note: We're using `OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=openai` in the run command to disable the OpenAI instrumentor for tracing. This avoids conflicts with LiteLLM's native telemetry/instrumentation, ensuring that telemetry is captured exclusively through LiteLLM's built-in instrumentation.
+`OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=openai` turns off the OpenAI instrumentor. This prevents conflicts with the built-in LiteLLM instrumentation.
 
-- **`<service_name>`** is the name of your service
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- Replace `<your_run_command>` with the actual command you would use to run your application. For example: `python main.py`
+**Verify these values:**
+
+- `<service_name>`: The name of your service.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your_run_command>`: The command that starts your application, for example `python main.py`.
 
 <Admonition type="info">
   Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -118,9 +122,9 @@ opentelemetry-instrument <your_run_command>
 
 <TabItem value="Code" label="Code" default>
 
-Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
+Code-based instrumentation gives you control over the telemetry configuration. Use it when you need custom resource attributes or sampling, or when you already run OpenTelemetry instrumentation.
 
-**Step 1:** Install the necessary packages in your Python environment.
+**Step 1:** Install these packages in your Python environment.
 
 ```bash
 pip install \
@@ -132,9 +136,9 @@ pip install \
   litellm
 ```
 
-**Step 2:** Import the necessary modules in your Python application
+**Step 2:** Import these modules in your Python application:
 
-**Traces:**
+Traces:
 
 ```python
 from opentelemetry import trace
@@ -144,7 +148,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 ```
 
-**Logs:**
+Logs:
 
 ```python
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
@@ -154,7 +158,7 @@ from opentelemetry._logs import set_logger_provider
 import logging
 ```
 
-**Metrics:**
+Metrics:
 
 ```python
 from opentelemetry.sdk.metrics import MeterProvider
@@ -165,7 +169,7 @@ from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrument
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 ```
 
-**Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+**Step 3:** Configure the OpenTelemetry tracer provider to send traces to SigNoz Cloud:
 
 ```python
 from opentelemetry.sdk.resources import Resource
@@ -186,16 +190,18 @@ provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 ```
 
-- **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
-- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+**Verify these values:**
+
+- `<service_name>`: The name of your service.
+- `OTEL_EXPORTER_TRACES_ENDPOINT`: The SigNoz Cloud trace endpoint for your [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint), `https://ingest.<region>.signoz.cloud:443/v1/traces`.
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="info">
   Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
-**Step 4**: Setup Logs
+**Step 4:** Configure logs:
 
 ```python defaultCollapsed
 import logging
@@ -224,16 +230,18 @@ logging.basicConfig(level=logging.INFO, handlers=[handler])
 logger = logging.getLogger(__name__)
 ```
 
-- **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
-- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+**Verify these values:**
+
+- `<service_name>`: The name of your service.
+- `OTEL_EXPORTER_LOGS_ENDPOINT`: The SigNoz Cloud logs endpoint for your [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint), `https://ingest.<region>.signoz.cloud:443/v1/logs`.
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="info">
   Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
-**Step 5**: Setup Metrics
+**Step 5:** Configure metrics:
 
 ```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
@@ -245,7 +253,7 @@ from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrument
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 import os
 
-resource = Resource.create({"service.name": "<service-name>"})
+resource = Resource.create({"service.name": "<service_name>"})
 metric_exporter = OTLPMetricExporter(
     endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
     headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
@@ -261,20 +269,22 @@ SystemMetricsInstrumentor().instrument()
 HTTPXClientInstrumentor().instrument()
 ```
 
-- **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
-- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+**Verify these values:**
+
+- `<service_name>`: The name of your service.
+- `OTEL_EXPORTER_METRICS_ENDPOINT`: The SigNoz Cloud metrics endpoint for your [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint), `https://ingest.<region>.signoz.cloud:443/v1/metrics`.
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="info">
   Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
-> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your LiteLLM application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+`SystemMetricsInstrumentor` sends system metrics such as CPU and memory use. `HTTPXClientInstrumentor` sends metrics for outbound HTTP requests, such as request duration. To add custom metrics, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
 
 **Step 6:** Instrument your LiteLLM application
 
-Initialize LiteLLM SDK instrumentation by calling `litellm.callbacks = ["otel"]`:
+Set `litellm.callbacks = ["otel"]` to turn on LiteLLM SDK instrumentation. Set it before your first LiteLLM call:
 
 ```python
 from litellm import litellm
@@ -282,9 +292,7 @@ from litellm import litellm
 litellm.callbacks = ["otel"]
 ```
 
-This call enables automatic tracing, logs, and metrics collection for all LiteLLM SDK calls in your application.
-
-> 📌 Note: Ensure this is called before any LiteLLM related calls to properly configure instrumentation of your application
+LiteLLM then sends traces, logs, and metrics for all SDK calls in your application.
 
 **Step 7:** Run an example
 
@@ -301,20 +309,17 @@ response = completion(
 print(response)
 ```
 
-> 📌 Note: LiteLLM supports a <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer nofollow">variety of model providers</a> for LLMs. In this example, we're using OpenAI. Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+LiteLLM supports many <a href="https://docs.litellm.ai/docs/providers" target="_blank" rel="noopener noreferrer nofollow">model providers</a>. This example uses OpenAI. Before you run it, set the `OPENAI_API_KEY` environment variable.
 
 </TabItem>
 
-</Tabs>
-
-</TabItem>
 </Tabs>
 
 ## View LiteLLM Traces, Logs, and Metrics in SigNoz
 
-Once configured, your LiteLLM application automatically emits traces, logs, and metrics.
+After you finish the setup, your LiteLLM application sends traces, logs, and metrics to SigNoz.
 
-LiteLLM traces are available in SigNoz under the traces tab:
+To see LiteLLM traces, open **Traces** in SigNoz:
 
 <Figure
   src="/img/docs/llm/litellm/litellmsdk-traces.webp"
@@ -322,7 +327,7 @@ LiteLLM traces are available in SigNoz under the traces tab:
   caption="LiteLLM SDK Trace View"
 />
 
-When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+Click a trace to see its spans, with their events and attributes.
 
 <Figure
   src="/img/docs/llm/litellm/litellmsdk-detailed-traces.webp"
@@ -330,7 +335,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="LiteLLM SDK Detailed Trace View"
 />
 
-LiteLLM logs are available in SigNoz under the logs tab. You can also view correlated logs by clicking the “Related Logs” button in the trace view:
+To see LiteLLM logs, open **Logs** in SigNoz. To see the logs for one trace, click **Related Logs** in the trace view:
 
 <figure data-zoomable align="center">
   <img src="/img/docs/llm/litellm/related-logs.webp" alt="Related logs" width="300" />
@@ -345,7 +350,7 @@ LiteLLM logs are available in SigNoz under the logs tab. You can also view corre
   caption="LiteLLM SDK Logs View"
 />
 
-When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+Click a log to see its attributes:
 
 <Figure
   src="/img/docs/llm/litellm/litellmsdk-detailed-logs.webp"
@@ -353,7 +358,7 @@ When you click on any of these logs in SigNoz, you'll see a detailed view of the
   caption="LiteLLM SDK Detailed Logs View"
 />
 
-LiteLLM metrics are available in SigNoz under the metrics tab:
+To see LiteLLM metrics, open **Metrics** in SigNoz:
 
 <Figure
   src="/img/docs/llm/litellm/litellmsdk-metrics.webp"
@@ -361,7 +366,7 @@ LiteLLM metrics are available in SigNoz under the metrics tab:
   caption="LiteLLM SDK Metrics View"
 />
 
-When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+Click a metric to see its attributes:
 
 <Figure
   src="/img/docs/llm/litellm/litellmsdk-detailed-metrics.webp"
@@ -371,7 +376,7 @@ When you click on any of these metrics in SigNoz, you'll see a detailed view of 
 
 ## LiteLLM SDK Observability Dashboard
 
-The [LiteLLM SDK Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/litellm-sdk-dashboard/) provides specialized visualizations for LiteLLM monitoring, including pre-built charts for LLM usage and import instructions to get started quickly.
+The [LiteLLM SDK Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/litellm-sdk-dashboard/) template has charts for LLM usage. Its page shows how to import the template.
 
 <Figure
   src="/img/docs/llm/litellm/litellm-sdk-dashboard.webp"
@@ -383,7 +388,102 @@ The [LiteLLM SDK Dashboard](https://signoz.io/docs/dashboards/dashboard-template
 
 <TabItem value="LiteLLM Proxy Server" label="LiteLLM Proxy Server" default>
 
-**Step 1:** Install the necessary packages in your Python environment.
+The proxy can send traces to SigNoz in two ways. On LiteLLM v1.105.0 or later, use the `signoz` callback. On earlier versions, use the generic `otel` callback.
+
+<Tabs entityName="callback">
+<TabItem value="signoz-callback" label="SigNoz callback (Recommended)" default>
+
+The `signoz` callback sends traces over OTLP/HTTP, but no logs or metrics.
+
+**Step 1:** Install the LiteLLM Proxy and the OpenTelemetry packages in your Python environment.
+
+```bash
+pip install 'litellm[proxy]>=1.105.0' \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp
+```
+
+If you run the LiteLLM Docker image, use tag `v1.105.0` or later. The image already includes these packages.
+
+**Step 2:** Add the `signoz` callback to `config.yaml`:
+
+```yaml:config.yaml
+litellm_settings:
+  callbacks: ["signoz"]
+```
+
+<Admonition type="warning">
+  Do not add `otel` to the same `callbacks` list. The two callbacks share one exporter, so one of the two destinations receives no spans.
+</Admonition>
+
+**Step 3:** Set the following environment variables:
+
+```bash
+export SIGNOZ_INGESTION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service_name>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). LiteLLM adds `/v1/traces` to the endpoint.
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: The service name for LiteLLM traces in SigNoz. If you do not set it, LiteLLM uses `litellm`.
+
+<Admonition type="info">
+  If you use Self-Hosted SigNoz, set `SIGNOZ_INGESTION_ENDPOINT` to your OpenTelemetry Collector, for example `http://<host>:4318`. Do not set `SIGNOZ_INGESTION_KEY`.
+</Admonition>
+
+**Step 4:** Start the proxy server with the configuration file:
+
+```bash
+litellm --config config.yaml
+```
+
+If you do not set `SIGNOZ_INGESTION_ENDPOINT`, the proxy logs `SIGNOZ_INGESTION_ENDPOINT not found in environment variables` and serves requests without traces.
+
+**Step 5:** Send a test trace:
+
+```bash
+curl "http://localhost:4000/health/services?service=signoz" \
+  -H "Authorization: Bearer <your-litellm-master-key>"
+```
+
+The proxy makes a mock LLM request and returns `{"status":"success","message":"Mock LLM request made - check signoz."}`. This response only shows that LiteLLM loaded the callback and created the trace. LiteLLM returns it even when SigNoz rejects the ingestion key. Open **Traces** in SigNoz and make sure that a trace for your service name appears.
+
+### Add the SigNoz callback from the Admin UI
+
+If you manage the proxy from the LiteLLM Admin UI, you can add the callback there instead of Steps 2 and 3.
+
+1. In the LiteLLM Admin UI, go to **Settings** > **Logging & Alerts**.
+2. On the **Logging Callbacks** tab, click **Add Callback**.
+
+<Figure
+  src="/img/docs/llm/litellm/litellm-ui-logging-callbacks.webp"
+  alt="LiteLLM Admin UI Logging Callbacks tab with the SigNoz callback in the Active Logging Callbacks list"
+  caption="Logging Callbacks tab in the LiteLLM Admin UI"
+/>
+
+3. In **Callback**, select **SigNoz**.
+4. In **SigNoz Ingestion Endpoint**, enter `https://ingest.<region>.signoz.cloud:443`.
+5. In **SigNoz Ingestion Key (optional)**, enter your SigNoz ingestion key. For Self-Hosted SigNoz, leave it empty.
+6. Click **Add Callback**.
+
+<Figure
+  src="/img/docs/llm/litellm/litellm-ui-add-signoz-callback.webp"
+  alt="LiteLLM Add Logging Callback dialog with SigNoz selected and the ingestion endpoint and key fields filled in"
+  caption="Add the SigNoz callback in the LiteLLM Admin UI"
+/>
+
+The proxy starts to send traces after you add the callback. If you edit the endpoint or key later, restart the proxy. The proxy keeps the old values until it restarts.
+
+To send the traces of each LiteLLM team or virtual key to a different SigNoz destination, see the <a href="https://docs.litellm.ai/docs/observability/signoz" target="_blank" rel="noopener noreferrer nofollow">LiteLLM SigNoz integration docs</a>. Per-team and per-key settings are a LiteLLM Enterprise feature.
+
+</TabItem>
+<TabItem value="otel-callback" label="OpenTelemetry callback">
+
+**Step 1:** Install these packages in your Python environment.
 
 ```bash
 pip install opentelemetry-api \
@@ -392,9 +492,7 @@ pip install opentelemetry-api \
   'litellm[proxy]'
 ```
 
-**Step 2:** Configure otel for the LiteLLM Proxy Server
-
-Add the following to `config.yaml`:
+**Step 2:** Add the `otel` callback to `config.yaml`:
 
 ```yaml
 litellm_settings:
@@ -412,23 +510,28 @@ export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_LOGS_EXPORTER="otlp"
 ```
 
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="info">
   Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
-**Step 4:** Run the proxy server using the config file:
+**Step 4:** Start the proxy server with the configuration file:
 
 ```bash
 litellm --config config.yaml
 ```
 
-Now any calls made through your LiteLLM proxy server will be traced and sent to SigNoz.
+The proxy then sends a trace to SigNoz for each request.
 
-LiteLLM Proxy traces are available in SigNoz under the traces tab:
+</TabItem>
+</Tabs>
+
+To see LiteLLM Proxy traces, open **Traces** in SigNoz. Each request through the proxy creates a `Received Proxy Server Request` span with a `litellm_request` child span. The `litellm_request` span holds the model, provider, and token usage attributes.
 
 <Figure
   src="/img/docs/llm/litellm/litellmproxy-traces.webp"
@@ -436,7 +539,7 @@ LiteLLM Proxy traces are available in SigNoz under the traces tab:
   caption="LiteLLM Proxy Trace View"
 />
 
-When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+Click a trace to see its spans, with their events and attributes.
 
 <Figure
   src="/img/docs/llm/litellm/litellmproxy-detailed-traces.webp"
@@ -446,7 +549,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
 
 ## LiteLLM Proxy Dashboard
 
-The [LiteLLM Proxy Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/litellm-proxy-dashboard/) provides specialized visualizations for LiteLLM Proxy monitoring, including pre-built charts for LLM usage and import instructions to get started quickly.
+The [LiteLLM Proxy Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/litellm-proxy-dashboard/) template has charts for LLM usage through the proxy. Its page shows how to import the template.
 
 <Figure
   src="/img/docs/llm/litellm/litellm-proxy-dashboard.webp"
@@ -454,17 +557,33 @@ The [LiteLLM Proxy Dashboard](https://signoz.io/docs/dashboards/dashboard-templa
   caption="LiteLLM Proxy Dashboard Template"
 />
 
+To compare the Proxy and SDK templates, see [LiteLLM Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/litellm-dashboards/).
+
 </TabItem>
 </Tabs>
 
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No traces in SigNoz with the `signoz` callback
+
+1. Make sure that you set `SIGNOZ_INGESTION_ENDPOINT` in the environment of the proxy or the SDK app. If it is missing, LiteLLM logs `SIGNOZ_INGESTION_ENDPOINT not found in environment variables`.
+2. Make sure that the `callbacks` list does not also contain `otel`. Remove one of the two callbacks.
+3. In an SDK app, make sure that no other code sets a global OpenTelemetry tracer provider, for example `opentelemetry-instrument`. If one exists, use the OpenTelemetry steps instead of the `signoz` callback.
+4. If the logs show `Failed to export batch code: 401`, make sure that the ingestion key is correct and has no quotes around it.
+
+</details>
+
 ## Related integrations
 
-Trace what sits on either side of your gateway, from the providers behind it to the apps in front:
+These guides cover the model providers behind LiteLLM and the apps in front of it:
 
-- [OpenRouter observability with OpenTelemetry](https://signoz.io/docs/openrouter-observability/) - trace routed model calls and compare cost across providers
-- [Monitor Amazon Bedrock with OpenTelemetry](https://signoz.io/docs/amazon-bedrock-monitoring/) - track invocation latency, token usage, and error rates across Bedrock foundation models
-- [Monitor Azure OpenAI with OpenTelemetry](https://signoz.io/docs/azure-openai-monitoring/) - track deployment latency, token consumption, and quota errors
-- [Monitor DeepSeek with OpenTelemetry](https://signoz.io/docs/deepseek-monitoring/) - track DeepSeek model latency, token usage, and error rates
-- [Monitor Cohere with OpenTelemetry](https://signoz.io/docs/cohere-monitoring/) - trace Chat, Embed, and Rerank calls with per-call token usage
+- [OpenRouter observability with OpenTelemetry](https://signoz.io/docs/openrouter-observability/): Trace routed model calls and compare cost across providers.
+- [Monitor Amazon Bedrock with OpenTelemetry](https://signoz.io/docs/amazon-bedrock-monitoring/): Track invocation latency, token usage, and error rates for Bedrock foundation models.
+- [Monitor Azure OpenAI with OpenTelemetry](https://signoz.io/docs/azure-openai-monitoring/): Track deployment latency, token use, and quota errors.
+- [Monitor DeepSeek with OpenTelemetry](https://signoz.io/docs/deepseek-monitoring/): Track DeepSeek model latency, token usage, and error rates.
+- [Monitor Cohere with OpenTelemetry](https://signoz.io/docs/cohere-monitoring/): Trace Chat, Embed, and Rerank calls with token usage for each call.
 
 Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
