@@ -584,7 +584,13 @@ For all options, see the <a href="https://github.com/SigNoz/foundry/blob/main/do
 
 ### Step 3: Pin the stateful services to their instances
 
-ClickHouse, ClickHouse Keeper and PostgreSQL keep their data on the instance that runs them. Pin each one so ECS does not move it. Add this to `casting.yaml`:
+ClickHouse, ClickHouse Keeper and PostgreSQL keep their data on the instance that runs them. Pin each one so ECS does not move it.
+
+<Admonition type="info" title="Where the data lives" defaultCollapsed="true">
+ClickHouse, ClickHouse Keeper and PostgreSQL store their data under `/var/lib/foundry/<name>/<component>/<kind>/<node>` on the instance that runs them, for example `/var/lib/foundry/signoz/telemetrystore/clickhouse/0-0`. Mount the volume at `/var/lib/foundry` before the instance registers with the cluster. A task that moves to an instance it is not pinned to starts on that instance's copy of the directory.
+</Admonition>
+
+Add this to `casting.yaml`:
 
 ```yaml
 spec:
@@ -618,14 +624,6 @@ spec:
 - `<clickhouse-instance-id>`: The ID of the container instance that runs ClickHouse, for example `i-0123456789abcdef1`.
 - `<postgres-instance-id>`: The ID of the container instance that runs PostgreSQL, for example `i-0123456789abcdef2`.
 
-<Admonition type="info" title="Where the data lives" defaultCollapsed="true">
-ClickHouse, ClickHouse Keeper and PostgreSQL store their data under `/var/lib/foundry/<name>/<component>/<kind>/<node>` on the instance that runs them, for example `/var/lib/foundry/signoz/telemetrystore/clickhouse/0-0`. Mount the volume at `/var/lib/foundry` before the instance registers with the cluster. A task that moves to an instance it is not pinned to starts on that instance's copy of the directory.
-</Admonition>
-
-With more shards or replicas, each node's service gets its own constraint: `telemetrykeeper_clickhousekeeper_<replica>`, `telemetrystore_clickhouse_<shard>_<replica>` and `metastore_postgres_<replica>`.
-
-If `casting.yaml` already has a `spec.patches` list, add these entries to it.
-
 <Admonition type="warning" title="SQLite instead of PostgreSQL" defaultCollapsed="true">
 With `spec.metastore.kind: sqlite` there is no PostgreSQL service. SigNoz holds the database file under `/var/lib/foundry/signoz/metastore/sqlite/0`, so pin the SigNoz service instead of PostgreSQL:
 
@@ -647,6 +645,10 @@ spec:
 
 Use this entry in place of the PostgreSQL one. Forge stops on the PostgreSQL entry, because its target, `deployment/metastore.tf.json`, is not generated under SQLite.
 </Admonition>
+
+With more shards or replicas, each node's service gets its own constraint: `telemetrykeeper_clickhousekeeper_<replica>`, `telemetrystore_clickhouse_<shard>_<replica>` and `metastore_postgres_<replica>`.
+
+If `casting.yaml` already has a `spec.patches` list, add these entries to it.
 
 ### Step 4: Deploy
 
