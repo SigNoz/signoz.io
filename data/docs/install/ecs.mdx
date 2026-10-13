@@ -48,8 +48,8 @@ metadata:
     foundry.signoz.io/ecs-region: <aws-region>
 spec:
   deployment:
-    platform: aws
-    mode: ecs
+    platform: ecs
+    mode: ec2
     flavor: terraform
   resource:
     spec:
@@ -130,7 +130,7 @@ foundryctl cast -f casting.yaml
 This creates the infrastructure with Terraform in `pours/infrastructure/`. Run the same command again after editing `casting.yaml` to apply the change.
 
 <Admonition type="tip" title="Run Terraform yourself" defaultCollapsed="true">
-To run Terraform directly, generate the files and apply them:
+Instead of `foundryctl cast`, generate the files and apply them yourself. Run this from the directory that contains `casting.yaml`:
 
 ```bash
 foundryctl forge -f casting.yaml   # writes pours/infrastructure/
@@ -152,11 +152,7 @@ aws ecs describe-clusters --clusters foundry-cls --region <aws-region> \
 
 - `<aws-region>`: The region from `casting.yaml`.
 
-Wait until the count reaches the number of instances before the next step:
-
-```output
-4
-```
+The command prints the registered instance count. Wait until it reaches `4`, one per instance in this `casting.yaml`, before the next step.
 
 ### Step 4: Create the SigNoz casting
 
@@ -236,7 +232,7 @@ foundryctl cast -f casting.yaml
 This installs SigNoz with Terraform in `pours/deployment/`. Run the same command again after editing `casting.yaml` to apply the change.
 
 <Admonition type="tip" title="Run Terraform yourself" defaultCollapsed="true">
-To run Terraform directly, generate the files and apply them:
+Instead of `foundryctl cast`, generate the files and apply them yourself. Run this from the directory that contains `casting.yaml`:
 
 ```bash
 foundryctl forge -f casting.yaml   # writes pours/deployment/
@@ -282,13 +278,7 @@ aws ecs describe-tasks --cluster foundry-cls --region <aws-region> \
   --query 'tasks[].healthStatus' --output text
 ```
 
-The output is:
-
-```output
-HEALTHY
-```
-
-The status reads `UNKNOWN` until the first check passes. Failed checks in the first five minutes after the task starts do not count against it.
+The command prints `HEALTHY` once the health check passes. The status reads `UNKNOWN` until the first check passes. Failed checks in the first five minutes after the task starts do not count against it.
 
 SigNoz is reachable at `http://signoz-0.signoz-installation.local:8080` from inside the VPC.
 
@@ -334,8 +324,8 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
       foundry.signoz.io/ecs-region: <aws-region>
   spec:
     deployment:
-      platform: aws
-      mode: ecs
+      platform: ecs
+      mode: ec2
       flavor: terraform
     resource:
       spec:
@@ -495,7 +485,7 @@ This path installs SigNoz on an ECS cluster you already run. You need:
 - An ECS cluster with registered EC2 container instances.
 - A VPC with private subnets that route outbound traffic through a NAT gateway or VPC endpoints.
 - A security group for the SigNoz tasks that allows traffic between them (the ports are listed below).
-- A durable volume mounted at `/var/lib/foundry` on the container instances. ClickHouse, ClickHouse Keeper and PostgreSQL store their data there. ECS can move a task to another instance, where it starts on that instance's copy of the directory; pin the stateful services with a placement constraint (see Step 2).
+- A durable volume mounted at `/var/lib/foundry` on the container instances (see Step 3).
 
 <Admonition type="info" title="Ports the SigNoz components use" defaultCollapsed="true">
 | Component | Ports |
@@ -592,10 +582,11 @@ spec:
 
 For all options, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting file reference</a> and the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/ecs/ec2/terraform" target="_blank" rel="noopener noreferrer nofollow">AWS ECS example</a>.
 
-<Admonition type="info" title="Pin the stateful services to their instances" defaultCollapsed="true">
-ClickHouse, ClickHouse Keeper and PostgreSQL keep their data under `/var/lib/foundry` on the instance that runs them. To keep each one on its instance, add placement constraints to `casting.yaml` before the first deploy:
+### Step 3: Pin the stateful services to their instances
 
-```yaml defaultCollapsed
+ClickHouse, ClickHouse Keeper and PostgreSQL keep their data on the instance that runs them. Pin each one so ECS does not move it. Add this to `casting.yaml`:
+
+```yaml
 spec:
   patches:
     - target: deployment/telemetrykeeper.tf.json
@@ -627,10 +618,15 @@ spec:
 - `<clickhouse-instance-id>`: The ID of the container instance that runs ClickHouse, for example `i-0123456789abcdef1`.
 - `<postgres-instance-id>`: The ID of the container instance that runs PostgreSQL, for example `i-0123456789abcdef2`.
 
-With more shards or replicas, each node's service gets its own constraint: `telemetrykeeper_clickhousekeeper_<replica>`, `telemetrystore_clickhouse_<shard>_<replica>` and `metastore_postgres_<replica>`.
+<Admonition type="info" title="Where the data lives" defaultCollapsed="true">
+ClickHouse, ClickHouse Keeper and PostgreSQL store their data under `/var/lib/foundry/<name>/<component>/<kind>/<node>` on the instance that runs them, for example `/var/lib/foundry/signoz/telemetrystore/clickhouse/0-0`. Mount the volume at `/var/lib/foundry` before the instance registers with the cluster. A task that moves to an instance it is not pinned to starts on that instance's copy of the directory.
 </Admonition>
 
-### Step 3: Deploy
+With more shards or replicas, each node's service gets its own constraint: `telemetrykeeper_clickhousekeeper_<replica>`, `telemetrystore_clickhouse_<shard>_<replica>` and `metastore_postgres_<replica>`.
+
+If `casting.yaml` already has a `spec.patches` list, add these entries to it.
+
+### Step 4: Deploy
 
 Run this from the directory that contains `casting.yaml`:
 
@@ -641,7 +637,7 @@ foundryctl cast -f casting.yaml
 This installs SigNoz with Terraform in `pours/deployment/`. Run the same command again after editing `casting.yaml` to apply the change.
 
 <Admonition type="tip" title="Run Terraform yourself" defaultCollapsed="true">
-To run Terraform directly, generate the files and apply them:
+Instead of `foundryctl cast`, generate the files and apply them yourself. Run this from the directory that contains `casting.yaml`:
 
 ```bash
 foundryctl forge -f casting.yaml   # writes pours/deployment/
@@ -652,7 +648,7 @@ terraform apply tfplan
 ```
 </Admonition>
 
-### Step 4: Verify the installation
+### Step 5: Verify the installation
 
 Check that each SigNoz service runs its task. Run this with the AWS CLI:
 
@@ -693,13 +689,7 @@ aws ecs describe-tasks --cluster <cluster-arn> --region <aws-region> \
 - `<cluster-arn>`: The cluster ARN from `casting.yaml`.
 - `<aws-region>`: The region from `casting.yaml`.
 
-The output is:
-
-```output
-HEALTHY
-```
-
-The status reads `UNKNOWN` until the first check passes. Failed checks in the first five minutes after the task starts do not count against it.
+The command prints `HEALTHY` once the health check passes. The status reads `UNKNOWN` until the first check passes. Failed checks in the first five minutes after the task starts do not count against it.
 
 SigNoz is reachable at `http://signoz-0.signoz-installation.local:8080` from inside the VPC. The `signoz` prefix follows `metadata.name`.
 
@@ -775,17 +765,9 @@ Re-run the failing command with `--debug` for verbose logs.
 
 ### Terraform rejects a variable or a subnet
 
-A missing or malformed annotation stops `terraform plan` with a validation message, for example:
+A missing or malformed annotation stops `terraform plan` with a validation message, for example `subnet_ids must be a non-empty list of subnet IDs.`
 
-```output
-subnet_ids must be a non-empty list of subnet IDs.
-```
-
-A subnet that assigns public IP addresses on launch stops the plan with a message that names it, for example:
-
-```output
-subnet subnet-0a1b2c3d4e5f67890 assigns public IPs on launch; tasks on the EC2 launch type take no public IP, so state private subnets with a NAT route or VPC endpoints.
-```
+A subnet that assigns public IP addresses on launch stops the plan with a message that names it, for example `subnet subnet-0a1b2c3d4e5f67890 assigns public IPs on launch; tasks on the EC2 launch type take no public IP, so state private subnets with a NAT route or VPC endpoints.`
 
 Fix the annotation in `casting.yaml` and run `foundryctl cast -f casting.yaml` again. What each annotation names is under <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/ecs/ec2/terraform/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">Annotations</a>.
 
@@ -802,7 +784,7 @@ aws ecs describe-services --cluster <cluster-arn> --region <aws-region> \
 
 - `<cluster-arn>`: The cluster ARN from `casting.yaml`.
 - `<aws-region>`: The region from `casting.yaml`.
-- `<service-name>`: A service name from Step 4, for example `signoz-signoz-0`.
+- `<service-name>`: A service name from Step 5, for example `signoz-signoz-0`.
 
 The events say why ECS could not place or start the task. Each SigNoz task takes its own elastic network interface on the instance, so small instance types fit only a few tasks. See <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking-awsvpc.html" target="_blank" rel="noopener noreferrer nofollow">task networking</a>.
 
@@ -833,7 +815,7 @@ aws ecs describe-container-instances --cluster <cluster-arn> --region <aws-regio
 
 - `<cluster-arn>`: The cluster ARN from `casting.yaml`.
 - `<aws-region>`: The region from `casting.yaml`.
-- `<service-name>`: A service name from Step 4, for example `signoz-signoz-0`.
+- `<service-name>`: A service name from Step 5, for example `signoz-signoz-0`.
 
 Connect to that instance (for example with AWS Systems Manager Session Manager) and run this. The main container of each task carries its service's name:
 
