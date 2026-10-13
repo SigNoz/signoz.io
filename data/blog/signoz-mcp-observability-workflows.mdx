@@ -14,9 +14,22 @@ related_articles:
 
 <h2 className="!mb-2">TL;DR</h2>
 
-SigNoz MCP lets your agents read and act on your telemetry in SigNoz. Within a few months of launch, MCP tool calls surpassed human-initiated operations on SigNoz.
+Our customers have unlocked several observability use cases with SigNoz MCP. Here are the six most common use-cases,
 
-In this article, we cover the six most common use cases: post-release checks, telemetry cost optimization, daily reports, performance optimization, customer support, and debugging from anywhere.
+1. **Post-release checks:** Check errors and latency after every deployment.
+2. **Telemetry cost optimization:** Find noisy telemetry and identify cost drivers.
+3. **Daily reports and triage:** Review daily reports and investigate anomalies.
+4. **RCA and performance optimization:** Trace failures and slow requests.
+5. **Customer support:** Investigate customer-reported issues.
+6. **Debugging from anywhere:** Ask what happened from your phone.
+
+<Figure
+  src="/img/blog/2026/10/signoz-mcp-observability-workflows.webp"
+  alt="Top observability MCP workflows with SigNoz and AI agents"
+  caption=""
+  width="1285"
+  height="723"
+/>
 
 ## An introduction to SigNoz MCP
 
@@ -24,9 +37,17 @@ In this article, we cover the six most common use cases: post-release checks, te
 
 We launched the SigNoz MCP server in April. Within a few months, MCP tool calls from agents surpassed operations initiated by humans on the platform. MCP tool calls are now growing roughly 2x month over month.
 
-So, we talked to our power users to understand the agentic workflows they’ve built with the SigNoz MCP. Some were exactly what we expected. A few caught us by surprise, in a good way.
+<Figure
+  src="/img/blog/2026/10/signoz-mcp-agent-operations-growth.webp"
+  alt="Bar chart comparing agent and human operations in SigNoz from April through July"
+  caption=""
+  width="1280"
+  height="672"
+/>
 
-As more agents interact with SigNoz every day, it’s exciting to see how our customers are finding new ways to put them to work. In this blog, we cover some of our favorite workflows that you can set up too.
+As more agents interact with SigNoz every day, it’s exciting to see how our customers are finding new ways to put them to work.
+
+So, we talked to our power users to understand the agentic workflows they’ve built with the SigNoz MCP. Some were exactly what we expected. A few caught us by surprise, in a good way.
 
 ## MCP gives agents the production context they need to close the development loop
 
@@ -47,14 +68,14 @@ Three things make agentic operations via SigNoz MCP more reliable and token-effi
 **Open source.** Because SigNoz is open source, agents aren’t working with a black box. They get more product context. They can read our source code, understand how things work under the hood, and land on the right fix faster with fewer retries. As one of our users mentioned:
 
 > *I was trying to get all the graphs to link properly, like the logs and the metrics graphs. I asked Claude why they weren’t linked. It went to your GitHub repo, read the source code, and found that the code was doing a union on two fields, so we needed to add those to our OTel config. I was like, oh, this is so nice.*
-
-— Cytracom
+>
+> — Cytracom
 
 **OpenTelemetry.** SigNoz is built on OpenTelemetry, an open standard with extensive documentation and community discussion available online. SigNoz also keeps standard OTel attribute names like `service.name` and `http.route` as they are. This gives agents another layer of context, and they don’t need to learn vendor-specific conventions, so they get to results faster and use fewer tokens.
 
 > *We add a lot of services on bare metal because our VMs are on bare metal. Onboarding that new service to SigNoz is so easy because of OTel. It’s like a couple of lines of OTel configuration and that’s it.*
-
-— Hiro Tamada, Founding Engineer, Kernel
+>
+> — Hiro Tamada, Founding Engineer, Kernel
 
 **A library of 40+ MCP tools.** That might sound like a lot for your agent’s context window. But modern coding agents like Claude Code, Codex, and Cursor use tool search to load only the tools they need. That can cut SigNoz MCP’s footprint from roughly 20K tokens to around 200.
 
@@ -64,6 +85,8 @@ Three things make agentic operations via SigNoz MCP more reliable and token-effi
   src="/img/blog/2026/10/signoz-mcp-six-use-cases.webp"
   alt="Six agentic observability workflows teams can build with SigNoz MCP"
   caption="Six common agentic observability workflows powered by SigNoz MCP."
+  width="1672"
+  height="941"
 />
 
 ### Post-release monitoring automation
@@ -74,9 +97,13 @@ Now, you can set up agents to screen your telemetry as soon as the release ships
 
 You can just ask:
 
+<div className="[&_pre]:!whitespace-pre-wrap [&_[data-line]]:!whitespace-pre-wrap [&_[data-line]]:break-words">
+
 ```text noLineNumbers
 I released the checkout service. Can you check if the release is healthy?
 ```
+
+</div>
 
 You can also add this to your CI/CD pipeline, so an agent checks every release on its own. To make the checks more reliable, give the agent your runbooks and skills along with SigNoz MCP.
 
@@ -90,9 +117,13 @@ With agents, you no longer have to manage this trade-off manaully. Agents can an
 
 At SigNoz, we’ve created dedicated skills for telemetry cost optimization. The `signoz-reducing-telemetry-cost` skill identifies what’s driving your costs. It covers everything from noisy logs and spans to high-cardinality metrics. It then recommends what you can safely drop.
 
+<div className="[&_pre]:!whitespace-pre-wrap [&_[data-line]]:!whitespace-pre-wrap [&_[data-line]]:break-words">
+
 ```text noLineNumbers
 Is the telemetry we're ingesting actually helpful? Which noisy logs or unhelpful instrumentation can we remove?
 ```
+
+</div>
 
 Before making a recommendation, the skill checks whether any dashboards or alerts depend on that data, helping ensure that nothing important breaks. This gives the agent clear context and makes its recommendations more reliable and token-efficient.
 
@@ -108,6 +139,8 @@ Before, an on-call engineer would put together the daily health report and share
   src="/img/blog/2026/10/signoz-mcp-daily-report-flow.webp"
   alt="Workflow showing an agent creating a daily observability report with SigNoz MCP"
   caption="A scheduled agent can use SigNoz MCP to prepare and distribute a daily health report."
+  width="2117"
+  height="743"
 />
 
 The report can cover error rates and latency compared with the previous day, recent deploys, and anything burning through its SLO. It can also be tailored for different users. For example, a platform head gets a different report than a service owner.
@@ -122,17 +155,21 @@ With SigNoz MCP, agents can analyze your application’s performance and find bo
 
 When an agent finds an issue, it can trace the affected request span by span, isolate the error span, and determine the cause. It could be a database query error, a network failure, or an infrastructure issue. This speeds up root cause analysis, which takes much longer when done manually through the UI.
 
+<div className="[&_pre]:!whitespace-pre-wrap [&_[data-line]]:!whitespace-pre-wrap [&_[data-line]]:break-words">
+
 ```text noLineNumbers
 Trace the slow requests end to end. Where are they taking the most time, and what can we optimize?
 ```
+
+</div>
 
 This also enables loops like hill climbing and auto-research. The agent makes a change, measures the impact in SigNoz, keeps what works, and repeats.
 
 One of our customers, [Kernel](https://signoz.io/customers/kernel/), used SigNoz MCP to cut browser acquisition latency from 140ms to 30ms.
 
 > *Browser acquisition latency was around 140 milliseconds, and we were not happy with it. We let agents look at traces of the requests, found the bottlenecks, and reduced the latency from 140 milliseconds to 30 milliseconds within a couple of weeks.*
-
-— Hiro Tamada, Founding Engineer, Kernel
+>
+> — Hiro Tamada, Founding Engineer, Kernel
 
 <YouTube id="XnPd_0gEwoM" mute="false" />
 
@@ -144,9 +181,13 @@ Previously, the support team would raise a ticket for engineering, and getting a
 
 Now, when a customer issue is reported, it immediately triggers an agent. The agent identifies the root cause and responds with details such as which service is responsible, whether the fix is small or substantial, and how many users are affected. The support team can then set the escalation priority accordingly.
 
+<div className="[&_pre]:!whitespace-pre-wrap [&_[data-line]]:!whitespace-pre-wrap [&_[data-line]]:break-words">
+
 ```text noLineNumbers
 A customer reported this issue. Which service is causing it, is it a small or large fix, and how many users are affected?
 ```
+
+</div>
 
 From there, the agent can create a pull request, assign a task, or take any other action configured as part of the workflow.
 
@@ -168,6 +209,8 @@ Let’s take an example workflow. We released a new version of our product-catal
   src="/img/blog/2026/10/signoz-mcp-workflow-prompts.webp"
   alt="Prompts used in a SigNoz MCP post-deployment observability workflow"
   caption="A post-deployment workflow that checks a release, investigates an issue, verifies the fix, and adds monitoring."
+  width="1672"
+  height="941"
 />
 
 1. Check the release. Ask the agent to run a health check. It pulls logs and metrics and finds errors, if any. In our case, it found one.
