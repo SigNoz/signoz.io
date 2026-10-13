@@ -1,0 +1,155 @@
+---
+date: 2026-10-08
+title: Trace Thread API - Retrieve LLM Conversation Spans
+description: Use the SigNoz Trace Thread API to fetch LLM input and output message spans from a trace in timestamp order, with cursor-based pagination.
+doc_type: reference
+---
+
+The Trace Thread API returns the spans within a single trace that carry LLM input or output messages, ordered by timestamp. Use it to reconstruct the conversation thread embedded in a trace for AI Observability, without replaying the full trace waterfall.
+
+<Admonition type="warning">
+This endpoint is in **alpha**. The response shape and pagination contract may change before it is considered stable. Message content normalization (`formatted_input` / `formatted_output`) is not yet available and will arrive in a follow-up release. No in-product UI ships with this endpoint yet; see [AI Observability](https://signoz.io/docs/ai-observability/) for the roadmap.
+</Admonition>
+
+## Endpoint
+
+```
+GET https://{URL}/api/v1/traces/{traceID}/thread
+```
+
+- Replace `{URL}` with your instance URL, for example `your-instance.signoz.cloud`.
+- Replace `{traceID}` with the ID of the trace whose thread you want to read.
+
+## Prerequisites
+
+- An API key generated from a Service Account. See [Authentication](https://signoz.io/docs/traces-management/trace-api/overview/#authentication) in the Trace API overview for how to create one.
+- The caller needs the **Viewer** role or higher.
+
+## Authentication
+
+Add the API key to your request header:
+
+```bash
+SIGNOZ-API-KEY:{YOUR_API_KEY}
+```
+
+## Query parameters
+
+| Name | Type | Description |
+|---|---|---|
+| `limit` | integer | Page size. Defaults to 20 when omitted or set to 0. Maximum is 100. |
+| `after` | string | Pass the `nextCursor` from a previous response to fetch the spans after it. |
+| `before` | string | Pass the `prevCursor` from a previous response to fetch the spans before it. |
+| `spanId` | string | Open the page centered on this span and return the surrounding message-bearing spans. |
+
+<Admonition>
+Set only one of `after`, `before`, or `spanId` in a single request. Supplying more than one returns a `400`.
+</Admonition>
+
+## Pagination
+
+Results are paginated with cursors. Each response includes a `nextCursor` and a `prevCursor`:
+
+- To move forward, send the `nextCursor` value as the `after` query parameter.
+- To move backward, send the `prevCursor` value as the `before` query parameter.
+- To jump directly to a known span, send its ID as the `spanId` query parameter.
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://{URL}/api/v1/traces/{traceID}/thread?limit=20' \
+  -H 'SIGNOZ-API-KEY:{YOUR_API_KEY}'
+```
+
+To fetch the next page, pass the `nextCursor` returned by the previous call:
+
+```bash
+curl -X GET \
+  'https://{URL}/api/v1/traces/{traceID}/thread?after={nextCursor}' \
+  -H 'SIGNOZ-API-KEY:{YOUR_API_KEY}'
+```
+
+## Response
+
+A successful request returns `200 OK` with a `status` field and a `data` object. The `data` object contains the pagination cursors and the ordered `spans` array.
+
+| Field | Type | Description |
+|---|---|---|
+| `nextCursor` | string | Cursor for the next page. Pass it as `after`. Omitted when there is no next page. |
+| `prevCursor` | string | Cursor for the previous page. Pass it as `before`. Omitted when there is no previous page. |
+| `spans` | array | Message-bearing spans in timestamp order. See [Thread span fields](#thread-span-fields). |
+
+### Thread span fields
+
+Field names match the trace waterfall view.
+
+| Field | Type | Description |
+|---|---|---|
+| `span_id` | string | Span ID. |
+| `trace_id` | string | Trace ID. |
+| `parent_span_id` | string | Parent span ID. |
+| `name` | string | Span name. |
+| `kind_string` | string | Span kind. |
+| `time_unix` | integer | Span start time (Unix epoch, milliseconds). |
+| `duration_nano` | integer | Span duration in nanoseconds. |
+| `has_error` | boolean | Whether the span is marked as an error. |
+| `status_code_string` | string | Span status code. |
+| `status_message` | string | Span status message. |
+| `resource` | object | Resource attributes as key-value pairs. |
+| `attributes` | object | Span attributes, including the GenAI message attributes. |
+| `events` | array | Span events. |
+| `references` | array | Span references, such as links to other spans. |
+
+### Example response
+
+```json defaultCollapsed
+{
+  "status": "success",
+  "data": {
+    "nextCursor": "eyJvZmZzZXQiOjIwfQ==",
+    "prevCursor": "eyJvZmZzZXQiOjB9",
+    "spans": [
+      {
+        "span_id": "6c1f8d2e9a3b4c5d",
+        "trace_id": "8f3a1b2c4d5e6f7089a1b2c3d4e5f607",
+        "parent_span_id": "0a1b2c3d4e5f6071",
+        "name": "chat gpt-4o",
+        "kind_string": "Client",
+        "time_unix": 1759900800000,
+        "duration_nano": 1842000000,
+        "has_error": false,
+        "status_code_string": "Unset",
+        "status_message": "",
+        "resource": {
+          "service.name": "assistant-api"
+        },
+        "attributes": {
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"content\":\"Summarize this trace\"}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"content\":\"...\"}]"
+        },
+        "events": [],
+        "references": []
+      }
+    ]
+  }
+}
+```
+
+## Error codes
+
+| Status | Meaning |
+|---|---|
+| `400` | Invalid `limit`, an invalid cursor, or more than one of `after`, `before`, and `spanId` set. |
+| `401` | Missing or invalid API key. |
+| `403` | The caller does not have the Viewer role or higher. |
+| `404` | The `spanId` does not exist in the trace. |
+| `500` | Internal server error. |
+
+## Limitations
+
+- **Alpha stability.** The response shape and pagination contract may change. Avoid deep-linking this endpoint from stable workflows until it is promoted out of alpha.
+- **Message normalization pending.** Normalized `formatted_input` / `formatted_output` fields are not available yet and will arrive in a follow-up release.
+- The endpoint reads spans written both before and after the internal storage migration, so a trace that straddles the rollout boundary is handled correctly with no action required.
+
+<GetHelp />
