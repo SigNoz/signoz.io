@@ -1,5 +1,5 @@
 ---
-date: 2026-07-27
+date: 2026-09-22
 title: Single Sign on (SSO) - Overview
 description: Overview of single sign-on (SSO) in SigNoz, including setup, role mapping, and user lifecycle management.
 doc_type: explanation
@@ -21,7 +21,11 @@ At a high level, you connect your organization’s email domain to an IdP, and S
 2. **Choose Method**: For that domain, select SAML, OIDC, or Google (for Workspace) and provide the IdP details.
 3. **Just‑in‑Time access**: Users with emails on that domain can sign in via your IdP without a prior invite.
 4. **Attribute/Claim Mapping**: Map IdP attributes (SAML) or token claims (OIDC/Google) to SigNoz user fields like email, display name, groups, and role.
-5. **Role Mapping**: Automatically assign SigNoz roles (VIEWER, EDITOR, ADMIN) based on IdP group memberships or a direct role attribute — no manual role assignment needed.
+5. **Role Mapping**: Automatically assign SigNoz roles (VIEWER, EDITOR, ADMIN) based on IdP group memberships or a direct role attribute, so you don't need to assign roles manually.
+
+<Admonition type="info">
+On enterprise deployments, auth domain management uses fine-grained authorization. Creating or updating a domain with a role mapping requires the configuring user to also hold `role:attach` on every role the mapping assigns (and `role:detach` on any role the previous mapping assigned, since an update replaces the full mapping). If no default role is set, SSO users fall back to VIEWER, so the caller needs `role:attach` on `signoz-viewer`. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#auth-domain).
+</Admonition>
 
 ## User deprovisioning
 
