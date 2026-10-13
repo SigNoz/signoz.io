@@ -1,5 +1,5 @@
 ---
-date: 2026-08-11
+date: 2026-09-18
 title: Slack Alerts - Configure a Slack Notification Channel
 description: Learn how to send SigNoz alerts to Slack. Set up an Incoming Webhook, create the notification channel, test it, and mention Slack user groups.
 doc_type: howto
@@ -188,6 +188,84 @@ curl '<your-signoz-cloud-url>/api/v1/channels' \
 | `slack_configs[].channel`       | `string`  | The channel or user to send notifications to. Slack ignores this value for an app Incoming Webhook, which always posts to its bound channel. |
 | `slack_configs[].title`         | `string`  | Templated title of the message. Go templates are supported.                                                                                  |
 | `slack_configs[].text`          | `string`  | Templated text of the message. Go templates are supported.                                                                                   |
+
+### Customize the Slack Message Attachment
+
+Each `slack_configs[]` entry accepts optional attachment fields that shape how the alert renders in Slack: a color bar, a clickable title, pretext, a fallback summary, a footer, key-value fields, and interactive action buttons. All string fields support <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a>.
+
+<Admonition type="info">
+These attachment options are set through the API. The Slack channel form in the SigNoz UI does not expose them yet. On the newer v2 channels API the same fields use camelCase names (`color`, `titleLink`, `pretext`, `fallback`, `footer`, `fields`, `actions`, and `okText`/`dismissText` inside `confirm`).
+</Admonition>
+
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `slack_configs[].color` | `string` | Optional | Hex color of the attachment's vertical sidebar, for example `#439FE0`. |
+| `slack_configs[].title_link` | `string` | Optional | Turns the message title into a hyperlink. |
+| `slack_configs[].pretext` | `string` | Optional | Plain text shown above the attachment block. |
+| `slack_configs[].fallback` | `string` | Optional | Plain-text summary shown where rich attachments cannot render, such as mobile notifications. |
+| `slack_configs[].footer` | `string` | Optional | Small text shown at the bottom of the attachment. |
+| `slack_configs[].fields` | `array` | Optional | Key-value rows rendered inside the attachment. |
+| `slack_configs[].fields[].title` | `string` | Required | Heading of the field. |
+| `slack_configs[].fields[].value` | `string` | Required | Value of the field. Go templates are supported. |
+| `slack_configs[].fields[].short` | `boolean` | Optional | `true` renders the field inline (half-width); `false` renders it full-width. |
+| `slack_configs[].actions` | `array` | Optional | Interactive buttons attached to the message. |
+| `slack_configs[].actions[].type` | `string` | Required | Action type, for example `button`. |
+| `slack_configs[].actions[].text` | `string` | Required | Button label. |
+| `slack_configs[].actions[].url` | `string` | Conditional | Link target for a link button. Provide either `url` or `name`. |
+| `slack_configs[].actions[].name` | `string` | Conditional | Action name for a message button. Provide either `url` or `name`. |
+| `slack_configs[].actions[].style` | `string` | Optional | Button style, for example `primary` or `danger`. |
+| `slack_configs[].actions[].value` | `string` | Optional | Value sent with a message button. |
+| `slack_configs[].actions[].confirm` | `object` | Optional | Confirmation dialog shown before the action fires. |
+| `slack_configs[].actions[].confirm.text` | `string` | Required | Body text of the confirmation dialog. |
+| `slack_configs[].actions[].confirm.title` | `string` | Optional | Title of the confirmation dialog. |
+| `slack_configs[].actions[].confirm.ok_text` | `string` | Optional | Label of the confirm button. |
+| `slack_configs[].actions[].confirm.dismiss_text` | `string` | Optional | Label of the cancel button. |
+
+The example below adds a status-driven color, a clickable title, two inline `fields`, and two `actions` (a link button and a message button with a confirmation dialog):
+
+```json defaultCollapsed minimap
+{
+  "name": "Prod Critical Alerts - Slack",
+  "slack_configs": [
+    {
+      "send_resolved": true,
+      "api_url": "https://hooks.slack.com/services/<your-webhook-path>",
+      "channel": "#prod-critical-alerts",
+      "title": "[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}",
+      "text": "{{ .CommonAnnotations.description }}",
+      "color": "{{ if eq .Status \"firing\" }}#D50000{{ else }}#2EB67D{{ end }}",
+      "title_link": "{{ .ExternalURL }}",
+      "pretext": "New alert from SigNoz",
+      "fallback": "{{ .CommonLabels.alertname }} is {{ .Status }}",
+      "footer": "SigNoz Alertmanager",
+      "fields": [
+        { "title": "Severity", "value": "{{ .CommonLabels.severity }}", "short": true },
+        { "title": "Service", "value": "{{ .CommonLabels.job }}", "short": true }
+      ],
+      "actions": [
+        {
+          "type": "button",
+          "text": "View in SigNoz",
+          "url": "{{ .ExternalURL }}",
+          "style": "primary"
+        },
+        {
+          "type": "button",
+          "text": "Acknowledge",
+          "name": "ack",
+          "value": "ack",
+          "confirm": {
+            "text": "Acknowledge this alert?",
+            "title": "Confirm acknowledgement",
+            "ok_text": "Yes",
+            "dismiss_text": "No"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Troubleshooting
 
