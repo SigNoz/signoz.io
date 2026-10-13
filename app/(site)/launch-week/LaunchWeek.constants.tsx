@@ -7,6 +7,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Monday - October 12',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/ixczfyuq',
+    watchUrl:
+      'https://www.linkedin.com/events/signozlaunchweek6-0keynote-obse7515120310010933248/theater/',
+    blogUrl: 'https://signoz.io/blog/why-engineering-first-teams-choose-signoz/',
   },
   {
     title: 'New Trace Detail View',
@@ -16,6 +19,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Monday - October 12',
     time: '9:30 AM PT',
     registrationUrl: 'https://luma.com/5c8so1z5',
+    watchUrl:
+      'https://www.linkedin.com/events/meettheall-newtracedetailview-s7514346445626380288/theater/',
+    blogUrl: 'https://signoz.io/blog/new-trace-detail-view/',
   },
   {
     title: 'MCP Workshop',
