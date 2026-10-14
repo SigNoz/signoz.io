@@ -101,7 +101,7 @@ const PAGE_MARKDOWN_EXCLUDED_PREFIXES = [
 
 // Real .md resources served by their own routes; the suffix is part of the
 // path, not a markdown-alternate marker.
-const MARKDOWN_ROUTE_PATHS = new Set(['/skill.md'])
+const MARKDOWN_ROUTE_PATHS = new Set(['/skill.md', '/api-reference.md'])
 
 /**
  * File-like paths (e.g. /llms.txt, /sitemap.xml, /favicon.ico) are real
@@ -161,3 +161,17 @@ export const buildPageMarkdownRewritePath = (pathname: string): string => {
  */
 export const servesMarkdownAlternate = (pathname: string): boolean =>
   shouldRewriteContentToMarkdown(pathname, true) || shouldRewritePageToMarkdown(pathname, true)
+
+/**
+ * Public `.md` URL of a non-docs page. `/` is skipped: its derived form is
+ * `/.md`, so the home page negotiates on Accept only.
+ */
+export const buildMarkdownAlternatePath = (pathname: string): string | null => {
+  const normalized = stripTrailingSlashes(pathname)
+
+  if (normalized === '/' || hasMarkdownExtension(normalized)) {
+    return null
+  }
+
+  return `${normalized}.md`
+}

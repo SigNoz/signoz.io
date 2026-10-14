@@ -3,6 +3,8 @@ import { agentResponse } from '@/utils/agentResponseHeaders'
 
 export const MCP_URL_TEMPLATE = 'https://mcp.<region>.signoz.cloud/mcp'
 
+export const MCP_ICON_PATH = '/svgs/icons/signoz.svg'
+
 export const REGION_INSTRUCTIONS =
   'Replace <region> with your SigNoz Cloud region. Find it under Settings → Ingestion in SigNoz, or see https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint. Using the wrong region fails authentication.'
 
@@ -46,6 +48,16 @@ export function buildMcpDiscoveryDocument(regionNames: string[]) {
   return {
     version: '1.0.0',
     name: 'SigNoz',
+    displayName: 'SigNoz',
+    icon: `${siteMetadata.siteUrl}${MCP_ICON_PATH}`,
+    icons: [
+      {
+        src: `${siteMetadata.siteUrl}${MCP_ICON_PATH}`,
+        mimeType: 'image/svg+xml',
+        sizes: ['any'],
+      },
+    ],
+    websiteUrl: `${siteMetadata.siteUrl}/`,
     description:
       'SigNoz Cloud hosted MCP servers for querying your observability data (metrics, traces, logs, alerts, dashboards) through natural language. Connect to the regional endpoint that matches your SigNoz Cloud account.',
     transport: 'http',
@@ -72,5 +84,39 @@ export async function getMcpDiscoveryDocument() {
 
 export async function mcpDiscoveryResponse() {
   const body = JSON.stringify(await getMcpDiscoveryDocument(), null, 2)
+  return agentResponse(body, { contentType: 'application/json; charset=utf-8' })
+}
+
+/**
+ * MCP server card (/.well-known/mcp/server-card.json): the branded listing
+ * registries and clients render — display name, icon, description, docs.
+ */
+export function buildMcpServerCard(regionNames: string[]) {
+  const discovery = buildMcpDiscoveryDocument(regionNames)
+
+  return {
+    name: discovery.name,
+    displayName: discovery.displayName,
+    description: discovery.description,
+    icon: discovery.icon,
+    icons: discovery.icons,
+    version: discovery.version,
+    websiteUrl: discovery.websiteUrl,
+    documentationUrl: discovery.documentation,
+    repositoryUrl: discovery.selfHosted.repository,
+    url: discovery.url,
+    transport: discovery.transport,
+    instructions: discovery.instructions,
+    authentication: discovery.authentication,
+    servers: discovery.servers,
+  }
+}
+
+export async function getMcpServerCard() {
+  return buildMcpServerCard(await fetchRegionNames())
+}
+
+export async function mcpServerCardResponse() {
+  const body = JSON.stringify(await getMcpServerCard(), null, 2)
   return agentResponse(body, { contentType: 'application/json; charset=utf-8' })
 }
