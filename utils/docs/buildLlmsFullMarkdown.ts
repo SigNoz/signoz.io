@@ -35,12 +35,39 @@ const renderIntroduction = (): string =>
     includeLlmsDirective: false,
   })
 
-const renderDoc = (doc: LlmsFullDoc): Promise<string> =>
+/**
+ * Closes a code fence the page left open. In a single page an unclosed fence
+ * only affects that page, but in the corpus it would swallow every later
+ * separator and page, so each page must end outside a fence.
+ */
+export const closeUnterminatedFence = (markdown: string): string => {
+  let open: { char: string; length: number } | null = null
+
+  for (const line of markdown.split('\n')) {
+    const match = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
+    if (!match) continue
+    const [, marker, rest] = match
+
+    if (!open) {
+      // A backtick fence's info string cannot contain a backtick.
+      if (marker[0] === '`' && rest.includes('`')) continue
+      open = { char: marker[0], length: marker.length }
+    } else if (marker[0] === open.char && marker.length >= open.length && rest.trim() === '') {
+      open = null
+    }
+  }
+
+  return open ? `${markdown.replace(/\n+$/, '')}\n${open.char.repeat(open.length)}` : markdown
+}
+
+const renderDoc = async (doc: LlmsFullDoc): Promise<string> =>
   // Tags are dropped: the docs list query does not fetch them, so the
   // renderer would otherwise print the transform's default tags for every page.
-  renderDocMarkdownForAgents(
-    { slug: doc.slug, title: doc.title, description: doc.description, body: doc.body },
-    { footerLines: [], includeLlmsDirective: false }
+  closeUnterminatedFence(
+    await renderDocMarkdownForAgents(
+      { slug: doc.slug, title: doc.title, description: doc.description, body: doc.body },
+      { footerLines: [], includeLlmsDirective: false }
+    )
   )
 
 async function mapWithConcurrency<T, R>(

@@ -4,7 +4,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
-const { buildLlmsFullMarkdownFromDocs, orderDocsBySidebar } = loadTsModule(
+const { buildLlmsFullMarkdownFromDocs, closeUnterminatedFence, orderDocsBySidebar } = loadTsModule(
   'utils/docs/buildLlmsFullMarkdown.ts'
 )
 const { isListedDoc } = loadTsModule('utils/docs/listedDocs.ts')
@@ -118,4 +118,34 @@ test('real docs render to clean markdown with their content and no leftover JSX'
   const leftoverJsx = proseOnly(body).match(/<\/?[A-Z][A-Za-z]*[\s/>]/g) || []
   assert.deepEqual(leftoverJsx, [], `leftover JSX tags: ${leftoverJsx.slice(0, 5).join(', ')}`)
   assert.equal(/className=/.test(proseOnly(body)), false)
+})
+
+test('an unclosed code fence in one page does not leak into later pages', async () => {
+  const fenced = ['```yaml', '```yaml', 'key: value'].join('\n')
+  const docs = [
+    createDoc('a/broken', { body: { raw: `Before.\n\n${fenced}\n` } }),
+    createDoc('b/after', { body: { raw: '```bash\necho ok\n```\n' } }),
+  ]
+  const body = await buildLlmsFullMarkdownFromDocs(docs)
+
+  const pages = body.split('\n\n---\n\n').slice(1)
+  assert.equal(pages.length, 3)
+  // A page that ends outside a fence is left unchanged by the fence closer.
+  pages.forEach((page) => {
+    assert.equal(
+      closeUnterminatedFence(page),
+      page,
+      `page ends inside a fence: ${page.split('\n')[0]}`
+    )
+  })
+  assert.equal(pages[1].trimEnd().endsWith('```'), true)
+})
+
+test('closeUnterminatedFence only touches pages that end inside a fence', () => {
+  const balanced = '```bash\necho ok\n```\n'
+  assert.equal(closeUnterminatedFence(balanced), balanced)
+  assert.equal(closeUnterminatedFence('Plain text.\n'), 'Plain text.\n')
+  assert.equal(closeUnterminatedFence('```js\nlet a = 1\n'), '```js\nlet a = 1\n```')
+  assert.equal(closeUnterminatedFence('~~~\ncode\n'), '~~~\ncode\n~~~')
+  assert.equal(closeUnterminatedFence('````md\n```\ninner\n```\n'), '````md\n```\ninner\n```\n````')
 })
