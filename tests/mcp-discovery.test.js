@@ -140,3 +140,9 @@ test('server card lists the MCP tools documented on the MCP server page', () => 
   assert.deepEqual(card.capabilities, { tools: true, resources: true, prompts: true })
   assert.equal(card.serverInfo.name, 'SigNozMCP')
 })
+
+test('the server-card route allows cross-origin fetches', async () => {
+  const response = await getServerCard()
+
+  assert.equal(response.headers.get('access-control-allow-origin'), '*')
+})

@@ -1,5 +1,6 @@
 import siteMetadata from '@/data/siteMetadata'
 import { agentResponse } from '@/utils/agentResponseHeaders'
+import { discoveryJsonResponse } from '@/utils/agentDiscoveryCards'
 import { MCP_SERVER_TOOLS } from '@/utils/docs/mcpServerTools'
 
 export const MCP_URL_TEMPLATE = 'https://mcp.<region>.signoz.cloud/mcp'
@@ -121,6 +122,5 @@ export async function getMcpServerCard() {
 }
 
 export async function mcpServerCardResponse() {
-  const body = JSON.stringify(await getMcpServerCard(), null, 2)
-  return agentResponse(body, { contentType: 'application/json; charset=utf-8' })
+  return discoveryJsonResponse(await getMcpServerCard())
 }
