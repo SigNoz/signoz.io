@@ -3,6 +3,7 @@ const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
 const { GET } = loadTsModule('app/(site)/skill.md/route.ts')
+const { GET: getDocsSkill } = loadTsModule('app/(site)/docs/skill.md/route.ts')
 
 let cachedBody
 
@@ -57,4 +58,32 @@ test('skill.md markdown links are absolute and parseable', async () => {
   links.forEach((url) => {
     assert.match(url, /^https:\/\//, `link is not absolute: ${url}`)
   })
+})
+
+test('skill.md includes runnable Cloud and self-hosted quick starts', async () => {
+  const body = await getBody()
+
+  assert.match(body, /## Quick start: SigNoz Cloud/)
+  assert.match(body, /## Quick start: self-hosted/)
+  assert.equal(body.includes('https://ingest.<region>.signoz.cloud:443'), true)
+  assert.equal(body.includes('signoz-ingestion-key=<your-ingestion-key>'), true)
+  assert.equal(body.includes('opentelemetry-instrument <your_run_command>'), true)
+  assert.equal(body.includes('curl -fsSL https://signoz.io/foundry.sh | bash'), true)
+  assert.equal(body.includes('foundryctl cast -f casting.yaml'), true)
+  assert.match(body, /## Verify data arrived/)
+})
+
+test('skill.md code fences are balanced', async () => {
+  const body = await getBody()
+  const fences = body.split('\n').filter((line) => line.startsWith('```'))
+
+  assert.equal(fences.length % 2, 0)
+})
+
+test('/docs/skill.md serves the same markdown as /skill.md', async () => {
+  const response = await getDocsSkill(new Request('https://signoz.io/docs/skill.md'))
+
+  assert.equal(response.status, 200)
+  assert.match(response.headers.get('content-type'), /^text\/markdown/)
+  assert.equal(await response.text(), await getBody())
 })
