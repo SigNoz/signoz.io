@@ -31,6 +31,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Tuesday - October 13',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/a8pzbqqt',
+    watchUrl:
+      'https://www.linkedin.com/events/hands-onsignozmcpworkshop-launc7514376660721336320/theater/',
+    blogUrl: 'https://signoz.io/blog/signoz-mcp-observability-workflows/',
   },
   {
     title: 'Infrastructure Monitoring Experience',
