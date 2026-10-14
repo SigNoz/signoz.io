@@ -8,6 +8,7 @@ import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSch
 import { fetchDocBySlug } from '@/utils/cachedData'
 import { compileMdxSource } from '@/utils/compileMdx'
 import { slugFromParams } from '@/utils/docs/markdownRouting'
+import { withMarkdownAlternate } from '@/utils/markdownAlternate'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -32,9 +33,7 @@ export async function generateMetadata(props: {
   return {
     title: seoTitle,
     description: post.description,
-    alternates: {
-      canonical: pageUrl,
-    },
+    alternates: withMarkdownAlternate(`/docs/${slug}`, { canonical: pageUrl }),
     openGraph: {
       title: fullTitle,
       description: post.description,

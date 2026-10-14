@@ -14,6 +14,7 @@ import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+import { withMarkdownAlternate } from '@/utils/markdownAlternate'
 
 async function getCustomerStoryContent(path: string, deploymentStatus: string) {
   return getContentBySlug('case-studies', path, deploymentStatus)
@@ -58,9 +59,9 @@ export async function generateMetadata(props: {
       return {
         title: seoTitle,
         description: content?.description || content?.title,
-        alternates: {
+        alternates: withMarkdownAlternate(`/customers/${path}`, {
           canonical: `${siteMetadata.siteUrl}/customers/${path}/`,
-        },
+        }),
         openGraph: {
           title: seoTitle,
           description: content?.description || content?.title,
