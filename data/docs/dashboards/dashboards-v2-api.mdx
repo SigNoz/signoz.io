@@ -1,5 +1,5 @@
 ---
-date: 2026-07-29
+date: 2026-08-05
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -102,6 +102,18 @@ Locking and unlocking a dashboard get new endpoints:
 PUT    /api/v2/dashboards/{id}/lock  -- Lock a Dashboard
 DELETE /api/v2/dashboards/{id}/lock  -- Unlock a Dashboard
 ```
+
+### Retry a dashboard migration
+
+A dashboard whose stored data could not be converted during the upgrade stays on the V1 schema and is flagged **Legacy**. Re-run the V1 to V2 migration for a single dashboard with:
+
+```
+POST /api/v2/dashboards/{id}/migrate  -- Retry the V1 to V2 migration
+```
+
+The call requires the **Editor** role. It is idempotent: a dashboard already on the V2 schema is returned unchanged, in the same shape as `GET /api/v2/dashboards/{id}` (a `status` string and the V2 dashboard under `data`). Migration also coerces numeric fields that were stored as strings, such as a `limit` or `offset` saved as `"5"`, so those dashboards convert without manual edits.
+
+In the product, this endpoint backs the **Retry migration** button in the legacy dashboard dialog. See [Recover a legacy dashboard](https://signoz.io/docs/operate/migration/upgrade-0-135/#recover-a-legacy-dashboard) in the upgrade guide for the UI flow. Full request and response details are in the <a href="https://signoz.io/api-reference/" target="_blank" rel="noopener noreferrer nofollow">API Reference</a>.
 
 ### Migrating from the V1 dashboard APIs
 
