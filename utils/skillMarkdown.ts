@@ -26,7 +26,7 @@ SigNoz is an open-source, OpenTelemetry-native observability platform. It brings
 
 ## Quick start: SigNoz Cloud
 
-1. Sign up at ${site}/teams/.
+1. Sign up for [SigNoz Cloud](${site}/teams/).
 2. In SigNoz, open **Settings** > **Ingestion** to find your region and create an ingestion key. Endpoints follow \`https://ingest.<region>.signoz.cloud:443\` ([ingestion overview](${site}/docs/ingestion/signoz-cloud/overview/)).
 3. Send traces from a Python app with OpenTelemetry auto-instrumentation:
 
