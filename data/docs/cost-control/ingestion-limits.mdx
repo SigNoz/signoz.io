@@ -1,39 +1,40 @@
 ---
-date: 2026-08-14
-title: Set Ingestion Limits in SigNoz Cloud
-description: Set hard, per-signal ingestion caps on a SigNoz Cloud ingestion key to stop a misconfigured Dev or Staging environment from generating an unexpected bill.
+date: 2026-10-13
+title: Set Ingestion Limits on Ingestion Keys
+meta_title: Ingestion Limits - Cap Daily & Per-Second Ingestion per Key
+description: Set hard, per-signal ingestion caps on a SigNoz ingestion key to stop a misconfigured Dev or Staging environment from generating an unexpected bill.
 doc_type: howto
-tags: [SigNoz Cloud]
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
-Ingestion Limits let you place hard caps on telemetry data ingested per ingestion key, independent of what the applications are sending. This is a SigNoz Cloud-only feature.
+Ingestion limits put hard caps on the telemetry that each ingestion key accepts, whatever your applications send. This feature is available in SigNoz Cloud and Self-Hosted Enterprise.
 
-The primary use case is **non-production environment governance**: prevent a misconfigured dev or staging service from generating an unexpectedly large bill by capping ingestion before it reaches your paid quota.
+Use limits mainly for non-production environments. A limit stops a misconfigured dev or staging service before it runs up a large bill.
 
 ## How to Set a Limit
 
-Limits are configured per-signal on an ingestion key. The full step-by-step procedure is in the ingestion keys documentation:
+You set limits per signal on each ingestion key. SigNoz Cloud has no limit for the whole workspace and no limit in dollars. The full step-by-step procedure is in the ingestion keys documentation:
 
 **[Add Limits to an Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/#add-limits-to-a-key)**
 
 In summary:
 
-1. Navigate to **Settings > Ingestion Settings** in SigNoz Cloud.
-2. Click the target ingestion key to open its dropdown.
-3. Select the signal to limit (Logs, Traces, or Metrics).
-4. Click **+ Limits**, enter a limit value, and click **Save**.
+1. Go to **Settings > Identity & Access > Ingestion**.
+2. Click the arrow at the left of the ingestion key to expand it.
+3. In the **LIMITS** section, click **+ Limits** next to the signal (logs, traces, or metrics).
+4. Turn on **Daily limit**, **Per Second limit**, or both, enter the values, and click **Save**.
 
-Limits reset daily. Once the limit is hit within the day, SigNoz drops further data for that signal until midnight UTC.
+Limits reset daily. After a key hits its limit, SigNoz drops new data for that signal until midnight UTC.
 
 <Admonition type="warning">
-  Data dropped due to ingestion limits is permanently lost. It does not buffer or retry. Apply
-  limits only on environments where data loss is acceptable (Dev, Staging).
+  SigNoz does not buffer or retry data that a limit drops, so that data is lost. Apply limits only
+  to environments where you can accept data loss, such as Dev or Staging.
 </Admonition>
 
 ## Next Steps
 
 - Return to **[Cost Control Overview](https://signoz.io/docs/cost-control/overview/)** for the full optimization flow.
-- Set up **[Cost Meter Alerts](https://signoz.io/docs/cost-meter/alerts/)** to be notified when ingestion volume is approaching your limit.
+- Set up **[Cost Meter Alerts](https://signoz.io/docs/cost-meter/alerts/)** to get an alert before ingestion volume reaches your limit.
 - See **[Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/)** for full key management, including modifying and removing limits.
 
 ## Get Help
