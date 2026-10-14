@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
-import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
-import { buildIntroductionAgentMarkdown } from '@/utils/docs/buildIntroductionAgentMarkdown'
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
-import { fetchDocBySlug } from '@/utils/cachedData'
+import { getDocMarkdownBySlug } from '@/utils/docs/getDocMarkdownBySlug'
 import { agentResponse } from '@/utils/agentResponseHeaders'
 
 export async function generateStaticParams() {
@@ -22,17 +20,11 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
   const params = await props.params
   const slug = resolveDocsMarkdownSlug(params.slug)
 
-  if (slug === 'introduction') {
-    return agentResponse(buildIntroductionAgentMarkdown(), { varyAccept: true })
-  }
+  const markdown = await getDocMarkdownBySlug(slug)
 
-  const doc = await fetchDocBySlug(slug)
-
-  if (!doc) {
+  if (markdown === null) {
     return notFoundResponse()
   }
-
-  const markdown = await renderDocMarkdownForAgents(doc)
 
   return agentResponse(markdown, { varyAccept: true })
 }
