@@ -274,6 +274,25 @@ test('does not add Vary: Accept on paths without a markdown alternate', () => {
   assert.equal(run('/docs-onboarding/introduction').headers.get('vary'), null)
 })
 
+test('advertises agent discovery resources via Link on HTML page responses', () => {
+  ;['/', '/docs/introduction/', '/blog/some-post', '/pricing'].forEach((path) => {
+    const link = run(path).headers.get('link')
+    assert.match(link, /rel="llms-txt"/, path)
+    assert.match(link, /rel="agent-skills"/, path)
+    assert.match(link, /rel="agent-card"/, path)
+  })
+})
+
+test('does not add the discovery Link header to markdown, files, or well-known responses', () => {
+  assert.equal(run('/docs/introduction.md').headers.get('link'), null)
+  assert.equal(
+    run('/docs/introduction', { headers: { accept: 'text/markdown' } }).headers.get('link'),
+    null
+  )
+  assert.equal(run('/llms.txt').headers.get('link'), null)
+  assert.equal(run('/.well-known/agent-card.json').headers.get('link'), null)
+})
+
 test('preserves the request pathname for not-found suggestions on passthrough and rewrite', () => {
   assert.equal(run('/nonexistent-page').headers.get(NOT_FOUND_PATHNAME_HEADER), '/nonexistent-page')
   assert.equal(run('/pricing.md').headers.get(NOT_FOUND_PATHNAME_HEADER), '/pricing.md')

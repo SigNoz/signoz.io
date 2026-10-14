@@ -1,12 +1,14 @@
+const fs = require('node:fs')
+const path = require('node:path')
 const test = require('node:test')
 const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
-const { buildMcpDiscoveryDocument, MCP_URL_TEMPLATE } = loadTsModule(
-  'utils/docs/buildMcpDiscoveryDocument.ts'
-)
+const { buildMcpDiscoveryDocument, buildMcpServerCard, MCP_ICON_PATH, MCP_URL_TEMPLATE } =
+  loadTsModule('utils/docs/buildMcpDiscoveryDocument.ts')
 const { GET: getMcpJson } = loadTsModule('app/(site)/.well-known/mcp.json/route.ts')
 const { GET: getMcp } = loadTsModule('app/(site)/.well-known/mcp/route.ts')
+const { GET: getServerCard } = loadTsModule('app/(site)/.well-known/mcp/server-card.json/route.ts')
 
 const SERVER_URL_PATTERN = /^https:\/\/mcp\.[^.]+\.signoz\.cloud\/mcp$/
 
@@ -83,4 +85,58 @@ test('both .well-known routes serve the same valid discovery JSON', async () => 
   serverUrls.forEach((url) => {
     assert.equal(SERVER_URL_PATTERN.test(url) || url === MCP_URL_TEMPLATE, true, url)
   })
+})
+
+test('discovery document carries branding registries render', () => {
+  const document = buildMcpDiscoveryDocument(['us'])
+
+  assert.equal(document.displayName, 'SigNoz')
+  assert.equal(document.icon, `https://signoz.io${MCP_ICON_PATH}`)
+  assert.equal(document.icons[0].mimeType, 'image/svg+xml')
+  assert.equal(document.websiteUrl, 'https://signoz.io/')
+})
+
+test('server card mirrors the discovery document with display metadata', () => {
+  const card = buildMcpServerCard(['us', 'eu'])
+
+  assert.equal(card.name, 'SigNoz')
+  assert.equal(card.displayName, 'SigNoz')
+  assert.equal(card.icon, `https://signoz.io${MCP_ICON_PATH}`)
+  assert.equal(typeof card.description, 'string')
+  assert.equal(card.documentationUrl, 'https://signoz.io/docs/ai/signoz-mcp-server/')
+  assert.equal(card.repositoryUrl, 'https://github.com/SigNoz/signoz-mcp-server')
+  assert.equal(card.url, MCP_URL_TEMPLATE)
+  assert.equal(card.transport, 'http')
+  assert.equal(card.servers.length, 2)
+})
+
+test('the server-card route serves valid JSON', async () => {
+  const json = await fetchRouteBody(
+    getServerCard,
+    'https://signoz.io/.well-known/mcp/server-card.json'
+  )
+  const card = JSON.parse(json)
+
+  assert.equal(card.name, 'SigNoz')
+  assert.equal(typeof card.icon, 'string')
+  assert.equal(Array.isArray(card.servers), true)
+})
+
+test('server card lists the MCP tools documented on the MCP server page', () => {
+  const mdx = fs.readFileSync(
+    path.join(__dirname, '..', 'data/docs/ai/signoz-mcp-server.mdx'),
+    'utf8'
+  )
+  const section = mdx.slice(mdx.indexOf('## Available Tools'))
+  const documented = [...section.matchAll(/^\| `(signoz_[a-z_]+)` \|/gm)].map((match) => match[1])
+  const card = buildMcpServerCard(['us'])
+
+  assert.equal(documented.length > 0, true)
+  assert.deepEqual(
+    card.tools.map((tool) => tool.name),
+    documented
+  )
+  card.tools.forEach((tool) => assert.equal(tool.description.length > 0, true, tool.name))
+  assert.deepEqual(card.capabilities, { tools: true, resources: true, prompts: true })
+  assert.equal(card.serverInfo.name, 'SigNozMCP')
 })

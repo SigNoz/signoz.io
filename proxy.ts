@@ -30,6 +30,10 @@ import {
   shouldRewriteContentToMarkdown,
   shouldRewritePageToMarkdown,
 } from '@/utils/agentMarkdownRouting'
+import {
+  AGENT_DISCOVERY_LINK_HEADER,
+  isAgentDiscoveryLinkTarget,
+} from '@/utils/agentDiscoveryCards'
 
 const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
 
@@ -201,6 +205,12 @@ export function proxy(req: NextRequest) {
   // caches on the Accept header so one representation never poisons the other.
   if (isDocsPathname(pathname) || servesMarkdownAlternate(pathname)) {
     res.headers.append('Vary', 'Accept')
+  }
+
+  // Advertise agent discovery resources (llms.txt, skills, agent card, MCP) on
+  // HTML page responses. Appended so other Link values on the response survive.
+  if (!markdownRewritePath && isAgentDiscoveryLinkTarget(pathname)) {
+    res.headers.append('Link', AGENT_DISCOVERY_LINK_HEADER)
   }
 
   // Preserve request path for server-rendered global not-found suggestions.
