@@ -569,9 +569,9 @@ Choose your framework below to see the specific run command. The setup steps abo
 
 </ToggleHeading>
 
-**Gunicorn** works out of the box. No extra setup needed unless you use the `--preload` flag. If you do use `--preload`, see the <a href="https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model" target="_blank" rel="noopener noreferrer nofollow">post_fork hook example</a>.
+**Gunicorn** works out of the box—unless you use `--preload` or multiple workers, which can cause missing spans due to forking issues. See the <a href="https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model" target="_blank" rel="noopener noreferrer nofollow">post_fork hook example</a> for the fix.
 
-**uWSGI** requires one of these options:
+**uWSGI** will drop spans by default due to forking. Fix with one of these:
 - Add `lazy-apps = true` to your uWSGI config (recommended, simplest fix)
 - Or implement a post_fork hook (see <a href="https://opentelemetry-python.readthedocs.io/en/latest/examples/fork-process-model/README.html" target="_blank" rel="noopener noreferrer nofollow">example</a>)
 
@@ -623,17 +623,6 @@ OTEL_TRACES_EXPORTER=console opentelemetry-instrument <your_run_command>
 ```
 
 If you see JSON span output in your terminal but traces don't appear in SigNoz, the usual causes are missing context propagation or an exporter misconfiguration (endpoint, auth, or network). If no output appears, the instrumentation isn't capturing your requests. Our deeper walkthrough on [troubleshooting Python OpenTelemetry tracing](https://signoz.io/blog/troubleshooting-python-with-opentelemetry-tracing/) covers these failure modes step by step, and [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) covers the same checks for logs and metrics too.
-
-### Why do multi-worker servers (Uvicorn, Gunicorn) drop spans?
-
-Application servers that spawn multiple worker processes require special handling because the OpenTelemetry SDK isn't fork-safe.
-
-- **Uvicorn** with `--workers` flag is not supported. Use Gunicorn with Uvicorn workers instead:
-  ```bash
-  opentelemetry-instrument gunicorn -k uvicorn.workers.UvicornWorker main:app
-  ```
-- **Hypercorn/Unicorn** are not supported due to fork-safety issues. See the [Hypercorn/Unicorn tab](#framework-instrumentation) for details and workarounds.
-- **Gunicorn with `--preload`** or **uWSGI** need extra config. See [Running with Gunicorn or uWSGI](#running-with-gunicorn-or-uwsgi).
 
 ### Hot reload breaks instrumentation
 
