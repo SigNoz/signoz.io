@@ -1,0 +1,175 @@
+---
+title: "Introducing JSON-native logs for faster and wider log search"
+date: 2026-10-14
+tags: [Product, Logs, OpenTelemetry]
+authors: [avishek_kataria]
+description: "SigNoz Cloud now stores JSON log bodies as native JSON for 30% faster queries, nested-field analysis, and autocomplete. Plus, search() now covers the full log record."
+image: /img/blog/2026/10/json-native-logs-banner.webp
+keywords: [json logs, log search, log analytics, structured logs, full-text search, opentelemetry, signoz cloud]
+related_articles:
+  - '/blog/new-trace-detail-view'
+  - '/blog/new-infrastructure-monitoring-experience'
+  - '/blog/why-engineering-first-teams-choose-signoz'
+---
+<h2 className="!mb-2">TL;DR</h2>
+
+Your JSON logs already have the fields you need to debug an issue. You shouldn't have to set up a parsing pipeline just to use them.
+
+SigNoz Cloud now parses JSON log bodies at ingestion and stores them as native JSON, instead of parsing them at query time. In our benchmarks, this makes log queries faster by 30%. You can filter, group by, and aggregate on nested body fields, with field and value suggestions as you type.
+
+Plus, we've expanded full-text search to cover resource and attribute metadata too. Use `search()` to find a value anywhere in the log record when you know what you're looking for, but not where it lives.
+
+<Figure
+  src="/img/blog/2026/10/json-native-logs-banner.webp"
+  alt="Meet JSON-native logs in SigNoz Cloud"
+  caption="JSON-native logs make log search faster in SigNoz Cloud"
+/>
+
+Most modern applications, APIs and microservices emit logs in JSON. You send those logs to SigNoz, then explore them by searching and filtering on field values.
+
+Until now, you could query JSON inside the log body, but it wasn't stored as a native JSON type. For any query you ran, it was parsed at query time, every time. That never sat right with us. It wasn't the most efficient way to do it.
+
+And if you wanted proper field-level access in your Log Explorer, filters, or search, you had to write a log pipeline to parse it first.
+
+We've updated how JSON logs work and removed that friction.
+
+## JSON log queries are 30% faster with parsing at ingestion
+
+SigNoz Cloud now parses the JSON log body at ingestion and stores it as a native JSON type in our datastore.
+
+Previously, the body was stored as a plain string. The parsing used to happen at query time, which slowed down queries.
+
+With logs already parsed and stored as JSON, our [benchmarks](https://signoz.io/blog/building-a-high-performance-log-store/) show log queries are around 30% faster while scanning 99% less data.
+
+<Figure
+  src="/img/blog/2026/10/json-native-logs-query.gif"
+  alt="Querying fields in a JSON log body in SigNoz Cloud"
+  caption="Filter and query fields inside a JSON log body"
+/>
+
+**Each JSON field becomes independently queryable.** Since the log body is already stored as native JSON and not as one string blob, fields inside nested objects and arrays can be queried directly by path.
+
+A query for `status` can now directly access the JSONPath, without parsing the full log body first. Earlier, SigNoz had to parse the whole JSON payload at query time just to read one field. Now that the parsing already happened at ingestion, a query for `status` reads far less data.
+
+Log:
+
+```json
+{
+  "msg": "payment declined",
+  "status": 402,
+  "latency_ms": 143,
+  "user": { "id": "8821", "plan": "pro" }
+}
+```
+
+Queryable fields:
+
+```text
+body.msg          String   "payment declined"
+body.status       Int64    402
+body.latency_ms   Int64    143
+body.user.id      String   "8821"
+body.user.plan    String   "pro"
+```
+
+This even works for nested JSON and arrays.
+
+You send this:
+
+```json
+{
+  "details": {
+    "game": {
+      "metadata": { "version": "v1.101" }
+    }
+  }
+}
+```
+
+You query this:
+
+```text
+body.details.game.metadata.version = 'v1.101'
+```
+
+**Group by and aggregate on any field in your JSON log body,** in addition to the attributes and resources you could already group on.
+
+This helps in cases like counting logs by account type to see which customers are hitting errors, comparing enterprise accounts against other tiers, or checking latency by account type.
+
+```text
+p99(body.latency_ms) group by body.user.plan
+```
+
+If you are using multiple AI models, check token spend per model.
+
+```text
+sum(body.usage.output_tokens) group by body.model
+```
+
+All of this works on your JSON body fields directly, without a pipeline.
+
+Most log tools have some limitations when it comes to querying fields in the log body for JSON logs. In Loki, the log line is stored as-is. JSON fields are extracted at query time with the `| json` parser. You can attach metadata at ingestion as labels or structured metadata, but you have to decide which fields up front.
+
+In Sumo Logic, automatic JSON parsing runs at search time, and parsing at ingestion means hand-written extraction rules capped at 200 fields per account.
+
+In ClickStack, the log body is stored as a string in the default schema. JSON type support exists but is not active by default. For faster queries on specific fields, you set up materialized columns or views to pull them out.
+
+For more technical details, read the [engineering deep dive](https://signoz.io/blog/building-a-high-performance-log-store/).
+
+## Autocomplete now lists the fields inside your JSON body
+
+SigNoz Cloud suggests the field names and values inside your JSON body as you type.
+
+Every SigNoz Cloud Explorer has autocomplete in the search bar. Start typing and you get suggestions matching your fields and values. This now works for JSON body fields too, without setting up a pipeline to parse them.
+
+Earlier, an unparsed JSON body was stored as one blob, so the fields inside it were never identified separately. They never popped out in the suggestions.
+
+This is useful for large payloads and deeply nested fields. You don't have to remember what a field is called or what values it holds. Start typing and it appears.
+
+## Full-text search now covers the entire log record
+
+The new `search()` function on SigNoz Cloud searches across your whole log record.
+
+We had full-text search earlier, where you just input any keyword to look for matching logs. However, it only worked on the log body.
+
+Now, we have expanded the full-text log search to attributes and resources as well. So, you can search for a pod name or an attribute value to get the desired log record. This works across both JSON and text logs.
+
+<Figure
+  src="/img/blog/2026/10/json-native-logs-full-text-search.gif"
+  alt="Full-text search across an entire log record in SigNoz Cloud"
+  caption="Search across the log body, attributes, resources, and log fields"
+/>
+
+Input your values inside the search function to search across the log record. This is built for cases when you know what you are looking for, but are not sure where the value sits.
+
+Dash0 offers full-text search on the log body. There's no equivalent single function for searching across the log body, attributes, and resources in one query.
+
+Let's say one of your users reports that a chat session in your platform returned a broken response. All you have is the `session id` from your support tool. You don't know whether the app logged it as `session_id` or `conversation_id`, or if it's nested inside a request payload. Just use `search()` with the ID you have, and you'll get the matching record.
+
+```text
+search('sess_9f2c41')
+```
+
+`search()` covers the complete log record: body, attribute keys and values, resource keys and values, and log fields like severity and trace ID.
+
+It matches **keys as well as values**, so `search('checkout')` will find a log with a field named `checkout_id` as well as one with the value `checkout-api`. The match is also case-insensitive.
+
+## Availability
+
+JSON-native logs are rolling out on SigNoz Cloud. There's nothing to upgrade or turn on. To check if you have it, open a plain-text log and look at the body on the detail page. If you see a message key wrapping your text, it's working.
+
+This applies to logs coming in from now on. Anything ingested before the change stays as it was. Support for self-hosted Enterprise and Community editions is coming next quarter.
+
+Your existing pipelines keep working. Just one thing to note: search on `body` now looks at `body.message` instead of the whole JSON payload. A saved query like `body contains 'x'` might return fewer results than it used to. If you want to search the full record, use `search()`.
+
+## Watch the new JSON-Native Logs in action
+
+<YouTube id="4KIsfNu7W7g" mute="false" />
+
+## Get Started with SigNoz
+
+If you're migrating from a traditional log analytics tool like Sumo Logic or an observability platform like Datadog, SigNoz Cloud gives you a more open and flexible way to work with logs.
+
+SigNoz Cloud is OpenTelemetry-native and brings logs, traces, and metrics into one observability platform, with deep querying and investigation workflows across all three. [Start a free trial](https://signoz.io/teams/) and bring your logs to see it in action.
+
+If you prefer to keep data in your own environment, SigNoz is also available as a [self-hosted Enterprise edition](https://signoz.io/contact-us/) and as the open-source [Community edition](https://signoz.io/docs/install/self-host/).
