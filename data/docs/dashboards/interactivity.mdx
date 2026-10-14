@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-10-08
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -126,8 +126,8 @@ They let you attach dynamic URLs to a panel and navigate to **internal explorers
 
 #### Add a context link
 
-1. Edit a panel and expand the **Context Links** section in the panel settings pane.
-2. Select **Add Context Link** to open the context link editor.
+1. Edit a panel and expand the **Context Links** section in the config pane. Links appear in a menu when someone clicks a data point. They can pass the clicked values and dashboard variables into the destination URL.
+2. Select **Add link** (formerly "Add Context Link") to open the context link editor.
 3. Configure the link:
    - **Label**: the text shown in the context menu. If you leave it empty, SigNoz shows the URL instead.
    - **URL**: the destination URL. It can include `{{variable}}` tokens that resolve to the clicked datapoint's values (see [Available variables](#available-variables)).
@@ -161,7 +161,7 @@ The URL must start with one of the following, or the link cannot be saved:
 - `/` for a root-relative path inside SigNoz, for example `/logs`.
 - A `{{variable}}/` token, so the resolved variable value forms the start of the URL.
 
-If the URL does not match, SigNoz highlights the field and shows the message `URLs must start with http(s), /, or {{.*}}/`. Fix the URL to save the link.
+If the URL does not match, SigNoz highlights the field and shows the message `URL must start with http(s)://, /, or {{variable}}/`. Fix the URL to save the link.
 
 <Figure
   src="/img/docs/dashboards/interactivity/context-links-validation.webp"
@@ -284,7 +284,7 @@ When a dashboard has multiple charts describing the same system — request rate
 
 <Figure
   src="/img/docs/dashboards/interactivity/cross-panel-sync-config.webp"
-  alt="Dashboard Configuration panel showing Tooltip sync mode with Synced Tooltip Series set to Filtered"
+  alt="Cross-Panel Sync settings in the dashboard Configure drawer with Sync Mode set to Tooltip and Synced Tooltip Series set to Filtered"
   caption="Cross-Panel Sync settings with Tooltip mode and Synced Tooltip Series options."
 />
 
@@ -298,7 +298,7 @@ When you hover a chart (the **source**), every other chart on the dashboard (the
 
 <Figure
   src="/img/docs/dashboards/interactivity/cross-panel-sync-demo.webp"
-  alt="Two dashboard panels with synchronized crosshair and tooltip showing matching series"
+  alt="Two time series panels side by side. Hovering frontendproxy on the left panel draws a crosshair on the right panel, whose tooltip shows only the matching frontendproxy series"
   caption="Hovering the source chart shows a crosshair and filtered tooltip on the receiver."
 />
 
@@ -433,7 +433,7 @@ The primary action in the empty state is **Extend time range**. Select it to wid
 Extending from a panel on the dashboard updates the dashboard's global time range, so every panel refreshes on the wider window. This is the same behavior as the zoom-out control in the dashboard toolbar.
 
 <Admonition type="info">
-When a panel uses a fixed **Panel time preference** (for example, `Last 6 hours`) instead of `Global Time`, it ignores the dashboard-wide time range. If such a panel returns no data, its empty state shows only a **Retry** button and hides **Extend time range**, because the panel's fixed window cannot be widened from the dashboard time picker.
+When a panel uses a fixed **Time range** (for example, `Last 6 hours`) instead of `Global Time`, it ignores the dashboard-wide time range. If such a panel returns no data, its empty state shows only a **Retry** button and hides **Extend time range**, because the dashboard time picker cannot widen the panel's fixed window.
 </Admonition>
 
 ### Retry
