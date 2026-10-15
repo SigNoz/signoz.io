@@ -1,5 +1,5 @@
 ---
-date: 2026-09-29
+date: 2026-10-13
 title: AI Observability Explorer - Query LLM & AI Trace Data
 description: Explore LLM and AI trace data in SigNoz with the AI Observability Explorer. Query AI traces and spans, chart them over time, and export table results.
 doc_type: howto
@@ -40,6 +40,12 @@ All views use the same query. The Explorer opens in **Trace View**. Column chang
 - **Trace View** adds up every span of the trace, even spans outside the selected time range.
 - **List View**, **Time Series**, and **Table** count only spans inside the selected time range. For example, `trace.total_tokens` adds up only the tokens of those spans.
 
+Sort order in **Trace View** and **List View** is saved in the page URL, so it stays applied when you navigate back from Trace Details, open a deep link, or load a saved view.
+
+<Admonition type="warning">
+Switching into **Trace View** or **List View** from the **Time Series** or **Table** view resets the sort to the default and clears any sort that referenced an aggregation column. Saved views and shared links that previously encoded an aggregation-based sort on these views now load with the default sort instead of that sort. If you relied on such a link, set the sort you want and re-save the view.
+</Admonition>
+
 ### Trace View
 
 **Trace View** shows one row for each AI trace, which is a trace with at least one LLM, tool, or agent span. Each row shows totals such as tokens, cost, and call counts. By default, the table shows the trace fields that exist in your data. Trace View columns and **Order by** show these fields without the `trace.` prefix.
@@ -54,7 +60,7 @@ Select a row to open the trace in [Trace Details](https://signoz.io/docs/usergui
 
 Use the two controls above the table:
 
-- **Order by**: sort the traces by a trace field, in ascending or descending order. The default is `last_activity_time (desc)`. You can sort by fields that the table does not show as columns, such as `last_activity_time`.
+- **Order by**: sort the traces by a trace field, in ascending or descending order. The default is `last_activity_time (desc)`. You can sort by fields that the table does not show as columns, such as `last_activity_time`. Your selection is saved in the page URL, so it stays applied across back navigation, deep links, and saved views.
 - **Options**: open the **Edit columns** drawer to show, hide, or reorder columns.
 
 The `trace_id` column always shows, but you can drag it to a new position.
