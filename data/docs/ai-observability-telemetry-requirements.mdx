@@ -1,5 +1,5 @@
 ---
-date: 2026-10-12
+date: 2026-10-15
 title: AI Observability Telemetry Requirements - GenAI Attributes
 description: Check which OpenTelemetry GenAI span attributes the SigNoz AI Observability dashboard and filters need, and how SigNoz counts LLM calls and tool calls.
 doc_type: reference
@@ -15,12 +15,15 @@ doc_type: reference
 | `gen_ai.provider.name` | **Cost by provider** and the **provider** filter. |
 | `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | Token panels and cost. |
 | `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` | Cache token panels, cache cost, and **Prompt cache hit ratio**. |
+| `gen_ai.usage.reasoning.output_tokens` | Reasoning (extended thinking) tokens. A subset of `gen_ai.usage.output_tokens`. |
 | `gen_ai.server.ttft` | **TTFT (p95)** and **Time to first token**. Streaming instrumentations, such as OpenLIT, send this attribute in seconds. |
 | `gen_ai.response.finish_reasons` | **Finish reasons**. |
 | `gen_ai.tool.name` | All **Tool calls** panels. SigNoz counts a span with this attribute as a tool call. |
 | `gen_ai.agent.name` | Agent spans for the **Per-trace usage** panels. |
 
 An AI trace is a trace with at least one LLM, tool, or agent span. Error panels use the error status of the span, not an attribute.
+
+SigNoz populates `gen_ai.usage.reasoning.output_tokens` from frameworks that report reasoning tokens, including OpenLLMetry and LiteLLM, the Bifrost gateway, OpenInference, and the Vercel AI SDK v5. If your instrumentation uses a different name for these attributes, map it in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/).
 
 ## Resource attributes
 

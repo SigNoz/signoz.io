@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-03
-updated_date: 2026-09-15
+updated_date: 2026-10-15
 title: Claude Code Monitoring & Observability with OpenTelemetry
 meta_title: Claude Code OpenTelemetry Monitoring
 description: Set CLAUDE_CODE_ENABLE_TELEMETRY and OTEL_EXPORTER_OTLP_ENDPOINT to export Claude Code metrics and events to SigNoz. Full environment variable reference.
@@ -308,6 +308,8 @@ Spans are separate from the metrics and events covered above and are off by defa
 |---|---|---|---|
 | `CLAUDE_CODE_ENHANCED_TELEMETRY_BETA` | Required to emit spans at all | `1` | disabled |
 | `CLAUDE_CODE_PROPAGATE_TRACEPARENT` | Propagate W3C `traceparent` to model and MCP requests through a custom proxy | `1` | only sent to the Anthropic API |
+
+With tracing enabled, Claude Code emits `claude_code.llm_request` and `claude_code.tool` spans. SigNoz reads these in [AI Observability](https://signoz.io/docs/ai-observability/): it prices input, output, and cache (read and write) tokens so cache costs appear in cost breakdowns, classifies `claude_code.tool` spans as tool calls, and attributes agent spans to their agent. See [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/) for how cache token costs are calculated.
 
 ### TLS
 

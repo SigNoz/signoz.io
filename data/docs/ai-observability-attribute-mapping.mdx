@@ -1,5 +1,5 @@
 ---
-date: 2026-09-29
+date: 2026-10-15
 title: AI Observability Attribute Mapping - Remap LLM Spans
 description: Remap source span and resource attributes to SigNoz GenAI fields in AI Observability. Group rules by condition, then test them against sample spans.
 doc_type: howto
@@ -30,7 +30,9 @@ To see the condition keys of a group, hover over its condition count. To edit or
 
 ## Default groups
 
-SigNoz creates three default groups: `gen_ai.llm`, `gen_ai.agent`, and `gen_ai.tool`. They map the attributes of common LLM libraries, such as OpenInference and the Vercel AI SDK, to the GenAI names.
+SigNoz creates three default groups: `gen_ai.llm`, `gen_ai.agent`, and `gen_ai.tool`. They map the attributes of common LLM instrumentation libraries, gateways, and coding agents to the GenAI names, including OpenInference, OpenLLMetry and LiteLLM, the Vercel AI SDK (v4 and v5), CrewAI, Pydantic AI, Langfuse, the OpenRouter and Bifrost gateways, Claude Code, Cursor (through opentelemetry-hooks), and vLLM. SigNoz keeps these default mappings current as instrumentation libraries change their attribute names.
+
+The default groups also normalize spans that older mappings missed: failed OpenInference calls that carry no model key, reranker spans that report a model name, cache-read and reasoning token counts under gateway-specific spellings, and `gen_ai.operation.name` across the LLM, tool, and agent groups.
 
 In a default group, you can turn the group and its mappings on or off. You can also add your own conditions, mappings, and sources. You cannot rename or delete a default group or a default mapping, and you cannot change the key or the operation of a default source.
 
