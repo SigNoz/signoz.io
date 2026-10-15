@@ -1,5 +1,5 @@
 ---
-date: 2026-08-19
+date: 2026-09-30
 doc_type: howto
 title: Configure Google Chat Channel
 description: Set up Google Chat as a notification channel in SigNoz to receive alerts as rich cards in your team's space.
@@ -23,7 +23,7 @@ To create a new Google Chat notification channel:
 
 - Navigate to `Settings > Notification Channels` and click on `New Channel`.
 - Enter a **Name** for the channel and select **Google Chat** as the channel type.
-- **Webhook URL**: Paste the Incoming Webhook URL from your Google Chat space. It must use `https` and the host `chat.googleapis.com`.
+- **Webhook URL**: Paste the Incoming Webhook URL from your Google Chat space. Any non-empty URL is accepted, so you can also point this at a proxy or relay endpoint that forwards to Google Chat.
 - **Title** and **Description**: These are prefilled with default templates and control the card heading and body. You can edit them (see [Customizing the message](#customizing-the-message)).
 - **Send resolved alerts**: On by default. When on, SigNoz also posts a card when an alert resolves.
 
@@ -114,7 +114,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `googlechat_configs` | `array` | List of Google Chat configurations. |
 | `googlechat_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
-| `googlechat_configs[].webhook_url` | `string` | The Google Chat Incoming Webhook URL. **Mandatory**. Must be `https` and use the host `chat.googleapis.com`. |
+| `googlechat_configs[].webhook_url` | `string` | The Google Chat Incoming Webhook URL. **Mandatory**; any non-empty URL is accepted, including a proxy or relay endpoint. |
 | `googlechat_configs[].title` | `string` | Templated title of the message. Go templates are supported. |
 | `googlechat_configs[].text` | `string` | Templated body of the message (standard markdown). Go templates are supported. |
 
@@ -122,7 +122,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 
 If you encounter issues:
 
-- **Check the Webhook URL**: Ensure it is entered correctly and uses `https` with the `chat.googleapis.com` host.
+- **Check the Webhook URL**: Ensure it is entered correctly and, if you route through a proxy or relay, that the endpoint forwards to Google Chat.
 - **Verify Google Chat permissions**: Confirm the webhook is still active and allowed to post to the target space.
 - **Test the webhook**: Use the **Test** button in SigNoz to verify connectivity. If it fails, re-check the webhook in Google Chat.
 
