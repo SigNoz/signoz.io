@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-10-15
 title: GraphQL OpenTelemetry Instrumentation Guide for Node.js
 description: Instrument your Node.js GraphQL server with OpenTelemetry and send traces to SigNoz. Works with Apollo Server, graphql-http, and graphql-js.
 doc_type: howto
@@ -135,13 +135,15 @@ metadata:
   name: graphql-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4318
+    endpoint: http://<collector-service>:4318
   propagators:
     - tracecontext
     - baggage
   nodejs:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
 ```
+
+Replace `<collector-service>` with the address of the collector Service that receives the application's telemetry. If you installed the Collection Agent with the OpenTelemetry Operator guide, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector) for its Service.
 
 Deploy this resource to your cluster.
 
