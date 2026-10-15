@@ -9,9 +9,74 @@ This guide explains how to configure the OpenTelemetry Collectors of the K8s Inf
 
 To install K8s Infra in your Kubernetes cluster, see [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
 
-<Admonition type="info" title="Installed with Foundry?" defaultCollapsed="true">
-Each section below has a **Foundry** tab with the change to make in `casting.yaml`, in the agent's document or in the deployment collector's document (`collector.kind: deployment`). Foundry already generates the receivers and processors of the default presets, so add only what you change. Edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it, as shown under Customize the Collection Agent for [**Helm** → **Foundry**](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/?tool=helm&setup=foundry#customize-the-collection-agent-1) or [**Kustomize**](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/?tool=kustomize#customize-the-collection-agent-2) in the install guide.
-</Admonition>
+## Prerequisites
+
+- K8s Infra Collection Agent installed with the Helm CLI or with Foundry (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/))
+- SigNoz Cloud account or self-hosted SigNoz instance
+- Access to the cluster with `kubectl`, and the files you installed from: `override-values.yaml` and Helm 3 for the Helm CLI, or `casting.yaml` and `foundryctl` for Foundry
+
+## Apply Changes
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+For each change:
+
+1. Add the section's values to `override-values.yaml`.
+
+2. Run this from the directory that contains `override-values.yaml` to apply the change:
+
+   ```bash
+   helm upgrade my-release signoz/k8s-infra -f override-values.yaml
+   ```
+
+   Helm updates the release, and the collector pods restart with the new config.
+
+3. Run this on the machine where you use `kubectl` to check that the pods restart:
+
+   ```bash
+   kubectl get pods
+   ```
+
+   Then view the collector logs to confirm there are no configuration errors:
+
+   ```bash
+   kubectl logs daemonset/my-release-k8s-infra-otel-agent --since=5m
+   ```
+
+   For the deployment collector, use `deployment/my-release-k8s-infra-otel-deployment`.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+For each change:
+
+1. Add the section's snippet to `casting.yaml`, in the agent's document or in the deployment collector's document (`collector.kind: deployment`). Foundry already generates the receivers and processors of the default presets, so add only what you change.
+
+2. Run this from the directory that contains `casting.yaml` to apply the change:
+
+   ```bash
+   foundryctl cast -f casting.yaml
+   ```
+
+   Foundry updates both collectors, and the collector pods restart with the new config.
+
+3. Run this on the machine where you use `kubectl` to check that the pods restart:
+
+   ```bash
+   kubectl get pods -n signoz
+   ```
+
+   Then view the collector logs to confirm there are no configuration errors:
+
+   ```bash
+   kubectl logs -n signoz daemonset/signoz-collector-agent --since=5m
+   ```
+
+   For the deployment collector, use `deployment/signoz-collector-deployment`.
+
+</TabItem>
+</Tabs>
 
 ## Send Data from Instrumented Applications
 
