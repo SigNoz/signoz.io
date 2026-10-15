@@ -1,0 +1,25 @@
+name: Metrics Aggregation Examples
+
+on:
+  pull_request:
+    paths:
+      - 'data/docs/metrics-management/types-and-aggregation.mdx'
+      - 'tests/metrics-aggregation-examples.test.js'
+      - '.github/workflows/metrics-aggregation-examples.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/docs/metrics-management/types-and-aggregation.mdx'
+      - 'tests/metrics-aggregation-examples.test.js'
+      - '.github/workflows/metrics-aggregation-examples.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Check the documented calculations
+        run: node --test tests/metrics-aggregation-examples.test.js
