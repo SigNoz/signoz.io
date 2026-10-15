@@ -1,5 +1,5 @@
 ---
-date: 2026-10-12
+date: 2026-10-15
 title: AI Observability Telemetry Requirements - GenAI Attributes
 description: Check which OpenTelemetry GenAI span attributes the SigNoz AI Observability dashboard and filters need, and how SigNoz counts LLM calls and tool calls.
 doc_type: reference
@@ -22,6 +22,8 @@ doc_type: reference
 
 An AI trace is a trace with at least one LLM, tool, or agent span. Error panels use the error status of the span, not an attribute.
 
+A span also needs one of these gate attributes to appear in the [Thread view](https://signoz.io/docs/ai-observability-thread-view/). A span that carries only message attributes such as `gen_ai.input.messages` or `gen_ai.output.messages`, without `gen_ai.request.model`, `gen_ai.tool.name`, or `gen_ai.agent.name`, is left out of the thread. If your instrumentation uses other names, map them in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/) so the spans pass the gate.
+
 ## Resource attributes
 
 | Attribute | Used by |
@@ -34,6 +36,7 @@ Tool spans do not carry a model. As a result, the **model** and **provider** fil
 ## Next steps
 
 - [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [Thread view](https://signoz.io/docs/ai-observability-thread-view/): read one AI trace as a conversation of model, tool, and agent spans.
 - [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map other attribute names to the GenAI names.
 - [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
 

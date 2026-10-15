@@ -1,0 +1,60 @@
+---
+date: 2026-10-15
+title: AI Trace Thread View - Inspect LLM Conversation Spans
+description: See which spans appear in the SigNoz AI trace thread view, inspect structured tool call input and output, and understand blank agent span rows.
+doc_type: howto
+---
+
+The **Thread** view reads one AI trace as a conversation. Instead of the full flame graph and waterfall, it shows an ordered list of the model calls, tool calls, and agent steps in the trace, with the request and response content for each row. Use it to follow what an LLM or agent application actually did, step by step, without scanning every span.
+
+To open it, select an AI trace in the [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/), then open the **Thread** panel in [Trace Details](https://signoz.io/docs/userguide/span-details/). An AI trace is a trace with at least one LLM, tool, or agent span.
+
+## Which spans appear
+
+The Thread view includes a span only when it carries a GenAI gate attribute: a model name, a tool name, or an agent name.
+
+| Gate attribute | Row type |
+| --- | --- |
+| `gen_ai.request.model` | Model call |
+| `gen_ai.tool.name` | Tool call |
+| `gen_ai.agent.name` | Agent span |
+
+Spans that carry only raw message attributes, such as `gen_ai.input.messages` or `gen_ai.output.messages`, but none of the three gate attributes, do not appear in the thread. The same rule applies to ordinary HTTP, database, and infrastructure spans: they stay in the flame graph and waterfall but are left out of the thread.
+
+If your instrumentation uses other attribute names, map them to the GenAI names in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/) so the spans pass the gate. For the full list of attributes SigNoz reads, see [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/).
+
+## Row types
+
+The thread lists three kinds of rows together, in trace order:
+
+- **Model call** rows, for spans with `gen_ai.request.model`. The request pane shows the input messages sent to the model, and the response pane shows the model's completion.
+- **Tool call** rows, for spans with `gen_ai.tool.name`. See [Tool call input and output](#tool-call-input-and-output).
+- **Agent** rows, for spans with `gen_ai.agent.name`. See [Agent span rows](#agent-span-rows).
+
+## Tool call input and output
+
+Select or expand a tool call row to read what the tool received and returned:
+
+- The **request pane** shows the tool's input arguments as a structured tool call.
+- The **response pane** shows the tool's result as a structured tool call response.
+
+SigNoz normalizes this content regardless of which library produced the trace. LangChain, Traceloop (OpenLLMetry), OpenInference, and Vercel AI SDK traces all render the same way, so you do not need to know which instrumentation emitted the span to read its arguments and result.
+
+## Agent span rows
+
+Agent rows appear in the thread alongside model call and tool call rows, but their request and response panes are blank. An agent span marks that a named agent ran. It does not carry message content of its own, so empty panes are expected behavior, not missing data. The model calls and tool calls that the agent made appear as their own rows in the same thread.
+
+## When the thread is empty
+
+If a trace contains no span with a model, tool, or agent attribute, the Thread view is empty. A trace of only HTTP or infrastructure spans is a trace with no GenAI content, so nothing passes the inclusion gate. This is expected, and the trace still renders normally in the flame graph and waterfall.
+
+## Next steps
+
+- [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/): find and open AI traces to inspect in the thread.
+- [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/): check which attributes a span needs to appear in the thread.
+- [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map other attribute names to the GenAI names.
+- [Trace Details](https://signoz.io/docs/userguide/span-details/): inspect the flame graph, waterfall, and spans of the same trace.
+
+## Get Help
+
+<GetHelp />
