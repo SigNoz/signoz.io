@@ -43,6 +43,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Wednesday - October 14',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/gam9999u',
+    watchUrl:
+      'https://www.linkedin.com/events/newinfrastructuremonitoringexpe7514482365490991104/theater/',
+    blogUrl: 'https://signoz.io/blog/new-infrastructure-monitoring-experience/',
   },
   {
     title: 'JSON-native Logs',
