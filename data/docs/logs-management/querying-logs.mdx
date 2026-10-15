@@ -1,5 +1,5 @@
 ---
-date: 2026-06-25
+date: 2026-07-20
 title: Querying Logs
 description: Query logs in SigNoz using the Query Builder in Logs Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
 doc_type: reference
@@ -27,6 +27,23 @@ Use the **Filter** field to narrow down logs using attributes, body content, and
 
 Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) guide and [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of operators and syntax details.
 
+#### Missing attribute keys
+
+If a filter, selected field, group-by, or aggregation references an attribute key that is not found in field metadata (because of indexing lag, TTL eviction, or a typo), the log query no longer fails. SigNoz runs the query against the raw log data stored in ClickHouse and returns results with a warning in the query response:
+
+```
+key `<name>` not found in metadata; querying the underlying data directly. If this is unexpected, check the key name for typos.
+```
+
+Key resolution follows these rules:
+
+- A bare key name is searched across every attribute map (string, number, and boolean) and, when JSON body parsing is enabled, the JSON body path as well. A single query finds the value regardless of which map stored it.
+- A qualified key such as `resource.service.name` or `mykey:string` is honored exactly. The context and data type you specify are used as-is, and the same fallback applies if the key is absent from metadata.
+
+<Admonition type="info">
+The warning is returned in the query API response alongside your results. It is not surfaced as a separate banner or element in the Logs Explorer UI. If a query returns no rows, a typo in the key name is still a likely cause, so check the key against the autocomplete dropdown.
+</Admonition>
+
 You can also use [Quick Filters](https://signoz.io/docs/logs-management/features/logs-quick-filters/) in the Logs Explorer sidebar to narrow results by common attributes without writing filter expressions. See the [Default Quick Filters Reference](https://signoz.io/docs/logs-management/features/logs-quick-filters-reference/) for the full list of available filter attributes.
 
 ### Aggregation (Time Series & Table views)
@@ -40,6 +57,15 @@ Log queries support a full set of [aggregation functions](https://signoz.io/docs
 ### Group By (Time Series & Table views)
 
 Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` produces a separate series for each service. Useful in aggregate views to compare error counts across services, namespaces, or any other attribute.
+
+When you group by or select an attribute key that is not present on every log, logs missing that key now appear in a `null` group or column instead of an empty-string (`''`) group. This makes attribute maps (string, number, boolean) consistent with the existing behavior for resource attributes.
+
+<Admonition type="warning">
+This is a breaking change for filters and rules that rely on the old empty-string behavior:
+
+- **Group-by matching:** If you have dashboards or alert rules that match or compare against the empty-string group-by bucket, update them to match `null` instead. Matching on `''` now silently returns no rows for logs that lack the grouped key.
+- **`!= ''` filters:** A filter such as `mykey != ''` used to exclude logs where the attribute was absent. Absent values now return `null`, and `null != ''` evaluates to `null` (falsy), so those logs are no longer matched. To exclude logs that lack a key, use `mykey EXISTS`; to include only logs missing a key, use `NOT mykey EXISTS`.
+</Admonition>
 
 ### Having
 
