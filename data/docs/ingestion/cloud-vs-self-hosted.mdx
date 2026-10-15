@@ -76,8 +76,6 @@ If you switch to HTTPS on self-hosted, change the endpoint to `https://<host>:44
 <Tabs entityName="collection-agent">
 <TabItem value="k8s-infra" label="K8s-infra Chart" default>
 
-The SigNoz `k8s-infra` Helm chart sends to SigNoz Cloud through `otelCollectorEndpoint`, `otelInsecure`, and `signozApiKey` in `override-values.yaml`:
-
 ```diff
  global:
    clusterName: <CLUSTER_NAME>
@@ -89,30 +87,39 @@ The SigNoz `k8s-infra` Helm chart sends to SigNoz Cloud through `otelCollectorEn
 +otelInsecure: true
 ```
 
-Apply the same change to the values for your platform, then install or upgrade the release with `override-values.yaml`.
+Apply the same change to the values for your platform, then run `helm upgrade my-release signoz/k8s-infra -f override-values.yaml` from the directory that contains `override-values.yaml`.
 
 **Verify these values:**
 
-- `<signoz-host>`: The host of your Self-Hosted SigNoz OTLP/HTTP endpoint. For SigNoz installed with Foundry in the same Kubernetes cluster, use `signoz-ingester.signoz.svc.cluster.local`. For SigNoz installed with the Helm chart in the same cluster, use `signoz-otel-collector.signoz.svc.cluster.local`. The second `signoz` in each address is the namespace SigNoz runs in. For a SigNoz outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+- `<signoz-host>`: in the same cluster, `signoz-ingester.<namespace>.svc.cluster.local` for SigNoz installed with Foundry or `signoz-otel-collector.<namespace>.svc.cluster.local` for the Helm chart, where `<namespace>` is SigNoz's namespace; otherwise, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
 
-If your SigNoz endpoint uses TLS, use its `https://` address, set `otelInsecure: false`, and add the TLS certificate settings the endpoint needs.
+With TLS, use the `https://` address and `otelInsecure: false`.
 
 </TabItem>
 <TabItem value="foundry" label="Foundry">
 
-A Foundry Collection Agent casting sends to SigNoz Cloud through `SIGNOZ_INGESTION_ENDPOINT`, `SIGNOZ_INGESTION_KEY`, and a `config.data` entry that adds the `signoz-ingestion-key` header.
+```diff
+ spec:
+   collector:
+     spec:
+       env:
+-        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
++        SIGNOZ_INGESTION_ENDPOINT: http://<signoz-host>:4318
+-        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+-      config:
+-        data:
+-          collector/agent/agent.yaml: |
+-            exporters:
+-              otlphttp/signoz:
+-                headers:
+-                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
 
-To send to Self-Hosted SigNoz, in every document of `casting.yaml`:
-
-- Set `SIGNOZ_INGESTION_ENDPOINT` to `http://<signoz-host>:4318`.
-- Remove `SIGNOZ_INGESTION_KEY`.
-- Remove the `config.data` lines that add the `signoz-ingestion-key` header, or the whole entry if that is all it holds.
-
-Then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+Make the same change in every document of `casting.yaml`, on every platform and with Kustomize. Then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
 
 **Verify these values:**
 
-- `<signoz-host>`: The host of your Self-Hosted SigNoz OTLP/HTTP endpoint. For SigNoz installed with Foundry in the same Kubernetes cluster, use `signoz-ingester.signoz.svc.cluster.local`. For SigNoz installed with the Helm chart in the same cluster, use `signoz-otel-collector.signoz.svc.cluster.local`. The second `signoz` in each address is the namespace SigNoz runs in. For a SigNoz outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+- `<signoz-host>`: in the same cluster, `signoz-ingester.<namespace>.svc.cluster.local` for SigNoz installed with Foundry or `signoz-otel-collector.<namespace>.svc.cluster.local` for the Helm chart, where `<namespace>` is SigNoz's namespace; otherwise, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
 
 </TabItem>
 </Tabs>
