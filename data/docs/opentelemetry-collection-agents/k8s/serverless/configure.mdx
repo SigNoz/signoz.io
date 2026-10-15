@@ -1,7 +1,7 @@
 ---
 date: 2026-10-15
 title: K8s Serverless (EKS Fargate) - Configure
-description: Configure the OpenTelemetry collector of the EKS Fargate collection agent through Foundry to send Kubernetes metrics, logs, and traces to SigNoz.
+description: Configure the OpenTelemetry Collector of the EKS Fargate collection agent through Foundry to send Kubernetes metrics, logs, and traces to SigNoz.
 doc_type: howto
 ---
 
@@ -72,7 +72,7 @@ env:
 - `<service-name>`: The name your application shows under in SigNoz.
 - `signoz` in the address: `metadata.name`, which is also the namespace unless the `foundry.signoz.io/kubernetes-namespace` annotation sets another.
 
-The collector adds the Kubernetes workload attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`. Use port `4317` for OTLP over gRPC.
+The collector adds the Kubernetes resource attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`. Use port `4317` for OTLP over gRPC.
 
 Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz, and its traces carry `k8s.namespace.name` and `k8s.pod.name`.
 
@@ -108,7 +108,7 @@ spec:
 
 `metrics` is a map, so the metrics you add join Foundry's defaults.
 
-These container-level metrics are disabled by default in the upstream kubeletstats receiver but enabled by default by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
+These container-level metrics are disabled by default in the upstream `kubeletstats` receiver but enabled by default by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
 
 | Metric | Powers |
 |---|---|
@@ -165,7 +165,7 @@ Application logs reach the collector over OTLP from the application, or through 
 
 ## Resource Detection and Kubernetes Attributes
 
-The `k8sattributes` processor adds Kubernetes workload attributes, so you can filter and group by namespace, workload, or pod in SigNoz. The resource detection processor adds the attributes set in the collector's `OTEL_RESOURCE_ATTRIBUTES`.
+The `k8sattributes` processor adds Kubernetes resource attributes, so you can filter and group by namespace, workload, or pod in SigNoz. The `resourcedetection` processor adds the resource attributes set in the collector's `OTEL_RESOURCE_ATTRIBUTES`.
 
 Foundry enriches telemetry by default with `k8sattributes`, and its `resource/identity` processor sets `cloud.provider: aws`, `cloud.platform: aws_eks`, and `k8s.cluster.name` from `K8S_CLUSTER_NAME`. In `casting.yaml`, add this to extract a pod label:
 
@@ -191,7 +191,7 @@ Lists replace, so restating `extract.metadata` or `pod_association` drops Foundr
 
 The `from:` field selects which Kubernetes object the processor reads the label or annotation from. The example above uses `pod`, but other workload kinds are supported as well, and each reads from its own metadata.
 
-Refer to the opentelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">k8sattributes processor documentation</a> for the full list of supported sources and the exact behavior of each.
+Refer to the OpenTelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">`k8sattributes` processor documentation</a> for the full list of supported sources and the exact behavior of each.
 
 </Admonition>
 
@@ -334,9 +334,9 @@ Lists replace, so restate Foundry's default processors in their order (`memory_l
 
 ## Exposing Ports for Custom Receivers
 
-A receiver that listens on a port needs that port reachable from your applications. The following example adds the statsd receiver on port 8125.
+A receiver that listens on a port needs that port reachable from your applications. The following example adds the `statsd` receiver on port 8125.
 
-In `casting.yaml`, add the statsd receiver and list it in the `metrics` pipeline:
+In `casting.yaml`, add the `statsd` receiver and list it in the `metrics` pipeline:
 
 ```yaml
 spec:
@@ -375,7 +375,7 @@ Your applications reach the receiver at `signoz-collector-deployment.signoz.svc.
 
 ## Disable Metrics Collection
 
-In `casting.yaml`, add this to remove the kubelet and cluster metrics receivers:
+In `casting.yaml`, add this to remove the `receiver_creator` (kubelet) and `k8s_cluster` receivers:
 
 ```yaml
 spec:

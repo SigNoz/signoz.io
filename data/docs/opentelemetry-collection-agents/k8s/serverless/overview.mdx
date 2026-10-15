@@ -1,11 +1,11 @@
 ---
 date: 2026-10-15
 title: K8s Serverless (EKS Fargate) - Overview
-description: Learn how the EKS Fargate collection agent uses an OpenTelemetry collector to send kubelet metrics, cluster metrics, Kubernetes events, and traces to SigNoz.
+description: Learn how the EKS Fargate collection agent uses an OpenTelemetry Collector to send kubelet metrics, cluster metrics, Kubernetes events, and traces to SigNoz.
 doc_type: explanation
 ---
 
-EKS Fargate runs each Pod on a Fargate node of its own, with no DaemonSets, host paths, or host ports. The EKS Fargate Collection Agent collects kubelet metrics, cluster metrics, Kubernetes events, and telemetry from your applications with one OpenTelemetry collector that runs as an ordinary Deployment.
+EKS Fargate runs each Pod on a Fargate node of its own, with no DaemonSets, host paths, or host ports. The EKS Fargate Collection Agent collects kubelet metrics, cluster metrics, Kubernetes events, and telemetry from your applications with one OpenTelemetry Collector that runs as an ordinary Deployment.
 
 [Install it](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) with Foundry through Kustomize.
 
@@ -13,11 +13,11 @@ EKS Fargate runs each Pod on a Fargate node of its own, with no DaemonSets, host
 
 The collector runs as a Deployment and reaches every Fargate node through the Kubernetes API server:
 
-- **Kubelet metrics:** container, pod, node, and volume metrics from every Fargate node via `kubeletstats`. The `k8s_observer` extension discovers the nodes, and `receiver_creator` starts one `kubeletstats` scrape per node through the API server's node proxy.
+- **Kubelet metrics:** container, pod, node, and volume metrics from every Fargate node via `kubeletstats`. The `k8s_observer` extension discovers the nodes, and the `receiver_creator` receiver starts one `kubeletstats` receiver per node through the API server's node proxy.
 - **Cluster metrics:** node and pod conditions, allocatable resources, and workload status via `k8s_cluster`.
 - **Kubernetes events:** via `k8s_events`.
-- **OTLP:** traces, metrics, and logs from your applications over gRPC (4317) and HTTP (4318), on the collector's Service.
-- **Metadata enrichment:** Kubernetes attributes via `k8sattributes`, and `cloud.provider`, `cloud.platform`, and `k8s.cluster.name` via `resource/identity`.
+- **OTLP:** traces, metrics, and logs from your applications over OTLP/gRPC (4317) and OTLP/HTTP (4318), on the collector's Service.
+- **Resource attributes:** Kubernetes resource attributes via the `k8sattributes` processor, and `cloud.provider`, `cloud.platform`, and `k8s.cluster.name` via the `resource/identity` processor.
 
 The collector runs as one replica. A rollout stops the old pod before it starts the new one, so each node is scraped once.
 
