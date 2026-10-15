@@ -59,6 +59,12 @@ const reducers = {
   Max: (values) => Math.max(...values),
 }
 
+assert.deepEqual(
+  reductions.map(([name]) => name),
+  Object.keys(reducers),
+  'The example must include all five Reduce To options'
+)
+
 for (const [name, ...values] of reductions) {
   test(`${name} results in the metrics aggregation example match the returned points`, () => {
     const reduce = reducers[name]
