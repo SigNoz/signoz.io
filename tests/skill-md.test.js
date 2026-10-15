@@ -1,9 +1,10 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
 const { GET } = loadTsModule('app/(site)/skill.md/route.ts')
-const { GET: getDocsSkill } = loadTsModule('app/(site)/docs/skill.md/route.ts')
 
 let cachedBody
 
@@ -80,10 +81,11 @@ test('skill.md code fences are balanced', async () => {
   assert.equal(fences.length % 2, 0)
 })
 
-test('/docs/skill.md serves the same markdown as /skill.md', async () => {
-  const response = await getDocsSkill(new Request('https://signoz.io/docs/skill.md'))
+test('/docs/skill.md permanently redirects to /skill.md', async () => {
+  const config = fs.readFileSync(path.join(__dirname, '..', 'next.config.js'), 'utf8')
 
-  assert.equal(response.status, 200)
-  assert.match(response.headers.get('content-type'), /^text\/markdown/)
-  assert.equal(await response.text(), await getBody())
+  assert.match(
+    config,
+    /source: '\/docs\/skill\.md',\s*destination: '\/skill\.md',\s*permanent: true,/
+  )
 })

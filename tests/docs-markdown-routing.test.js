@@ -24,8 +24,6 @@ test('shouldRewriteDocsToMarkdown does not rewrite when markdown is not preferre
 test('shouldRewriteDocsToMarkdown excludes sitemap and internal markdown routes', async () => {
   assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md/', true), false)
-  assert.equal(shouldRewriteDocsToMarkdown('/docs/skill.md', true), false)
-  assert.equal(shouldRewriteDocsToMarkdown('/docs/skill.md/', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/api/docs-markdown', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/api/docs-markdown/introduction', true), false)
 })
@@ -36,11 +34,9 @@ test('shouldRewriteDocsToMarkdown rewrites .md-suffixed docs paths without the A
   assert.equal(shouldRewriteDocsToMarkdown('/docs/introduction.md/', false), true)
 })
 
-test('shouldRewriteDocsToMarkdown still excludes the markdown sitemap and skill on the .md path', async () => {
+test('shouldRewriteDocsToMarkdown still excludes the markdown sitemap on the .md path', async () => {
   assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md', false), false)
   assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md/', false), false)
-  assert.equal(shouldRewriteDocsToMarkdown('/docs/skill.md', false), false)
-  assert.equal(shouldRewriteDocsToMarkdown('/docs/skill.md/', false), false)
 })
 
 test('hasDocsMarkdownExtension detects .md-suffixed docs paths', async () => {
