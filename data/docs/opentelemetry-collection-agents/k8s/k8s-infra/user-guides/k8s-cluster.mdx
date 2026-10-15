@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-10-15
 title: Monitoring Kubernetes Clusters using Opentelemetry Collection Agents
 description: Monitor Kubernetes clusters using the k8s-infra OpenTelemetry collection agent to send metrics, logs, and traces to SigNoz.
 ---
@@ -18,7 +18,7 @@ Before setting up OpenTelemetry monitoring for your Kubernetes cluster, ensure y
 
 - A SigNoz backend (SigNoz Cloud or self-hosted) to receive OpenTelemetry data
 - kubectl access to your Kubernetes cluster
-- Helm v3 installed for deploying the OpenTelemetry collector
+- Helm v3 installed for deploying the OpenTelemetry collector, or `foundryctl` for a Foundry install
 - Basic understanding of Kubernetes concepts (pods, nodes, namespaces)
 
 ## How OpenTelemetry Kubernetes Monitoring Works
@@ -33,7 +33,7 @@ The k8s-infra collection agent deploys OpenTelemetry collectors as a DaemonSet a
 
 ## Step 1: Install OpenTelemetry Collector for Kubernetes
 
-Deploy the `k8s-infra` Collection agent to your Kubernetes cluster. Follow the complete step-by-step instructions in the [K8s-Infra Installation Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+Deploy the `k8s-infra` Collection agent to your Kubernetes cluster. Follow the complete step-by-step instructions in the [K8s-Infra Installation Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), with the `k8s-infra` Helm chart or with Foundry.
 
 ## Step 2: What Telemetry Does the OpenTelemetry Collector Gather?
 
@@ -53,6 +53,8 @@ Cluster metrics and events:
 - **Custom Metrics:** It can be configured to collect metrics from other services in the cluster, like Redis or PostgreSQL.
 - **Prometheus Scraping:** Metrics can also be scraped using pod annotations.
 
+K8s Infra installed with Foundry collects the same telemetry by default.
+
 Learn more about what the k8s-infra collection agent monitors in the [K8s-Infra Overview Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/).
 
 ## Step 3: Configure Your OpenTelemetry Collector for Kubernetes Monitoring
@@ -68,17 +70,17 @@ The k8s-infra collection agent offers extensive configuration options to customi
 - **Custom processors**: Add your own OpenTelemetry processors for data transformation
 - **Performance tuning**: Adjust batch sizes, timeout values, and resource limits
 
-For detailed information on all available configuration options, including log presets, metrics collection settings, and advanced customizations, see the [K8s-Infra Configuration Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+For detailed information on all available configuration options, including log presets, metrics collection settings, and advanced customizations, see the [K8s-Infra Configuration Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/). With Foundry, you make the same changes in `casting.yaml`, as the guide's **Foundry** tabs show.
 
 ## Step 4: Monitor Multiple Kubernetes Clusters with OpenTelemetry
 
 To monitor multiple Kubernetes clusters with a single SigNoz backend:
 
 1. **Deploy k8s-infra** in each Kubernetes cluster you want to monitor
-2. **Set unique cluster names** using the cluster identification parameter
+2. **Set unique cluster names** using the cluster identification parameter: `global.clusterName` with the Helm CLI, or `K8S_CLUSTER_NAME` with Foundry
 3. **Point to the same SigNoz endpoint** for centralized observability
 
-The installation guide provides specific instructions for multi-cluster setups. See the [K8s-Infra Installation Guide](/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) for multi-cluster deployment instructions.
+For the steps with the Helm CLI or with Foundry, see [Monitor Multiple K8S Clusters](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster/).
 
 ## Step 5: Visualize Kubernetes Metrics in SigNoz
 
@@ -87,7 +89,7 @@ After installing the OpenTelemetry collector, view your Kubernetes data in SigNo
 ### Filter by Kubernetes Cluster
 
 - Navigate to **Metrics**, **Logs**, or **Traces** in SigNoz
-- Filter by `clusterName` attribute to view specific cluster data
+- Filter by `k8s.cluster.name`, which carries the name you set as `global.clusterName` or `K8S_CLUSTER_NAME`, to view specific cluster data
 - Use the `k8s.cluster.name` resource attribute for OpenTelemetry standard filtering
 
 ### Create Kubernetes Dashboards

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-10-15
 title: Cloud vs Self-Hosted Ingestion
 meta_title: Cloud vs Self-Hosted Ingestion - Key Differences
 description: Understand the differences between SigNoz Cloud and self-hosted ingestion. Compare endpoints, authentication, TLS, CORS, and learn how to adapt guides across both setups.
@@ -31,6 +31,9 @@ Review the [OpenTelemetry environment variables reference](https://signoz.io/doc
 
 Using a guide that only shows SigNoz Cloud steps? Apply the following minimal changes to send data to Self-Hosted SigNoz:
 
+<Tabs entityName="ingestion-client">
+<TabItem value="sdk" label="Language SDKs" default>
+
 ### Language SDKs
 
 ```diff
@@ -45,6 +48,9 @@ Notes:
 
 - If you enable TLS for self-hosted (via ingress/reverse proxy), use `https://<host>:443` and set `OTEL_EXPORTER_OTLP_INSECURE=false` (or omit it) and trust the certificates as needed.
 - OTLP/HTTP appends `/v1/{traces|metrics|logs}` automatically when you use the signal-agnostic endpoint variable `OTEL_EXPORTER_OTLP_ENDPOINT`.
+
+</TabItem>
+<TabItem value="collector" label="OpenTelemetry Collector">
 
 ### OpenTelemetry Collector (gateway/agent)
 
@@ -61,6 +67,58 @@ Notes:
 ```
 
 If you switch to HTTPS on self-hosted, change the endpoint to `https://<host>:443`, remove `tls.insecure: true`, and add a `tls` block only if you need to trust custom CAs.
+
+</TabItem>
+<TabItem value="collection-agent" label="Collection Agent">
+
+### Collection Agent
+
+<Tabs entityName="collection-agent">
+<TabItem value="k8s-infra" label="K8s-infra Chart" default>
+
+The SigNoz `k8s-infra` Helm chart sends to SigNoz Cloud through `otelCollectorEndpoint`, `otelInsecure`, and `signozApiKey` in `override-values.yaml`:
+
+```diff
+ global:
+   clusterName: <CLUSTER_NAME>
+   deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+-otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
+-otelInsecure: false
+-signozApiKey: <your-ingestion-key>
++otelCollectorEndpoint: http://<signoz-host>:4318
++otelInsecure: true
+```
+
+Apply the same change to the values for your platform, then install or upgrade the release with `override-values.yaml`.
+
+**Verify these values:**
+
+- `<signoz-host>`: The host of your Self-Hosted SigNoz OTLP/HTTP endpoint. For SigNoz installed with Foundry in the same Kubernetes cluster, use `signoz-ingester.signoz.svc.cluster.local`. For SigNoz installed with the Helm chart in the same cluster, use `signoz-otel-collector.signoz.svc.cluster.local`. The second `signoz` in each address is the namespace SigNoz runs in. For a SigNoz outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+
+If your SigNoz endpoint uses TLS, use its `https://` address, set `otelInsecure: false`, and add the TLS certificate settings the endpoint needs.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+A Foundry Collection Agent casting sends to SigNoz Cloud through `SIGNOZ_INGESTION_ENDPOINT`, `SIGNOZ_INGESTION_KEY`, and a `config.data` entry that adds the `signoz-ingestion-key` header.
+
+To send to Self-Hosted SigNoz, in every document of `casting.yaml`:
+
+- Set `SIGNOZ_INGESTION_ENDPOINT` to `http://<signoz-host>:4318`.
+- Remove `SIGNOZ_INGESTION_KEY`.
+- Remove the `config.data` lines that add the `signoz-ingestion-key` header, or the whole entry if that is all it holds.
+
+Then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+**Verify these values:**
+
+- `<signoz-host>`: The host of your Self-Hosted SigNoz OTLP/HTTP endpoint. For SigNoz installed with Foundry in the same Kubernetes cluster, use `signoz-ingester.signoz.svc.cluster.local`. For SigNoz installed with the Helm chart in the same cluster, use `signoz-otel-collector.signoz.svc.cluster.local`. The second `signoz` in each address is the namespace SigNoz runs in. For a SigNoz outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
 
 ## Self-Hosted to Cloud
 
