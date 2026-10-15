@@ -49,9 +49,36 @@ Node, pod, and container metrics, container logs, and Kubernetes events flow as 
 
 ### Where and how to send data from your application
 
-To send traces, metrics, and logs from your applications, set their OTLP endpoint to the agent's Service, `http://signoz-collector-agent-collector.signoz.svc.cluster.local:4318`. The operator creates this Service from the agent's resource and keeps each application's traffic on its own node.
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then add this to the application's container in its manifest:
 
-`signoz` is `metadata.name`, which is also the namespace unless the `foundry.signoz.io/kubernetes-namespace` annotation sets another. Use port `4317` for OTLP over gRPC. To have the operator instrument your applications, see [Auto-instrumentation](#auto-instrumentation-with-opentelemetry-operator).
+```yaml
+env:
+  - name: K8S_POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+  - name: K8S_POD_UID
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.uid
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://signoz-collector-agent-collector.signoz.svc.cluster.local:4318
+  - name: OTEL_SERVICE_NAME
+    value: <service-name>
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
+```
+
+**Verify these values:**
+
+- `<service-name>`: The name your application shows under in SigNoz.
+- `signoz` in the address: `metadata.name`, which is also the namespace unless the `foundry.signoz.io/kubernetes-namespace` annotation sets another.
+
+The Service keeps each application's traffic on the agent of its own node, which adds the Kubernetes workload attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`. Use port `4317` for OTLP over gRPC.
+
+To have the operator inject this instead, see [Auto-instrumentation](#auto-instrumentation-with-opentelemetry-operator).
+
+Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz, and its traces carry `k8s.namespace.name` and `k8s.pod.name`.
 
 ## Export to SigNoz
 
