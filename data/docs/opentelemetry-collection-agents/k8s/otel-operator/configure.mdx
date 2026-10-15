@@ -74,7 +74,7 @@ env:
 - `<service-name>`: The name your application shows under in SigNoz.
 - `signoz` in the address: `metadata.name`, which is also the namespace unless the `foundry.signoz.io/kubernetes-namespace` annotation sets another.
 
-The Service keeps each application's traffic on the agent of its own node, which adds the Kubernetes workload attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`. Use port `4317` for OTLP over gRPC.
+The Service keeps each application's traffic on the agent of its own node, which adds the Kubernetes resource attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`. Use port `4317` for OTLP over gRPC.
 
 To have the operator inject this instead, see [Auto-instrumentation](#auto-instrumentation-with-opentelemetry-operator).
 
@@ -88,7 +88,7 @@ Foundry generates this by default: the `otlphttp/signoz` exporter sends every pi
 
 ## Collect Host Metrics
 
-Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each node.
+Use the [`hostmetrics`](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each node.
 
 Foundry collects host metrics by default, every 30s. In `casting.yaml`, add this to the agent's document to change the interval and the excluded disk devices:
 
@@ -152,7 +152,7 @@ spec:
 
 ### Disable Logs Collection
 
-In `casting.yaml`, add this to the agent's document. It removes the container log receiver; logs that applications send over OTLP keep flowing:
+In `casting.yaml`, add this to the agent's document. It removes the `filelog/k8s` receiver; logs that applications send over OTLP keep flowing:
 
 ```yaml
 spec:
@@ -195,7 +195,7 @@ spec:
 
 `metrics` is a map, so the metrics you add join Foundry's defaults. With `insecure_skip_verify: false`, the receiver checks the kubelet's certificate against the cluster CA.
 
-These container-level metrics are disabled by default in the upstream kubeletstats receiver but enabled by default by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
+These container-level metrics are disabled by default in the upstream `kubeletstats` receiver but enabled by default by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
 
 | Metric | Powers |
 |---|---|
@@ -262,9 +262,9 @@ spec:
 
 ## Resource Detection and Kubernetes Attributes
 
-The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds node metadata, and the `k8sattributes` processor adds Kubernetes workload attributes, so you can filter and group by namespace, workload, or pod in SigNoz.
+The [`resourcedetection` processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and cloud resource attributes, and the `k8sattributes` processor adds Kubernetes resource attributes, so you can filter and group by namespace, workload, or pod in SigNoz.
 
-Foundry enriches telemetry by default with the `k8sattributes` processor, with default metadata and pod association rules. In `casting.yaml`, add this to the agent's document to extract a pod label and a node annotation:
+Foundry enriches telemetry by default with the `k8sattributes` processor, with the default `extract.metadata` attributes and pod association rules. In `casting.yaml`, add this to the agent's document to extract a pod label and a node annotation:
 
 ```yaml
 spec:
@@ -292,7 +292,7 @@ Lists replace, so restating `extract.metadata` or `pod_association` drops Foundr
 
 The `from:` field selects which Kubernetes object the processor reads the label or annotation from. The examples above use `pod` and `node`, but other workload kinds are supported as well, and each reads from its own metadata.
 
-Refer to the opentelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">k8sattributes processor documentation</a> for the full list of supported sources and the exact behavior of each.
+Refer to the OpenTelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">`k8sattributes` processor documentation</a> for the full list of supported sources and the exact behavior of each.
 
 </Admonition>
 
@@ -501,7 +501,7 @@ Lists replace, so restate Foundry's default processors in their order (`memory_l
 
 ## Exposing Ports for Custom Receivers
 
-A receiver that listens on a port needs that port open on the agent. The following example opens port 8125 for the statsd receiver. In `casting.yaml`, add the statsd receiver to the agent's document and list it in the `metrics` pipeline:
+A receiver that listens on a port needs that port open on the agent. The following example opens port 8125 for the `statsd` receiver. In `casting.yaml`, add the `statsd` receiver to the agent's document and list it in the `metrics` pipeline:
 
 ```yaml
 spec:
@@ -552,7 +552,7 @@ spec:
 
 ## Disable Metrics Collection
 
-In `casting.yaml`, add this to the agent's document to remove the host and kubelet metrics receivers:
+In `casting.yaml`, add this to the agent's document to remove the `hostmetrics` and `kubeletstats` receivers:
 
 ```yaml
 spec:
@@ -570,7 +570,7 @@ spec:
                   receivers: [otlp/http, otlp/grpc]
 ```
 
-Add this to the cluster collector's document to remove the cluster metrics receiver:
+Add this to the cluster collector's document to remove the `k8s_cluster` receiver:
 
 ```yaml
 spec:
@@ -636,7 +636,7 @@ Lists replace, so `include` collects logs from the `production` namespace only.
 
 ### Development Environment
 
-Telemetry data can be tagged with a "deployment environment" attribute (such as development, staging, or production) by setting it globally or explicitly in your application's OTEL_RESOURCE_ATTRIBUTES.
+Telemetry can carry a `deployment.environment` resource attribute (such as `development`, `staging`, or `production`), set globally or in your application's `OTEL_RESOURCE_ATTRIBUTES`.
 
 In `casting.yaml`, set this in both documents, the agent's and the cluster collector's:
 
@@ -656,7 +656,7 @@ A `deployment.environment` that an application sets in its own `OTEL_RESOURCE_AT
 
 ## Auto-instrumentation with OpenTelemetry Operator
 
-The operator can also inject language agents into your workloads with an `Instrumentation` resource and pod annotations, which enables traces, metrics, and logs without code changes. In the `Instrumentation` resource, set the exporter endpoint to the agent's Service:
+The operator can also inject OpenTelemetry auto-instrumentation into your workloads with an `Instrumentation` resource and pod annotations, which produces traces, metrics, and logs without code changes. In the `Instrumentation` resource, set the exporter endpoint to the agent's Service:
 
 ```yaml
 spec:

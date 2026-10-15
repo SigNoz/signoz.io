@@ -17,7 +17,7 @@ This guide explains how to install the OpenTelemetry Operator collection agent o
 
 ## Install the OpenTelemetry Operator
 
-Foundry runs the collectors as `OpenTelemetryCollector` resources, which the operator reconciles. Install operator v0.139.0, which matches the 0.139.0 collector these resources run:
+Foundry runs the collectors as `OpenTelemetryCollector` resources, which the operator reconciles. Install operator v0.139.0, which matches the OpenTelemetry Collector 0.139.0 these resources run:
 
 <Tabs entityName="k8s-method">
 <TabItem label="Manifest" value="manifest" default>
@@ -219,7 +219,7 @@ spec:
 - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
 
 <Admonition type="warning" title="Nodes that require IMDSv2">
-The AWS detectors read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
+The AWS detectors of the `resourcedetection` processor read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS resource attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
 
 Then restart the collectors so they detect again. Run this on the machine where you use `kubectl`:
 
@@ -700,7 +700,7 @@ spec:
 - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
 
 <Admonition type="warning" title="Nodes that require IMDSv2">
-The AWS detectors read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
+The AWS detectors of the `resourcedetection` processor read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS resource attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
 
 Then restart the collectors so they detect again. Run this on the machine where you use `kubectl`:
 
