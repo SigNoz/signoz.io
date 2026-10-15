@@ -279,7 +279,6 @@ test('advertises agent discovery resources via Link on HTML page responses', () 
     const link = run(path).headers.get('link')
     assert.match(link, /rel="llms-txt"/, path)
     assert.match(link, /rel="agent-skills"/, path)
-    assert.match(link, /rel="agent-card"/, path)
   })
 })
 
@@ -290,7 +289,7 @@ test('does not add the discovery Link header to markdown, files, or well-known r
     null
   )
   assert.equal(run('/llms.txt').headers.get('link'), null)
-  assert.equal(run('/.well-known/agent-card.json').headers.get('link'), null)
+  assert.equal(run('/.well-known/agent-skills/index.json').headers.get('link'), null)
 })
 
 test('preserves the request pathname for not-found suggestions on passthrough and rewrite', () => {

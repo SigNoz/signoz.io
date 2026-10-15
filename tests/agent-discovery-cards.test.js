@@ -23,7 +23,6 @@ const { GET: getLegacySkillsIndex } = loadTsModule(
 const { GET: getLegacySkill } = loadTsModule(
   'app/(site)/.well-known/skills/signoz/SKILL.md/route.ts'
 )
-const { GET: getAgentCard } = loadTsModule('app/(site)/.well-known/agent-card.json/route.ts')
 
 const readJson = async (handler) => {
   const response = await handler()
@@ -81,30 +80,14 @@ test('skill name and description come from the SKILL.md frontmatter', async () =
   assert.equal(description.length > 0 && description.length <= 1024, true)
 })
 
-test('agent card describes SigNoz docs as an A2A card', async () => {
-  const card = await readJson(getAgentCard)
-
-  assert.equal(card.url, 'https://signoz.io/docs/')
-  assert.equal(card.documentationUrl, 'https://signoz.io/docs/')
-  assert.equal(card.protocolVersion, '0.3')
-  assert.equal(card.provider.organization, 'SigNoz')
-  assert.equal(Array.isArray(card.defaultInputModes), true)
-  assert.equal(Array.isArray(card.defaultOutputModes), true)
-  assert.equal(card.skills.length > 0, true)
-  card.skills.forEach((skill) => {
-    assert.equal(typeof skill.id, 'string')
-    assert.equal(typeof skill.description, 'string')
-  })
-})
-
 test('discovery Link header advertises every agent resource', () => {
+  assert.doesNotMatch(AGENT_DISCOVERY_LINK_HEADER, /agent-card/)
   assert.match(AGENT_DISCOVERY_LINK_HEADER, /<\/llms\.txt>; rel="llms-txt"/)
   assert.match(AGENT_DISCOVERY_LINK_HEADER, /<\/llms-full\.txt>; rel="llms-full-txt"/)
   assert.match(
     AGENT_DISCOVERY_LINK_HEADER,
     /<\/\.well-known\/agent-skills\/index\.json>; rel="agent-skills"/
   )
-  assert.match(AGENT_DISCOVERY_LINK_HEADER, /<\/\.well-known\/agent-card\.json>; rel="agent-card"/)
   assert.match(
     AGENT_DISCOVERY_LINK_HEADER,
     /<\/\.well-known\/mcp\/server-card\.json>; rel="mcp-server-card"/
