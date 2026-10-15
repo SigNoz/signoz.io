@@ -1,391 +1,281 @@
 ---
-date: 2026-10-13
-title: EKS Fargate Collection Agent - Install the Sidecar Collector
-description: Run the OpenTelemetry Collector as a sidecar container in your EKS Fargate pods to collect application traces, metrics, and logs and send them to SigNoz.
+date: 2026-10-15
+title: K8s Serverless (EKS Fargate) - Install
+description: Install the EKS Fargate collection agent with Foundry through Kustomize to send kubelet metrics, cluster metrics, Kubernetes events, and traces to SigNoz.
 doc_type: howto
 ---
 
-Follow this guide to set up an OpenTelemetry Collector sidecar alongside your applications on EKS Fargate. The sidecar collects OTLP telemetry from your app and sends it to SigNoz. It runs inside your pod, so no node-level access is required.
+This guide explains how to install the EKS Fargate Collection Agent with Foundry through Kustomize.
 
-> Note: On EKS Fargate, direct access to kubelet ports (`:10250`/`:10255`) isn't available. This guide uses the Kubernetes API-server proxy to scrape kubelet stats/summary via `kubeletstats`.
+If you run the sidecar setup from earlier versions of this guide, see [Sidecar Setup](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/sidecar-setup/).
 
 ## Prerequisites
 
-- An EKS cluster with Fargate profiles set up
-- A SigNoz backend (either SigNoz Cloud or self-hosted)
-- `kubectl` access to update your app Deployment/Pod specs
-- A Kubernetes ServiceAccount mapped to your workloads with sufficient RBAC permissions
+- An EKS cluster with a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the `signoz` namespace, which the collector runs in.
+- `kubectl` configured to reach the cluster.
+- A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
-## 1. Before you start: Install k8s-infra
+## Install with Foundry and Kustomize
 
-- Install the `k8s-infra` Helm chart to enable cluster-level collection functionality. (See: [K8s-Infra - Install](/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/))
-- For Fargate nodes, disable the `otelAgent` (DaemonSet) in your Helm values. Keep `otelDeployment` enabled if you want cluster metrics/events.
-- Then add the sidecar collector to your application pods (steps below). The sidecar acts as the per-pod agent (replacement for the DaemonSet `otelAgent`).
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
 
-## 2. Create a ConfigMap for the sidecar collector
+### Step 1: Install foundryctl
 
-Create a ConfigMap containing the collector configuration and an in-cluster kubeconfig (used by `kubeletstats` in API-proxy mode):
-
-### in-cluster kubeConfig ConfigMap
-
-Add the following ConfigMap to provide a minimal in-cluster kubeconfig for the sidecar collector, used by `kubeletstats` in API-proxy mode.
-
-```yaml defaultCollapsed
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: otel-agent-sidecar-config
-  namespace: <YOUR_NAMESPACE>
-data:
-  # minimal kubeconfig so the collector can talk to the API server via the pod SA
-  kubeconfig: |
-    apiVersion: v1
-    kind: Config
-    clusters:
-    - name: in-cluster
-      cluster:
-        server: https://kubernetes.default.svc:443
-        certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    contexts:
-    - name: in-cluster
-      context: { cluster: in-cluster, user: in-cluster }
-    current-context: in-cluster
-    users:
-    - name: in-cluster
-      user:
-        tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-```
-
-### OtelCollector Config ConfigMap
-
-Add the following to your application pod spec to inject the OpenTelemetry Collector as a sidecar.
-
-```yaml minimap defaultCollapsed
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: otel-agent-sidecar-config
-  namespace: <YOUR_NAMESPACE>
-
-  otel-agent-config.yaml: |
-    exporters:
-      debug:
-        sampling_initial: 2
-        sampling_thereafter: 500
-        verbosity: basic
-      otlphttp:
-        endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
-        headers:
-          signoz-ingestion-key: ${env:SIGNOZ_API_KEY}
-
-    extensions:
-      health_check:
-        endpoint: 0.0.0.0:13133
-      pprof:
-        endpoint: localhost:1777
-      zpages:
-        endpoint: localhost:55679
-    processors:
-      batch:
-        send_batch_size: 10000
-        timeout: 200ms
-      k8sattributes:
-        extract:
-          annotations: []
-          labels: []
-          metadata:
-            - k8s.namespace.name
-            - k8s.deployment.name
-            - k8s.statefulset.name
-            - k8s.daemonset.name
-            - k8s.cronjob.name
-            - k8s.job.name
-            - k8s.node.name
-            - k8s.node.uid
-            - k8s.pod.name
-            - k8s.pod.uid
-            - k8s.pod.start_time
-        filter:
-          node_from_env_var: K8S_NODE_NAME
-        passthrough: false
-        pod_association:
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.ip
-        - sources:
-          - from: resource_attribute
-            name: k8s.pod.uid
-        - sources:
-          - from: connection
-      resourcedetection:
-        detectors:
-        - eks
-        - env
-        - system
-        override: false
-        system:
-          resource_attributes:
-            host.id:
-              enabled: false
-            host.name:
-              enabled: false
-            os.type:
-              enabled: true
-        timeout: 2s
-
-    receivers:
-      kubeletstats:
-        auth_type: kubeConfig
-        collection_interval: 30s
-        endpoint: ${env:K8S_NODE_NAME}
-        insecure_skip_verify: true
-        metric_groups:
-        - container
-        - pod
-        - node
-        - volume
-        metrics:
-          container.cpu.usage:
-            enabled: true
-          container.uptime:
-            enabled: true
-          k8s.container.cpu_limit_utilization:
-            enabled: true
-          k8s.container.cpu_request_utilization:
-            enabled: true
-          k8s.container.memory_limit_utilization:
-            enabled: true
-          k8s.container.memory_request_utilization:
-            enabled: true
-          k8s.node.cpu.usage:
-            enabled: true
-          k8s.node.uptime:
-            enabled: true
-          k8s.pod.cpu.usage:
-            enabled: true
-          k8s.pod.cpu_limit_utilization:
-            enabled: true
-          k8s.pod.cpu_request_utilization:
-            enabled: true
-          k8s.pod.memory_limit_utilization:
-            enabled: true
-          k8s.pod.memory_request_utilization:
-            enabled: true
-          k8s.pod.uptime:
-            enabled: true
-      otlp:
-        protocols:
-          grpc: { endpoint: 0.0.0.0:4317, max_recv_msg_size_mib: 4 }
-          http: { endpoint: 0.0.0.0:4318 }
-
-    service:
-      extensions: [health_check, zpages, pprof]
-      pipelines:
-        logs:
-          receivers:  [otlp]
-          processors: [resourcedetection, k8sattributes, batch]
-          exporters:  [debug, otlphttp]
-        metrics:
-          receivers:  [otlp, kubeletstats]
-          processors: [resourcedetection, k8sattributes, batch]
-          exporters:  [otlphttp, debug]
-        traces:
-          receivers:  [otlp]
-          processors: [resourcedetection, k8sattributes, batch]
-          exporters:  [otlphttp, debug]
-
-      telemetry:
-        logs:    { encoding: json }
-```
-
-This configuration reads exporter endpoints and credentials from environment variables you set in your Deployment.
-
-## 3. Cluster roles and privileges
-
-Create a ServiceAccount and minimal RBAC so the sidecar can call the API-server proxy path:
-
-```yaml defaultCollapsed minimap
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: otel-agent-sidecar
-  namespace: <YOUR_NAMESPACE>
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: otel-kubeletstats-proxy
-rules:
-  # Needed for: GET /api/v1/nodes/<node>/proxy/stats/summary
-  - apiGroups: ['']
-    resources: ['nodes/stats', 'nodes/proxy']
-    verbs: ['get']
-  # Informers for enrichment (k8sattributes/resourcedetection)
-  - apiGroups: ['']
-    resources: ['pods', 'namespaces', 'nodes']
-    verbs: ['get', 'list', 'watch']
-  # Optional: owner lookups (ReplicaSets)
-  - apiGroups: ['apps']
-    resources: ['replicasets']
-    verbs: ['get', 'list', 'watch']
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: otel-kubeletstats-proxy
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: otel-kubeletstats-proxy
-subjects:
-  - kind: ServiceAccount
-    name: otel-agent-sidecar
-    namespace: <YOUR_NAMESPACE>
-```
-
-## 4. Add the sidecar container to your app
-
-Add the following sidecar container to your Deployments/Apps. Replace placeholders like `<OTLP_EXPORTER_OTLP_ENDPOINT>` and `<YOUR_K8S_CLUSTER_NAME>`.
-
-```yaml minimap defaultCollapsed
-# Example Deployment fragment
-spec:
-  template:
-    spec:
-      ## Service Account for otel-agent-sidecar container ##
-      serviceAccountName: otel-agent-sidecar
-
-      ## Mount the otel-agent config configMap
-      volumes:
-        - name: otel-agent-config-vol
-          configMap:
-            name: otel-agent-sidecar-config
-
-      containers:
-        - name: your-app
-          image: <YOUR_IMAGE>
-          env:
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://otel-collector:4317
-
-        ###### Otel Agent Sidecar container ####
-        - name: opentelemetry-collector-contrib
-          imageOverride:
-            repository: otel/opentelemetry-collector-contrib
-            tag: 0.139.0
-          command:
-            - /otelcol-contrib --config=/conf/otel-agent-config.yaml
-          env:
-            # This endpoint should be reachable from your pod
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: <OTLP_EXPORTER_OTLP_ENDPOINT>
-            - name: OTEL_EXPORTER_OTLP_INSECURE
-              value: 'true'
-            - name: OTEL_SECRETS_PATH
-              value: /secrets
-            - name: K8S_CLUSTER_NAME
-              value: <YOUR_K8S_CLUSTER_NAME>
-            - name: K8S_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
-            - name: K8S_POD_IP
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.podIP
-            - name: K8S_HOST_IP
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.hostIP
-            - name: K8S_POD_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-            - name: K8S_POD_UID
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.uid
-            - name: K8S_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-            - name: SIGNOZ_COMPONENT
-              value: otel-agent
-            - name: OTEL_RESOURCE_ATTRIBUTES
-              value: signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME),k8s.node.name=$(K8S_NODE_NAME),host.name=$(K8S_NODE_NAME)
-          livenessProbe:
-            failureThreshold: 6
-            httpGet:
-              path: /
-              port: 13133
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 5
-          ports:
-            - containerPort: 13133
-              name: health-check
-              protocol: TCP
-            - containerPort: 8888
-              name: metrics
-              protocol: TCP
-            - containerPort: 4317
-              name: otlp
-              protocol: TCP
-            - containerPort: 4318
-              name: otlp-http
-              protocol: TCP
-          readinessProbe:
-            failureThreshold: 6
-            httpGet:
-              path: /
-              port: 13133
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 5
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          useDefault:
-            env: true
-          volumeMounts:
-            - mountPath: /conf
-              name: otel-agent-config-vol
-            - mountPath: /var/log
-              name: varlog
-              readOnly: true
-```
-
-## 5. Apply manifests
+Run this on the machine where you use `kubectl`:
 
 ```bash
-kubectl apply -f otel-agent-sidecar-config.yaml
-kubectl apply -f rbac.yaml
-kubectl apply -f app-deployment.yaml
+curl -fsSL https://signoz.io/foundry.sh | bash
 ```
 
-## Notes & troubleshooting
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
 
-- If you see `404 Not Found` for `/api/v1/nodes/proxy/stats/summary`, ensure:
+### Step 2: Create casting.yaml
 
-  - The **receiver endpoint** is `endpoint: ${env:K8S_NODE_NAME}` (not empty / not a host\:port).
-  - The **env var** is set via `spec.nodeName` and your sidecar has `KUBECONFIG=/conf/kubeconfig`.
-  - RBAC allows `get` on `nodes/stats` and `nodes/proxy`.
+Create a file named `casting.yaml` with one document for the collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/#how-it-works). `collector.kind: deployment` selects that collector:
 
-- Some EKS Fargate environments may not expose `/stats/summary` via proxy. If that’s your case, use the **cAdvisor via API-proxy** method (`/api/v1/nodes/$NODE/proxy/metrics/cadvisor`) with a Prometheus receiver as a fallback.
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes-serverless
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pod.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize" target="_blank" rel="noopener noreferrer nofollow">EKS Fargate Kustomize example</a>.
+
+<Admonition type="info" title="Change the namespace" defaultCollapsed="true">
+The `foundry.signoz.io/kubernetes-namespace` annotation under `metadata` sets the namespace the collector is applied to. A Fargate profile must select that namespace, or the collector pod stays `Pending`. The default is:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-namespace: signoz   # namespace to apply into, created by the apply
+```
+
+The namespace defaults to `metadata.name`. The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes it.
+</Admonition>
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+This command:
+
+- writes the kustomize root `pours/collectionagent/collector/deployment`;
+- applies it with `kubectl apply -k` to the cluster of your current `kubectl` context;
+- creates the `signoz` namespace on the first apply, since the root holds the namespace, the collector's service account and RBAC, its config, its Service, and its Deployment.
+
+Run the same command again after editing `casting.yaml` to apply the change.
+
+<Admonition type="tip" title="Run kubectl yourself" defaultCollapsed="true">
+To run kubectl directly, generate the kustomize root and apply it. Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl forge -f casting.yaml   # writes the kustomize root under pours/collectionagent/collector/deployment
+kubectl apply -k pours/collectionagent/collector/deployment
+```
+
+To see the manifests before you apply them, run `kubectl kustomize pours/collectionagent/collector/deployment`.
+</Admonition>
+
+### Step 4: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that the collector pod is running on a Fargate node:
+
+```bash
+kubectl get pods -n signoz -o wide
+```
+
+The output should look similar to the following, with one `signoz-collector-deployment` pod on a node whose name starts with `fargate-`. Pod suffixes, IP addresses, and node names vary:
+
+```output
+NAME                                           READY   STATUS    RESTARTS   AGE   IP           NODE                                 NOMINATED NODE   READINESS GATES
+signoz-collector-deployment-6d9c7b8f5c-k2x9p   1/1     Running   0          2m    10.0.12.34   fargate-ip-10-0-12-34.ec2.internal   <none>           <none>
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/deployment/deployment.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/deployment/deployment.yaml: |
+              receivers:
+                receiver_creator:
+                  receivers:
+                    kubeletstats:
+                      config:
+                        collection_interval: 60s
+  ```
+
+- **Manifests** (resources, annotations): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against the files under `collectionagent/collector/deployment/`, such as `workload.yaml` for the collector's Deployment. For example, to set the collector's resource requests:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/deployment/workload.yaml
+        operations:
+          - op: replace
+            path: /spec/template/spec/containers/0/resources
+            value:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+  ```
+
+  Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Collector pod stays Pending
+
+Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the collector pod's name from `kubectl get pods -n signoz`. The events show `FailedScheduling`.
+
+**Cause:** no Fargate profile selects the `signoz` namespace, so no Fargate node is started for the pod.
+
+**Fix:** add a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the namespace, then run this on the machine where you use `kubectl` to recreate the pod:
+
+```bash
+kubectl rollout restart -n signoz deployment/signoz-collector-deployment
+```
+
+After the fix, `kubectl get pods -n signoz -o wide` shows the pod as `Running` on a `fargate-` node.
+
+### The Pods view stays empty
+
+Run this on the machine where you use `kubectl` to read the collector's logs:
+
+```bash
+kubectl logs -n signoz deployment/signoz-collector-deployment --since=10m
+```
+
+The logs show errors from the `kubeletstats` scrapes: a `403`, or a `404` on `/api/v1/nodes/<node-name>/proxy/stats/summary`.
+
+**Cause:** with a `403`, the collector's service account is not allowed through the Kubernetes API server's node proxy. With a `404`, the kubelet on that node does not serve its stats through the proxy.
+
+**Fix:** for a `403`, run this on the machine where you use `kubectl`. It prints `yes` once the ClusterRole Foundry generates is in place:
+
+```bash
+kubectl auth can-i get nodes/proxy --as=system:serviceaccount:signoz:signoz-collector-deployment
+```
+
+If it prints `no`, run `foundryctl cast -f casting.yaml` again from the directory that contains it. For a `404`, scrape the kubelets directly, as the example's <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#when-the-api-server-proxy-does-not-serve-kubelet-stats" target="_blank" rel="noopener noreferrer nofollow">API-server proxy section</a> shows.
+
+After the fix, the **Pods** view in SigNoz lists your pods.
+
+### foundryctl cast stops with `unsupported collector kind "agent"`
+
+`foundryctl cast -f casting.yaml` stops before it applies anything, with the message `unsupported collector kind "agent"`.
+
+**Cause:** the casting has no `collector.kind`, so the collector kind defaults to `agent`, and on EKS Fargate the collector runs as a Deployment.
+
+**Fix:** add `kind: deployment` under `spec.collector`, as in Step 2, then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pod.
+
+### foundryctl cast rejects a patch
+
+`foundryctl cast -f casting.yaml` stops before it applies anything, with a message that names the patch's target.
+
+**Cause:** the patch's target or path does not exist in what Foundry generates for EKS Fargate.
+
+**Fix:** target a file under `collectionagent/collector/deployment/`, such as `collectionagent/collector/deployment/workload.yaml`, with a `path` that exists in it. To see the files a patch can target, run this from the directory that contains `casting.yaml` and look under `pours/collectionagent/collector/deployment/`:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+Then run `foundryctl cast -f casting.yaml` again.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pod.
+
+### foundryctl cast reaches the wrong cluster or none
+
+Run this on the machine where you run `foundryctl` to see which cluster it uses:
+
+```bash
+kubectl config current-context
+```
+
+**Cause:** `foundryctl cast` applies to the cluster of your current `kubectl` context.
+
+**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. Replace `<context-name>` with a context from `kubectl config get-contexts`.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pod on that cluster.
+
+</details>
+
+## Send data from your applications
+
+Kubelet and cluster metrics and Kubernetes events flow as soon as the collector is running. To send traces, metrics, and logs from your applications, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector).
 
 ## Next Steps
 
-- [Configure Fargate log routing and Collector receivers](/docs/opentelemetry-collection-agents/k8s/serverless/configure/)
+- [Configure the EKS Fargate Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/)
+- [Learn more about the EKS Fargate Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

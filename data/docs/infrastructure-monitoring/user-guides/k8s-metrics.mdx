@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-10-15
 title: Setup Kubernetes Metrics with OpenTelemetry
 description: Configure the OpenTelemetry kubeletstats and k8scluster receivers (plus k8sattributesprocessor) on top of a running Kubernetes Collection Agent to track node, pod, container, and volume metrics in SigNoz.
 doc_type: howto
@@ -17,7 +17,7 @@ This guide explains how to set up monitoring for your Kubernetes cluster using t
 Make sure you have an OpenTelemetry Collector running in your cluster. Pick the install guide that matches your setup:
 
 - **Standard Kubernetes** → [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/): Helm chart that already wires `kubeletstats`, `k8scluster`, and `k8sattributes`.
-- **EKS Fargate / GKE Autopilot / AKS Virtual Nodes** → [Serverless Kubernetes Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/): for managed clusters that block kubelet scraping on worker nodes.
+- **EKS Fargate** → [Serverless Kubernetes Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/): collects kubelet metrics through the Kubernetes API server, since a Fargate pod cannot reach the kubelet of its node.
 - **OpenTelemetry Operator** → [OTel Operator Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/): if you're already managing collectors via the OpenTelemetry Operator.
 
 Every install path ships a config that already includes the receivers and processors covered below. The sections that follow explain the receiver / processor options so you can adjust the shipped config for your needs.
