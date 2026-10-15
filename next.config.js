@@ -144,6 +144,11 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/docs/skill.md',
+          destination: '/skill.md',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
           destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
           permanent: true,
