@@ -1,5 +1,5 @@
 ---
-date: 2026-08-17
+date: 2026-10-14
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Agent Integration Guide
 description: Connect Claude, Cursor, Copilot, and other AI agents to SigNoz via MCP for natural language access to metrics, logs, traces, and alerts.
@@ -13,6 +13,32 @@ The MCP server works best with the [SigNoz plugin](https://signoz.io/docs/ai/age
 <KeyPointCallout title="Already configured?" defaultCollapsed="true">
 If you've already set up the MCP server, skip ahead to the [use cases](https://signoz.io/docs/ai/use-cases/) to see what you can do with it.
 </KeyPointCallout>
+
+<Admonition type="tip" title="Only need the docs?">
+To let your AI agent search and read SigNoz documentation without a SigNoz account, connect the public docs MCP server. It needs no region or authentication and exposes only `signoz_search_docs` and `signoz_fetch_doc`; it has no access to your observability data.
+
+```
+https://signoz.io/docs/mcp/
+```
+
+For example, in Claude Code:
+
+```bash
+claude mcp add --transport http signoz-docs https://signoz.io/docs/mcp/
+```
+
+In clients configured with JSON, such as Cursor:
+
+```json
+{
+  "mcpServers": {
+    "signoz-docs": {
+      "url": "https://signoz.io/docs/mcp/"
+    }
+  }
+}
+```
+</Admonition>
 
 ## Connect to SigNoz's MCP server
 

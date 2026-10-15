@@ -24,6 +24,8 @@ test('shouldRewriteDocsToMarkdown does not rewrite when markdown is not preferre
 test('shouldRewriteDocsToMarkdown excludes sitemap and internal markdown routes', async () => {
   assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md/', true), false)
+  assert.equal(shouldRewriteDocsToMarkdown('/docs/mcp', true), false)
+  assert.equal(shouldRewriteDocsToMarkdown('/docs/mcp/', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/api/docs-markdown', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/api/docs-markdown/introduction', true), false)
 })

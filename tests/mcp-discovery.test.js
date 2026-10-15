@@ -61,6 +61,19 @@ test('discovery document records the authentication model and self-hosted path',
   assert.equal(document.selfHosted.repository, 'https://github.com/SigNoz/signoz-mcp-server')
 })
 
+test('discovery document lists the public docs server separately with no auth', () => {
+  const document = buildMcpDiscoveryDocument(['us'])
+
+  assert.equal(document.docsServer.url, 'https://signoz.io/docs/mcp/')
+  assert.equal(document.docsServer.transport, 'http')
+  assert.equal(document.docsServer.authentication, 'none')
+  assert.deepEqual(document.docsServer.tools, ['signoz_search_docs', 'signoz_fetch_doc'])
+  assert.equal(
+    document.servers.some((server) => server.url === document.docsServer.url),
+    false
+  )
+})
+
 const fetchRouteBody = async (handler, url) => {
   const response = await handler(new Request(url))
   assert.equal(response.status, 200)

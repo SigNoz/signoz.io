@@ -18,10 +18,12 @@ export const shouldRewriteDocsToMarkdown = (
 ): boolean => {
   const isDocsPath = pathname === '/docs' || pathname.startsWith('/docs/')
   const isDocsSitemapPath = pathname === '/docs/sitemap.md' || pathname === '/docs/sitemap.md/'
+  // The public docs MCP endpoint is an API, not a docs page.
+  const isDocsMcpPath = pathname === '/docs/mcp' || pathname === '/docs/mcp/'
   const isInternalMarkdownPath =
     pathname === '/api/docs-markdown' || pathname.startsWith('/api/docs-markdown/')
 
-  if (!isDocsPath || isDocsSitemapPath || isInternalMarkdownPath) {
+  if (!isDocsPath || isDocsSitemapPath || isDocsMcpPath || isInternalMarkdownPath) {
     return false
   }
 

@@ -1,5 +1,6 @@
 import siteMetadata from '@/data/siteMetadata'
 import { agentResponse } from '@/utils/agentResponseHeaders'
+import { DOCS_MCP_SERVER_NAME, DOCS_MCP_URL } from '@/utils/docs/docsMcp'
 
 export const MCP_URL_TEMPLATE = 'https://mcp.<region>.signoz.cloud/mcp'
 
@@ -42,6 +43,17 @@ const placeholderServer = () => ({
   authentication: 'oauth2',
 })
 
+// Public docs-only server; listed apart from `servers` because it needs no account.
+const docsServer = () => ({
+  name: DOCS_MCP_SERVER_NAME,
+  description:
+    'Public SigNoz documentation MCP server. Search and read official SigNoz docs with signoz_search_docs and signoz_fetch_doc. No account, region, or credentials required; no access to observability data.',
+  url: DOCS_MCP_URL,
+  transport: 'http',
+  authentication: 'none',
+  tools: ['signoz_search_docs', 'signoz_fetch_doc'],
+})
+
 export function buildMcpDiscoveryDocument(regionNames: string[]) {
   return {
     version: '1.0.0',
@@ -58,6 +70,7 @@ export function buildMcpDiscoveryDocument(regionNames: string[]) {
         'OAuth 2.1 with Dynamic Client Registration (RFC 7591) and Authorization Code + PKCE; auth endpoints are discovered from the server metadata. Clients that cannot run interactive OAuth flows can instead send SIGNOZ-API-KEY and X-SigNoz-URL request headers.',
     },
     servers: regionNames.length > 0 ? regionNames.map(regionServer) : [placeholderServer()],
+    docsServer: docsServer(),
     selfHosted: {
       description:
         'Self-hosted SigNoz users run the open-source MCP server locally over stdio or HTTP.',

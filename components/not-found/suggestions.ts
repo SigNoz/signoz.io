@@ -5,27 +5,14 @@ import {
 } from './constants'
 import { rerankSuggestions, tokenizePathForSuggestions } from './rerank'
 import type { AlgoliaHit, SuggestedDoc } from './types'
+import {
+  buildAlgoliaHeaders,
+  buildAlgoliaQueryUrl,
+  getAlgoliaConfig,
+  hasAlgoliaConfig,
+} from '@/utils/algoliaConfig'
 
-export const hasAlgoliaConfig = (): boolean => {
-  return Boolean(
-    process.env.NEXT_PUBLIC_ALGOLIA_APP_ID &&
-    (process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY) &&
-    process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
-  )
-}
-
-const getAlgoliaConfig = (): { appId: string; apiKey: string; indexName: string } | null => {
-  const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
-  const apiKey =
-    process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
-  const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
-
-  if (!appId || !apiKey || !indexName) {
-    return null
-  }
-
-  return { appId, apiKey, indexName }
-}
+export { hasAlgoliaConfig }
 
 const getTitleFromHit = (hit: AlgoliaHit): string | null => {
   return (
@@ -73,8 +60,6 @@ export const getNotFoundSuggestions = async (
     return QUICK_LINK_FALLBACK.slice(0, count)
   }
 
-  const { appId, apiKey, indexName } = algoliaConfig
-
   const tokens = tokenizePathForSuggestions(pathname)
   const query = tokens.join(' ').trim()
 
@@ -83,22 +68,15 @@ export const getNotFoundSuggestions = async (
   }
 
   try {
-    const response = await fetch(
-      `https://${appId}-dsn.algolia.net/1/indexes/${encodeURIComponent(indexName)}/query`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Algolia-API-Key': apiKey,
-          'X-Algolia-Application-Id': appId,
-        },
-        body: JSON.stringify({
-          query,
-          hitsPerPage: ALGOLIA_CANDIDATE_LIMIT,
-        }),
-        next: { revalidate: ALGOLIA_SUGGESTIONS_REVALIDATE_SECONDS },
-      }
-    )
+    const response = await fetch(buildAlgoliaQueryUrl(algoliaConfig), {
+      method: 'POST',
+      headers: buildAlgoliaHeaders(algoliaConfig),
+      body: JSON.stringify({
+        query,
+        hitsPerPage: ALGOLIA_CANDIDATE_LIMIT,
+      }),
+      next: { revalidate: ALGOLIA_SUGGESTIONS_REVALIDATE_SECONDS },
+    })
 
     if (!response.ok) {
       return QUICK_LINK_FALLBACK.slice(0, count)
