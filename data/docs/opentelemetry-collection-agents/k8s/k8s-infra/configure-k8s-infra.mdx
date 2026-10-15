@@ -128,7 +128,7 @@ env:
 
 - `<service-name>`: The name your application shows under in SigNoz.
 
-The application sends to the agent on its own node, which adds the Kubernetes workload attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`, and forwards everything to SigNoz.
+The application sends to the agent on its own node, which adds the Kubernetes resource attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`, and forwards everything to SigNoz.
 
 <Admonition type="info" title="On GKE Autopilot">
 The agent binds no host ports, so set `OTEL_EXPORTER_OTLP_ENDPOINT` to the agent's Service instead:
@@ -164,7 +164,7 @@ Foundry generates this by default: the `otlphttp/signoz` exporter sends every pi
 
 ## Collect Host Metrics
 
-Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each node.
+Use the [`hostmetrics`](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each node.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -330,7 +330,7 @@ presets:
 </TabItem>
 <TabItem value="foundry" label="Foundry">
 
-In `casting.yaml`, add this to the agent's document. It removes the container log receiver; logs that applications send over OTLP keep flowing:
+In `casting.yaml`, add this to the agent's document. It removes the `filelog/k8s` receiver; logs that applications send over OTLP keep flowing:
 
 ```yaml
 spec:
@@ -422,7 +422,7 @@ spec:
 </TabItem>
 </Tabs>
 
-These container-level metrics are disabled by default in the upstream kubeletstats receiver but enabled by default in this chart and by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
+These container-level metrics are disabled by default in the upstream `kubeletstats` receiver but enabled by default in this chart and by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
 
 | Metric | Powers |
 |---|---|
@@ -556,7 +556,7 @@ spec:
 
 ## Resource Detection and Kubernetes Attributes
 
-The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds node metadata, and the `k8sattributes` processor adds Kubernetes workload attributes, so you can filter and group by namespace, workload, or pod in SigNoz.
+The [`resourcedetection` processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and cloud resource attributes, and the `k8sattributes` processor adds Kubernetes resource attributes, so you can filter and group by namespace, workload, or pod in SigNoz.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -606,14 +606,14 @@ presets:
 
 **Configuration tips**:
 
-- Enable only required metadata fields to optimize performance
+- List only the resource attributes you need under `extractMetadatas` to optimize performance
 - Use `passthrough: true` in very large clusters to reduce API load
 - Configure pod association based on your networking setup
 
 </TabItem>
 <TabItem value="foundry" label="Foundry">
 
-Foundry enriches telemetry by default with the `k8sattributes` processor, with the chart's default metadata and pod association rules. In `casting.yaml`, add this to the agent's document to extract a pod label and a node annotation:
+Foundry enriches telemetry by default with the `k8sattributes` processor, with the chart's default `extract.metadata` attributes and pod association rules. In `casting.yaml`, add this to the agent's document to extract a pod label and a node annotation:
 
 ```yaml
 spec:
@@ -644,7 +644,7 @@ Lists replace, so restating `extract.metadata` or `pod_association` drops Foundr
 
 The `from:` field selects which Kubernetes object the processor reads the label or annotation from. The examples above use `pod` and `node`, but other workload kinds are supported as well, and each reads from its own metadata.
 
-Refer to the opentelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">k8sattributes processor documentation</a> for the full list of supported sources and the exact behavior of each.
+Refer to the OpenTelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">`k8sattributes` processor documentation</a> for the full list of supported sources and the exact behavior of each.
 
 </Admonition>
 
@@ -975,7 +975,7 @@ otelAgent:
 </TabItem>
 <TabItem value="foundry" label="Foundry">
 
-In `casting.yaml`, add the statsd receiver to the agent's document and list it in the `metrics` pipeline:
+In `casting.yaml`, add the `statsd` receiver to the agent's document and list it in the `metrics` pipeline:
 
 ```yaml
 spec:
@@ -1299,7 +1299,7 @@ otelDeployment:
 </TabItem>
 <TabItem value="foundry" label="Foundry">
 
-In `casting.yaml`, add this to the agent's document to remove the host and kubelet metrics receivers:
+In `casting.yaml`, add this to the agent's document to remove the `hostmetrics` and `kubeletstats` receivers:
 
 ```yaml
 spec:
@@ -1317,7 +1317,7 @@ spec:
                   receivers: [otlp/http, otlp/grpc]
 ```
 
-Add this to the deployment collector's document to remove the cluster metrics receiver:
+Add this to the deployment collector's document to remove the `k8s_cluster` receiver:
 
 ```yaml
 spec:
@@ -1448,7 +1448,7 @@ Lists replace, so `include` collects logs from the `production` namespace only.
 
 ### Development Environment
 
-Telemetry data can be tagged with a "deployment environment" attribute (such as development, staging, or production) by setting it globally or explicitly in your application's OTEL_RESOURCE_ATTRIBUTES.
+Telemetry can carry a `deployment.environment` resource attribute (such as `development`, `staging`, or `production`), set globally or in your application's `OTEL_RESOURCE_ATTRIBUTES`.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
