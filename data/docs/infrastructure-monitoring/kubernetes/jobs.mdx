@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-10-15
 title: "Kubernetes Jobs Monitoring: Completions and Resource Usage"
 description: Monitor Kubernetes job status and resource usage in SigNoz, covering active, successful, and failed pod counts with CPU and memory metrics.
 doc_type: explanation
@@ -105,7 +105,7 @@ The **Jobs** view tracks job completion status alongside resource consumption, u
 
 ### Pod Counts by Status
 
-- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#collect-cluster-metrics); all three must be flowing for this column to be populated.
 - Counts of the Job's pods grouped by their kubectl-style display status within the selected window, including replacements for failed retries. The status is derived exactly as on the Pods view: see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
 - `OOMKilled` / `Error` counts are the primary triage signal for a failing Job: the work isn't completing; read them alongside the **Failed** count on the Jobs view and inspect with `kubectl describe job/<name>`.
 

@@ -5,9 +5,14 @@ description: Configure the K8s Infra OpenTelemetry collection agent to send Kube
 doc_type: howto
 ---
 
-This guide explains how to configure the OpenTelemetry Collectors of the K8s Infra collection agent, through the values of the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">`k8s-infra` Helm chart</a> or through Foundry's `casting.yaml`.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) provides a working config: the agent collects host and kubelet metrics, container logs, and data from instrumented applications on every node, and the deployment collector collects cluster metrics and Kubernetes events. This page explains what each component in that config does and how to customize it, through the values of the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">`k8s-infra` Helm chart</a> or through Foundry's `casting.yaml`.
 
-To install K8s Infra in your Kubernetes cluster, see [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+With the Helm CLI, you can use the presets in the <a href="https://github.com/signoz/charts/tree/main/charts/k8s-infra/values.yaml" target="_blank" rel="noopener noreferrer nofollow">k8s-infra Helm chart</a> to configure the collectors, and the chart exposes the full OpenTelemetry Collector configuration via Helm values for everything else.
+
+<Admonition>
+  The `presets` section in the `values.yaml` file allows you to enable or disable specific
+  configurations. To check the available presets, refer to the <a href="https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/README.md#presets-configuration" target="_blank" rel="noopener noreferrer nofollow">k8s-infra Helm chart documentation</a>.
+</Admonition>
 
 ## Prerequisites
 
@@ -46,6 +51,8 @@ For each change:
 
    For the deployment collector, use `deployment/my-release-k8s-infra-otel-deployment`.
 
+4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for node, pod, and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs and Kubernetes events, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
+
 </TabItem>
 <TabItem value="foundry" label="Foundry">
 
@@ -75,10 +82,12 @@ For each change:
 
    For the deployment collector, use `deployment/signoz-collector-deployment`.
 
+4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for node, pod, and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs and Kubernetes events, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
+
 </TabItem>
 </Tabs>
 
-## Send Data from Instrumented Applications
+## Send Data from Applications to the Collector
 
 <Figure
   src="/img/docs/data-flow-2x.webp"
@@ -87,7 +96,11 @@ For each change:
         your k8s infra. The OTelAgent daemon sends the collected data to SigNoz."
 />
 
-Node, pod, and container metrics, container logs, and Kubernetes events flow as soon as the agent pods are running. To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then add this to the application's container in its manifest:
+Node, pod, and container metrics, container logs, and Kubernetes events flow as soon as the agent pods are running.
+
+### Where and how to send data from your application
+
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then add this to the application's container in its manifest:
 
 ```yaml
 env:
@@ -126,119 +139,9 @@ The agent binds no host ports, so set `OTEL_EXPORTER_OTLP_ENDPOINT` to the agent
 
 Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz, and its traces carry `k8s.namespace.name` and `k8s.pod.name`.
 
-### Disable Logs Collection
+## Export to SigNoz
 
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-In case you do not want to collect logs from your Kubernetes cluster, you
-can disable using presets in `k8s-infra` chart.
-
-```yaml
-presets:
-  logsCollection:
-    enabled: false
-```
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-In `casting.yaml`, add this to the agent's document. It removes the container log receiver; logs that applications send over OTLP keep flowing:
-
-```yaml
-spec:
-  collector:
-    spec:
-      config:
-        data:
-          collector/agent/agent.yaml: |
-            receivers:
-              filelog/k8s: null
-            service:
-              pipelines:
-                logs:
-                  receivers: [otlp/http, otlp/grpc]
-```
-
-`null` removes the receiver. Lists replace, so the `logs` pipeline is restated with Foundry's two OTLP receivers.
-
-</TabItem>
-</Tabs>
-
-### Disable Metrics Collection
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-In case you do not want to collect metrics from your Kubernetes cluster, you
-can disable using presets in `k8s-infra` chart.
-
-```yaml
-presets:
-  hostMetrics:
-    enabled: false
-  kubeletMetrics:
-    enabled: false
-  clusterMetrics:
-    enabled: false
-
-otelDeployment:
-  enabled: false
-```
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-In `casting.yaml`, add this to the agent's document to remove the host and kubelet metrics receivers:
-
-```yaml
-spec:
-  collector:
-    spec:
-      config:
-        data:
-          collector/agent/agent.yaml: |
-            receivers:
-              hostmetrics: null
-              kubeletstats: null
-            service:
-              pipelines:
-                metrics:
-                  receivers: [otlp/http, otlp/grpc]
-```
-
-Add this to the deployment collector's document to remove the cluster metrics receiver:
-
-```yaml
-spec:
-  collector:
-    kind: deployment
-    spec:
-      config:
-        data:
-          collector/deployment/deployment.yaml: |
-            receivers:
-              k8s_cluster: null
-            service:
-              pipelines:
-                metrics:
-                  receivers: [otlp/http, otlp/grpc]
-```
-
-Lists replace, so each `metrics` pipeline is restated with Foundry's two OTLP receivers. Kubernetes events keep flowing from the deployment collector.
-
-</TabItem>
-</Tabs>
-
-## Essential Presets
-
-SigNoz allows you to use the presets in the k8s-infra Helm chart to easily configure OtelCollector. The following configurations can be set by modifying the `values.yml` in the [k8s-infra Helm chart](https://github.com/signoz/charts/tree/main/charts/k8s-infra/values.yaml).
-
-<Admonition>
-  The `presets` section in the `values.yaml` file allows you to enable or disable specific
-  configurations. To check the available presets, refer to the <a href="https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/README.md#presets-configuration" target="_blank" rel="noopener noreferrer nofollow">k8s-infra Helm chart documentation</a>.
-</Admonition>
-### 1. OTLP/HTTP Exporter
+The OTLP/HTTP exporter sends the telemetry that both collectors gather to SigNoz.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -259,7 +162,9 @@ Foundry generates this by default: the `otlphttp/signoz` exporter sends every pi
 </TabItem>
 </Tabs>
 
-### 2. Host Metrics Collection
+## Collect Host Metrics
+
+Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each node.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -325,7 +230,9 @@ Lists replace, so `devices` holds only the entries you list. Foundry's default l
 </TabItem>
 </Tabs>
 
-### 3. Container Log Collection
+## Collect Container Logs
+
+Use the `filelog` receiver to tail the container log files on each node. For full setup details, see [Collecting Kubernetes Pod Logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/).
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -406,7 +313,48 @@ spec:
 </TabItem>
 </Tabs>
 
-### 4. Kubernetes Metrics Collection
+### Disable Logs Collection
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+In case you do not want to collect logs from your Kubernetes cluster, you
+can disable using presets in `k8s-infra` chart.
+
+```yaml
+presets:
+  logsCollection:
+    enabled: false
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add this to the agent's document. It removes the container log receiver; logs that applications send over OTLP keep flowing:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/k8s: null
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+`null` removes the receiver. Lists replace, so the `logs` pipeline is restated with Foundry's two OTLP receivers.
+
+</TabItem>
+</Tabs>
+
+## Collect Kubelet Metrics
+
+Use the `kubeletstats` receiver to collect node, pod, container, and volume metrics from the kubelet on each node.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -486,7 +434,129 @@ These container-level metrics are disabled by default in the upstream kubeletsta
 | `k8s.container.cpu.node.utilization` | Node-utilization chart (CPU) |
 | `k8s.container.memory.node.utilization` | Node-utilization chart (memory) |
 
-### 5. Kubernetes Metadata Enrichment
+## Collect Cluster Metrics
+
+Use the `k8s_cluster` receiver on the deployment collector to collect cluster-level metrics from the Kubernetes API server.
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+```yaml defaultCollapsed
+presets:
+  clusterMetrics:
+    enabled: true
+    collectionInterval: 30s
+
+    # Node conditions to monitor
+    nodeConditionsToReport:
+      - Ready
+      - MemoryPressure
+      - DiskPressure
+      # Add conditions based on monitoring needs
+
+    # Resource types to monitor
+    allocatableTypesToReport:
+      - cpu
+      - memory
+      # - storage    # Uncomment if needed
+
+    # Fine-grained metric enablement
+    metrics:
+      k8s.pod.status_reason:
+        enabled: true
+      k8s.container.status.reason:
+        enabled: true
+      k8s.container.status.state:
+        enabled: true
+```
+
+**When to use**:
+
+- Enable for cluster health monitoring
+- Useful for capacity planning and resource optimization
+- Essential for multi-node cluster monitoring
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+Foundry collects cluster metrics by default from the deployment collector, every 30s, with the metrics in the table below enabled. In `casting.yaml`, add this to the deployment collector's document to change the interval and report storage too:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_cluster:
+                collection_interval: 60s
+                allocatable_types_to_report: [cpu, memory, storage]
+```
+
+Lists replace, so restate every entry you keep. Foundry's defaults are `allocatable_types_to_report: [cpu, memory]` and `node_conditions_to_report: [Ready, MemoryPressure, DiskPressure, PIDPressure, NetworkUnavailable]`.
+
+</TabItem>
+</Tabs>
+
+These metrics are disabled by default in the upstream `k8s_cluster` receiver but enabled by default in this chart and by Foundry. Keep them enabled to retain pod- and container-status visibility. Without them, status falls back to the lifecycle phase or state only:
+
+| Metric | Powers |
+|---|---|
+| `k8s.pod.status_reason` | Pods view kubectl-style **Pod Status** column (and the per-entity Pod Counts by Status breakdown) |
+| `k8s.container.status.reason` | Pods view **Pod Status** column; [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
+| `k8s.container.status.state` | [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
+
+<Admonition type="info">
+<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusreason" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.reason`</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusstate" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.state`</a> are experimental (development stability) upstream, so their allowed values may change on a collector upgrade.
+</Admonition>
+
+## Collect Kubernetes Events
+
+Use the `k8s_events` receiver on the deployment collector to collect Kubernetes events as logs.
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+```yaml
+presets:
+  k8sEvents:
+    enabled: true
+    authType: serviceAccount
+    namespaces: [] # Empty for all namespaces, or specify list
+```
+
+**Usage scenarios**:
+
+- Enable for debugging and audit trails
+- Monitor specific namespaces by listing them
+- Useful for compliance and security monitoring
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+Foundry collects Kubernetes events by default from the deployment collector, for all namespaces. In `casting.yaml`, add this to the deployment collector's document to watch specific namespaces:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_events:
+                namespaces: [default, production]
+```
+
+</TabItem>
+</Tabs>
+
+## Resource Detection and Kubernetes Attributes
+
+The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds node metadata, and the `k8sattributes` processor adds Kubernetes workload attributes, so you can filter and group by namespace, workload, or pod in SigNoz.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -588,123 +658,7 @@ If you customize `podAssociation`, include the rules you need from the chart def
 
 </Admonition>
 
-### 6. Cluster-level Metrics
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-```yaml defaultCollapsed
-presets:
-  clusterMetrics:
-    enabled: true
-    collectionInterval: 30s
-
-    # Node conditions to monitor
-    nodeConditionsToReport:
-      - Ready
-      - MemoryPressure
-      - DiskPressure
-      # Add conditions based on monitoring needs
-
-    # Resource types to monitor
-    allocatableTypesToReport:
-      - cpu
-      - memory
-      # - storage    # Uncomment if needed
-
-    # Fine-grained metric enablement
-    metrics:
-      k8s.pod.status_reason:
-        enabled: true
-      k8s.container.status.reason:
-        enabled: true
-      k8s.container.status.state:
-        enabled: true
-```
-
-**When to use**:
-
-- Enable for cluster health monitoring
-- Useful for capacity planning and resource optimization
-- Essential for multi-node cluster monitoring
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-Foundry collects cluster metrics by default from the deployment collector, every 30s, with the metrics in the table below enabled. In `casting.yaml`, add this to the deployment collector's document to change the interval and report storage too:
-
-```yaml
-spec:
-  collector:
-    kind: deployment
-    spec:
-      config:
-        data:
-          collector/deployment/deployment.yaml: |
-            receivers:
-              k8s_cluster:
-                collection_interval: 60s
-                allocatable_types_to_report: [cpu, memory, storage]
-```
-
-Lists replace, so restate every entry you keep. Foundry's defaults are `allocatable_types_to_report: [cpu, memory]` and `node_conditions_to_report: [Ready, MemoryPressure, DiskPressure, PIDPressure, NetworkUnavailable]`.
-
-</TabItem>
-</Tabs>
-
-These metrics are disabled by default in the upstream `k8s_cluster` receiver but enabled by default in this chart and by Foundry. Keep them enabled to retain pod- and container-status visibility. Without them, status falls back to the lifecycle phase or state only:
-
-| Metric | Powers |
-|---|---|
-| `k8s.pod.status_reason` | Pods view kubectl-style **Pod Status** column (and the per-entity Pod Counts by Status breakdown) |
-| `k8s.container.status.reason` | Pods view **Pod Status** column; [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
-| `k8s.container.status.state` | [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
-
-<Admonition type="info">
-<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusreason" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.reason`</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusstate" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.state`</a> are experimental (development stability) upstream, so their allowed values may change on a collector upgrade.
-</Admonition>
-
-### 7. Kubernetes Events
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-```yaml
-presets:
-  k8sEvents:
-    enabled: true
-    authType: serviceAccount
-    namespaces: [] # Empty for all namespaces, or specify list
-```
-
-**Usage scenarios**:
-
-- Enable for debugging and audit trails
-- Monitor specific namespaces by listing them
-- Useful for compliance and security monitoring
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-Foundry collects Kubernetes events by default from the deployment collector, for all namespaces. In `casting.yaml`, add this to the deployment collector's document to watch specific namespaces:
-
-```yaml
-spec:
-  collector:
-    kind: deployment
-    spec:
-      config:
-        data:
-          collector/deployment/deployment.yaml: |
-            receivers:
-              k8s_events:
-                namespaces: [default, production]
-```
-
-</TabItem>
-</Tabs>
-
-### 8. Prometheus Metrics Scraping
+## Scrape Prometheus Metrics from Pods
 
 Prometheus preset allows to scrapes metrics from pods that have the appropriate annotations. This enables collecting metrics from applications that expose Prometheus endpoints without manual configuration.
 
@@ -768,7 +722,7 @@ Lists replace, so the `metrics` pipeline is restated with Foundry's default rece
 </TabItem>
 </Tabs>
 
-#### Custom Scrape Configurations
+### Custom Scrape Configurations
 
 For more advanced use cases, you can define custom scrape configurations using the `scrapeConfigs` field. This allows you to specify Prometheus-compatible scrape configs directly:
 
@@ -821,11 +775,9 @@ Lists replace, so the `metrics` pipeline is restated with Foundry's default rece
 </TabItem>
 </Tabs>
 
-## Configurations
+## Tune Batch and Memory Limiter
 
-The `k8s-infra` chart exposes the full OpenTelemetry Collector configuration via Helm values, so you can adapt the running agents to your needs. The following are common options you may want to adjust.
-
-### Batch Processor
+Adjust the `batch` processor for throughput and the `memory_limiter` processor for stability based on your workload. See [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices) for detailed guidance.
 
 The [batch processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md) batches spans, metrics, and logs before export. That reduces connections and improves compression. It supports both size-based and time-based batching.
 
@@ -871,7 +823,96 @@ Keys you leave out keep Foundry's values. For the deployment collector, add the 
 </TabItem>
 </Tabs>
 
-### Adding Custom Processors to Pipelines
+### Resource Requests and Limits
+
+Recommended resource allocations based on preset combinations:
+
+| Configuration | CPU Request | Memory Request | CPU Limit | Memory Limit |
+| ------------- | ----------- | -------------- | --------- | ------------ |
+| Minimal       | 100m        | 256Mi          | 200m      | 512Mi        |
+| Standard      | 200m        | 512Mi          | 500m      | 1Gi          |
+| Full          | 500m        | 1Gi            | 1000m     | 2Gi          |
+
+Adjust these values based on your cluster size and monitoring requirements.
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+Set them under `otelAgent.resources` and `otelDeployment.resources` in your Helm values.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add a patch to the agent's document. This one sets the Minimal row:
+
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/values.yaml
+      operations:
+        - op: add
+          path: /otelAgent/resources
+          value:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+```
+
+For the deployment collector, add the same patch to its document with target `collectionagent/collector/deployment/values.yaml` and path `/otelDeployment/resources`.
+
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/workload.yaml
+      operations:
+        - op: replace
+          path: /spec/template/spec/containers/0/resources
+          value:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+```
+
+For the deployment collector, add the same patch to its document with target `collectionagent/collector/deployment/workload.yaml`.
+
+</TabItem>
+</Tabs>
+
+Foundry's `memory_limiter` processor uses a fixed `limit_mib: 4000`. When you set a memory limit, size `memory_limiter` to it with percentages, in the same document:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              memory_limiter:
+                limit_mib: null
+                spike_limit_mib: null
+                limit_percentage: 80
+                spike_limit_percentage: 25
+```
+
+</TabItem>
+</Tabs>
+
+## Add Custom Processors to Pipelines
+
+A processor transforms or enriches telemetry once a pipeline lists it under `processors`.
 
 <Tabs entityName="setup">
 <TabItem value="helm" label="Helm CLI" default>
@@ -909,6 +950,392 @@ spec:
 ```
 
 Lists replace, so restate Foundry's default processors in their order (`memory_limiter`, `resourcedetection`, `resource/identity`, `k8sattributes`, `batch`) with yours before `batch`.
+
+</TabItem>
+</Tabs>
+
+## Exposing Ports for Custom Receivers
+
+You may want to use a custom receiver to receive metrics. If the receiver listens on a port, you need to expose that port to the host. The following example shows how to expose port 8125 of statsd receiver:
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+```yaml
+otelAgent:
+  ports:
+    statsd:
+      enabled: true
+      containerPort: 8125
+      servicePort: 8125
+      hostPort: 8125
+      protocol: UDP
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add the statsd receiver to the agent's document and list it in the `metrics` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              statsd:
+                endpoint: 0.0.0.0:8125
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, hostmetrics, kubeletstats, statsd]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers. Then open the port with patches in the same document:
+
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/values.yaml
+      operations:
+        - op: add
+          path: /otelAgent/ports
+          value:
+            statsd:
+              enabled: true
+              containerPort: 8125
+              servicePort: 8125
+              hostPort: 8125
+              protocol: UDP
+```
+
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/workload.yaml
+      operations:
+        - op: add
+          path: /spec/template/spec/containers/0/ports/-
+          value: {name: statsd, containerPort: 8125, hostPort: 8125, protocol: UDP}
+    - target: collectionagent/collector/agent/service.yaml
+      operations:
+        - op: add
+          path: /spec/ports/-
+          value: {name: statsd, port: 8125, targetPort: statsd, protocol: UDP}
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Collect Metrics from Other Components
+
+The otelDeployment collector is configured to collect cluster metrics and events by default. There are some use cases where you might want to collect metrics from components other than the ones that are being collected by default.
+
+This section describes how to override the default configuration of the otelDeployment collector to collect metrics from additional components. The override-values.yaml file contains the configurations that you can override.
+
+### Example 1: Redis Receiver Configuration
+
+The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a Redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379:
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+```yaml
+otelDeployment:
+  config:
+    receivers:
+      redis:
+        endpoint: redis-server.redis-ns.svc.cluster.local:6379
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [redis]
+          processors: [batch]
+          exporters: []
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add this to the deployment collector's document:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              redis:
+                endpoint: redis-server.redis-ns.svc.cluster.local:6379
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, k8s_cluster, redis]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc` and `k8s_cluster`.
+
+</TabItem>
+</Tabs>
+
+### Example 2: Configuring a PostgreSQL receiver
+
+The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a PostgreSQL server running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432:
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+```yaml
+otelDeployment:
+  additionalEnvs:
+    POSTGRES_USER: <postgres-user>
+    POSTGRES_PASSWORD: <postgres-password>
+  config:
+    receivers:
+      postgresql:
+        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+        username: ${env:POSTGRES_USER}
+        password: ${env:POSTGRES_PASSWORD}
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [postgresql]
+          processors: [batch]
+          exporters: []
+```
+
+**Verify these values:**
+
+- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
+- `<postgres-password>`: That user's password. To read it from a Kubernetes Secret instead, see Example 3.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add this to the deployment collector's document:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      env:
+        POSTGRES_USER: <postgres-user>
+        POSTGRES_PASSWORD: <postgres-password>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              postgresql:
+                endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+                username: ${env:POSTGRES_USER}
+                password: ${env:POSTGRES_PASSWORD}
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, k8s_cluster, postgresql]
+```
+
+**Verify these values:**
+
+- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
+- `<postgres-password>`: That user's password. To read it from a Kubernetes Secret instead, see Example 3.
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc` and `k8s_cluster`.
+
+</TabItem>
+</Tabs>
+
+### Example 3: Configuring multiple receivers
+
+The following configuration shows how to configure both Redis and PostgreSQL receivers:
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+```yaml defaultCollapsed
+otelDeployment:
+  additionalEnvs:
+    POSTGRES_USER: <postgres-user>
+    POSTGRES_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: postgres
+          key: password
+  config:
+    receivers:
+      redis:
+        endpoint: redis-server.redis-ns.svc.cluster.local:6379
+      postgresql:
+        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+        username: ${env:POSTGRES_USER}
+        password: ${env:POSTGRES_PASSWORD}
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [redis, postgresql]
+          processors: [batch]
+          exporters: []
+```
+
+The password comes from the `password` key of a Kubernetes Secret named `postgres` in the collector's namespace.
+
+**Verify these values:**
+
+- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add this to the deployment collector's document:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      env:
+        POSTGRES_USER: <postgres-user>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              redis:
+                endpoint: redis-server.redis-ns.svc.cluster.local:6379
+              postgresql:
+                endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+                username: ${env:POSTGRES_USER}
+                password: ${env:POSTGRES_PASSWORD}
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, k8s_cluster, redis, postgresql]
+```
+
+**Verify these values:**
+
+- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
+
+Then set `POSTGRES_PASSWORD` from the `password` key of a Kubernetes Secret named `postgres` in the collector's namespace, with a patch in the same document:
+
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/deployment/values.yaml
+      operations:
+        - op: add
+          path: /otelDeployment/additionalEnvs/POSTGRES_PASSWORD
+          value:
+            valueFrom:
+              secretKeyRef:
+                name: postgres
+                key: password
+```
+
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/deployment/workload.yaml
+      operations:
+        - op: add
+          path: /spec/template/spec/containers/0/env/-
+          value:
+            name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres
+                key: password
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might need to configure the receiver with a username and password and other configurations.
+
+## Disable Metrics Collection
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+In case you do not want to collect metrics from your Kubernetes cluster, you
+can disable using presets in `k8s-infra` chart.
+
+```yaml
+presets:
+  hostMetrics:
+    enabled: false
+  kubeletMetrics:
+    enabled: false
+  clusterMetrics:
+    enabled: false
+
+otelDeployment:
+  enabled: false
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add this to the agent's document to remove the host and kubelet metrics receivers:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics: null
+              kubeletstats: null
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+Add this to the deployment collector's document to remove the cluster metrics receiver:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_cluster: null
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+Lists replace, so each `metrics` pipeline is restated with Foundry's two OTLP receivers. Kubernetes events keep flowing from the deployment collector.
 
 </TabItem>
 </Tabs>
@@ -1065,423 +1492,21 @@ A `deployment.environment` that an application sets in its own `OTEL_RESOURCE_AT
 </TabItem>
 </Tabs>
 
-## Exposing Ports for Custom Receivers
+<details>
 
-You may want to use a custom receiver to receive metrics. If the receiver listens on a port, you need to expose that port to the host. The following example shows how to expose port 8125 of statsd receiver:
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-```yaml
-otelAgent:
-  ports:
-    statsd:
-      enabled: true
-      containerPort: 8125
-      servicePort: 8125
-      hostPort: 8125
-      protocol: UDP
-```
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-In `casting.yaml`, add the statsd receiver to the agent's document and list it in the `metrics` pipeline:
-
-```yaml
-spec:
-  collector:
-    spec:
-      config:
-        data:
-          collector/agent/agent.yaml: |
-            receivers:
-              statsd:
-                endpoint: 0.0.0.0:8125
-            service:
-              pipelines:
-                metrics:
-                  receivers: [otlp/http, otlp/grpc, hostmetrics, kubeletstats, statsd]
-```
-
-Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers. Then open the port with patches in the same document:
-
-<Tabs entityName="tool">
-<TabItem value="helm" label="Helm" default>
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/agent/values.yaml
-      operations:
-        - op: add
-          path: /otelAgent/ports
-          value:
-            statsd:
-              enabled: true
-              containerPort: 8125
-              servicePort: 8125
-              hostPort: 8125
-              protocol: UDP
-```
-
-</TabItem>
-<TabItem value="kustomize" label="Kustomize">
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/agent/workload.yaml
-      operations:
-        - op: add
-          path: /spec/template/spec/containers/0/ports/-
-          value: {name: statsd, containerPort: 8125, hostPort: 8125, protocol: UDP}
-    - target: collectionagent/collector/agent/service.yaml
-      operations:
-        - op: add
-          path: /spec/ports/-
-          value: {name: statsd, port: 8125, targetPort: statsd, protocol: UDP}
-```
-
-</TabItem>
-</Tabs>
-
-</TabItem>
-</Tabs>
-
-## Configuring otelDeployment to collect from additional components
-
-The otelDeployment collector is configured to collect cluster metrics and events by default. There are some use cases where you might want to collect metrics from components other than the ones that are being collected by default.
-
-This section describes how to override the default configuration of the otelDeployment collector to collect metrics from additional components. The override-values.yaml file contains the configurations that you can override.
-
-#### Example 1: Redis Receiver Configuration
-
-The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a Redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379:
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-```yaml
-otelDeployment:
-  config:
-    receivers:
-      redis:
-        endpoint: redis-server.redis-ns.svc.cluster.local:6379
-    service:
-      pipelines:
-        metrics/internal:
-          receivers: [redis]
-          processors: [batch]
-          exporters: []
-```
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-In `casting.yaml`, add this to the deployment collector's document:
-
-```yaml
-spec:
-  collector:
-    kind: deployment
-    spec:
-      config:
-        data:
-          collector/deployment/deployment.yaml: |
-            receivers:
-              redis:
-                endpoint: redis-server.redis-ns.svc.cluster.local:6379
-            service:
-              pipelines:
-                metrics:
-                  receivers: [otlp/http, otlp/grpc, k8s_cluster, redis]
-```
-
-Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc` and `k8s_cluster`.
-
-</TabItem>
-</Tabs>
-
-#### Example 2: Configuring a PostgreSQL receiver
-
-The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a PostgreSQL server running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432:
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-```yaml
-otelDeployment:
-  additionalEnvs:
-    POSTGRES_USER: <postgres-user>
-    POSTGRES_PASSWORD: <postgres-password>
-  config:
-    receivers:
-      postgresql:
-        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
-        username: ${env:POSTGRES_USER}
-        password: ${env:POSTGRES_PASSWORD}
-    service:
-      pipelines:
-        metrics/internal:
-          receivers: [postgresql]
-          processors: [batch]
-          exporters: []
-```
-
-**Verify these values:**
-
-- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
-- `<postgres-password>`: That user's password. To read it from a Kubernetes Secret instead, see Example 3.
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-In `casting.yaml`, add this to the deployment collector's document:
-
-```yaml
-spec:
-  collector:
-    kind: deployment
-    spec:
-      env:
-        POSTGRES_USER: <postgres-user>
-        POSTGRES_PASSWORD: <postgres-password>
-      config:
-        data:
-          collector/deployment/deployment.yaml: |
-            receivers:
-              postgresql:
-                endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
-                username: ${env:POSTGRES_USER}
-                password: ${env:POSTGRES_PASSWORD}
-            service:
-              pipelines:
-                metrics:
-                  receivers: [otlp/http, otlp/grpc, k8s_cluster, postgresql]
-```
-
-**Verify these values:**
-
-- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
-- `<postgres-password>`: That user's password. To read it from a Kubernetes Secret instead, see Example 3.
-
-Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc` and `k8s_cluster`.
-
-</TabItem>
-</Tabs>
-
-#### Example 3: Configuring multiple receivers
-
-The following configuration shows how to configure both Redis and PostgreSQL receivers:
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-```yaml defaultCollapsed
-otelDeployment:
-  additionalEnvs:
-    POSTGRES_USER: <postgres-user>
-    POSTGRES_PASSWORD:
-      valueFrom:
-        secretKeyRef:
-          name: postgres
-          key: password
-  config:
-    receivers:
-      redis:
-        endpoint: redis-server.redis-ns.svc.cluster.local:6379
-      postgresql:
-        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
-        username: ${env:POSTGRES_USER}
-        password: ${env:POSTGRES_PASSWORD}
-    service:
-      pipelines:
-        metrics/internal:
-          receivers: [redis, postgresql]
-          processors: [batch]
-          exporters: []
-```
-
-The password comes from the `password` key of a Kubernetes Secret named `postgres` in the collector's namespace.
-
-**Verify these values:**
-
-- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-In `casting.yaml`, add this to the deployment collector's document:
-
-```yaml
-spec:
-  collector:
-    kind: deployment
-    spec:
-      env:
-        POSTGRES_USER: <postgres-user>
-      config:
-        data:
-          collector/deployment/deployment.yaml: |
-            receivers:
-              redis:
-                endpoint: redis-server.redis-ns.svc.cluster.local:6379
-              postgresql:
-                endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
-                username: ${env:POSTGRES_USER}
-                password: ${env:POSTGRES_PASSWORD}
-            service:
-              pipelines:
-                metrics:
-                  receivers: [otlp/http, otlp/grpc, k8s_cluster, redis, postgresql]
-```
-
-**Verify these values:**
-
-- `<postgres-user>`: The PostgreSQL user the receiver logs in as.
-
-Then set `POSTGRES_PASSWORD` from the `password` key of a Kubernetes Secret named `postgres` in the collector's namespace, with a patch in the same document:
-
-<Tabs entityName="tool">
-<TabItem value="helm" label="Helm" default>
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/deployment/values.yaml
-      operations:
-        - op: add
-          path: /otelDeployment/additionalEnvs/POSTGRES_PASSWORD
-          value:
-            valueFrom:
-              secretKeyRef:
-                name: postgres
-                key: password
-```
-
-</TabItem>
-<TabItem value="kustomize" label="Kustomize">
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/deployment/workload.yaml
-      operations:
-        - op: add
-          path: /spec/template/spec/containers/0/env/-
-          value:
-            name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: postgres
-                key: password
-```
-
-</TabItem>
-</Tabs>
-
-</TabItem>
-</Tabs>
-
-The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might need to configure the receiver with a username and password and other configurations.
-
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
 ### A custom processor under `otelAgent.config.processors` does not appear to run
 
-Defining a processor in Helm values, or under `processors` in a Foundry `config.data` block, renders it into the collector configuration but does not attach it to any pipeline. Confirm the processor is referenced in the relevant pipeline's `processors` list. Helm values and `config.data` both replace lists, so restate every processor the pipeline still needs. See [Adding Custom Processors to Pipelines](#adding-custom-processors-to-pipelines). After applying the change and restarting the collector pods, verify in SigNoz Explorer that the attribute or transformation introduced by the processor is present on the relevant signal.
+Defining a processor in Helm values, or under `processors` in a Foundry `config.data` block, renders it into the collector configuration but does not attach it to any pipeline. Confirm the processor is referenced in the relevant pipeline's `processors` list. Helm values and `config.data` both replace lists, so restate every processor the pipeline still needs. See [Add Custom Processors to Pipelines](#add-custom-processors-to-pipelines). After applying the change and restarting the collector pods, verify in SigNoz Explorer that the attribute or transformation introduced by the processor is present on the relevant signal.
 
 ### Telemetry stopped getting Kubernetes attributes after customizing `podAssociation`
 
-Helm replaces array values rather than merging them, and Foundry's `config.data` replaces lists the same way. An override on `podAssociation` (`pod_association` in `config.data`) drops the defaults, including the fallbacks the processor needs to associate telemetry with a pod. See the warning under [Kubernetes Metadata Enrichment](#5-kubernetes-metadata-enrichment) for the rules to keep. After restoring the rules and restarting the collector pods, confirm in SigNoz Explorer that resource attributes such as `k8s.pod.name` and `k8s.namespace.name` are populated on traces, metrics, or logs from your workloads.
+Helm replaces array values rather than merging them, and Foundry's `config.data` replaces lists the same way. An override on `podAssociation` (`pod_association` in `config.data`) drops the defaults, including the fallbacks the processor needs to associate telemetry with a pod. See the warning under [Resource Detection and Kubernetes Attributes](#resource-detection-and-kubernetes-attributes) for the rules to keep. After restoring the rules and restarting the collector pods, confirm in SigNoz Explorer that resource attributes such as `k8s.pod.name` and `k8s.namespace.name` are populated on traces, metrics, or logs from your workloads.
 
-## Resource Requirements
-
-Recommended resource allocations based on preset combinations:
-
-| Configuration | CPU Request | Memory Request | CPU Limit | Memory Limit |
-| ------------- | ----------- | -------------- | --------- | ------------ |
-| Minimal       | 100m        | 256Mi          | 200m      | 512Mi        |
-| Standard      | 200m        | 512Mi          | 500m      | 1Gi          |
-| Full          | 500m        | 1Gi            | 1000m     | 2Gi          |
-
-Adjust these values based on your cluster size and monitoring requirements.
-
-<Tabs entityName="setup">
-<TabItem value="helm" label="Helm CLI" default>
-
-Set them under `otelAgent.resources` and `otelDeployment.resources` in your Helm values.
-
-</TabItem>
-<TabItem value="foundry" label="Foundry">
-
-In `casting.yaml`, add a patch to the agent's document. This one sets the Minimal row:
-
-<Tabs entityName="tool">
-<TabItem value="helm" label="Helm" default>
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/agent/values.yaml
-      operations:
-        - op: add
-          path: /otelAgent/resources
-          value:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 200m
-              memory: 512Mi
-```
-
-For the deployment collector, add the same patch to its document with target `collectionagent/collector/deployment/values.yaml` and path `/otelDeployment/resources`.
-
-</TabItem>
-<TabItem value="kustomize" label="Kustomize">
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/agent/workload.yaml
-      operations:
-        - op: replace
-          path: /spec/template/spec/containers/0/resources
-          value:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 200m
-              memory: 512Mi
-```
-
-For the deployment collector, add the same patch to its document with target `collectionagent/collector/deployment/workload.yaml`.
-
-</TabItem>
-</Tabs>
-
-Foundry's `memory_limiter` processor uses a fixed `limit_mib: 4000`. When you set a memory limit, size `memory_limiter` to it with percentages, in the same document:
-
-```yaml
-spec:
-  collector:
-    spec:
-      config:
-        data:
-          collector/agent/agent.yaml: |
-            processors:
-              memory_limiter:
-                limit_mib: null
-                spike_limit_mib: null
-                limit_percentage: 80
-                spike_limit_percentage: 25
-```
-
-</TabItem>
-</Tabs>
+</details>
 
 ## Next Steps
 
