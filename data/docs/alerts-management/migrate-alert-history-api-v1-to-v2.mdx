@@ -1,5 +1,5 @@
 ---
-date: 2026-07-31
+date: 2026-09-11
 title: Migrate the Alert History API from v1 to v2 Endpoints
 description: Migrate from the deprecated v1 alert history API endpoints to the v2 replacements, including request, pagination, and response changes.
 doc_type: reference
@@ -180,6 +180,7 @@ The v2 payloads carry the same information with a few shape changes:
 - Timeline responses include `nextCursor` alongside `items` and `total`; it is omitted on the last page. The v1 top-level `labels` map on the timeline response is gone; use `filter_keys` and `filter_values` instead.
 - `currentAvgResolutionTime` and `pastAvgResolutionTime` in the stats response are now numbers (seconds) instead of formatted strings.
 - `relatedTracesLink` and `relatedLogsLink` are omitted when empty instead of always being present.
+- Timeline items and top contributors also carry `relatedAITracesLink`. AI trace alerts (`alertType: AI_TRACES_BASED_ALERT`) populate this field with a link to the AI Observability Explorer and leave `relatedTracesLink` empty; other alert types leave `relatedAITracesLink` empty.
 
 Full response schemas for every endpoint are in the [SigNoz API Reference](https://signoz.io/api-reference/).
 
