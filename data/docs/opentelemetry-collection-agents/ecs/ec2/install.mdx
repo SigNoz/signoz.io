@@ -1,7 +1,7 @@
 ---
 date: 2026-10-16
-title: ECS EC2 Collection Agent - Install
-description: Install the ECS EC2 Collection Agent with Foundry and Terraform to send host metrics, container metrics, logs, and traces from Amazon ECS to SigNoz.
+title: ECS EC2 - Install
+description: Install the OpenTelemetry Collector of the ECS EC2 Collection Agent with Foundry and Terraform to send host and container metrics, logs, and traces to SigNoz.
 doc_type: howto
 ---
 
@@ -9,11 +9,11 @@ This guide explains how to install the ECS EC2 Collection Agent on an Amazon ECS
 
 ## Prerequisites
 
-- An Amazon ECS cluster with <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_container_instance.html" target="_blank" rel="noopener noreferrer nofollow">EC2 container instances</a>, or with <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html" target="_blank" rel="noopener noreferrer nofollow">external instances registered through ECS Anywhere</a>. Every instance runs Docker Engine 25 or newer, as the current Amazon ECS-optimized AMIs do.
-- <a href="https://developer.hashicorp.com/terraform/install" target="_blank" rel="noopener noreferrer nofollow">Terraform</a> 1.4 or newer and the AWS CLI, with AWS credentials on the same machine that can create AWS AppConfig applications, IAM roles, ECS task definitions, and ECS services.
+- An Amazon ECS cluster with <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_container_instance.html" target="_blank" rel="noopener noreferrer nofollow">EC2 container instances</a> or <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html" target="_blank" rel="noopener noreferrer nofollow">ECS Anywhere external instances</a>, running Docker Engine 25 or newer.
+- <a href="https://developer.hashicorp.com/terraform/install" target="_blank" rel="noopener noreferrer nofollow">Terraform</a> 1.4 or newer and the AWS CLI on the same machine, with AWS credentials that can create ECS services, task definitions, IAM roles, and AWS AppConfig applications.
 - A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
-## Install with Foundry and Terraform
+## Install the Collection Agent
 
 <Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
 Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
@@ -31,7 +31,11 @@ For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the
 
 ### Step 2: Create casting.yaml
 
-Create a file named `casting.yaml` with one document for the collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/#how-it-works). Pick the tab for the instances your cluster runs on:
+Create a file named `casting.yaml` with one document for the collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/#how-it-works). `collector.kind: agent` selects that collector. Pick the tab for the instances your cluster runs on:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
 
 <Tabs entityName="launch-type">
 <TabItem value="ec2" label="EC2" default>
@@ -67,11 +71,11 @@ spec:
 
 **Verify these values:**
 
-- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`. Terraform creates every resource in this region.
-- `<ecs-cluster-arn>`: The ARN of your ECS cluster, from the cluster's page in the <a href="https://console.aws.amazon.com/ecs/v2/clusters" target="_blank" rel="noopener noreferrer nofollow">Amazon ECS console</a> or from `aws ecs list-clusters`. The collector runs on every container instance of this cluster.
+- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`.
+- `<ecs-cluster-arn>`: The ARN of your ECS cluster, from the <a href="https://console.aws.amazon.com/ecs/v2/clusters" target="_blank" rel="noopener noreferrer nofollow">Amazon ECS console</a> or `aws ecs list-clusters`.
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable in the collector's task definition.
-- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on every signal the collector sends.
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
 
 For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/ecs/terraform" target="_blank" rel="noopener noreferrer nofollow">ECS EC2 Terraform example</a>.
 
@@ -79,16 +83,11 @@ For every option of this casting, see the <a href="https://github.com/SigNoz/fou
 <TabItem value="external" label="External">
 
 <Admonition type="warning" title="Before you install on external instances">
-Each external instance needs:
-
-- Docker Engine 25 or newer. The `docker_stats` receiver uses Docker Engine API version 1.44.
-- Outbound access to AWS AppConfig, `public.ecr.aws`, Docker Hub, and your SigNoz endpoint. The task pulls its images from `public.ecr.aws` and Docker Hub, and the AppConfig agent container fetches the collector config from AWS AppConfig.
-- Task IAM roles enabled for the `host` network mode, since the AppConfig agent container reads the config with the task role. The `ecs-init` package that the ECS Anywhere install script installs enables them. For an ECS agent you run another way, see <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#enable_task_iam_roles" target="_blank" rel="noopener noreferrer nofollow">External instance additional configuration</a>.
-
-Tasks on external instances use the `bridge`, `host`, or `none` network mode. The `awsvpc` network mode is not available on them.
+- Outbound access from each instance to <a href="https://docs.aws.amazon.com/general/latest/gr/appconfig.html" target="_blank" rel="noopener noreferrer nofollow">AWS AppConfig</a>, `public.ecr.aws`, Docker Hub, and your SigNoz endpoint.
+- <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#enable_task_iam_roles" target="_blank" rel="noopener noreferrer nofollow">Task IAM roles enabled</a> for the `host` network mode, which the ECS Anywhere install script sets up.
 </Admonition>
 
-This casting sets the launch type to `EXTERNAL` with two patches on the generated Terraform. It detects the host with the `system` detector, since external instances have no EC2 instance metadata, and it adds the `/var/log/syslog` and `/var/log/auth.log` files that Ubuntu writes:
+This casting runs the collector with the `EXTERNAL` launch type, detects the host with the `system` detector, and also collects `/var/log/syslog` and `/var/log/auth.log`:
 
 ```yaml:casting.yaml minimap defaultCollapsed
 apiVersion: v1alpha1
@@ -141,40 +140,69 @@ spec:
 
 **Verify these values:**
 
-- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`. Terraform creates every resource in this region.
-- `<ecs-cluster-arn>`: The ARN of the ECS cluster your external instances are registered to, from the cluster's page in the <a href="https://console.aws.amazon.com/ecs/v2/clusters" target="_blank" rel="noopener noreferrer nofollow">Amazon ECS console</a> or from `aws ecs list-clusters`. The collector runs on every external instance of this cluster.
+- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`.
+- `<ecs-cluster-arn>`: The ARN of the ECS cluster your external instances are registered to, from the <a href="https://console.aws.amazon.com/ecs/v2/clusters" target="_blank" rel="noopener noreferrer nofollow">Amazon ECS console</a> or `aws ecs list-clusters`.
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable in the collector's task definition.
-- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on every signal the collector sends.
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
 
-For every option of the casting this one patches, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/ecs/terraform" target="_blank" rel="noopener noreferrer nofollow">ECS EC2 Terraform example</a>.
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/ecs/terraform" target="_blank" rel="noopener noreferrer nofollow">ECS EC2 Terraform example</a>.
 
 </TabItem>
 </Tabs>
 
-<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
-</Admonition>
-
-<Admonition type="info" title="Use your own IAM roles" defaultCollapsed="true">
-By default, Terraform creates two IAM roles: the task role `signoz-collectionagent-iam-task`, with read access to the collector's AWS AppConfig configuration, and the task execution role `signoz-collectionagent-iam-exec`. To use roles you manage instead, add either or both annotations under `metadata`:
+<Admonition type="info" title="Change the region, cluster, or IAM roles" defaultCollapsed="true">
+Annotations under `metadata` set the region and ECS cluster the collector runs on, and the IAM roles its task uses. To use a role you manage instead of the one Terraform creates, add its annotation. The casting reads these:
 
 ```yaml
 metadata:
   name: signoz
   annotations:
-    foundry.signoz.io/ecs-region: <aws-region>
-    foundry.signoz.io/ecs-cluster-arn: <ecs-cluster-arn>
-    foundry.signoz.io/ecs-task-role-arn: <task-role-arn>
-    foundry.signoz.io/ecs-task-execution-role-arn: <task-execution-role-arn>
+    foundry.signoz.io/ecs-region: <aws-region>                                 # AWS region of the cluster, required
+    foundry.signoz.io/ecs-cluster-arn: <ecs-cluster-arn>                       # ECS cluster the collector runs on, required
+    foundry.signoz.io/ecs-task-role-arn: <task-role-arn>                       # optional; Terraform creates signoz-collectionagent-iam-task when absent
+    foundry.signoz.io/ecs-task-execution-role-arn: <task-execution-role-arn>   # optional; Terraform creates signoz-collectionagent-iam-exec when absent
 ```
 
 **Verify these values:**
 
-- `<task-role-arn>`: The ARN of an IAM role that `ecs-tasks.amazonaws.com` can assume, with the `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration` actions. The AppConfig agent container uses it to fetch the collector config. See <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-containers-agent.html" target="_blank" rel="noopener noreferrer nofollow">AWS AppConfig Agent with Amazon ECS</a>.
-- `<task-execution-role-arn>`: The ARN of an IAM role that `ecs-tasks.amazonaws.com` can assume to pull the images and start the task, for example one with the `AmazonECSTaskExecutionRolePolicy` managed policy.
+- `<aws-region>` and `<ecs-cluster-arn>`: The values you set in the casting above.
+- `<task-role-arn>`: An IAM role with `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`, used to <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-containers-agent.html" target="_blank" rel="noopener noreferrer nofollow">fetch the collector config</a>.
+- `<task-execution-role-arn>`: An IAM role that pulls the images and starts the task, for example one with the `AmazonECSTaskExecutionRolePolicy` managed policy.
 
-The role names Terraform creates start with `metadata.name`.
+Terraform attaches policies to the roles it creates and passes the task's roles to ECS. Your AWS credentials need permission for both: `iam:PutRolePolicy` and `iam:AttachRolePolicy` to attach the policies, and `iam:PassRole` to pass the roles.
+
+The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/ecs/terraform/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes each one.
+</Admonition>
+
+<Admonition type="info" title="Store Terraform state in S3" defaultCollapsed="true">
+The Collection Agent's Terraform state starts in `pours/collectionagent/collector/agent/terraform.tfstate`. To keep it in an S3 bucket, add this under the Collection Agent document's `spec` before the first cast:
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/backend.tf.json
+      operations:
+        - op: replace
+          path: /terraform/backend
+          value:
+            s3:
+              bucket: <state-bucket>
+              key: signoz/collectionagent.tfstate
+              region: <state-bucket-region>
+```
+
+**Verify these values:**
+
+- `<state-bucket>`: An existing S3 bucket. Your AWS credentials need `s3:ListBucket`, `s3:GetObject` and `s3:PutObject` on it.
+- `<state-bucket-region>`: The AWS region of that bucket, for example `us-east-1`.
+
+If you add the backend after a first cast, run this from the directory that contains `casting.yaml` to move the existing state into the bucket, then cast again:
+
+```bash
+foundryctl forge -f casting.yaml
+terraform -chdir=pours/collectionagent/collector/agent init -migrate-state
+```
 </Admonition>
 
 ### Step 3: Deploy
@@ -187,13 +215,9 @@ foundryctl cast -f casting.yaml
 
 This command:
 
-- checks that `terraform` is on your `PATH`, then writes the Terraform root `pours/collectionagent/collector/agent`;
-- runs `terraform init`, `terraform plan -out=tfplan`, and `terraform apply tfplan` in that root, with the AWS credentials Terraform finds on this machine, and applies the plan without a confirmation prompt;
-- creates the AWS AppConfig application that holds the collector config, the `signoz-collector-agent` task definition, and the `signoz-collector-agent` daemon service on your cluster, plus the IAM roles you did not state.
-
-Terraform keeps its state in `pours/collectionagent/collector/agent/terraform.tfstate`. Keep that file, and run every later command from the same directory: later casts and the removal read it.
-
-Run the same command again after editing `casting.yaml` to apply the change.
+- writes the Terraform root `pours/collectionagent/collector/agent`;
+- applies it with Terraform, using the AWS credentials on this machine;
+- creates the collector's config in AWS AppConfig, the `signoz-collector-agent` task definition and daemon service, and the IAM roles you did not state.
 
 <Admonition type="tip" title="Run Terraform yourself" defaultCollapsed="true">
 To run Terraform directly, generate the Terraform root and apply it. Run this from the directory that contains `casting.yaml`:
@@ -201,11 +225,10 @@ To run Terraform directly, generate the Terraform root and apply it. Run this fr
 ```bash
 foundryctl forge -f casting.yaml   # writes the Terraform root under pours/collectionagent/collector/agent
 terraform -chdir=pours/collectionagent/collector/agent init
-terraform -chdir=pours/collectionagent/collector/agent plan -out=tfplan
-terraform -chdir=pours/collectionagent/collector/agent apply tfplan
+terraform -chdir=pours/collectionagent/collector/agent apply
 ```
 
-The plan lists every resource before you apply it.
+To see the changes before you apply them, run `terraform -chdir=pours/collectionagent/collector/agent plan`.
 </Admonition>
 
 ### Step 4: Verify the Collection Agent
@@ -215,39 +238,25 @@ Run this on the machine where you use the AWS CLI to check that the daemon servi
 ```bash
 aws ecs describe-services --region <aws-region> --cluster <ecs-cluster-arn> \
   --services signoz-collector-agent \
-  --query 'services[0].{status:status,launchType:launchType,schedulingStrategy:schedulingStrategy,desiredCount:desiredCount,runningCount:runningCount}'
+  --query 'services[0].{status:status,desiredCount:desiredCount,runningCount:runningCount}'
 ```
 
 **Verify these values:**
 
-- `<aws-region>`: The region you set in `casting.yaml`.
-- `<ecs-cluster-arn>`: The cluster ARN you set in `casting.yaml`.
+- `<aws-region>`: The `foundry.signoz.io/ecs-region` value in `casting.yaml`.
+- `<ecs-cluster-arn>`: The `foundry.signoz.io/ecs-cluster-arn` value in `casting.yaml`.
 
-The output should look similar to the following, with `runningCount` equal to `desiredCount`, the number of instances in the cluster. `launchType` is `EXTERNAL` on external instances, and the counts vary:
+The output should look similar to the following, with `runningCount` equal to `desiredCount`, the number of instances in the cluster. The counts vary:
 
 ```output
 {
     "status": "ACTIVE",
-    "launchType": "EC2",
-    "schedulingStrategy": "DAEMON",
     "desiredCount": 3,
     "runningCount": 3
 }
 ```
 
-Then run this on a container instance to check the collector's health endpoint:
-
-```bash
-curl -fsS localhost:13133/healthz
-```
-
-The output should look similar to the following. The timestamps vary:
-
-```output
-{"status":"Server available","upSince":"2026-10-16T06:39:18.210100752Z","uptime":"2m3.51s"}
-```
-
-In SigNoz, open **Infrastructure Monitoring** and its [Hosts](https://signoz.io/docs/infrastructure-monitoring/host-monitoring/) view. Each instance shows under its `host.name`: the instance's private DNS name on EC2, or its hostname on an external instance. Then open [Logs](https://signoz.io/docs/logs-management/overview/) and filter by `service.name`: the instance's own logs show as `ecs-host`, and container logs show under their task family once the task definition sets the log labels in [Collect Container Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#collect-container-logs).
+In SigNoz, open the [Hosts](https://signoz.io/docs/infrastructure-monitoring/host-monitoring/) view under **Infrastructure Monitoring**, which lists each instance under its `host.name`. Check **Logs Explorer** to confirm container and host logs are flowing; host logs show under `service.name` `ecs-host`.
 
 ## Customize the Collection Agent
 
@@ -262,7 +271,7 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
         image: otel/opentelemetry-collector-contrib:0.139.0
   ```
 
-- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml`, in the same block that holds the `otlphttp/signoz` header. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>), and a changed config registers a new task revision that the daemon service rolls out to every instance. For example, to collect host metrics every 30s:
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to collect host metrics every 30s:
 
   ```yaml
   spec:
@@ -276,7 +285,7 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
                   collection_interval: 30s
   ```
 
-- **Terraform** (task definition, service): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/collector/agent/collector.tf.json`. The collector container is `/locals/containers_collector_agent/1`, the AppConfig agent container is `/locals/containers_collector_agent/0`, and the daemon service is `/resource/aws_ecs_service/collector_agent`. For example, to reserve more memory for the collector:
+- **Terraform** (task definition, service): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against the files under `collectionagent/collector/agent/`, such as `collector.tf.json` for the task definition and daemon service. To find the path to patch, run `foundryctl forge -f casting.yaml` and look in the generated files under `pours/collectionagent/collector/agent/`. For example, to reserve more memory for the collector:
 
   ```yaml
   spec:
@@ -288,19 +297,7 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
             value: 1024
   ```
 
-  Collector config changes go through `config.data`, which records the config's digest in the task definition so that every change rolls out. Keep patches to the Terraform files.
-
-Each run regenerates the files under `pours/` and keeps `terraform.tfstate`, so keep every change in `casting.yaml`.
-
-## Remove the Collection Agent
-
-Run this from the directory that contains `casting.yaml`:
-
-```bash
-terraform -chdir=pours/collectionagent/collector/agent destroy
-```
-
-Terraform lists what it removes and asks you to confirm with `yes`. It removes the daemon service, which stops the collector on every instance, its task definition, the AWS AppConfig application, and the IAM roles it created. Roles you stated through annotations stay. Terraform reads `terraform.tfstate` in that directory and uses the same AWS credentials as `foundryctl cast`.
+  Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
 
 <details>
 
@@ -310,16 +307,21 @@ Terraform lists what it removes and asks you to confirm with `yes`. It removes t
 
 ### The collector task is not placed on an instance
 
-Run this on the machine where you use the AWS CLI to read the service's latest events:
+In Step 4, `runningCount` stays below `desiredCount`. Run this on the machine where you use the AWS CLI to read the service's latest events:
 
 ```bash
 aws ecs describe-services --region <aws-region> --cluster <ecs-cluster-arn> \
   --services signoz-collector-agent --query 'services[0].events[:5].message'
 ```
 
-Replace `<aws-region>` and `<ecs-cluster-arn>` with the values in `casting.yaml`. The events include `service signoz-collector-agent was unable to place a task because no container instance met all of its requirements. The closest matching container-instance <container-instance-id> is already using a port required by your task.`
+**Verify these values:**
 
-**Cause:** another task on that instance holds host port 4317 or 4318, for example another OpenTelemetry Collector running as a daemon service.
+- `<aws-region>`: The `foundry.signoz.io/ecs-region` value in `casting.yaml`.
+- `<ecs-cluster-arn>`: The `foundry.signoz.io/ecs-cluster-arn` value in `casting.yaml`.
+
+The events include `service signoz-collector-agent was unable to place a task because no container instance met all of its requirements. The closest matching container-instance <container-instance-id> is already using a port required by your task.`
+
+**Cause:** another task on that instance holds host port 4317 or 4318, for example another OpenTelemetry Collector running as a daemon service. The task also uses port 13133 (the collector's health check) and port 2772 (the AppConfig agent) on the instance without reserving them. A process that holds one of those makes the container fail at start instead of blocking placement.
 
 **Fix:** list the cluster's services with `aws ecs list-services --region <aws-region> --cluster <ecs-cluster-arn>`, then delete the service that holds the ports or move its ports. The daemon service places its task on that instance again on its own.
 
@@ -333,46 +335,72 @@ In the Step 4 command, `runningCount` stays below `desiredCount`. Run this on a 
 docker ps -a --filter label=com.amazonaws.ecs.container-name=signoz-collector-appconfig-agent --format '{{.Status}}'
 ```
 
-The status shows `(unhealthy)`. The collector starts only once this container is healthy, that is once it has written the collector config. To see the error it gets from AWS AppConfig, read its logs:
+The status shows `(unhealthy)`. To see the error it gets from AWS AppConfig, read its logs:
 
 ```bash
 docker logs --since 10m $(docker ps -aq --filter label=com.amazonaws.ecs.container-name=signoz-collector-appconfig-agent | head -n 1)
 ```
 
-**Cause:** the container has no AWS credentials that can read the config. Either the task role you stated with `foundry.signoz.io/ecs-task-role-arn` lacks `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`, or the instance hands no task-role credentials to tasks in the `host` network mode. The second happens when the instance's ECS agent runs without the `ecs-init` package that the Amazon ECS-optimized AMIs and the ECS Anywhere install script set up.
+**Cause:** the task has no AWS credentials that can read the config. Either the task role you stated with `foundry.signoz.io/ecs-task-role-arn` lacks `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`, or task IAM roles are not enabled for the `host` network mode on the instance.
 
-**Fix:** add both actions to the task role, or enable task IAM roles for the `host` network mode as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#enable_task_iam_roles" target="_blank" rel="noopener noreferrer nofollow">External instance additional configuration</a> describes; the same settings apply to EC2 instances. The daemon service replaces the unhealthy task on its own.
+**Fix:** add both actions to the task role, or enable task IAM roles as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#enable_task_iam_roles" target="_blank" rel="noopener noreferrer nofollow">External instance additional configuration</a> describes. The daemon service replaces the unhealthy task on its own.
 
-After the fix, the Step 4 command shows `runningCount` equal to `desiredCount`, and the health endpoint answers on the instance.
+After the fix, the Step 4 command shows `runningCount` equal to `desiredCount`.
+
+### foundryctl cast rejects a patch
+
+In Step 3, or after you add a patch from [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/#customize-the-collection-agent), `foundryctl cast -f casting.yaml` stops before it applies anything, with the message `failed to apply patch for target "<target>"`. Its cause ends with `doc is missing key: <path>: missing value` or `doc is missing path: <path>: missing value`, or, when no generated file matches the target, `patch target "<target>" did not match any generated material`.
+
+**Cause:** the patch's target or `path` does not exist in what Foundry generates.
+
+**Fix:** remove the patch and run `foundryctl forge -f casting.yaml`. Then take the target and the path from the generated files under `pours/collectionagent/collector/agent/`, add the patch back, and run Step 3 again.
+
+After the fix, the cast creates the resources, and the Step 4 command shows the service.
 
 ### terraform plan rejects the region or the cluster ARN
 
-`foundryctl cast -f casting.yaml` stops at `terraform plan` with `Error: Invalid value for variable` and one of these messages:
+In Step 3, `foundryctl cast -f casting.yaml` stops at `terraform plan` with `Error: Invalid value for variable` and one of these messages:
 
 ```output
 aws_region must be a region identifier such as us-east-1.
 cluster_arn must be the ARN of an ECS cluster.
 ```
 
-**Cause:** the `foundry.signoz.io/ecs-region` or `foundry.signoz.io/ecs-cluster-arn` annotation is missing or malformed. The region must look like `us-east-1`, and the cluster ARN must start with `arn:aws:ecs:`. A role annotation that is not an IAM role ARN fails the same way, with `task_role_arn must be the ARN of an IAM role.` or `execution_role_arn must be the ARN of an IAM role.`
+**Cause:** the `foundry.signoz.io/ecs-region` or `foundry.signoz.io/ecs-cluster-arn` annotation is missing or malformed. The region must look like `us-east-1`, and the cluster ARN must start with `arn:aws:ecs:`. A role annotation that is not an IAM role ARN fails the same way.
 
-**Fix:** set the annotation under `metadata.annotations` in `casting.yaml`, as in Step 2, then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+**Fix:** set the annotation under `metadata.annotations` in `casting.yaml`, as in Step 2, then run Step 3 again.
 
-After the fix, `terraform plan` lists the resources to create, and the apply creates them.
+After the fix, the cast creates the resources, and the Step 4 command shows the service.
+
+### terraform plan stops on an interpolation in `env`
+
+In Step 3, `foundryctl cast -f casting.yaml` stops at `terraform plan` on `collector.tf.json`, in `locals.containers_collector_agent[1].environment`, with `Error: Invalid reference` for a value such as `${MY_KEY}`, or `Error: Extra characters after interpolation expression` for a value such as `${env:MY_KEY}`.
+
+**Cause:** a value under `spec.collector.spec.env` contains `${`, which Terraform reads as one of its own expressions.
+
+**Fix:** replace the expression with the literal value in `casting.yaml`, then run Step 3 again.
+
+After the fix, the cast creates the resources, and the Step 4 command shows the service.
 
 ### terraform plan finds no AWS credentials
 
-`foundryctl cast -f casting.yaml` stops at `terraform plan` with `Error: No valid credential sources found`.
+In Step 3, `foundryctl cast -f casting.yaml` stops at `terraform plan` with `Error: No valid credential sources found`.
 
 **Cause:** Terraform's AWS provider found no credentials on the machine where you run `foundryctl`.
 
-**Fix:** sign in with the AWS CLI or select a profile, for example `export AWS_PROFILE=<profile-name>`, in the shell you run `foundryctl` from. Replace `<profile-name>` with a profile from `aws configure list-profiles`. For every way to pass credentials, see the <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration" target="_blank" rel="noopener noreferrer nofollow">AWS provider authentication docs</a>. Then run this on the machine where you run Terraform to check which identity it resolves:
+**Fix:** sign in with the AWS CLI or select a profile in the shell you run `foundryctl` from, for example:
 
 ```bash
-aws sts get-caller-identity
+export AWS_PROFILE=<profile-name>
 ```
 
-After the fix, the command prints your account and role, and `foundryctl cast -f casting.yaml` gets past `terraform plan`.
+**Verify these values:**
+
+- `<profile-name>`: A profile from `aws configure list-profiles`.
+
+For every way to pass credentials, see the <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration" target="_blank" rel="noopener noreferrer nofollow">AWS provider authentication docs</a>.
+
+After the fix, `aws sts get-caller-identity` prints your account and role, and Step 3 gets past `terraform plan`.
 
 </details>
 
@@ -383,6 +411,6 @@ Host metrics, container metrics, and container and host logs flow as soon as the
 ## Next Steps
 
 - [Configure the ECS EC2 Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
-- [Learn more about the ECS EC2 Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/)
+- [Monitoring ECS EC2 using OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

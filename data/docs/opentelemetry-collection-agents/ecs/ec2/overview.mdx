@@ -1,34 +1,37 @@
 ---
 date: 2026-10-16
-title: ECS EC2 Collection Agent - Overview
+title: ECS EC2 - Overview
 description: Learn how the ECS EC2 Collection Agent runs an OpenTelemetry Collector on each ECS instance to send host metrics, container metrics, logs, and traces to SigNoz.
 doc_type: explanation
 ---
 
-The ECS EC2 Collection Agent runs one OpenTelemetry Collector task on every container instance of an Amazon ECS cluster, as an ECS daemon service. It collects host metrics, container metrics, container and host logs, and telemetry from your applications, on EC2 container instances and on external instances registered through ECS Anywhere.
+The ECS EC2 Collection Agent runs one OpenTelemetry Collector task on every container instance of an Amazon ECS cluster, as an ECS daemon service, on EC2 container instances and on external instances registered through ECS Anywhere. It collects host metrics, container metrics, container and host logs, and telemetry from your applications.
 
-[Install it](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/) with Foundry and Terraform.
+The ECS EC2 Collection Agent primarily performs the following:
+
+- Collects host metrics and per-container metrics from each container instance.
+- Tails the logs of the containers on each container instance.
+- Collects the host logs and the ECS agent logs of each container instance.
+- Receives OTLP traces, metrics, and logs from your applications and forwards them to SigNoz.
 
 ## How it works
 
-The collector task uses the `host` network mode, with the `EC2` launch type on EC2 container instances and the `EXTERNAL` launch type on external instances. It reads the instance through read-only mounts of the Docker socket, the Docker container log directory, and the instance's root filesystem at `/hostfs`, and it runs as root because Docker writes container log files that only root can read:
+### Agent (daemon service)
 
-- **Host metrics:** CPU, memory, disk, filesystem, network, paging, load, and process metrics of the instance via `hostmetrics`.
-- **Container metrics:** CPU, memory, network, and block I/O metrics of every container via `docker_stats`, from the Docker Engine API, with the resource attributes `aws.ecs.cluster.name`, `aws.ecs.task.arn`, `aws.ecs.task.family`, and `aws.ecs.task.revision` from each container's ECS labels.
-- **Container logs:** stdout and stderr of every container that uses the `json-file` log driver via `filelog`. `service.name` is the container's task family, with `aws.ecs.container.name`, `aws.ecs.task.arn`, `aws.ecs.cluster.name`, and `container.id`. The collector drops the logs of its own task.
-- **Host logs:** `/var/log/messages`, `/var/log/secure`, and the ECS agent logs under `/var/log/ecs/` via `filelog/host`, with `service.name: ecs-host`.
-- **OTLP:** traces, metrics, and logs from your applications over OTLP/gRPC (4317) and OTLP/HTTP (4318), on the instance's ports.
-- **Resource attributes:** `host.name`, `host.id`, and the instance's `cloud.*` attributes via the `resourcedetection` processor's `ec2` detector, plus the attributes in the collector's `OTEL_RESOURCE_ATTRIBUTES`. On external instances, the `system` detector sets `host.name` and `os.type` instead.
+The agent runs as the `signoz-collector-agent` ECS daemon service, so one collector task runs on every container instance in your cluster. It collects instance-level and container-level data:
 
-A second container in the task, the AWS AppConfig agent, fetches the collector config from AWS AppConfig and writes it to the task, and the collector starts once that container is healthy.
+- **Host metrics:** CPU, memory, disk, filesystem, and network of each container instance via `hostmetrics`.
+- **Container metrics:** CPU, memory, network, and block I/O of every container via `docker_stats`, with its ECS cluster, task, and task family as resource attributes.
+- **Container logs:** the stdout and stderr of containers that use the `json-file` log driver, via `filelog`. Containers set up as [Collect Container Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#collect-container-logs) shows carry their task family as `service.name`.
+- **Host logs:** the ECS agent logs, and the container instance's system logs in `/var/log/messages` and `/var/log/secure`, via `filelog/host`. Amazon Linux 2023 writes its system logs to the systemd journal instead, so on it only the ECS agent logs are collected by default.
+- **OTLP:** traces, metrics, and logs from your applications over OTLP/gRPC (4317) and OTLP/HTTP (4318).
+- **Resource attributes:** host and cloud resource attributes via the `resourcedetection` processor.
 
 ## Known Limitations
 
-- **Logs of `awslogs` and `awsfirelens` containers:** these log drivers send stdout and stderr to CloudWatch Logs or to FireLens and write no `json-file` log on the instance, so `filelog` does not collect them. Send those logs to the collector over OTLP from the application, or switch the container to the `json-file` log driver. Until then, they are missing from SigNoz Logs.
-- **Container logs without `service.name`:** a `json-file` log carries the container's task family, task ARN, cluster, and container name only when its task definition sets the log driver's `labels` option, as [Collect Container Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#collect-container-logs) shows. Without it, the logs arrive with `container.id` and `log.file.path` only, and SigNoz cannot attribute them to a service.
-- **OTLP data without ECS task attributes:** the collector runs in its own task, so it cannot tell which task sent traces, metrics, or logs over OTLP. They carry `aws.ecs.*` attributes only when the application's SDK runs the ECS resource detector, as [Add ECS task attributes](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#add-ecs-task-attributes) shows. Without it, you can filter them by host but not by task.
-- **Host logs on Amazon Linux 2023:** Amazon Linux 2023 writes system logs to the systemd journal and installs no `rsyslog` by default, so `/var/log/messages` and `/var/log/secure` do not exist there, and `filelog/host` collects only the ECS agent logs. To write the system log files again, install `rsyslog` as <a href="https://docs.aws.amazon.com/linux/al2023/ug/journald.html" target="_blank" rel="noopener noreferrer nofollow">systemd journal replaces rsyslog</a> describes.
-- **Fargate:** tasks on Fargate have no instance to run a daemon on. For Fargate, use the [ECS Serverless Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/).
+- **Containers that log to CloudWatch Logs or FireLens:** their logs leave the instance, so they are not collected. Use the `json-file` log driver, or send logs over OTLP.
+- **No task attributes on application data:** telemetry your applications send over OTLP carries no ECS task attributes unless the application's SDK adds them.
+- **EC2 and external instances only:** <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_definition_parameters.html#sd-schedulingstrategy" target="_blank" rel="noopener noreferrer nofollow">Fargate does not run daemon services</a>, so Fargate tasks in the same cluster are not collected. Add the [ECS Serverless Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/) to their task definitions.
 
 ## Next Steps
 

@@ -16,41 +16,31 @@ With the EC2 launch type, your tasks run on EC2 instances that you manage. Runni
 - Receiving OTLP telemetry from your applications
 - Forwarding telemetry to SigNoz for analysis and dashboards
 
-Learn the concepts in the [ECS EC2 Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/).
+Learn the concepts in the [ECS EC2 - Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/).
 
 ## Prerequisites
 
-- SigNoz backend (SigNoz Cloud or self-hosted)
+- A SigNoz backend (SigNoz Cloud or self-hosted) to receive OpenTelemetry data
 - An ECS cluster with EC2 container instances, or external instances registered through ECS Anywhere
-- Terraform and the AWS credentials Foundry uses to create the collector's resources
+- Terraform 1.4 or newer and the AWS CLI, with AWS credentials that can create the collector's resources
 
 ## How It Works
 
-1. Install the OpenTelemetry Collector as a daemon service (one task per container instance) with Foundry
-2. The collector collects host and container data and receives OTLP from your applications
-3. Point your instrumented applications to the collector's OTLP endpoint on their instance
-4. Data is enriched and sent to SigNoz
+For where the collector runs and what it collects, see [How it works](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/#how-it-works) in the overview.
 
 ## Step 1: Install the Collection Agent
 
 Install the collector as a daemon service across your container instances with Foundry and Terraform.
 
-- Follow [ECS EC2 Collection Agent - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
+- Follow [ECS EC2 - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
 
 ## Step 2: Configure the Collector and Applications
 
 - Tune the collector configuration (receivers, processors, exporters) in `casting.yaml`
-- Set the application's `OTEL_EXPORTER_OTLP_ENDPOINT` to the collector on its instance
-- Add `OTEL_RESOURCE_ATTRIBUTES` with `service.name=<your-service>`
+- Set the application's `OTEL_EXPORTER_OTLP_ENDPOINT` to the [collector on its instance](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#send-data-from-applications-to-the-collector)
+- Set `OTEL_SERVICE_NAME` to your service's name
 
-- Follow [ECS EC2 Collection Agent - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
-
-## What Data Can You Collect?
-
-- Host metrics (CPU, memory, disk, filesystem, network) (`hostmetrics`)
-- Container metrics with ECS task attributes (`docker_stats`)
-- Container logs and the instance's own logs (`filelog`)
-- Application traces, metrics, and logs (OTLP)
+- Follow [ECS EC2 - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
 
 ## Visualize in SigNoz
 
@@ -60,6 +50,6 @@ Install the collector as a daemon service across your container instances with F
 
 ## Next Steps
 
-1. [ECS EC2 Collection Agent - Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/)
-2. [ECS EC2 Collection Agent - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
-3. [ECS EC2 Collection Agent - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
+1. [ECS EC2 - Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/)
+2. [ECS EC2 - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
+3. [ECS EC2 - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
