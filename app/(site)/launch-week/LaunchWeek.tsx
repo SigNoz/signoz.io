@@ -88,68 +88,102 @@ const LaunchWeek: React.FC = () => {
 
             <Divider className={DIVIDER_CLASS_NAME} />
 
-            {LAUNCH_WEEK_6_ANNOUNCEMENTS.map((announcement, index) => (
-              <React.Fragment key={announcement.title}>
-                <div className="flex flex-col justify-between gap-4 px-6 py-6 lg:flex-row lg:gap-6">
-                  <div className="flex shrink-0 flex-col items-start gap-6 self-stretch lg:w-72 lg:pr-4">
-                    <div className="w-max whitespace-nowrap font-mono text-sm font-medium uppercase leading-6 text-signoz_vanilla-400 sm:text-base">
-                      <div>{announcement.date}</div>
-                      <div>{announcement.time}</div>
+            {LAUNCH_WEEK_6_ANNOUNCEMENTS.map((announcement, index) => {
+              const watchUrl = 'watchUrl' in announcement ? announcement.watchUrl : undefined
+              const blogUrl = 'blogUrl' in announcement ? announcement.blogUrl : undefined
+              const cardUrl = blogUrl ?? announcement.registrationUrl
+
+              return (
+                <React.Fragment key={announcement.title}>
+                  <div className="flex flex-col justify-between gap-4 px-6 py-6 lg:flex-row lg:gap-6">
+                    <div className="flex shrink-0 flex-col items-start gap-6 self-stretch lg:w-72 lg:pr-4">
+                      <div className="w-max whitespace-nowrap font-mono text-sm font-medium uppercase leading-6 text-signoz_vanilla-400 sm:text-base">
+                        <div>{announcement.date}</div>
+                        <div>{announcement.time}</div>
+                      </div>
+                      {watchUrl && blogUrl ? (
+                        <div className="flex w-full flex-col gap-3 lg:mt-auto">
+                          <Button
+                            asChild
+                            variant="secondary"
+                            id={`btn-watch-launch-week-6-${index + 1}`}
+                            className="w-full"
+                          >
+                            <a href={watchUrl} target="_blank" rel="noopener noreferrer">
+                              Watch the session
+                            </a>
+                          </Button>
+                          <Button
+                            asChild
+                            variant="secondary"
+                            id={`btn-read-blog-launch-week-6-${index + 1}`}
+                            className="w-full"
+                          >
+                            <a href={blogUrl} target="_blank" rel="noopener noreferrer">
+                              Read the blog
+                            </a>
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          asChild
+                          variant="secondary"
+                          id={`btn-register-launch-week-6-${index + 1}`}
+                          className="!hidden md:!inline-flex lg:mt-auto lg:w-full"
+                        >
+                          <a
+                            href={announcement.registrationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Register Now
+                          </a>
+                        </Button>
+                      )}
                     </div>
-                    <Button
-                      asChild
-                      variant="secondary"
-                      id={`btn-register-launch-week-6-${index + 1}`}
-                      className="!hidden md:!inline-flex lg:mt-auto lg:w-full"
+                    <a
+                      href={cardUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      id={`card-${blogUrl ? 'blog' : 'register'}-launch-week-6-${index + 1}`}
+                      className="launch-week-card-background group flex w-[864px] max-w-full flex-col gap-6 rounded-md border border-signoz_slate-500 p-6 text-inherit no-underline transition-colors duration-300 hover:bg-signoz_ink-300 hover:text-inherit lg:flex-row"
                     >
-                      <a
-                        href={announcement.registrationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Register Now
-                      </a>
-                    </Button>
+                      <div className="relative aspect-[40/21] w-full shrink-0 overflow-hidden rounded-sm lg:w-3/5">
+                        <Image
+                          src={announcement.image}
+                          alt=""
+                          fill
+                          sizes="(min-width: 1024px) 52vw, calc(100vw - 88px)"
+                          className="object-cover"
+                          aria-hidden="true"
+                          loading={index === 0 ? 'eager' : 'lazy'}
+                        />
+                      </div>
+                      <div className="flex min-w-0 flex-1 flex-col justify-between">
+                        <div>
+                          <h2 className="mb-2 text-lg font-semibold text-signoz_vanilla-100">
+                            {announcement.title}
+                          </h2>
+                          <p className="mb-0 text-sm font-normal leading-6 text-signoz_vanilla-400">
+                            {announcement.description}
+                          </p>
+                        </div>
+                        <div className="mt-4 flex justify-end">
+                          <span className="button-background flex h-8 w-8 transform items-center justify-center rounded-full transition-transform group-hover:translate-x-1.5">
+                            <ArrowRight size={14} aria-hidden="true" />
+                            <span className="sr-only">
+                              {blogUrl ? 'Read the blog about' : 'Register for'}{' '}
+                              {announcement.title}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </a>
                   </div>
-                  <a
-                    href={announcement.registrationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    id={`card-register-launch-week-6-${index + 1}`}
-                    className="launch-week-card-background group flex w-[864px] max-w-full flex-col gap-6 rounded-md border border-signoz_slate-500 p-6 text-inherit no-underline transition-colors duration-300 hover:bg-signoz_ink-300 hover:text-inherit lg:flex-row"
-                  >
-                    <div className="relative aspect-[40/21] w-full shrink-0 overflow-hidden rounded-sm lg:w-3/5">
-                      <Image
-                        src={announcement.image}
-                        alt=""
-                        fill
-                        sizes="(min-width: 1024px) 52vw, calc(100vw - 88px)"
-                        className="object-cover"
-                        aria-hidden="true"
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                      />
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col justify-between">
-                      <div>
-                        <h2 className="mb-2 text-lg font-semibold text-signoz_vanilla-100">
-                          {announcement.title}
-                        </h2>
-                        <p className="mb-0 text-sm font-normal leading-6 text-signoz_vanilla-400">
-                          {announcement.description}
-                        </p>
-                      </div>
-                      <div className="mt-4 flex justify-end">
-                        <span className="button-background flex h-8 w-8 transform items-center justify-center rounded-full transition-transform group-hover:translate-x-1.5">
-                          <ArrowRight size={14} aria-hidden="true" />
-                          <span className="sr-only">Register for {announcement.title}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-                <Divider className={DIVIDER_CLASS_NAME} />
-              </React.Fragment>
-            ))}
+                  <Divider className={DIVIDER_CLASS_NAME} />
+                </React.Fragment>
+              )
+            })}
 
             <GetStarted page="launch-week-6" />
           </div>

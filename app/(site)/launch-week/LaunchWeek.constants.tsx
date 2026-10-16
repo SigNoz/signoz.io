@@ -7,6 +7,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Monday - October 12',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/ixczfyuq',
+    watchUrl:
+      'https://www.linkedin.com/events/signozlaunchweek6-0keynote-obse7515120310010933248/theater/',
+    blogUrl: 'https://signoz.io/blog/why-engineering-first-teams-choose-signoz/',
   },
   {
     title: 'New Trace Detail View',
@@ -16,6 +19,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Monday - October 12',
     time: '9:30 AM PT',
     registrationUrl: 'https://luma.com/5c8so1z5',
+    watchUrl:
+      'https://www.linkedin.com/events/meettheall-newtracedetailview-s7514346445626380288/theater/',
+    blogUrl: 'https://signoz.io/blog/new-trace-detail-view/',
   },
   {
     title: 'MCP Workshop',
@@ -25,6 +31,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Tuesday - October 13',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/a8pzbqqt',
+    watchUrl:
+      'https://www.linkedin.com/events/hands-onsignozmcpworkshop-launc7514376660721336320/theater/',
+    blogUrl: 'https://signoz.io/blog/signoz-mcp-observability-workflows/',
   },
   {
     title: 'Infrastructure Monitoring Experience',
@@ -34,6 +43,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Wednesday - October 14',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/gam9999u',
+    watchUrl:
+      'https://www.linkedin.com/events/newinfrastructuremonitoringexpe7514482365490991104/theater/',
+    blogUrl: 'https://signoz.io/blog/new-infrastructure-monitoring-experience/',
   },
   {
     title: 'JSON-native Logs',
@@ -43,6 +55,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Thursday - October 15',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/j3k51i73',
+    watchUrl:
+      'https://www.linkedin.com/events/json-nativelogs-fasterqueries-w7515463825773461504/theater/',
+    blogUrl: 'https://signoz.io/blog/introducing-json-native-logs/',
   },
   {
     title: 'Fine-grained RBAC',
