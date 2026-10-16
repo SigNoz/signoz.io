@@ -55,6 +55,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Thursday - October 15',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/j3k51i73',
+    watchUrl:
+      'https://www.linkedin.com/events/json-nativelogs-fasterqueries-w7515463825773461504/theater/',
+    blogUrl: 'https://signoz.io/blog/introducing-json-native-logs/',
   },
   {
     title: 'Fine-grained RBAC',
