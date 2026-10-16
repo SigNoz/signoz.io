@@ -10,12 +10,13 @@ The <a href="https://opentelemetry.io/docs/platforms/kubernetes/operator/" targe
 
 [Install the operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/#install-the-opentelemetry-operator), then [install the collectors](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/) with Foundry through Helm or Kustomize.
 
-## Benefits of using the OpenTelemetry Operator
+The OpenTelemetry Operator Collection Agent primarily performs the following:
 
-- **Simplified Deployment:** Automates the deployment and scaling of the OpenTelemetry Collector.
-- **Centralized Configuration:** Manages Collector configurations through Custom Resources (CRs).
-- **Automated Lifecycle Management:** Upgrades the `OpenTelemetryCollector` resources when the operator itself is upgraded, and handles health checks of the Collector.
-- **Auto-Instrumentation:** Supports Auto-Instrumentation of the workloads using OpenTelemetry instrumentation libraries.
+- Tails and parses container logs and sends them to SigNoz.
+- Collects kubelet metrics and host metrics from every node.
+- Gathers cluster-level metrics and Kubernetes events from the Kubernetes API server.
+- Receives OTLP traces, metrics, and logs from your applications and forwards them to SigNoz.
+- Injects auto-instrumentation into your workloads through `Instrumentation` resources.
 
 ## How it works
 
@@ -26,7 +27,7 @@ The OpenTelemetry Operator works through Kubernetes custom resources and a contr
 ![OpenTelemetry Operator Architecture](/img/docs/otel-operator-arch.webp)
 
 - **Custom resources:** The operator defines Custom Resource Definitions (CRDs) for OpenTelemetry components, such as `OpenTelemetryCollector`. Custom resources of these kinds declare the desired state of your telemetry collection.
-- **Controller:** The operator's controller watches these custom resources. When one changes, it reconciles the current state of the cluster with the desired state the resource declares. The operator owns the workloads it creates and reverts edits made to them directly, so change a Collector, including its version, through its `OpenTelemetryCollector` resource.
+- **Controller:** The operator's controller watches these custom resources. When one changes, it reconciles the current state of the cluster with the desired state the resource declares. The operator owns the workloads it creates and reverts edits made to them directly, so change a Collector, including its version, through its `OpenTelemetryCollector` resource. It also upgrades the `OpenTelemetryCollector` resources when the operator itself is upgraded, and adds health checks to the Collector pods.
 - **OpenTelemetry Collector:** From each `OpenTelemetryCollector` resource, the controller creates and configures the Collector's workload and Services.
 - **Auto-instrumentation:** The operator can also manage auto-instrumentation for your applications, so they send telemetry without manual code changes.
 
