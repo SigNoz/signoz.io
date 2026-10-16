@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { clearPathsCache } from '@/utils/strapi'
-import {
-  getMarkdownTwinRoutePaths,
-  getStrapiDocumentCacheTags,
-  parseCmsUrlPath,
-} from '@/utils/cmsRevalidatePaths'
+import { getStrapiDocumentCacheTags, parseCmsUrlPath } from '@/utils/cmsRevalidatePaths'
 
 type PathInput = string | { urlPath: string; contentKey?: string }
 
@@ -71,21 +67,13 @@ function revalidateCmsUrlPath(
   if (contentKey) {
     const parsed = parseCmsUrlPath(normalized)
     if (parsed) {
-      const info = { ...parsed, contentKey }
-      const strapiTags = getStrapiDocumentCacheTags(info)
+      const strapiTags = getStrapiDocumentCacheTags({
+        ...parsed,
+        contentKey,
+      })
       for (const t of strapiTags) {
         revalidateTag(t, 'max')
         tags.push(t)
-      }
-
-      for (const twinPath of getMarkdownTwinRoutePaths(info)) {
-        revalidatePath(twinPath)
-        results.push({
-          path: twinPath,
-          revalidated: true,
-          type: 'path',
-          timestamp: new Date().toISOString(),
-        })
       }
     }
   }
