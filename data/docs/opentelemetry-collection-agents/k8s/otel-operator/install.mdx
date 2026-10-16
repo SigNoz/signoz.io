@@ -17,7 +17,7 @@ This guide explains how to install the OpenTelemetry Operator collection agent o
 
 ## Install the OpenTelemetry Operator
 
-Foundry runs the collectors as `OpenTelemetryCollector` resources, which the operator reconciles. Install operator v0.139.0, which matches the OpenTelemetry Collector 0.139.0 these resources run:
+Foundry generates the collectors as `OpenTelemetryCollector` resources for the operator to reconcile. Install operator v0.139.0, which matches the OpenTelemetry Collector 0.139.0 these resources run:
 
 <Tabs entityName="k8s-method">
 <TabItem label="Manifest" value="manifest" default>
@@ -85,7 +85,7 @@ For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the
 Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works):
 
 <Admonition type="info" title="Required on every document: the controller annotation">
-`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` makes the OpenTelemetry Operator the collector's controller: Foundry generates an `OpenTelemetryCollector` resource, and the operator runs the collector from it. Without it, Foundry deploys the collector as a standard DaemonSet or Deployment, the same setup as [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/). See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` sets the OpenTelemetry Operator as the controller of the collector's workload: Foundry generates an `OpenTelemetryCollector` resource for the operator to reconcile, instead of the plain DaemonSet or Deployment that [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/) uses. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
 </Admonition>
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
@@ -568,7 +568,7 @@ For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the
 Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works):
 
 <Admonition type="info" title="Required on every document: the controller annotation">
-`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` makes the OpenTelemetry Operator the collector's controller: Foundry generates an `OpenTelemetryCollector` resource, and the operator runs the collector from it. Without it, Foundry deploys the collector as a standard DaemonSet or Deployment, the same setup as [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/). See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` sets the OpenTelemetry Operator as the controller of the collector's workload: Foundry generates an `OpenTelemetryCollector` resource for the operator to reconcile, instead of the plain DaemonSet or Deployment that [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/) uses. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
 </Admonition>
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
