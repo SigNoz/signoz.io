@@ -1,0 +1,296 @@
+---
+date: 2026-10-16
+title: PM2 OpenTelemetry Setup - Trace Node.js Apps in Cluster Mode
+description: Learn how to send traces from Node.js apps that run under PM2 to SigNoz with OpenTelemetry. Works in fork and cluster mode and keeps spans across restarts.
+doc_type: howto
+---
+
+Send traces from a Node.js application that runs under <a href="https://pm2.keymetrics.io/" target="_blank" rel="noopener noreferrer nofollow">PM2</a> to SigNoz with OpenTelemetry. The setup works in fork mode and in cluster mode.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Overview
+
+The [Node.js guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/) loads OpenTelemetry with the `NODE_OPTIONS` environment variable. Under PM2, this approach has two problems:
+
+- In cluster mode, PM2 applies the `env` block of your ecosystem file after the Node.js process starts. `NODE_OPTIONS` never takes effect, and SigNoz receives no traces.
+- PM2 stops, restarts, and reloads processes with `SIGINT`. The zero-code agent flushes buffered spans on `SIGTERM` but not on `SIGINT`, so you lose the spans of the last few seconds on every restart.
+
+This guide loads OpenTelemetry from a `tracing.js` file in your code. The file reads its configuration from the PM2 ecosystem file and flushes spans on `SIGINT`.
+
+## Prerequisites
+
+- <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/upgrade-to-2.x.md#-nodejs-supported-versions" target="_blank" rel="noopener noreferrer nofollow">Node.js 20.6.0+</a>
+- PM2 installed, and an application that you start with a PM2 <a href="https://pm2.keymetrics.io/docs/usage/application-declaration/" target="_blank" rel="noopener noreferrer nofollow">ecosystem file</a>
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send traces to SigNoz
+
+### Step 1. Install OpenTelemetry packages
+
+Run this command in your application directory:
+
+```bash
+npm install --save @opentelemetry/api @opentelemetry/sdk-node \
+  @opentelemetry/auto-instrumentations-node @opentelemetry/resources
+```
+
+### Step 2. Create the tracing file
+
+Create `tracing.js` next to your application entry file. If your `package.json` sets `"type": "module"`, use the **ES module** tab.
+
+<Tabs entityName="module-system">
+<TabItem value="commonjs" label="CommonJS" default>
+
+```js:tracing.js defaultCollapsed
+const { hostname } = require('os')
+const { NodeSDK } = require('@opentelemetry/sdk-node')
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node')
+const { resourceFromAttributes } = require('@opentelemetry/resources')
+
+const sdk = new NodeSDK({
+  // One stable ID per PM2 instance, kept across restarts
+  resource: resourceFromAttributes({
+    'service.instance.id': `${hostname()}-${process.env.NODE_APP_INSTANCE ?? 0}`,
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+})
+sdk.start()
+
+// PM2 stops processes with SIGINT. Flush buffered telemetry before exit.
+// If the application has its own handler, let that handler exit.
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => {
+    const appHandlesExit = process.listenerCount(signal) > 1
+    sdk.shutdown().finally(() => {
+      if (!appHandlesExit) process.exit(0)
+    })
+  })
+}
+```
+
+</TabItem>
+<TabItem value="esm" label="ES module">
+
+```js:tracing.js defaultCollapsed
+import { hostname } from 'node:os'
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
+import { resourceFromAttributes } from '@opentelemetry/resources'
+
+const sdk = new NodeSDK({
+  // One stable ID per PM2 instance, kept across restarts
+  resource: resourceFromAttributes({
+    'service.instance.id': `${hostname()}-${process.env.NODE_APP_INSTANCE ?? 0}`,
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+})
+sdk.start()
+
+// PM2 stops processes with SIGINT. Flush buffered telemetry before exit.
+// If the application has its own handler, let that handler exit.
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => {
+    const appHandlesExit = process.listenerCount(signal) > 1
+    sdk.shutdown().finally(() => {
+      if (!appHandlesExit) process.exit(0)
+    })
+  })
+}
+```
+
+</TabItem>
+</Tabs>
+
+The SDK reads the exporter endpoint, the ingestion key, and the service name from `OTEL_*` environment variables. You set them in the next step.
+
+PM2 gives each cluster instance a `NODE_APP_INSTANCE` number (`0`, `1`, and so on) and keeps that number when the instance restarts. The file uses it to set `service.instance.id`, so each worker keeps one identity in SigNoz.
+
+### Step 3. Load the tracing file first
+
+The tracing file must load before any other module. OpenTelemetry can only instrument modules, such as `http` or `express`, that load after it.
+
+<Tabs entityName="module-system">
+<TabItem value="commonjs" label="CommonJS" default>
+
+Add this line as the first line of the file that the `script` field of your ecosystem file points to, for example `app.js`:
+
+```js:app.js
+require('./tracing')
+```
+
+</TabItem>
+<TabItem value="esm" label="ES module">
+
+1. Install the packages that provide the ES module loader hooks:
+
+   ```bash
+   npm install --save @opentelemetry/instrumentation import-in-the-middle
+   ```
+
+2. Create `start.js` next to `tracing.js`. Replace `./app.js` with your application entry file:
+
+   ```js:start.js
+   import { register } from 'node:module'
+   import { register as registerHooks, supportsSyncHooks } from 'import-in-the-middle/register-hooks.mjs'
+
+   // Use the in-thread hook where Node.js supports it. Fall back on older versions.
+   if (supportsSyncHooks()) registerHooks()
+   else register('@opentelemetry/instrumentation/hook.mjs', import.meta.url)
+
+   await import('./tracing.js')
+   await import('./app.js')
+   ```
+
+3. In the next step, set the `script` field of your ecosystem file to `start.js`.
+
+`start.js` runs after PM2 sets the `OTEL_*` variables. The loader hook lets OpenTelemetry instrument modules that your application loads with `import`. On Node.js 22.22.3, 24.11.1, 25.1.0, 26.0.0, and newer releases of each line, `start.js` uses `module.registerHooks()`. On older versions, it falls back to `module.register()`, which Node.js 26 deprecates.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="warning">
+If your ecosystem file sets `NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"`, remove it. Otherwise, fork mode starts OpenTelemetry twice.
+</Admonition>
+
+### Step 4. Set environment variables in the ecosystem file
+
+Add the `OTEL_*` variables to the `env` block of your application in `ecosystem.config.js`:
+
+```js:ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: '<app-name>',
+      script: 'app.js', // 'start.js' for an ES module app
+      exec_mode: 'cluster', // or 'fork'
+      instances: 2,
+      env: {
+        OTEL_SERVICE_NAME: '<service-name>',
+        OTEL_TRACES_EXPORTER: 'otlp',
+        OTEL_METRICS_EXPORTER: 'none',
+        OTEL_LOGS_EXPORTER: 'none',
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'https://ingest.<region>.signoz.cloud:443',
+        OTEL_EXPORTER_OTLP_HEADERS: 'signoz-ingestion-key=<your-ingestion-key>',
+        OTEL_NODE_RESOURCE_DETECTORS: 'env,host,os',
+      },
+    },
+  ],
+}
+```
+
+**Verify these values:**
+
+- `<app-name>`: The PM2 name of your application.
+- `<service-name>`: Name of your service in SigNoz (for example, `payment-service`).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+The `none` values for `OTEL_METRICS_EXPORTER` and `OTEL_LOGS_EXPORTER` keep this setup to traces. Without them, the SDK also exports metrics and logs.
+
+### Step 5. Start or restart the application
+
+Run this command in the directory that contains `ecosystem.config.js`:
+
+```bash
+pm2 start ecosystem.config.js
+```
+
+If the application already runs under PM2, restart it from the ecosystem file:
+
+```bash
+pm2 restart ecosystem.config.js
+```
+
+`pm2 restart <app-name>` keeps the environment from the first start and does not load the new `OTEL_*` variables. To keep the new environment after a server reboot, run `pm2 save`.
+
+Run `pm2 ls`. Each instance of your application shows the status `online`.
+
+### Step 6. Send metrics (optional)
+
+The same `tracing.js` file can export metrics. In the `env` block of `ecosystem.config.js`, change `OTEL_METRICS_EXPORTER` to `otlp`, then run `pm2 restart ecosystem.config.js`:
+
+```js
+OTEL_METRICS_EXPORTER: 'otlp',
+```
+
+Auto-instrumentation then sends metrics such as `http.server.request.duration`. Each worker reports its own series with its own `service.instance.id`. For custom and runtime metrics, see [Send metrics from Node.js](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs/).
+
+## Validate
+
+1. Send a few requests to your application.
+2. In SigNoz, open **Services** and look for `<service-name>`. If it does not appear, click **Refresh**.
+
+<Figure
+  src="/img/docs/instrumentation/javascript/pm2-services-list.webp"
+  alt="SigNoz Services page that lists a Node.js service running under PM2"
+  caption="Node.js service running under PM2 in the SigNoz Services list"
+/>
+
+3. In cluster mode, make sure that every worker sends spans. Open **Traces**, select the **Table** view, filter by `service.name = '<service-name>'`, and group by `service.instance.id`. You see one row per PM2 instance, such as `<hostname>-0` and `<hostname>-1`.
+
+<Figure
+  src="/img/docs/instrumentation/javascript/pm2-traces-by-instance.webp"
+  alt="SigNoz Traces explorer table with span counts grouped by service.instance.id, one row for each PM2 cluster worker"
+  caption="Span count for each PM2 cluster worker, grouped by service.instance.id"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Traces arrive in fork mode but not in cluster mode
+
+In cluster mode, PM2 sets the `env` block after the Node.js process starts. `NODE_OPTIONS` and the `node_args` field in the ecosystem file load OpenTelemetry before PM2 sets the `OTEL_*` variables, or not at all.
+
+1. Remove `NODE_OPTIONS` and `node_args` entries that load OpenTelemetry.
+2. Load `tracing.js` from your code as shown in [Step 3](#step-3-load-the-tracing-file-first).
+3. Run `pm2 restart ecosystem.config.js`.
+
+### Spans from the last seconds before a restart are missing
+
+The SDK sends spans in batches every 5 seconds by default. If the process exits before the next batch, you lose the spans in the buffer. The `SIGINT` handler in `tracing.js` sends the buffer before the process exits.
+
+If your application has its own `SIGINT` or `SIGTERM` handler, `tracing.js` flushes the buffer but does not exit the process. Your handler finishes its cleanup and exits. PM2 sends `SIGKILL` if the process does not exit within 1.6 seconds. To give the flush more time, set <a href="https://pm2.keymetrics.io/docs/usage/signals-clean-restart/" target="_blank" rel="noopener noreferrer nofollow">`kill_timeout`</a> in the ecosystem file.
+
+### Service name or endpoint changes do not apply
+
+`pm2 restart <app-name>` keeps the environment from the first start. Run `pm2 restart ecosystem.config.js` instead, then send a few requests and look for the new values in SigNoz.
+
+### ERR_REQUIRE_ESM or no spans in an ES module app
+
+`require('./tracing')` works only in CommonJS apps. If your `package.json` sets `"type": "module"`, follow the **ES module** tabs in [Step 2](#step-2-create-the-tracing-file) and [Step 3](#step-3-load-the-tracing-file-first), and point the `script` field to `start.js`.
+
+### Service does not appear in SigNoz
+
+1. Run `pm2 env <id>` and make sure that the `OTEL_*` variables show the values you set. Get the ID from `pm2 ls`.
+2. Run `pm2 logs <app-name>` and look for export errors.
+3. Follow [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) for SDK diagnostics and common ingestion errors.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+To send telemetry through an OpenTelemetry Collector that runs on the same host, change two variables in the `env` block of `ecosystem.config.js`:
+
+```js:ecosystem.config.js
+OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318',
+// Remove OTEL_EXPORTER_OTLP_HEADERS. The Collector adds the ingestion key.
+```
+
+Then run `pm2 restart ecosystem.config.js`. To install and configure the Collector, see [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/).
+
+</details>
+
+## Next steps
+
+- Send logs from your application with [Winston](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/) or [Pino](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/).
+- Turn off instrumentation for libraries you do not need with [selective instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/).
+- Add custom spans with [manual instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-manual-instrumentation/).
+- Drop health-check spans with [Exclude HTTP endpoints](https://signoz.io/docs/instrumentation/javascript/nodejs-exclude-http-endpoints/).
