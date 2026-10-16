@@ -9,9 +9,17 @@ EKS Fargate runs each Pod on a Fargate node of its own, with no DaemonSets, host
 
 [Install it](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) with Foundry through Kustomize.
 
+The EKS Fargate Collection Agent primarily performs the following:
+
+- Collects kubelet metrics from every Fargate node through the Kubernetes API server.
+- Gathers cluster-level metrics and Kubernetes events from the Kubernetes API server.
+- Receives OTLP traces, metrics, and logs from your applications and forwards them to SigNoz.
+
 ## How it works
 
-The collector runs as a Deployment and reaches every Fargate node through the Kubernetes API server:
+### Cluster collector (Deployment)
+
+The collector runs as one Deployment and reaches every Fargate node through the Kubernetes API server:
 
 - **Kubelet metrics:** container, pod, node, and volume metrics from every Fargate node via `kubeletstats`. The `k8s_observer` extension discovers the nodes, and the `receiver_creator` receiver starts one `kubeletstats` receiver per node through the API server's node proxy.
 - **Cluster metrics:** node and pod conditions, allocatable resources, and workload status via `k8s_cluster`.
