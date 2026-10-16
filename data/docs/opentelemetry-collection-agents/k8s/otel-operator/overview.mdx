@@ -1,5 +1,5 @@
 ---
-date: 2026-10-15
+date: 2026-10-16
 
 title: OpenTelemetry Operator - Overview
 description: Learn how the OpenTelemetry Operator collection agent runs OpenTelemetry Collectors on Kubernetes to send metrics, traces, logs, and Kubernetes events to SigNoz.
@@ -9,37 +9,6 @@ doc_type: explanation
 The <a href="https://github.com/open-telemetry/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> manages OpenTelemetry Collectors and auto-instrumentation in a Kubernetes cluster through custom resources. As a SigNoz collection agent, it runs the two pre-configured collectors described below, which Foundry declares as `OpenTelemetryCollector` resources.
 
 [Install the operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/#install-the-opentelemetry-operator), then [install the collectors](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/) with Foundry through Helm or Kustomize.
-
-## How it works: the agent and the cluster collector
-
-Each collector is an `OpenTelemetryCollector` resource. From each resource, the operator creates the collector's workload and Services.
-
-### Agent (DaemonSet)
-
-The agent runs one collector pod on every node and collects node-level and pod-level data:
-
-- **Container logs:** Kubernetes container logs via `filelog/k8s` from `/var/log/pods/*/*/*.log`.
-- **Host metrics:** CPU, disk, filesystem, load, memory, and network via `hostmetrics`.
-- **Kubelet metrics:** container, pod, node, and volume metrics via `kubeletstats`.
-- **OTLP:** traces, metrics, and logs from your applications over OTLP/gRPC (4317) and OTLP/HTTP (4318).
-- **Resource attributes:** Kubernetes and host resource attributes via the `k8sattributes` and `resourcedetection` processors.
-
-### Cluster collector (Deployment)
-
-The cluster collector runs as a Deployment and collects cluster-level data:
-
-- **Cluster metrics:** node and pod conditions, allocatable resources, and container runtime and kubelet version resource attributes via `k8s_cluster`.
-- **Kubernetes events:** via `k8s_events`.
-- **Resource attributes:** via the `k8sattributes` and `resourcedetection` processors.
-
-Cluster-level metrics come from this one collector, so each Kubernetes object is reported once.
-
-## Benefits of using the OpenTelemetry Operator
-
-- **Simplified Deployment:** Automates the deployment and scaling of the OpenTelemetry Collector.
-- **Centralized Configuration:** Manages Collector configurations through Custom Resources (CRs).
-- **Automated Lifecycle Management:** Upgrades the `OpenTelemetryCollector` resources when the operator itself is upgraded, and handles health checks of the Collector.
-- **Auto-Instrumentation:** Supports Auto-Instrumentation of the workloads using OpenTelemetry instrumentation libraries.
 
 ## Architecture
 
@@ -54,25 +23,34 @@ The OpenTelemetry Operator follows a Kubernetes-native approach by leveraging Cu
 
 For a deeper dive into the architecture, you can explore the <a href="https://github.com/open-telemetry/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator GitHub repository</a>.
 
-## Deployment Modes
+## Benefits of using the OpenTelemetry Operator
+
+- **Simplified Deployment:** Automates the deployment and scaling of the OpenTelemetry Collector.
+- **Centralized Configuration:** Manages Collector configurations through Custom Resources (CRs).
+- **Automated Lifecycle Management:** Upgrades the `OpenTelemetryCollector` resources when the operator itself is upgraded, and handles health checks of the Collector.
+- **Auto-Instrumentation:** Supports Auto-Instrumentation of the workloads using OpenTelemetry instrumentation libraries.
+
+## OpenTelemetry Operator Deployment Modes
 
 The OpenTelemetry Operator supports four deployment modes through the `OpenTelemetryCollector` Custom Resource, which specifies how the Collector should be installed in your Kubernetes cluster. In every mode the operator owns the workload it creates, so change the Collector, including its version, through the `OpenTelemetryCollector` resource; the operator reverts edits made to the workload directly.
 
-### Sidecar
+| Mode (`spec.mode`) | What the operator creates | Typical use |
+|---|---|---|
+| `sidecar` | A Collector container, injected into application pods annotated with `sidecar.opentelemetry.io/inject` | Collecting and processing telemetry inside each application's pod, with fewer network hops |
+| `daemonset` | A DaemonSet: one Collector pod on each node | Node-level data, such as host metrics, local log collection, or network monitoring |
+| `deployment` (default) | A Deployment | A gateway that receives OTLP data and scales with replicas, or a single Collector that pulls cluster-wide data. Every replica of a Collector that pulls data pulls the same data, so run one replica for it |
+| `statefulset` | A StatefulSet: stable pod names and, through `volumeClaimTemplates`, a persistent volume per pod | Collectors that keep state. The operator's Target Allocator, which spreads Prometheus scrape targets across the Collector pods, works with this mode and with `daemonset` |
 
-In this mode, the OpenTelemetry Operator injects a collector container as a sidecar into application pods. This enables localized telemetry collection and processing directly within the application's pod, reducing network hops and making data flow simpler for individual workloads. The operator injects the sidecar into pods annotated with `sidecar.opentelemetry.io/inject`.
+## How it works
 
-### DaemonSet
+The Collection Agent runs two collectors. Each is an `OpenTelemetryCollector` resource in one of the modes above, from which the operator creates the collector's workload and Services:
 
-When deployed as a DaemonSet, the OpenTelemetry Collector runs as a separate pod on each node in your cluster, which makes it ideal for collecting infrastructure performance metrics, such as system metrics, local log collection, or network monitoring.
+| Collector | `spec.mode` | Runs | Collects |
+|---|---|---|---|
+| Agent (`signoz-collector-agent`) | `daemonset` | One pod per node | Container logs (`filelog/k8s`), host metrics (`hostmetrics`), kubelet metrics (`kubeletstats`), and OTLP from your applications |
+| Cluster collector (`signoz-collector-deployment`) | `deployment` | One pod | Cluster metrics (`k8s_cluster`) and Kubernetes events (`k8s_events`) |
 
-### Deployment (Default Mode)
-
-The operator runs the Collector as a Deployment. Use it for a gateway that receives OTLP data and scales with replicas, or for a single Collector that pulls cluster-wide data, like the cluster collector above. Every replica of a Collector that pulls data pulls the same data, so run one replica for it.
-
-### StatefulSet
-
-In this mode, the operator runs the Collector as a StatefulSet, which gives each Collector pod a stable name and, through `volumeClaimTemplates`, its own persistent volume. Use it when the Collector keeps state. The operator's Target Allocator, which spreads Prometheus scrape targets across the Collector pods, works with this mode and with DaemonSet.
+Both collectors add Kubernetes and host resource attributes with the `k8sattributes` and `resourcedetection` processors. Cluster-level metrics come from the cluster collector alone, so each Kubernetes object is reported once.
 
 ## Auto-instrumentation
 

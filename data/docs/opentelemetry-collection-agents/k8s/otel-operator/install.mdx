@@ -1,5 +1,5 @@
 ---
-date: 2026-10-15
+date: 2026-10-16
 title: OpenTelemetry Operator - Install
 description: Install the OpenTelemetry Operator collection agent on Kubernetes with Foundry through Helm or Kustomize to send metrics, logs, and traces to SigNoz.
 doc_type: howto
@@ -61,10 +61,10 @@ The operator is ready when `READY` shows `1/1`. For every chart setting, see the
 </TabItem>
 </Tabs>
 
+## Install the Collection Agent
+
 <Tabs entityName="tool">
 <TabItem value="helm" label="Helm" default>
-
-## Install with Foundry and Helm
 
 <Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
 Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
@@ -82,7 +82,11 @@ For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the
 
 ### Step 2: Create casting.yaml
 
-Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works-the-agent-and-the-cluster-collector). The `foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` annotation on each document runs that collector as an `OpenTelemetryCollector` resource:
+Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works):
+
+<Admonition type="info" title="Required on every document: the controller annotation">
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` makes the OpenTelemetry Operator the collector's controller: Foundry generates an `OpenTelemetryCollector` resource, and the operator runs the collector from it. Without it, Foundry deploys the collector as a standard DaemonSet or Deployment, the same setup as [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/). See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+</Admonition>
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
@@ -545,8 +549,6 @@ After the fix, `kubectl get pods -n signoz` shows the collector pods on that clu
 </TabItem>
 <TabItem value="kustomize" label="Kustomize">
 
-## Install with Foundry and Kustomize
-
 <Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
 Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
 </Admonition>
@@ -563,7 +565,11 @@ For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the
 
 ### Step 2: Create casting.yaml
 
-Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works-the-agent-and-the-cluster-collector). The `foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` annotation on each document runs that collector as an `OpenTelemetryCollector` resource:
+Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works):
+
+<Admonition type="info" title="Required on every document: the controller annotation">
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` makes the OpenTelemetry Operator the collector's controller: Foundry generates an `OpenTelemetryCollector` resource, and the operator runs the collector from it. Without it, Foundry deploys the collector as a standard DaemonSet or Deployment, the same setup as [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/). See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+</Admonition>
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
