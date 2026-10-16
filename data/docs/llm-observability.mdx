@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-08
-updated_date: 2026-10-12
+updated_date: 2026-10-16
 title: LLM Observability Overview
 meta_title: "LLM Observability with OpenTelemetry"
 description: Learn what LLM observability is and how to instrument LLM apps with OpenTelemetry. Trace token usage, latency, cost, and tool calls in SigNoz.
@@ -143,6 +143,8 @@ These share the `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.request
 ### Prompt and response content
 
 Prompt and completion content is not captured by default. `gen_ai.input.messages`, `gen_ai.output.messages`, and `gen_ai.system_instructions` are all **Opt-In** in the specification, which means an instrumentation should only record them when explicitly enabled. This is a deliberate privacy default: prompts frequently contain user data. Turn content capture on knowingly, and check what your data retention policy implies before you do.
+
+When message content is present, SigNoz renders it as a structured conversation in the trace detail view, with roles, tool calls, tool responses, finish reasons, reasoning, and media. For LangChain apps, SigNoz parses the LangSmith OpenTelemetry exporter's serialised run format automatically. See [how SigNoz renders LangChain and LangSmith messages](https://signoz.io/docs/langchain-observability/#how-signoz-renders-langchain-and-langsmith-messages).
 
 ## What to Alert On
 
