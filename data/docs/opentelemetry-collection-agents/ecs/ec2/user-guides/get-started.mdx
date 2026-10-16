@@ -1,66 +1,65 @@
 ---
-date: 2025-10-22
-title: Monitoring ECS EC2 using Opentelemetry Collection Agents
-
-description: Monitor Amazon ECS on EC2 with OpenTelemetry Collector as a daemon to send metrics, logs, and traces to SigNoz
+date: 2026-10-16
+title: Monitoring ECS EC2 using OpenTelemetry Collection Agents
+description: Monitor Amazon ECS on EC2 with an OpenTelemetry Collector daemon that Foundry installs, and send host metrics, container metrics, logs, and traces to SigNoz.
+doc_type: tutorial
 ---
 
-This guide explains how to monitor Amazon ECS on EC2 using OpenTelemetry and SigNoz. You'll deploy an OpenTelemetry Collector as a daemon service on each EC2 host to collect infrastructure metrics, container logs, and application telemetry.
+This guide explains how to monitor Amazon ECS on EC2 using OpenTelemetry and SigNoz. You'll install the ECS EC2 Collection Agent with Foundry, which runs an OpenTelemetry Collector as a daemon service on each container instance to collect host metrics, container metrics, logs, and application telemetry.
 
 ## What is ECS EC2 Monitoring with OpenTelemetry?
 
-With the EC2 launch type, your tasks run on EC2 instances that you manage. Running the OpenTelemetry Collector as a daemon on each host enables:
+With the EC2 launch type, your tasks run on EC2 instances that you manage. Running the OpenTelemetry Collector as a daemon on each instance enables:
 
 - Host and container metrics collection
-- Container log tailing and processing
+- Container and host log collection
 - Receiving OTLP telemetry from your applications
 - Forwarding telemetry to SigNoz for analysis and dashboards
 
-Learn the concepts in the [ECS EC2 - Overview](/docs/opentelemetry-collection-agents/ecs/ec2/overview/).
+Learn the concepts in the [ECS EC2 Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/).
 
 ## Prerequisites
 
 - SigNoz backend (SigNoz Cloud or self-hosted)
-- ECS cluster using EC2 launch type
-- AWS CLI with appropriate permissions
-- Ability to deploy CloudFormation stacks and set SSM Parameter Store values
+- An ECS cluster with EC2 container instances, or external instances registered through ECS Anywhere
+- Terraform and the AWS credentials Foundry uses to create the collector's resources
 
 ## How It Works
 
-1. Deploy the OpenTelemetry Collector as a daemon service (one per EC2 host)
-2. Configure the collector to collect host/container data and receive app OTLP
-3. Point your instrumented applications to the daemon service OTLP endpoint
+1. Install the OpenTelemetry Collector as a daemon service (one task per container instance) with Foundry
+2. The collector collects host and container data and receives OTLP from your applications
+3. Point your instrumented applications to the collector's OTLP endpoint on their instance
 4. Data is enriched and sent to SigNoz
 
-## Step 1: Install the Daemon Service
+## Step 1: Install the Collection Agent
 
-Use the CloudFormation-based setup to deploy the collector as a daemon across your EC2 hosts.
+Install the collector as a daemon service across your container instances with Foundry and Terraform.
 
-- Follow [ECS EC2 - Install](/docs/opentelemetry-collection-agents/ecs/ec2/install/)
+- Follow [ECS EC2 Collection Agent - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
 
 ## Step 2: Configure the Collector and Applications
 
-- Tune the collector configuration (receivers, processors, exporters)
-- Set app `OTEL_EXPORTER_OTLP_ENDPOINT` to the daemon service
+- Tune the collector configuration (receivers, processors, exporters) in `casting.yaml`
+- Set the application's `OTEL_EXPORTER_OTLP_ENDPOINT` to the collector on its instance
 - Add `OTEL_RESOURCE_ATTRIBUTES` with `service.name=<your-service>`
 
-- Follow [ECS EC2 - Configure](/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
+- Follow [ECS EC2 Collection Agent - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
 
 ## What Data Can You Collect?
 
-- Host metrics (CPU, memory, disk, network)
-- ECS container/task metrics (awsecscontainermetrics)
-- Container and application logs (filelog)
-- Application traces and custom metrics (OTLP)
+- Host metrics (CPU, memory, disk, filesystem, network) (`hostmetrics`)
+- Container metrics with ECS task attributes (`docker_stats`)
+- Container logs and the instance's own logs (`filelog`)
+- Application traces, metrics, and logs (OTLP)
 
 ## Visualize in SigNoz
 
 - Build dashboards for cluster and service-level views
-- Filter by cluster/service/task attributes
+- Filter by cluster, task family, and task attributes
 - Investigate traces and logs for faster troubleshooting
 
 ## Next Steps
 
-1. [ECS EC2 - Overview](/docs/opentelemetry-collection-agents/ecs/ec2/overview/)
-2. [ECS EC2 - Install](/docs/opentelemetry-collection-agents/ecs/ec2/install/)
-3. [ECS EC2 - Configure](/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
+1. [ECS EC2 Collection Agent - Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/)
+2. [ECS EC2 Collection Agent - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
+3. [ECS EC2 Collection Agent - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
