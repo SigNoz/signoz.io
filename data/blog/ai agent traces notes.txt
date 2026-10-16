@@ -1,0 +1,55 @@
+ai agent traces notes:
+
+- Agents/agentic apps need visibility: Instrumenting agents is critical to gain visibility into the multitude of operations that an agent runs for each request. Often, one request can trigger multiple agentic loops. Helps perform RCA (root cause analysis).
+The same request can trigger different tool calls, retrieve different documents, and generate different responses each time.
+
+- Best observed via traces: Visibility is best gained via traces, which break down each operation in agentic loop into an individual span, with each span representing a tool call, a guardrail trigger, a decision, or something else within the agentic harness(?).
+
+- Traces are enormous in volume, and complex to understand: As requests increase, and as one request integrates moving parts: previously DB hits, Redis or external API calls — now agent loops, traces 
+Traces, by their nature, capture tens if not hundreds of operations in the observability setup of any modern production system. That is a lot of information to sift through when diagnosing a production incident, even without the inclusion of agentic loops. While this information helps break down a request across its entire life cycle across application systems, the inclusion of agentic loops adds a whole new level of complexity.
+
+- Ability to capture full execution context: Exact prompts, conversation history (user and agent), model reasoning, retrieval results, etc. 
+
+- Classic approach of scanning logs can fall short: Expecting engineers to scan logs to debug issues will fall short. You need to combine all three signals, leading from traces interconnected with logs to figure out the entire context. Observing this context with metrics, and across multiple requests will help figure out patterns.
+
+- Cost control: Monitor what each conversation costs, context usage, check per-step latency. Identify expensive or unoptimized patterns before they become a concern at scale. 
+
+- Utilizing AI for debugging: Just like you use AI for debugging code failures, scanning logs, do the same for your agentic loops as well. AI can efficiently scan telemetry for recurring patterns, pinpoint anomalies, and automate monitoring, saving you many developer hours that are better invested in rectifying the problems at hand.
+
+- Build test database of queries, run evals: Use the findings to build a truly comprehensive QA suite for your applications. Use the findings acquired from observing your AI agents to build test datasets, and run evaluations on these dataset of queries and agentic workflows to ensure your agents consistently perform at a standard baseline, and you catch any regressions before they get out of hand.
+
+- LLM vs Agent tracing: LLM tracing is scoped to instrumenting LLM calls: prompts, completions, model params, token usage, latency, metadata.
+Agent tracing captures 
+
+- Check whether we can use span or trace links to correlate traces across turns/conversation: eg., 1 same conv ID used across multiple individual requests.
+
+- check whether we can expose reasoning or add a reasoning step
+
+
+
+personal NOTES:
+
+keep explanations a little terser. People already have a good idea about the concepts. A terse, tight explanation that leaves a little extra out might be more desirable than an elementary explanation.
+
+better understand agentic loops: can one loop be re-run from scratch based on certain conditions? (e.g., output quality not meeting certain standards, or a certain retry trigger)?
+
+traces doesn't have to be the focus, we can focus agent(ic) observability in general, and have it rank for such keywords with content-level keyword emphasis.
+  - almost no usage of the `agentic` keyword
+
+might make sense having a key takeaways section, with a link to the hands-on section
+
+---
+
+Write about the difference since the article was first published. How the instrumentation libraries have evolved. How standards have developed, the consolidation in a dedicated genAI repo.
+Gather enough content AND enough context for a linkedin tweet or two.
+
+for LI, we can narrate the instrumentation and harness choosing experience...
+
+---
+
+`opentelemetry-instrumentation-logging` should be installed, as the `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` env var is now deprecated.
+We are only using it in the app to send default python logging logs to the SigNoz instance to showcase logs correlation.
+
+document that we're switchign to gpt-6-luna -- also enables price calculation in the signoz AI OBSERVABILITY module!
+
+ai agents exist within applications -- title can reflect that 
