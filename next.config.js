@@ -89,6 +89,9 @@ module.exports = () => {
     productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     trailingSlash: true,
+    // /llms-full.txt compiles every docs page's MDX in one prerender (~30s
+    // locally); the 60s default leaves too little headroom on build machines.
+    staticPageGenerationTimeout: 180,
     turbopack: {
       resolveAlias: {
         'react-router-dom': reactRouterDomCompat,

@@ -38,6 +38,7 @@ const hasMatchingLeadingH1 = (markdown: string, title: string): boolean => {
 
 type RenderMarkdownOptions = {
   footerLines?: string[]
+  includeLlmsDirective?: boolean
 }
 
 const wrapDocument = (
@@ -53,6 +54,7 @@ const wrapDocument = (
       tags: getDocTags(doc),
       bodyMarkdown,
       footerLines: options.footerLines ?? [MORE_DOCS_POINTER],
+      includeLlmsDirective: options.includeLlmsDirective,
     })
   )
 

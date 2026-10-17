@@ -3,6 +3,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { fetchAllDocsForPage } from '@/utils/cachedData'
+import { isListedDoc } from '@/utils/docs/listedDocs'
 
 export const revalidate = 86400
 
@@ -17,14 +18,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   const docs = await fetchAllDocsForPage()
-  const docRoutes = docs
-    .filter((post) => !post.draft && post.slug !== 'introduction')
-    .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
-      lastModified: post.lastmod || resolveLatestDate(post),
-      changeFrequency: 'weekly' as const,
-      priority: 0.5,
-    }))
+  const docRoutes = docs.filter(isListedDoc).map((post) => ({
+    url: `${siteUrl}/${post.path}/`,
+    lastModified: post.lastmod || resolveLatestDate(post),
+    changeFrequency: 'weekly' as const,
+    priority: 0.5,
+  }))
 
   return [introductionRoute, ...docRoutes]
 }

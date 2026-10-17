@@ -14,6 +14,8 @@ export type BuildMarkdownDocumentOptions = {
   includeTagDefinitions?: boolean
   bodyMarkdown?: string
   footerLines?: string[]
+  /** Off when the document is embedded in a corpus that already points at llms.txt. */
+  includeLlmsDirective?: boolean
 }
 
 const buildTagSection = (tags: string[], includeTagDefinitions: boolean): string => {
@@ -47,6 +49,7 @@ export const buildMarkdownDocument = ({
   includeTagDefinitions = false,
   bodyMarkdown,
   footerLines = [],
+  includeLlmsDirective = true,
 }: BuildMarkdownDocumentOptions): string => {
   const sections: string[] = []
 
@@ -58,7 +61,9 @@ export const buildMarkdownDocument = ({
     sections.push(description)
   }
 
-  sections.push(LLMS_TXT_DIRECTIVE)
+  if (includeLlmsDirective) {
+    sections.push(LLMS_TXT_DIRECTIVE)
+  }
 
   const tagSection = buildTagSection(tags, includeTagDefinitions)
   if (tagSection) {

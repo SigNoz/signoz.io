@@ -1,90 +1,141 @@
 import siteMetadata from '@/data/siteMetadata'
+import { fetchAllDocsForPage } from '@/utils/cachedData'
+import { getDocsRouteList, INTRO_DESCRIPTION } from './agentDiscovery'
 import {
-  ALTERNATIVES_SITEMAP_ROUTES,
-  CMS_SITEMAP_SECTIONS,
-  CORPORATE_SITEMAP_ROUTES,
-  PRODUCT_SITEMAP_ROUTES,
-  routeLabel,
-  routeUrl,
-} from '@/utils/sitemapRoutes'
-import { getLlmStarterLinks, type LlmStarterLink } from './agentDiscovery'
+  buildIntroductionSectionsMarkdown,
+  INTRO_MARKDOWN_TITLE,
+} from './buildIntroductionAgentMarkdown'
+import { buildMarkdownDocument } from './buildMarkdownDocument'
+import { INTRODUCTION_SLUG, isListedDoc } from './listedDocs'
+import { renderDocMarkdownForAgents } from './renderDocMarkdownForAgents'
 
-const link = (label: string, url: string, description?: string): string =>
-  description ? `- [${label}](${url}): ${description}` : `- [${label}](${url})`
+export type LlmsFullDoc = {
+  slug: string
+  title: string
+  description?: string
+  draft?: boolean
+  body: { raw: string }
+}
 
-const starterLink = (item: LlmStarterLink): string =>
-  link(item.label, `${siteMetadata.siteUrl}${item.route}/`, item.description)
+// MDX compilation is CPU-bound; a small pool keeps the CMS-independent work
+// overlapped without holding every compiled tree in memory at once.
+const RENDER_CONCURRENCY = 8
 
-const routeLinks = (routes: readonly string[]): string =>
-  routes.map((route) => link(routeLabel(route), routeUrl(route))).join('\n')
+const pageUrl = (slug: string): string => `${siteMetadata.siteUrl}/docs/${slug}/`
+const pageMarkdownUrl = (slug: string): string => `${siteMetadata.siteUrl}/docs/${slug}.md`
+
+const pageSection = (slug: string, markdown: string): string =>
+  [`Source: ${pageUrl(slug)}`, `Markdown: ${pageMarkdownUrl(slug)}`, '', markdown].join('\n')
+
+const renderIntroduction = (): string =>
+  buildMarkdownDocument({
+    title: INTRO_MARKDOWN_TITLE,
+    description: INTRO_DESCRIPTION,
+    bodyMarkdown: buildIntroductionSectionsMarkdown(),
+    includeLlmsDirective: false,
+  })
 
 /**
- * Entry-point map of all SigNoz content. Every page already serves its own
- * markdown (`.md` suffix / Accept negotiation), so this file lists where to
- * start — key docs plus every product, alternatives, and company page — and
- * delegates exhaustive listings to the per-section markdown sitemaps that
- * mirror the XML sitemap segments.
+ * Closes a code fence the page left open. In a single page an unclosed fence
+ * only affects that page, but in the corpus it would swallow every later
+ * separator and page, so each page must end outside a fence.
  */
+export const closeUnterminatedFence = (markdown: string): string => {
+  let open: { char: string; length: number } | null = null
+
+  for (const line of markdown.split('\n')) {
+    const match = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
+    if (!match) continue
+    const [, marker, rest] = match
+
+    if (!open) {
+      // A backtick fence's info string cannot contain a backtick.
+      if (marker[0] === '`' && rest.includes('`')) continue
+      open = { char: marker[0], length: marker.length }
+    } else if (marker[0] === open.char && marker.length >= open.length && rest.trim() === '') {
+      open = null
+    }
+  }
+
+  return open ? `${markdown.replace(/\n+$/, '')}\n${open.char.repeat(open.length)}` : markdown
+}
+
+const renderDoc = async (doc: LlmsFullDoc): Promise<string> =>
+  // Tags are dropped: the docs list query does not fetch them, so the
+  // renderer would otherwise print the transform's default tags for every page.
+  closeUnterminatedFence(
+    await renderDocMarkdownForAgents(
+      { slug: doc.slug, title: doc.title, description: doc.description, body: doc.body },
+      { footerLines: [], includeLlmsDirective: false }
+    )
+  )
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results = new Array<R>(items.length)
+  let next = 0
+  const worker = async () => {
+    while (next < items.length) {
+      const index = next++
+      results[index] = await fn(items[index])
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
+  return results
+}
+
+/**
+ * Orders docs by their position in the docs sidebar; docs missing from the
+ * sidebar follow in slug order so the output stays deterministic.
+ */
+export const orderDocsBySidebar = (docs: LlmsFullDoc[], routeOrder: string[]): LlmsFullDoc[] => {
+  const position = new Map(routeOrder.map((route, index) => [route, index]))
+  const rank = (doc: LlmsFullDoc) => position.get(`/docs/${doc.slug}`) ?? Number.POSITIVE_INFINITY
+
+  return [...docs].sort((a, b) => rank(a) - rank(b) || a.slug.localeCompare(b.slug))
+}
+
+/** Builds the corpus from already-fetched docs; separated from I/O for tests. */
+export async function buildLlmsFullMarkdownFromDocs(
+  docs: LlmsFullDoc[],
+  routeOrder: string[] = []
+): Promise<string> {
+  const listed = orderDocsBySidebar(
+    docs.filter((doc) => isListedDoc(doc) && doc.slug.length > 0 && Boolean(doc.title)),
+    routeOrder
+  )
+  const rendered = await mapWithConcurrency(listed, RENDER_CONCURRENCY, renderDoc)
+
+  const header = [
+    '# SigNoz Documentation',
+    '',
+    `> The full text of every SigNoz documentation page (${listed.length + 1} pages) in one markdown file, ordered like the docs sidebar. For the curated index, see ${siteMetadata.siteUrl}/llms.txt. Each page's own markdown is available by appending \`.md\` to its URL.`,
+    '',
+    `Blog posts, guides, comparisons, and product pages are not included. Their markdown indexes: ${siteMetadata.siteUrl}/blogs/sitemap.md, ${siteMetadata.siteUrl}/products/sitemap.md, ${siteMetadata.siteUrl}/alternatives/sitemap.md, ${siteMetadata.siteUrl}/corporate/sitemap.md.`,
+  ].join('\n')
+
+  const sections = [
+    pageSection(INTRODUCTION_SLUG, renderIntroduction()),
+    ...listed.map((doc, index) => pageSection(doc.slug, rendered[index])),
+  ]
+
+  return `${[header, ...sections].join('\n\n---\n\n')}\n`
+}
+
 export async function buildLlmsFullMarkdown(): Promise<string> {
-  const starters = await getLlmStarterLinks()
+  const [docs, routeList] = await Promise.all([fetchAllDocsForPage(), getDocsRouteList()])
 
-  const documentation = [
-    link(
-      'Docs sitemap (markdown)',
-      `${siteMetadata.siteUrl}/docs/sitemap.md`,
-      'Markdown index of every SigNoz documentation page.'
-    ),
-    ...starters.map(starterLink),
-  ].join('\n')
+  // Fail the prerender (or regeneration) rather than publish an empty corpus;
+  // a failed regeneration keeps serving the last good copy.
+  if (docs.length === 0) {
+    throw new Error('llms-full.txt: docs list is empty, refusing to publish an empty corpus')
+  }
 
-  const learning = [
-    link(
-      'Blog & content sitemap (markdown)',
-      `${siteMetadata.siteUrl}/blogs/sitemap.md`,
-      'Markdown index of every blog post, guide, FAQ, case study, OpenTelemetry article, and comparison.'
-    ),
-    ...CMS_SITEMAP_SECTIONS.map(({ section, label }) => link(label, routeUrl(section))),
-  ].join('\n')
-
-  const product = [
-    link('Product pages sitemap (markdown)', `${siteMetadata.siteUrl}/products/sitemap.md`),
-    routeLinks(PRODUCT_SITEMAP_ROUTES),
-  ].join('\n')
-
-  const alternatives = [
-    link('Alternatives sitemap (markdown)', `${siteMetadata.siteUrl}/alternatives/sitemap.md`),
-    routeLinks(ALTERNATIVES_SITEMAP_ROUTES),
-  ].join('\n')
-
-  const company = [
-    link('Company pages sitemap (markdown)', `${siteMetadata.siteUrl}/corporate/sitemap.md`),
-    routeLinks(CORPORATE_SITEMAP_ROUTES),
-  ].join('\n')
-
-  return [
-    '# SigNoz',
-    '',
-    `> Entry points to all SigNoz content. Every page serves a markdown version: append \`.md\` to the page URL or request it with \`Accept: text/markdown\`. For the curated quick-start index, see ${siteMetadata.siteUrl}/llms.txt.`,
-    '',
-    '## Documentation',
-    '',
-    documentation,
-    '',
-    '## Blog & learning content',
-    '',
-    learning,
-    '',
-    '## Product',
-    '',
-    product,
-    '',
-    '## Alternatives & migration',
-    '',
-    alternatives,
-    '',
-    '## Company',
-    '',
-    company,
-    '',
-  ].join('\n')
+  return buildLlmsFullMarkdownFromDocs(
+    docs as LlmsFullDoc[],
+    routeList.map((item) => item.route)
+  )
 }
