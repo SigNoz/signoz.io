@@ -1,329 +1,388 @@
 ---
-date: 2026-08-03
-title: ECS Serverless Collection Agent - Configure
-description: Configure your sidecar service and set up application data collection for ECS Serverless Infrastructure
+date: 2026-10-16
+title: ECS Serverless (Fargate) - Configure
+description: Configure the OpenTelemetry Collector of the ECS Serverless Collection Agent through Foundry to send task metrics, container logs, and traces to SigNoz.
+doc_type: howto
 ---
 
-This guide explains how to configure your ECS sidecar service, verify data flow, and set up application data collection.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/) provides a working config: the collector in each task collects task metrics, the logs of your containers, and data from instrumented applications. This page explains what each component in that config does and how to customize it through Foundry's `casting.yaml`.
 
 ## Prerequisites
 
-- Complete the [installation steps](/docs/opentelemetry-collection-agents/ecs/sidecar/install/)
-- Sidecar container running in your ECS tasks
-- Access to SigNoz Cloud or self-hosted instance
+- ECS Serverless Collection Agent installed with Foundry and Terraform (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/))
+- SigNoz Cloud account or self-hosted SigNoz instance
+- The AWS CLI with access to your ECS cluster
+- The `casting.yaml`, `foundryctl`, and Terraform you installed with
 
-## Verify Data Collection
+## Apply Changes
 
-Log into your SigNoz instance and check that infrastructure data is being received. You should see ECS metrics and logs in the relevant sections.
+For each change:
 
-To visualize ECS data, import pre-built dashboards:
+1. Add the section's snippet to `casting.yaml`. Foundry already generates the default receivers and processors, so add only what you change.
 
-- [container-metrics.json](https://github.com/SigNoz/dashboards/raw/main/ecs-infra-metrics/container-metrics.json)
-- [hostmetrics.json](https://github.com/SigNoz/dashboards/raw/main/hostmetrics/hostmetrics.json)
+2. Run this from the directory that contains `casting.yaml`, then apply the change with your usual Terraform workflow:
 
-Import these in the **Dashboards** section of SigNoz.
+   ```bash
+   foundryctl forge -f casting.yaml
+   ```
 
-## Send Data from Applications
+   Terraform updates the collector's config and registers a new revision of your task definition.
 
-To send data from your ECS applications to SigNoz via the sidecar:
+3. Run this on the machine where you use the AWS CLI to check that the new task runs the collector:
 
-### 1. Instrument Your Application
+   ```bash
+   aws ecs describe-tasks --region <aws-region> --cluster <ecs-cluster> \
+     --tasks $(aws ecs list-tasks --region <aws-region> --cluster <ecs-cluster> --family <task-family> --query 'taskArns[0]' --output text) \
+     --query 'tasks[0].containers[].[name,lastStatus]' --output text
+   ```
 
-Add OpenTelemetry instrumentation to your application. See [SigNoz instrumentation docs](https://signoz.io/docs/instrumentation/).
+   **Verify these values:**
 
-### 2. Configure OTLP Endpoint
+   - `<aws-region>`: The AWS region of your ECS cluster.
+   - `<ecs-cluster>`: The name or ARN of the cluster your task runs in.
+   - `<task-family>`: The `family` of your task definition.
 
-Set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable in your application container to point to the sidecar.
+   The output shows `signoz-collector-sidecar` as `RUNNING`. If it shows `STOPPED`, see [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#view-the-collectors-logs).
 
-<Tabs entityName="network-mode">
-<TabItem value="bridge" label="Bridge" default>
+4. In SigNoz, confirm data in the <a href="https://github.com/SigNoz/dashboards/tree/main/ecs-infra-metrics" target="_blank" rel="noopener noreferrer nofollow">Container Metrics - ECS</a> dashboard for task metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
 
-```json defaultCollapsed
-{
-    ...
-    "containerDefinitions": [
-        {
-            "name": "<your-container-name>",
-            "environment": [
-                {
-                    "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
-                    "value": "http://signoz-collector:4317"
-                },
-                {
-                    "name": "OTEL_RESOURCE_ATTRIBUTES",
-                    "value": "service.name=<your-service-name>"
-                }
-            ],
-            "links": [
-                "signoz-collector"
-            ],
-            ...
-        }
-    ]
-}
+## Send Data from Applications to the Collector
+
+Task metrics and container logs flow as soon as the collector is running.
+
+### Where and how to send data from your application
+
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then add this to its container in `container_definitions`:
+
+```hcl
+environment = [
+  { name = "OTEL_EXPORTER_OTLP_PROTOCOL", value = "http/protobuf" },
+  { name = "OTEL_EXPORTER_OTLP_ENDPOINT", value = "http://localhost:4318" },
+  { name = "OTEL_SERVICE_NAME", value = "<service-name>" },
+  { name = "OTEL_RESOURCE_ATTRIBUTES", value = "service.version=<service-version>" },
+]
 ```
 
-</TabItem>
-<TabItem value="awsvpc" label="AWS VPC">
+**Verify these values:**
 
-```json
-{
-    ...
-    "containerDefinitions": [
-        {
-            "name": "<your-container-name>",
-            "environment": [
-                {
-                    "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
-                    "value": "http://localhost:4317"
-                },
-                {
-                    "name": "OTEL_RESOURCE_ATTRIBUTES",
-                    "value": "service.name=<your-service-name>"
-                }
-            ],
-            ...
-        }
-      ]
-    }
-    ```
+- `<service-name>`: The name your application shows under in SigNoz. It becomes `service.name`.
+- `<service-version>`: Your application's version. It becomes `service.version`.
 
-</TabItem>
-</Tabs>
+Containers in a Fargate task share one network namespace in the `awsvpc` network mode, so they reach the collector on `localhost`. Use port `4317` with `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` for OTLP over gRPC.
 
-### 3. Add Service Name of your Application
+Redeploy the application with your usual Terraform workflow and send it some traffic. Within a minute it shows under **Services** in SigNoz, and its traces carry `aws.ecs.task.family` and `aws.ecs.task.arn`.
 
-To add the service name of your application, you need to set the `OTEL_RESOURCE_ATTRIBUTES` environment variable of the application container to `service.name=<your-service-name>`.
+## Export to SigNoz
 
-In your task definition, you can add the following lines:
+The OTLP/HTTP exporter sends the telemetry the collector gathers to SigNoz.
+
+Foundry generates this by default: the `otlphttp/signoz` exporter sends every pipeline to `SIGNOZ_INGESTION_ENDPOINT`.
+
+## Collect Task Metrics
+
+Use the `awsecscontainermetrics` receiver to collect task and container metrics from the ECS task metadata endpoint.
+
+Foundry collects task metrics by default, every 20s, and its `filter/ecs` processor keeps the 8 `ecs.task.*` metrics. In `casting.yaml`, add this to also send per-container metrics:
+
+```yaml defaultCollapsed
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            processors:
+              filter/ecs:
+                metrics:
+                  include:
+                    metric_names:
+                      - ecs.task.memory.reserved
+                      - ecs.task.memory.utilized
+                      - ecs.task.cpu.reserved
+                      - ecs.task.cpu.utilized
+                      - ecs.task.network.rate.rx
+                      - ecs.task.network.rate.tx
+                      - ecs.task.storage.read_bytes
+                      - ecs.task.storage.write_bytes
+                      - container.memory.utilized
+                      - container.cpu.utilized
+```
+
+Lists replace, so `metric_names` is restated with Foundry's 8 task metrics. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
+
+## Collect Container Logs
+
+Send your containers' stdout and stderr to SigNoz to read them in **Logs Explorer**. The collector is the task's log router (FireLens), and it receives these logs with the `fluentforward` receiver.
+
+A container sends its logs to the collector when its definition uses the module's `log_configuration` output, as in [Step 4 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/#step-4-add-the-module-to-your-task-definition). To add another container, add this to it in `container_definitions`, then apply with your usual Terraform workflow:
+
+```hcl
+logConfiguration = module.signoz_collector_sidecar.log_configuration
+```
+
+The container's logs then go to SigNoz instead of CloudWatch Logs, with `service.name` set to the container's name.
+
+Two rules apply:
+
+- At least one container in the task must keep this setting. The collector is always the task's log router, and ECS rejects a task definition whose log router no container uses, as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/firelens-taskdef.html" target="_blank" rel="noopener noreferrer nofollow">Route logs to FireLens</a> describes.
+- A task can have only one log router. Remove any other FireLens log router container from the task definition before you add the module.
+
+### Disable Logs Collection
+
+To stop collecting one container's logs, remove its `logConfiguration` line, or set its earlier log configuration, then apply with your usual Terraform workflow. Keep the line on at least one other container.
+
+To collect no container logs at all, remove the line from every container, and add this to `casting.yaml`. It removes the collector's log router setting and the `fluentforward` receiver, which cannot start without it:
 
 ```yaml
-ContainerDefinitions:
-    - Name: <your-container-name>
-      
-      Environment:
-        - Name: OTEL_RESOURCE_ATTRIBUTES
-          Value: service.name=<your-service-name>
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            receivers:
+              fluentforward: null
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc]
+  patches:
+    - target: collectionagent/collector/sidecar/main.tf.json
+      operations:
+        - op: remove
+          path: /locals/container_collector_sidecar/firelensConfiguration
 ```
 
-In case of JSON task definition, you can add the following lines:
+Lists replace, so the `logs` pipeline is restated with Foundry's OTLP receivers. Logs that applications send over OTLP keep flowing. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
 
-```json
-"containerDefinitions": [
-    {
-        "name": "<your-container-name>",
-        
-        "environment": [
-            {
-                "name": "OTEL_RESOURCE_ATTRIBUTES",
-                "value": "service.name=<your-service-name>"
-            }
-        ],
-        
-    }
-],
-```
+## Resource Detection
 
-## Send Logs Data from Applications
+The [`resourcedetection` processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds ECS task and cloud resource attributes, so you can filter and group by task in SigNoz.
 
-In this section, we will see how to send logs data from applications deployed in ECS to SigNoz using the sidecar container that we deployed in the previous section.
-
-### 1. Configure Log Router
-
-In your application code, you need to configure the Fluent Bit log router to your application to the sidecar otel-collector container.
-
-```json defaultCollapsed minimap
-{
-    ...
-    {
-        "name": "signoz-log-router",
-        "image": "906394416424.dkr.ecr.us-west-2.amazonaws.com/aws-for-fluent-bit:stable",
-        "cpu": 250,
-        "memory": 512,
-        "essential": true,
-        "dependsOn": [
-            {
-                "containerName": "signoz-collector",
-                "condition": "HEALTHY"
-            }
-        ],
-        "logConfiguration": {
-            "logDriver": "awslogs",
-            "options": {
-                "awslogs-create-group": "True",
-                "awslogs-group": "/ecs/ecs-signoz-log-router",
-                "awslogs-region": "us-east-1",
-                "awslogs-stream-prefix": "ecs"
-            }
-        },
-        "firelensConfiguration": {
-            "type": "fluentbit",
-            "options": {
-                "enable-ecs-log-metadata": "true"
-            }
-        }
-    }
-}
-```
-
-<Admonition type="info">
-When collecting logs from multiple applications, it is recommended to use `<application-name>-log-router` pattern instead of `signoz-log-router` for container name and `awslogs-group`. It helps to separate log router of different application.
-</Admonition>
-
-### 2. Send Logs to Sidecar Container
-
-In your application task definition, you need to use `awsfirelens` log driver to send logs to the sidecar otel-collector container via Fluent Bit log router.
-
-<Tabs entityName="network-mode">
-<TabItem value="bridge" label="Bridge" default>
-
-```json defaultCollapsed
-{
-    ...
-    "containerDefinitions": [
-        {
-            "name": "<your-container-name>",
-            "dependsOn": [
-                {
-                    "containerName": "signoz-log-router",
-                    "condition": "START"
-                }
-            ],
-            "logConfiguration": {
-                "logDriver": "awsfirelens",
-                "options": {
-                    "Name": "forward",
-                    "Match": "*",
-                    "Host": "signoz-collector",
-                    "Port": "8006",
-                    "tls": "off",
-                    "tls.verify": "off"
-                }
-            },
-            "links": [
-                "signoz-collector"
-            ],
-            ...
-        }
-    ]
-}
-```
-
-</TabItem>
-<TabItem value="awsvpc" label="AWS VPC">
-
-```json defaultCollapsed
-{
-    ...
-    "containerDefinitions": [
-        {
-            "name": "<your-container-name>",
-            "dependsOn": [
-                {
-                    "containerName": "signoz-log-router",
-                    "condition": "START"
-                }
-            ],
-            "logConfiguration": {
-                "logDriver": "awsfirelens",
-                "options": {
-                    "Name": "forward",
-                    "Match": "*",
-                    "Host": "localhost",
-                    "Port": "8006",
-                    "tls": "off",
-                    "tls.verify": "off"
-                }
-            }
-            ...
-        }
-    ]
-}
-```
-
-</TabItem>
-</Tabs>
-
-
-## Customize Collection Settings
-
-### Modify Collection Intervals
-
-You can adjust how frequently the sidecar container collects data by modifying the configuration in AWS Parameter Store:
-
-1. Navigate to **AWS Systems Manager > Parameter Store**
-2. Find the `/ecs/signoz/otelcol-sidecar.yaml` parameter
-3. Edit the parameter value
-4. Modify collection intervals in the configuration:
+Foundry runs the `env` and `ecs` detectors by default: `ecs` adds task and cloud resource attributes such as `aws.ecs.cluster.arn`, `aws.ecs.task.arn`, `aws.ecs.task.family`, and `cloud.region`, and `env` adds the collector's `OTEL_RESOURCE_ATTRIBUTES`. In `casting.yaml`, set this to add resource attributes to every signal the collector sends:
 
 ```yaml
-receivers:
-  awsecscontainermetrics:
-    collection_interval: 20s  # Adjust this value
-  
-  hostmetrics:
-    collection_interval: 30s  # Adjust this value
+spec:
+  collector:
+    spec:
+      env:
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>,service.namespace=<service-namespace>
 ```
 
-5. Save the parameter
-6. Restart your ECS tasks to apply the new configuration
+**Verify these values:**
 
-### Filter Specific Metrics
+- `<DEPLOYMENT_ENVIRONMENT>`: The deployment environment you set at install, for example `production`.
+- `<service-namespace>`: A name that groups your services. It becomes `service.namespace`.
 
-To collect only specific metrics, you can modify the configuration to include only the scrapers you need:
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
+
+## Scrape Prometheus Metrics from Containers in the Task
+
+The collector can scrape metrics from containers in the task that expose a Prometheus endpoint. In `casting.yaml`, add this to scrape a container that serves them on port 9090:
 
 ```yaml
-receivers:
-  hostmetrics:
-    scrapers:
-      cpu:        # Only CPU metrics
-      memory:     # Only memory metrics
-      # Comment out or remove scrapers you don't need
-      # disk:
-      # network:
-      # filesystem:
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            receivers:
+              prometheus/app:
+                config:
+                  scrape_configs:
+                    - job_name: app
+                      scrape_interval: 60s
+                      static_configs:
+                        - targets: [localhost:9090]
+            service:
+              pipelines:
+                metrics/prometheus:
+                  receivers: [prometheus/app]
+                  processors: [memory_limiter, resourcedetection, batch]
+                  exporters: [otlphttp/signoz]
 ```
 
-### Customize Log Collection
+The `metrics/prometheus` pipeline runs without `filter/ecs`, so the scraped metrics are kept. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
 
-To customize log collection, you can modify the filelog receiver configuration:
+## Tune Batch and Memory Limiter
+
+Adjust the `batch` processor for throughput and the `memory_limiter` processor for stability based on your workload. See [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices) for detailed guidance.
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">batch processor</a> batches spans, metrics, and logs before export. That reduces connections and improves compression. It supports both size-based and time-based batching.
+
+Foundry's defaults are `send_batch_size: 1000`, `send_batch_max_size: 2048`, and `timeout: 10s`, and `limit_percentage: 80` and `spike_limit_percentage: 20` of the task's memory. In `casting.yaml`, add this to change the batch sizes and the memory limits:
 
 ```yaml
-receivers:
-  filelog:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-    operators:
-    - id: container-parser
-      type: container
-    # Add custom log parsing operators here
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            processors:
+              batch:
+                send_batch_size: 2000
+                send_batch_max_size: 4000
+              memory_limiter:
+                limit_percentage: 75
+                spike_limit_percentage: 15
 ```
 
-## Troubleshooting Configuration
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
 
-### Common Issues
+### Resource Requests and Limits
 
-**No Data in SigNoz:**
-- Verify the sidecar container is running and healthy
-- Check CloudWatch logs for the sidecar container
-- Ensure the OTLP endpoint is correctly configured
-- Verify IAM permissions for Parameter Store access
+Foundry reserves `cpu: 256` and `memoryReservation: 256` for the collector container by default. In `casting.yaml`, add a patch that reserves more:
 
-**Application Traces Not Appearing:**
-- Confirm the `OTEL_EXPORTER_OTLP_ENDPOINT` is set correctly
-- Check that the application is instrumented with OpenTelemetry
-- Verify the sidecar container ports are accessible
-- Ensure the service name is properly configured
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/sidecar/main.tf.json
+      operations:
+        - op: replace
+          path: /locals/container_collector_sidecar/cpu
+          value: 512
+        - op: replace
+          path: /locals/container_collector_sidecar/memoryReservation
+          value: 512
+```
 
-**Logs Not Being Collected:**
-- Verify the log router container is running
-- Check the `awsfirelens` log driver configuration
-- Ensure the sidecar container is accessible on port 8006
-- Verify the log router has proper dependencies configured
+Raise the task's `cpu` and `memory` by what you add, to a <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size" target="_blank" rel="noopener noreferrer nofollow">Fargate task size</a>. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
+
+## Add Custom Processors to Pipelines
+
+A processor transforms or enriches telemetry once a pipeline lists it under `processors`.
+
+Foundry's pipelines are `traces`, `metrics` and `logs`, plus `metrics/ecs` for task metrics. In `casting.yaml`, add this to define a processor and add it to the `traces` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            processors:
+              attributes/team:
+                actions:
+                  - key: team
+                    value: platform
+                    action: insert
+            service:
+              pipelines:
+                traces:
+                  processors: [memory_limiter, resourcedetection, attributes/team, batch]
+```
+
+Lists replace, so `processors` is restated with Foundry's defaults (`memory_limiter`, `resourcedetection`, `batch`), with yours before `batch`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
+
+## Exposing Ports for Custom Receivers
+
+A receiver that listens on a port needs that port reachable from your applications. The following example adds the `statsd` receiver on UDP port 8125.
+
+In `casting.yaml`, add the `statsd` receiver in its own `metrics/statsd` pipeline and map the port:
+
+```yaml defaultCollapsed
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            receivers:
+              statsd:
+                endpoint: 0.0.0.0:8125
+            service:
+              pipelines:
+                metrics/statsd:
+                  receivers: [statsd]
+                  processors: [memory_limiter, resourcedetection, batch]
+                  exporters: [otlphttp/signoz]
+  patches:
+    - target: collectionagent/collector/sidecar/main.tf.json
+      operations:
+        - op: add
+          path: /locals/container_collector_sidecar/portMappings/-
+          value: {containerPort: 8125, protocol: udp}
+```
+
+Containers in the task send to `localhost:8125`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
+
+## Disable Metrics Collection
+
+Turn off task metrics when you only need the telemetry your applications send. Foundry collects task metrics by default. In `casting.yaml`, add this to remove the `awsecscontainermetrics` receiver, the `filter/ecs` processor, and the `metrics/ecs` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            receivers:
+              awsecscontainermetrics: null
+            processors:
+              filter/ecs: null
+            service:
+              pipelines:
+                metrics/ecs: null
+```
+
+The `metrics` pipeline keeps its OTLP receivers, so OTLP metrics from your applications keep flowing. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes).
+
+## Monitor More Task Definitions
+
+The collector sees only the task it runs in, so each task definition you want to monitor needs it.
+
+In the same Terraform root, use the one module in every task definition, as in [Step 4 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/#step-4-add-the-module-to-your-task-definition), then apply with your usual Terraform workflow. For another Terraform root in the same AWS account and region, give its `casting.yaml` its own `metadata.name`, because the module's SSM parameter and IAM policy names come from it.
+
+## View the Collector's Logs
+
+Check the collector's status and read its output when it stops or when data stops arriving in SigNoz. The collector container is not essential, so the task keeps running when the collector stops. ECS restarts the collector only when it stops after running for at least 5 minutes, as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/container-restart-policy.html" target="_blank" rel="noopener noreferrer nofollow">container restart policies</a> describes. A collector that stops sooner, for example on a config error, stays stopped.
+
+Run this on the machine where you use the AWS CLI to read the collector container's status in the latest task:
+
+```bash
+aws ecs describe-tasks --region <aws-region> --cluster <ecs-cluster> \
+  --tasks $(aws ecs list-tasks --region <aws-region> --cluster <ecs-cluster> --family <task-family> --query 'taskArns[0]' --output text) \
+  --query "tasks[0].containers[?name=='signoz-collector-sidecar'].[lastStatus,exitCode]" --output text
+```
+
+**Verify these values:**
+
+- `<aws-region>`: The AWS region of your ECS cluster.
+- `<ecs-cluster>`: The name or ARN of the cluster your task runs in.
+- `<task-family>`: The `family` of your task definition.
+
+The output shows `RUNNING`, or `STOPPED` with the collector's exit code.
+
+The collector's own output is not sent anywhere by default. To read it in CloudWatch Logs, add this patch to `casting.yaml`, as <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/ecs-serverless/terraform/README.md#after-deployment" target="_blank" rel="noopener noreferrer nofollow">Foundry's ECS Serverless example</a> shows:
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/sidecar/main.tf.json
+      operations:
+        - op: add
+          path: /locals/container_collector_sidecar/logConfiguration
+          value:
+            logDriver: awslogs
+            options:
+              awslogs-group: <log-group>
+              awslogs-region: <aws-region>
+              awslogs-stream-prefix: collector
+```
+
+**Verify these values:**
+
+- `<log-group>`: An existing CloudWatch Logs log group, for example `/ecs/app`. The execution role needs permission to write to it, which the `AmazonECSTaskExecutionRolePolicy` managed policy grants.
+- `<aws-region>`: The AWS region of your ECS cluster.
+
+[Apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#apply-changes). The collector's output then shows in the log group, under the `collector` stream prefix, as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html" target="_blank" rel="noopener noreferrer nofollow">Send Amazon ECS logs to CloudWatch</a> describes.
 
 ## Next Steps
 
+- [Monitoring ECS Fargate using OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

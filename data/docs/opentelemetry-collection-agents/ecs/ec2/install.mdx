@@ -1,782 +1,416 @@
 ---
-date: 2026-10-06
-title: ECS EC2 Collection Agent - Install
-description: View metrics and logs for your ECS infrastructure
+date: 2026-10-16
+title: ECS EC2 - Install
+description: Install the OpenTelemetry Collector of the ECS EC2 Collection Agent with Foundry and Terraform to send host and container metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
-This guide walks you through installing the daemon service to collect metrics and logs from your ECS infrastructure.
+This guide explains how to install the ECS EC2 Collection Agent on an Amazon ECS cluster with Foundry and Terraform.
 
-## Prerequisites Check
+## Prerequisites
 
-Before starting, verify you have:
+- An Amazon ECS cluster with <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_container_instance.html" target="_blank" rel="noopener noreferrer nofollow">EC2 container instances</a> or <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html" target="_blank" rel="noopener noreferrer nofollow">ECS Anywhere external instances</a>, running Docker Engine 25 or newer.
+- <a href="https://developer.hashicorp.com/terraform/install" target="_blank" rel="noopener noreferrer nofollow">Terraform</a> 1.4 or newer and the AWS CLI on the same machine, with AWS credentials that can create ECS services, task definitions, IAM roles, and AWS AppConfig applications.
+- A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
-- ECS cluster with **EC2** or **External** launch type
-- AWS CLI configured with appropriate permissions
-- SigNoz Cloud account or self-hosted SigNoz instance
-- Access to AWS Parameter Store and CloudFormation
+## Install the Collection Agent
 
-## Installation Steps
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
 
-### Step 1: Daemon Service Template
+### Step 1: Install foundryctl
 
-The CloudFormation template defines the infrastructure needed for the daemon service, including container specifications, IAM roles, and network settings.
+Run this on the machine where you run Terraform:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` with one document for the collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/overview/#how-it-works). `collector.kind: agent` selects that collector. Pick the tab for the instances your cluster runs on:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
 
 <Tabs entityName="launch-type">
 <TabItem value="ec2" label="EC2" default>
 
-```yaml minimap defaultCollapsed
-AWSTemplateFormatVersion: 2010-09-09
-Parameters:
-  ClusterName:
-    Type: String
-    Description: Enter the name of your ECS cluster from which you want to collect metrics
-  CreateIAMRoles:
-    Type: String
-    Default: 'False'
-    AllowedValues:
-      - 'True'
-      - 'False'
-    Description: Whether to create default IAM roles
-    ConstraintDescription: must specify True or False.
-  TaskRoleArn:
-    Type: String
-    Default: Default
-    Description: Enter the role arn you want to use as the ecs task role
-  ExecutionRoleArn:
-    Type: String
-    Default: Default
-    Description: Enter the role arn you want to use as the ecs execution role
-  command:
-    Type: String
-    Description: Using the right command to choose the config file you want to config your signoz-collector
-    Default: Default
-  SigNozConfigPath:
-    Type: String
-    Description: Enter the name of your SigNoz config file to fetch from SSM Parameter Store
-    Default: Default
-Conditions:
-  CreateRoles: !Equals
-    - !Ref CreateIAMRoles
-    - 'True'
-  DefaultTaskRole: !Equals
-    - !Ref TaskRoleArn
-    - Default
-  DefaultExecutionRole: !Equals
-    - !Ref ExecutionRoleArn
-    - Default
-Resources:
-  ECSTaskDefinition:
-    Type: 'AWS::ECS::TaskDefinition'
-    Properties:
-      Family: ecs-otel-daemon-service
-      TaskRoleArn: !If
-        - CreateRoles
-        - !GetAtt
-          - ECSTaskRole
-          - Arn
-        - !If
-          - DefaultTaskRole
-          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSTaskRole'
-          - !Ref TaskRoleArn
-      ExecutionRoleArn: !If
-        - CreateRoles
-        - !GetAtt
-          - ECSExecutionRole
-          - Arn
-        - !If
-          - DefaultExecutionRole
-          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSExecutionRole'
-          - !Ref ExecutionRoleArn
-      NetworkMode: host
-      ContainerDefinitions:
-        - Name: signoz-collector
-          Image: 'otel/opentelemetry-collector-contrib:0.139.0'
-          User: 0
-          MountPoints:
-            - ReadOnly: true
-              ContainerPath: /rootfs/proc
-              SourceVolume: proc
-            - ReadOnly: true
-              ContainerPath: /rootfs/dev
-              SourceVolume: dev
-            - ReadOnly: true
-              ContainerPath: /sys/fs/cgroup
-              SourceVolume: al2_cgroup
-            - ReadOnly: true
-              ContainerPath: /cgroup
-              SourceVolume: al1_cgroup
-            - ReadOnly: true
-              ContainerPath: /rootfs/sys/fs/cgroup
-              SourceVolume: al2_cgroup
-            - ReadOnly: true
-              ContainerPath: /rootfs/cgroup
-              SourceVolume: al1_cgroup
-            - ReadOnly: true
-              ContainerPath: /rootfs/boot/efi
-              SourceVolume: boot
-            - ReadOnly: true
-              ContainerPath: /var/lib/docker/containers/
-              SourceVolume: docker-logs
-            - ReadOnly: true
-              ContainerPath: /var/run/docker.sock
-              SourceVolume: docker-sock
-          PortMappings:
-            - ContainerPort: 2255
-              HostPort: 2255
-              Protocol: tcp
-            - ContainerPort: 4317
-              HostPort: 4317
-              Protocol: tcp
-            - ContainerPort: 4318
-              HostPort: 4318
-              Protocol: tcp
-          Command: !Split [' ', !Ref command]
-          Secrets:
-            - Name: SIGNOZ_CONFIG_CONTENT
-              ValueFrom: !Ref SigNozConfigPath
-          LogConfiguration:
-            LogDriver: json-file
-      RequiresCompatibilities:
-        - EC2
-      Volumes:
-        - Name: proc
-          Host:
-            SourcePath: /proc
-        - Name: dev
-          Host:
-            SourcePath: /dev
-        - Name: al1_cgroup
-          Host:
-            SourcePath: /cgroup
-        - Name: al2_cgroup
-          Host:
-            SourcePath: /sys/fs/cgroup
-        - Name: boot
-          Host:
-            SourcePath: /boot/efi
-        - Name: docker-logs
-          Host:
-            SourcePath: /var/lib/docker/containers/
-        - Name: docker-sock
-          Host:
-            SourcePath: /var/run/docker.sock
-      Cpu: '1000'
-      Memory: '1024'
-  ECSDaemonService:
-    Type: 'AWS::ECS::Service'
-    Properties:
-      TaskDefinition: !Ref ECSTaskDefinition
-      Cluster: !Ref ClusterName
-      LaunchType: EC2
-      SchedulingStrategy: DAEMON
-      ServiceName: otel-daemon-service
-  ECSTaskRole:
-    Type: 'AWS::IAM::Role'
-    Condition: CreateRoles
-    Properties:
-      Description: Allows ECS tasks to call AWS services on your behalf.
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: ''
-            Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
-      RoleName: OtelECSTaskRole
-  ECSExecutionRole:
-    Type: 'AWS::IAM::Role'
-    Condition: CreateRoles
-    Properties:
-      Description: >-
-        Allows ECS container agent makes calls to the Amazon ECS API on your
-        behalf.
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: ''
-            Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
-        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
-        - 'arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess'
-      RoleName: OtelECSExecutionRole
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/ecs-region: <aws-region>
+    foundry.signoz.io/ecs-cluster-arn: <ecs-cluster-arn>
+spec:
+  deployment:
+    platform: aws
+    mode: ecs
+    flavor: terraform
+  collector:
+    kind: agent
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
 ```
 
-</TabItem>
+**Verify these values:**
 
+- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`.
+- `<ecs-cluster-arn>`: The ARN of your ECS cluster, from the <a href="https://console.aws.amazon.com/ecs/v2/clusters" target="_blank" rel="noopener noreferrer nofollow">Amazon ECS console</a> or `aws ecs list-clusters`.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/ecs/terraform" target="_blank" rel="noopener noreferrer nofollow">ECS EC2 Terraform example</a>.
+
+</TabItem>
 <TabItem value="external" label="External">
 
-```yaml minimap defaultCollapsed
-AWSTemplateFormatVersion: 2010-09-09
-Parameters:
-  ClusterName:
-    Type: String
-    Description: Enter the name of your ECS cluster from which you want to collect metrics
-  CreateIAMRoles:
-    Type: String
-    Default: 'False'
-    AllowedValues:
-      - 'True'
-      - 'False'
-    Description: Whether to create default IAM roles
-    ConstraintDescription: must specify True or False.
-  TaskRoleArn:
-    Type: String
-    Default: Default
-    Description: Enter the role arn you want to use as the ecs task role
-  ExecutionRoleArn:
-    Type: String
-    Default: Default
-    Description: Enter the role arn you want to use as the ecs execution role
-  command:
-    Type: String
-    Description: Using the right command to choose the config file you want to config your signoz-collector
-    Default: Default
-  SigNozConfigPath:
-    Type: String
-    Description: Enter the name of your SigNoz config file to fetch from SSM Parameter Store
-    Default: Default
-Conditions:
-  CreateRoles: !Equals
-    - !Ref CreateIAMRoles
-    - 'True'
-  DefaultTaskRole: !Equals
-    - !Ref TaskRoleArn
-    - Default
-  DefaultExecutionRole: !Equals
-    - !Ref ExecutionRoleArn
-    - Default
-Resources:
-  ECSTaskDefinition:
-    Type: 'AWS::ECS::TaskDefinition'
-    Properties:
-      Family: ecs-otel-daemon-service
-      TaskRoleArn: !If
-        - CreateRoles
-        - !GetAtt
-          - ECSTaskRole
-          - Arn
-        - !If
-          - DefaultTaskRole
-          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSTaskRole'
-          - !Ref TaskRoleArn
-      ExecutionRoleArn: !If
-        - CreateRoles
-        - !GetAtt
-          - ECSExecutionRole
-          - Arn
-        - !If
-          - DefaultExecutionRole
-          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSExecutionRole'
-          - !Ref ExecutionRoleArn
-      NetworkMode: host
-      ContainerDefinitions:
-        - Name: signoz-collector
-          Image: 'otel/opentelemetry-collector-contrib:0.139.0'
-          User: 0
-          MountPoints:
-            - ReadOnly: true
-              ContainerPath: /rootfs/proc
-              SourceVolume: proc
-            - ReadOnly: true
-              ContainerPath: /rootfs/dev
-              SourceVolume: dev
-            - ReadOnly: true
-              ContainerPath: /sys/fs/cgroup
-              SourceVolume: al2_cgroup
-            - ReadOnly: true
-              ContainerPath: /cgroup
-              SourceVolume: al1_cgroup
-            - ReadOnly: true
-              ContainerPath: /rootfs/sys/fs/cgroup
-              SourceVolume: al2_cgroup
-            - ReadOnly: true
-              ContainerPath: /rootfs/cgroup
-              SourceVolume: al1_cgroup
-            - ReadOnly: true
-              ContainerPath: /rootfs/boot/efi
-              SourceVolume: boot
-            - ReadOnly: true
-              ContainerPath: /var/lib/docker/containers/
-              SourceVolume: docker-logs
-            - ReadOnly: true
-              ContainerPath: /var/run/docker.sock
-              SourceVolume: docker-sock
-          PortMappings:
-            - ContainerPort: 2255
-              HostPort: 2255
-              Protocol: tcp
-            - ContainerPort: 4317
-              HostPort: 4317
-              Protocol: tcp
-            - ContainerPort: 4318
-              HostPort: 4318
-              Protocol: tcp
-          Command: !Split [' ', !Ref command] # <-- This line is updated for correctness
-          Secrets:
-            - Name: SIGNOZ_CONFIG_CONTENT
-              ValueFrom: !Ref SigNozConfigPath
-          HealthCheck:
-            Command:
-              - CMD-SHELL
-              - wget -qO- http://localhost:13133/ || exit 1
-            Interval: 5
-            Retries: 2
-            Timeout: 3
-          LogConfiguration:
-            LogDriver: json-file
-      RequiresCompatibilities:
-        - EC2
-      Volumes:
-        - Name: proc
-          Host:
-            SourcePath: /proc
-        - Name: dev
-          Host:
-            SourcePath: /dev
-        - Name: al1_cgroup
-          Host:
-            SourcePath: /cgroup
-        - Name: al2_cgroup
-          Host:
-            SourcePath: /sys/fs/cgroup
-        - Name: boot
-          Host:
-            SourcePath: /boot/efi
-        - Name: docker-logs
-          Host:
-            SourcePath: /var/lib/docker/containers/
-        - Name: docker-sock
-          Host:
-            SourcePath: /var/run/docker.sock
-      Cpu: '1000'
-      Memory: '1024'
-  ECSDaemonService:
-    Type: 'AWS::ECS::Service'
-    Properties:
-      TaskDefinition: !Ref ECSTaskDefinition
-      Cluster: !Ref ClusterName
-      LaunchType: EXTERNAL
-      SchedulingStrategy: DAEMON
-      ServiceName: otel-daemon-service
-  ECSTaskRole:
-    Type: 'AWS::IAM::Role'
-    Condition: CreateRoles
-    Properties:
-      Description: Allows ECS tasks to call AWS services on your behalf.
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: ''
-            Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
-      RoleName: OtelECSTaskRole
-  ECSExecutionRole:
-    Type: 'AWS::IAM::Role'
-    Condition: CreateRoles
-    Properties:
-      Description: >-
-        Allows ECS container agent makes calls to the Amazon ECS API on your
-        behalf.
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: ''
-            Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
-        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
-        - 'arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess'
-      RoleName: OtelECSExecutionRole
+<Admonition type="warning" title="Before you install on external instances">
+- Outbound access from each instance to <a href="https://docs.aws.amazon.com/general/latest/gr/appconfig.html" target="_blank" rel="noopener noreferrer nofollow">AWS AppConfig</a>, `public.ecr.aws`, Docker Hub, and your SigNoz endpoint.
+- <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#enable_task_iam_roles" target="_blank" rel="noopener noreferrer nofollow">Task IAM roles enabled</a> for the `host` network mode, which the ECS Anywhere install script sets up.
+</Admonition>
+
+This casting runs the collector with the `EXTERNAL` launch type, detects the host with the `system` detector, and also collects `/var/log/syslog` and `/var/log/auth.log`:
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/ecs-region: <aws-region>
+    foundry.signoz.io/ecs-cluster-arn: <ecs-cluster-arn>
+spec:
+  deployment:
+    platform: aws
+    mode: ecs
+    flavor: terraform
+  collector:
+    kind: agent
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+            processors:
+              resourcedetection:
+                detectors: [env, system]
+            receivers:
+              filelog/host:
+                include:
+                  - /hostfs/var/log/messages
+                  - /hostfs/var/log/secure
+                  - /hostfs/var/log/syslog
+                  - /hostfs/var/log/auth.log
+                  - /hostfs/var/log/ecs/*.log
+  patches:
+    - target: collectionagent/collector/agent/collector.tf.json
+      operations:
+        - op: replace
+          path: /resource/aws_ecs_task_definition/collector_agent/requires_compatibilities/0
+          value: EXTERNAL
+        - op: replace
+          path: /resource/aws_ecs_service/collector_agent/launch_type
+          value: EXTERNAL
 ```
+
+**Verify these values:**
+
+- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`.
+- `<ecs-cluster-arn>`: The ARN of the ECS cluster your external instances are registered to, from the <a href="https://console.aws.amazon.com/ecs/v2/clusters" target="_blank" rel="noopener noreferrer nofollow">Amazon ECS console</a> or `aws ecs list-clusters`.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/ecs/terraform" target="_blank" rel="noopener noreferrer nofollow">ECS EC2 Terraform example</a>.
 
 </TabItem>
 </Tabs>
-### Step 2: Create OpenTelemetry Collector Configuration
 
-The OpenTelemetry Collector configuration defines what data to collect and where to send it.
+<Admonition type="info" title="Change the region, cluster, or IAM roles" defaultCollapsed="true">
+Annotations under `metadata` set the region and ECS cluster the collector runs on, and the IAM roles its task uses. To use a role you manage instead of the one Terraform creates, add its annotation. The casting reads these:
 
-#### 2a. OtelCollector Configuration Template
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-
-1. Copy the following Collector template to `otelcol-daemon.yaml` file
-2. Replace `SIGNOZ_INGESTION_KEY` with your [SigNoz Cloud ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-3. Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-
-```yaml minimap defaultCollapsed
-extensions:
-  health_check:
-    endpoint: 0.0.0.0:13133
-
-receivers:
-  # Standard OTLP receiver for traces, metrics, and logs from instrumented applications
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-
-  # Collects ECS task and container metrics from the ECS Task Metadata Endpoint.
-  # In daemon mode, this receiver collects metrics only for the collector's own task.
-  # For container metrics of your application tasks, use the ECS sidecar setup.
-  awsecscontainermetrics:
-    collection_interval: 20s
-
-  # Collects host-level metrics from the underlying EC2 instance.
-  hostmetrics:
-    collection_interval: 30s
-    root_path: /rootfs
-    scrapers:
-      cpu:
-      disk:
-      load:
-      memory:
-      network:
-      filesystem:
-        metrics:
-          system.filesystem.usage:
-            enabled: true
-        exclude_mount_points:
-          match_type: regexp
-          mount_points:
-            - /rootfs/boot/*
-
-  # Auto-discovers and tails container logs directly from the Docker json-log files on the host.
-  filelog:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-    operators:
-      - id: container-parser
-        type: container
-        # Docker log paths have no Kubernetes metadata. Skip path parsing.
-        add_metadata_from_filepath: false
-
-processors:
-  # Detects host-level resource attributes (EC2 instance, ECS cluster, region, account).
-  # The `ecs` detector reads the collector's own task. The task and log attributes
-  # below are turned off so that your applications do not get the collector's task.
-  # Set ECS task attributes in the application instead.
-  resourcedetection:
-    detectors: [env, ecs, ec2]
-    override: false
-    ecs:
-      resource_attributes:
-        aws.ecs.task.arn:
-          enabled: false
-        aws.ecs.task.family:
-          enabled: false
-        aws.ecs.task.id:
-          enabled: false
-        aws.ecs.task.revision:
-          enabled: false
-        aws.log.group.arns:
-          enabled: false
-        aws.log.group.names:
-          enabled: false
-        aws.log.stream.arns:
-          enabled: false
-        aws.log.stream.names:
-          enabled: false
-
-  # Batches telemetry to optimize network traffic.
-  batch:
-    timeout: 10s
-    send_batch_size: 1000
-
-exporters:
-  # Exports telemetry to your backend (e.g., SigNoz)
-  # Uses environment variables for portability, which you'll set in your ECS task definition.
-  otlphttp:
-    endpoint: 'https://ingest.<region>.signoz.cloud:443'
-    headers:
-      signoz-ingestion-key: '<your-ingestion-key>'
-
-service:
-  extensions: [health_check]
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [resourcedetection, batch]
-      exporters: [otlphttp]
-
-    metrics:
-      receivers: [otlp, hostmetrics, awsecscontainermetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlphttp]
-
-    logs:
-      receivers: [otlp, filelog]
-      processors: [resourcedetection, batch]
-      exporters: [otlphttp]
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/ecs-region: <aws-region>                                 # AWS region of the cluster, required
+    foundry.signoz.io/ecs-cluster-arn: <ecs-cluster-arn>                       # ECS cluster the collector runs on, required
+    foundry.signoz.io/ecs-task-role-arn: <task-role-arn>                       # optional; Terraform creates signoz-collectionagent-iam-task when absent
+    foundry.signoz.io/ecs-task-execution-role-arn: <task-execution-role-arn>   # optional; Terraform creates signoz-collectionagent-iam-exec when absent
 ```
 
-</TabItem>
+**Verify these values:**
 
-<TabItem value="self-host" label="Self Host" default>
-1. Copy the following Collector Template to `otelcol-daemon.yaml` file  
-2. Replace the endpoint URLs with your SigNoz instance endpoints
-3. Update any authentication settings as needed
+- `<aws-region>` and `<ecs-cluster-arn>`: The values you set in the casting above.
+- `<task-role-arn>`: An IAM role with `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`, used to <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-integration-containers-agent.html" target="_blank" rel="noopener noreferrer nofollow">fetch the collector config</a>.
+- `<task-execution-role-arn>`: An IAM role that pulls the images and starts the task, for example one with the `AmazonECSTaskExecutionRolePolicy` managed policy.
 
-```yaml minimap defaultCollapsed
-extensions:
-  health_check:
-    endpoint: 0.0.0.0:13133
+Terraform attaches policies to the roles it creates and passes the task's roles to ECS. Your AWS credentials need permission for both: `iam:PutRolePolicy` and `iam:AttachRolePolicy` to attach the policies, and `iam:PassRole` to pass the roles.
 
-receivers:
-  # Standard OTLP receiver for traces, metrics, and logs from instrumented applications
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
+The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/ecs/terraform/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes each one.
+</Admonition>
 
-  # Collects ECS task and container metrics from the ECS Task Metadata Endpoint.
-  # In daemon mode, this receiver collects metrics only for the collector's own task.
-  # For container metrics of your application tasks, use the ECS sidecar setup.
-  awsecscontainermetrics:
-    collection_interval: 20s
+<Admonition type="info" title="Store Terraform state in S3" defaultCollapsed="true">
+The Collection Agent's Terraform state starts in `pours/collectionagent/collector/agent/terraform.tfstate`. To keep it in an S3 bucket, add this under the Collection Agent document's `spec` before the first cast:
 
-  # Collects host-level metrics from the underlying EC2 instance.
-  hostmetrics:
-    collection_interval: 30s
-    root_path: /rootfs
-    scrapers:
-      cpu:
-      disk:
-      load:
-      memory:
-      network:
-      filesystem:
-        metrics:
-          system.filesystem.usage:
-            enabled: true
-        exclude_mount_points:
-          match_type: regexp
-          mount_points:
-            - /rootfs/boot/*
-
-  # Auto-discovers and tails container logs directly from the Docker json-log files on the host.
-  filelog:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-    operators:
-      - id: container-parser
-        type: container
-        # Docker log paths have no Kubernetes metadata. Skip path parsing.
-        add_metadata_from_filepath: false
-
-processors:
-  # Detects host-level resource attributes (EC2 instance, ECS cluster, region, account).
-  # The `ecs` detector reads the collector's own task. The task and log attributes
-  # below are turned off so that your applications do not get the collector's task.
-  # Set ECS task attributes in the application instead.
-  resourcedetection:
-    detectors: [env, ecs, ec2]
-    override: false
-    ecs:
-      resource_attributes:
-        aws.ecs.task.arn:
-          enabled: false
-        aws.ecs.task.family:
-          enabled: false
-        aws.ecs.task.id:
-          enabled: false
-        aws.ecs.task.revision:
-          enabled: false
-        aws.log.group.arns:
-          enabled: false
-        aws.log.group.names:
-          enabled: false
-        aws.log.stream.arns:
-          enabled: false
-        aws.log.stream.names:
-          enabled: false
-
-  # Batches telemetry to optimize network traffic.
-  batch:
-    timeout: 10s
-    send_batch_size: 1000
-
-exporters:
-  # Exports telemetry to your backend (e.g., SigNoz)
-  # Uses environment variables for portability, which you'll set in your ECS task definition.
-  otlphttp:
-    endpoint: 'http://<SIGNOZ_SELF_HOST_ENDPOINT>:4318'
-
-
-service:
-  extensions: [health_check]
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [resourcedetection, batch]
-      exporters: [otlphttp]
-
-    metrics:
-      receivers: [otlp, hostmetrics, awsecscontainermetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlphttp]
-
-    logs:
-      receivers: [otlp, filelog]
-      processors: [resourcedetection, batch]
-      exporters: [otlphttp]
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/backend.tf.json
+      operations:
+        - op: replace
+          path: /terraform/backend
+          value:
+            s3:
+              bucket: <state-bucket>
+              key: signoz/collectionagent.tfstate
+              region: <state-bucket-region>
 ```
 
-</TabItem>
-</Tabs>
-#### 2b. Store Configuration in AWS Parameter Store
+**Verify these values:**
 
-1. Navigate to **AWS Systems Manager > Parameter Store** in the AWS Console
-2. Click **Create parameter**
-3. Set parameter name: `/ecs/signoz/otelcol-daemon.yaml`
-4. Choose type: **String**
-5. Copy the entire contents of your updated `otelcol-daemon.yaml` file
-6. Paste the content into the **Value** field
-7. Click **Create parameter**
+- `<state-bucket>`: An existing S3 bucket. Your AWS credentials need `s3:ListBucket`, `s3:GetObject` and `s3:PutObject` on it.
+- `<state-bucket-region>`: The AWS region of that bucket, for example `us-east-1`.
 
-### Step 3: Set Environment Variables
-
-Configure the necessary environment variables for the CloudFormation deployment:
+If you add the backend after a first cast, run this from the directory that contains `casting.yaml` to move the existing state into the bucket, then cast again:
 
 ```bash
-export CLUSTER_NAME=<YOUR-ECS-CLUSTER-NAME>
-export REGION=<YOUR-ECS-REGION>
-export COMMAND=--config=env:SIGNOZ_CONFIG_CONTENT
-export SIGNOZ_CONFIG_PATH=/ecs/signoz/otelcol-daemon.yaml
+foundryctl forge -f casting.yaml
+terraform -chdir=pours/collectionagent/collector/agent init -migrate-state
 ```
+</Admonition>
 
-**Replace the placeholders:**
+### Step 3: Deploy
 
-- `<YOUR-ECS-CLUSTER-NAME>`: Name of your ECS cluster (e.g., `my-production-cluster`)
-- `<YOUR-ECS-REGION>`: AWS region where your cluster runs (e.g., `us-east-1`)
-
-### Step 4: Deploy the Daemon Service
-
-Create the CloudFormation stack that will deploy your daemon service:
+Run this from the directory that contains `casting.yaml`:
 
 ```bash
-aws cloudformation create-stack \
-    --stack-name AOCECS-daemon-${CLUSTER_NAME}-${REGION} \
-    --template-body file://daemon-template.yaml \
-    --parameters ParameterKey=ClusterName,ParameterValue=${CLUSTER_NAME} \
-                 ParameterKey=CreateIAMRoles,ParameterValue=True \
-                 ParameterKey=command,ParameterValue=${COMMAND} \
-                 ParameterKey=SigNozConfigPath,ParameterValue=${SIGNOZ_CONFIG_PATH} \
-    --capabilities CAPABILITY_NAMED_IAM \
-    --region ${REGION}
+foundryctl cast -f casting.yaml
 ```
 
-### Step 5: Verify Installation
+This command:
 
-Check that the daemon service deployed successfully:
+- writes the Terraform root `pours/collectionagent/collector/agent`;
+- applies it with Terraform, using the AWS credentials on this machine;
+- creates the collector's config in AWS AppConfig, the `signoz-collector-agent` task definition and daemon service, and the IAM roles you did not state.
+
+<Admonition type="tip" title="Run Terraform yourself" defaultCollapsed="true">
+To run Terraform directly, generate the Terraform root and apply it. Run this from the directory that contains `casting.yaml`:
 
 ```bash
-# Check CloudFormation stack status
-aws cloudformation describe-stacks \
-    --stack-name AOCECS-daemon-${CLUSTER_NAME}-${REGION} \
-    --region ${REGION} \
-    --query 'Stacks[0].StackStatus'
-
-# List running tasks to see the daemon service
-aws ecs list-tasks \
-    --cluster ${CLUSTER_NAME} \
-    --region ${REGION}
+foundryctl forge -f casting.yaml   # writes the Terraform root under pours/collectionagent/collector/agent
+terraform -chdir=pours/collectionagent/collector/agent init
+terraform -chdir=pours/collectionagent/collector/agent apply
 ```
 
-**Expected outputs:**
+To see the changes before you apply them, run `terraform -chdir=pours/collectionagent/collector/agent plan`.
+</Admonition>
 
-- Stack status should be `CREATE_COMPLETE`
-- You should see task ARNs for the daemon service containers
+### Step 4: Verify the Collection Agent
 
-### Step 6: Check Service Health
-
-Verify the daemon service containers are running properly:
+Run this on the machine where you use the AWS CLI to check that the daemon service runs one collector task on every instance:
 
 ```bash
-# Get detailed information about running tasks
-aws ecs describe-tasks \
-    --cluster ${CLUSTER_NAME} \
-    --tasks $(aws ecs list-tasks --cluster ${CLUSTER_NAME} --query 'taskArns[0]' --output text) \
-    --region ${REGION}
+aws ecs describe-services --region <aws-region> --cluster <ecs-cluster-arn> \
+  --services signoz-collector-agent \
+  --query 'services[0].{status:status,desiredCount:desiredCount,runningCount:runningCount}'
 ```
 
-Look for:
+**Verify these values:**
 
-- **Task Status**: Should be `RUNNING`
-- **Health Status**: Should be `HEALTHY`
-- **Container Status**: All containers should be `RUNNING`
+- `<aws-region>`: The `foundry.signoz.io/ecs-region` value in `casting.yaml`.
+- `<ecs-cluster-arn>`: The `foundry.signoz.io/ecs-cluster-arn` value in `casting.yaml`.
 
-## Video Walkthrough
+The output should look similar to the following, with `runningCount` equal to `desiredCount`, the number of instances in the cluster. The counts vary:
 
-If you are someone who understands things better through video implementation, here are videos to help you. Check them out:
+```output
+{
+    "status": "ACTIVE",
+    "desiredCount": 3,
+    "runningCount": 3
+}
+```
 
-**Part 1 — AWS ECS OpenTelemetry Tutorial: Daemon Service Setup, SSM Config & CloudFormation Deploy**
+In SigNoz, open the [Hosts](https://signoz.io/docs/infrastructure-monitoring/host-monitoring/) view under **Infrastructure Monitoring**, which lists each instance under its `host.name`. Check **Logs Explorer** to confirm container and host logs are flowing; host logs show under `service.name` `ecs-host`.
 
-<YouTube id="adodyKwlh84" />
+## Customize the Collection Agent
 
-**Part 2 — AWS ECS OpenTelemetry Tutorial: Deploy App Containers, Route OTLP & Validate Signals in SigNoz**
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
 
-<YouTube id="NxW0XhWhN-s" />
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
 
-## Troubleshooting Installation
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
 
-### Common Issues
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to collect host metrics every 30s:
 
-**Stack Creation Failed:**
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/agent/agent.yaml: |
+              receivers:
+                hostmetrics:
+                  collection_interval: 30s
+  ```
 
-- Check IAM permissions for CloudFormation, ECS, and Parameter Store
-- Verify the cluster name and region are correct
-- Ensure the Parameter Store parameter exists and has correct content
+- **Terraform** (task definition, service): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against the files under `collectionagent/collector/agent/`, such as `collector.tf.json` for the task definition and daemon service. To find the path to patch, run `foundryctl forge -f casting.yaml` and look in the generated files under `pours/collectionagent/collector/agent/`. For example, to reserve more memory for the collector:
 
-**Tasks Not Starting:**
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/agent/collector.tf.json
+        operations:
+          - op: replace
+            path: /locals/containers_collector_agent/1/memoryReservation
+            value: 1024
+  ```
 
-- Check ECS cluster has available capacity
-- Verify the container image can be pulled
-- Review CloudWatch logs for the failed tasks
+  Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
 
-**Parameter Store Access Issues:**
+<details>
 
-- Ensure the IAM role has `ssm:GetParameter` permissions
-- Verify the parameter name matches exactly: `/ecs/signoz/otelcol-daemon.yaml`
-- Check the parameter is in the same region as your ECS cluster
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
 
-## Clean Up (If Needed)
+### The collector task is not placed on an instance
 
-To remove the daemon service installation:
+In Step 4, `runningCount` stays below `desiredCount`. Run this on the machine where you use the AWS CLI to read the service's latest events:
 
 ```bash
-aws cloudformation delete-stack \
-    --stack-name AOCECS-daemon-${CLUSTER_NAME}-${REGION} \
-    --region ${REGION}
+aws ecs describe-services --region <aws-region> --cluster <ecs-cluster-arn> \
+  --services signoz-collector-agent --query 'services[0].events[:5].message'
 ```
 
-This will remove all resources created by the CloudFormation template, including the ECS service, task definition, and IAM roles.
+**Verify these values:**
+
+- `<aws-region>`: The `foundry.signoz.io/ecs-region` value in `casting.yaml`.
+- `<ecs-cluster-arn>`: The `foundry.signoz.io/ecs-cluster-arn` value in `casting.yaml`.
+
+The events include `service signoz-collector-agent was unable to place a task because no container instance met all of its requirements. The closest matching container-instance <container-instance-id> is already using a port required by your task.`
+
+**Cause:** another task on that instance holds host port 4317 or 4318, for example another OpenTelemetry Collector running as a daemon service. The task also uses port 13133 (the collector's health check) and port 2772 (the AppConfig agent) on the instance without reserving them. A process that holds one of those makes the container fail at start instead of blocking placement.
+
+**Fix:** list the cluster's services with `aws ecs list-services --region <aws-region> --cluster <ecs-cluster-arn>`, then delete the service that holds the ports or move its ports. The daemon service places its task on that instance again on its own.
+
+After the fix, the Step 4 command shows `runningCount` equal to `desiredCount`.
+
+### The AppConfig agent container never turns healthy
+
+In the Step 4 command, `runningCount` stays below `desiredCount`. Run this on a container instance to see the AppConfig agent container's status:
+
+```bash
+docker ps -a --filter label=com.amazonaws.ecs.container-name=signoz-collector-appconfig-agent --format '{{.Status}}'
+```
+
+The status shows `(unhealthy)`. To see the error it gets from AWS AppConfig, read its logs:
+
+```bash
+docker logs --since 10m $(docker ps -aq --filter label=com.amazonaws.ecs.container-name=signoz-collector-appconfig-agent | head -n 1)
+```
+
+**Cause:** the task has no AWS credentials that can read the config. Either the task role you stated with `foundry.signoz.io/ecs-task-role-arn` lacks `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`, or task IAM roles are not enabled for the `host` network mode on the instance.
+
+**Fix:** add both actions to the task role, or enable task IAM roles as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#enable_task_iam_roles" target="_blank" rel="noopener noreferrer nofollow">External instance additional configuration</a> describes. The daemon service replaces the unhealthy task on its own.
+
+After the fix, the Step 4 command shows `runningCount` equal to `desiredCount`.
+
+### foundryctl cast rejects a patch
+
+In Step 3, or after you add a patch from [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/#customize-the-collection-agent), `foundryctl cast -f casting.yaml` stops before it applies anything, with the message `failed to apply patch for target "<target>"`. Its cause ends with `doc is missing key: <path>: missing value` or `doc is missing path: <path>: missing value`, or, when no generated file matches the target, `patch target "<target>" did not match any generated material`.
+
+**Cause:** the patch's target or `path` does not exist in what Foundry generates.
+
+**Fix:** remove the patch and run `foundryctl forge -f casting.yaml`. Then take the target and the path from the generated files under `pours/collectionagent/collector/agent/`, add the patch back, and run Step 3 again.
+
+After the fix, the cast creates the resources, and the Step 4 command shows the service.
+
+### terraform plan rejects the region or the cluster ARN
+
+In Step 3, `foundryctl cast -f casting.yaml` stops at `terraform plan` with `Error: Invalid value for variable` and one of these messages:
+
+```output
+aws_region must be a region identifier such as us-east-1.
+cluster_arn must be the ARN of an ECS cluster.
+```
+
+**Cause:** the `foundry.signoz.io/ecs-region` or `foundry.signoz.io/ecs-cluster-arn` annotation is missing or malformed. The region must look like `us-east-1`, and the cluster ARN must start with `arn:aws:ecs:`. A role annotation that is not an IAM role ARN fails the same way.
+
+**Fix:** set the annotation under `metadata.annotations` in `casting.yaml`, as in Step 2, then run Step 3 again.
+
+After the fix, the cast creates the resources, and the Step 4 command shows the service.
+
+### terraform plan stops on an interpolation in `env`
+
+In Step 3, `foundryctl cast -f casting.yaml` stops at `terraform plan` on `collector.tf.json`, in `locals.containers_collector_agent[1].environment`, with `Error: Invalid reference` for a value such as `${MY_KEY}`, or `Error: Extra characters after interpolation expression` for a value such as `${env:MY_KEY}`.
+
+**Cause:** a value under `spec.collector.spec.env` contains `${`, which Terraform reads as one of its own expressions.
+
+**Fix:** replace the expression with the literal value in `casting.yaml`, then run Step 3 again.
+
+After the fix, the cast creates the resources, and the Step 4 command shows the service.
+
+### terraform plan finds no AWS credentials
+
+In Step 3, `foundryctl cast -f casting.yaml` stops at `terraform plan` with `Error: No valid credential sources found`.
+
+**Cause:** Terraform's AWS provider found no credentials on the machine where you run `foundryctl`.
+
+**Fix:** sign in with the AWS CLI or select a profile in the shell you run `foundryctl` from, for example:
+
+```bash
+export AWS_PROFILE=<profile-name>
+```
+
+**Verify these values:**
+
+- `<profile-name>`: A profile from `aws configure list-profiles`.
+
+For every way to pass credentials, see the <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration" target="_blank" rel="noopener noreferrer nofollow">AWS provider authentication docs</a>.
+
+After the fix, `aws sts get-caller-identity` prints your account and role, and Step 3 gets past `terraform plan`.
+
+</details>
+
+## Send data from your applications
+
+Host metrics, container metrics, and container and host logs flow as soon as the collector is running. To send traces, metrics, and logs from your applications, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#send-data-from-applications-to-the-collector).
 
 ## Next Steps
 
-- [Configure the Daemon Service Collection Agent](/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
+- [Configure the ECS EC2 Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
+- [Monitoring ECS EC2 using OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
-- [Learn more about Collection from EC2](/docs/opentelemetry-collection-agents/ecs/ec2/overview/)
