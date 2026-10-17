@@ -4,7 +4,7 @@ description: Learn how to setup observability for your AI Agents using OpenTelem
 date: 2026-10-16
 tags: [OpenTelemetry, AI]
 authors: [dhruv_ahuja]
-image: /img/blog/2026/06/opentelemetry-llm-guardrail-trace.gif 
+image: /img/blog/2026/10/ai_agent_observability.webp
 keywords: [opentelemetry,python,opentelemetry llm,ai observability,agentic observability,llm observability,opentelemetry genai,opentelemetry agentic,observability for ai]
 related_articles:
   - '/blog/what-is-opentelemetry'
@@ -15,21 +15,40 @@ related_articles:
   - '/opentelemetry/python'
 ---
 
-{/* # TODO: replace the image property; guardrail not captured (no genai-util support) */}
+AI agents don't just call a model and return its response. Instead, they orchestrate entire workflows that involve selecting tools for LLMs to use, evaluating guardrails, routing between LLM calls, and managing context across conversation turns. This means that a single user request can spawn dozens of internal steps, each one a potential point of failure, latency, or unexpected cost.
 
-AI agents are redefining what software is capable of: they run complex workflows, make smart decisions based on user input, automate entire manual processes end-to-end with support for human-in-the-loop handoffs or smart decision routing via LLM calls, and enable users to build complex knowledge systems tailored to their use-case. A person can now verbally dictate a system and have an agent build and deploy that system for them.
+AI agent observability is the practice of capturing these agent execution flows so you can understand _what_ the agent did, _why_ it chose that path, and _how_ it performed. In terms of the implementation, it means tracing every step in an agent run, such as tool calls and model invocations, and correlating them with system-level signals like latency, token usage, and error rates.
 
-{/* # TODO: combine these two paragraphs; idea is they are powerful but complex  */}
+Tracing builds the foundation for agent observability, as a single trace maps an agent's decision graph per-run, revealing which tools were called and what their output was, what the model returned, what input context was passed to the model, and so on.<br />
+Without tracing, debugging an AI agent becomes a game of trying to guess what event triggered what decision in the agentic loop, and why.
 
-There's no free lunch, however. AI agent implementations are often complex, with branching system implementations, extensive guardrails to flag malicious user activity, multiple tool integrations, and constantly evolving model capabilities and variable usage costs that developers must observe, control, and optimize.
+## Why do agents need observability?
 
-AI agents need observability because they are non-determinstic by nature with many complex, moving parts. Although some variance is to be expected, agent runs with the same inputs might produce significantly different, or even outright invalid results depending on the LLM version, tool choice, or provider availability and uptime, among other factors.
+Unlike traditional software, where one could argue that full-fledged observability can be implemented when the application reaches a certain scale, deploying AI agents to production requires observability from the get-go, because:
+
+- 
+
+
+## How does OpenTelmeetry enable AI agent observability?
+
+Using [OpenTelemetry](https://signoz.io/opentelemetry/) for your agentic applications means your visibility extends beyond AI agents to the entire request: what endpoint did the user call, what DB queries ran, were any background jobs enqueued, did the application make any downstream API calls?  
+
+<Figure src="/img/blog/2026/10/ai_agent_observability.webp" alt="OpenTelemetry enables developers to instrument entire applications, including their AI agents." caption="OpenTelemetry enables developers to instrument entire applications, including their AI agents." />
 
 In this article, we'll go into more detail on why you need to observe your AI agents, and go over hands-on demo by adding OpenTelemetry to a Python application using the OpenTelemetry Agents SDK.<br />
 During this process, we'll also cover some common challenges you might face while <Tooltip text="instrumenting" content="The process of configuring applications to emit telemetry data (primarily traces, metrics, and logs)." /> your AI agent workflows, and talk about the current maturity levels of <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry GenAI libraries</a>.
 
 
-## Why do LLM applications need observability?
+## Why do AI Agents need observability?
+
+AI agents are fundamentally different from traditional software as they encapsulate LLM API calls, which are non-determinstic in nature. Every single request can trigger multiple agent workflows, each of which might perform multiple operations: tool calls, guardrail checks, context persistence, etc.
+
+You need observability for AI agents because:
+- **LLMs are non-deterministic:** 
+
+
+
+
 
 If you are already familiar with the challenges of maintaining LLM applications across their lifecycle, feel free to [skip to the next section](#what-is-opentelemetry) that discusses OpenTelemetry.
 
