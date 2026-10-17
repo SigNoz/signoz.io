@@ -1,5 +1,5 @@
 ---
-date: 2026-10-12
+date: 2026-10-16
 title: AI Observability Telemetry Requirements - GenAI Attributes
 description: Check which OpenTelemetry GenAI span attributes the SigNoz AI Observability dashboard and filters need, and how SigNoz counts LLM calls and tool calls.
 doc_type: reference
@@ -16,11 +16,21 @@ doc_type: reference
 | `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | Token panels and cost. |
 | `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` | Cache token panels, cache cost, and **Prompt cache hit ratio**. |
 | `gen_ai.server.ttft` | **TTFT (p95)** and **Time to first token**. Streaming instrumentations, such as OpenLIT, send this attribute in seconds. |
-| `gen_ai.response.finish_reasons` | **Finish reasons**. |
+| `gen_ai.response.finish_reasons` | **Finish reasons** panel. Also sets the finish reason on every output message in the [conversation thread](https://signoz.io/docs/ai-observability-conversation-thread/), overriding per-message values. |
 | `gen_ai.tool.name` | All **Tool calls** panels. SigNoz counts a span with this attribute as a tool call. |
 | `gen_ai.agent.name` | Agent spans for the **Per-trace usage** panels. |
 
 An AI trace is a trace with at least one LLM, tool, or agent span. Error panels use the error status of the span, not an attribute.
+
+## Conversation thread attributes
+
+The [conversation thread](https://signoz.io/docs/ai-observability-conversation-thread/) in [Trace Details](https://signoz.io/docs/userguide/span-details/) reads these attributes from an LLM or agent span. They carry prompt and response content, which is **Opt-In** in the OpenTelemetry specification, so SigNoz only renders a turn when the span carries the matching attribute.
+
+| Attribute | Used by |
+| --- | --- |
+| `gen_ai.system_instructions` | The leading **system** message in the conversation thread. |
+| `gen_ai.input.messages` | The user and prior turns in the conversation thread. |
+| `gen_ai.output.messages` | The assistant turns and tool calls in the conversation thread. |
 
 ## Resource attributes
 
@@ -34,6 +44,7 @@ Tool spans do not carry a model. As a result, the **model** and **provider** fil
 ## Next steps
 
 - [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [Conversation thread](https://signoz.io/docs/ai-observability-conversation-thread/): read the system prompt, turns, and finish reasons of an AI span.
 - [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map other attribute names to the GenAI names.
 - [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
 
