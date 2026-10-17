@@ -22,63 +22,39 @@ AI agent observability is the practice of capturing these agent execution flows 
 Tracing builds the foundation for agent observability, as a single trace maps an agent's decision graph per-run, revealing which tools were called and what their output was, what the model returned, what input context was passed to the model, and so on.<br />
 Without tracing, debugging an AI agent becomes a game of trying to guess what event triggered what decision in the agentic loop, and why.
 
-## Why do agents need observability?
+## Why do AI agents need observability?
 
-Unlike traditional software, where one could argue that full-fledged observability can be implemented when the application reaches a certain scale, deploying AI agents to production requires observability from the get-go, because:
+When building traditional software, engineers could start small with application observability, and reach for more comprehensive implementations once the application scaled up or the business asked.<br />
+Consider a startup that found product-market fit and must now adhere to Service Level Agreements (SLAs) for enterprise clients. At this stage, they must observe their entire distributed system to maintain service uptime.
 
-- 
+However, the same can't be said for agentic applications. Every request can trigger a different combination of tool calls, guardrail checks, and model invocations, meaning the resulting behaviour can vary significantly across runs.
 
+### LLM non-determinism compounds across agent steps
 
-## How does OpenTelmeetry enable AI agent observability?
+A single LLM call is already non-deterministic: the same prompt can produce different outputs across runs. Agents amplify this because they chain multiple LLM calls together, where the output of one step determines the input of the next.
 
-Using [OpenTelemetry](https://signoz.io/opentelemetry/) for your agentic applications means your visibility extends beyond AI agents to the entire request: what endpoint did the user call, what DB queries ran, were any background jobs enqueued, did the application make any downstream API calls?  
+This means variance doesn't just exist at one point. Rather, it compounds across the workflow. A slightly different model response in step one can cause the agent to select a completely different tool in step two, which changes the context passed to step three, and so on. Reproducing a specific agent run becomes nearly impossible without capturing the full execution path.
+
+### Agents can silently produce incorrect results
+
+Traditional software either succeeds or throws an error. Very rarely do you have situations where application response quality degrades without notice. Agents introduce a failure mode that's harder to catch: the workflow completes without any error, but the agent selected the wrong tool, retrieved stale context, or returned a response that is confidently incorrect.
+
+Without observability, these silent failures only surface when a user complains or when downstream systems consume bad output. Tracing each decision in the agentic loop, such as which tool was selected, what context was available, what the model actually returned, is the only reliable way to evaluate whether an agent's "successful" run was actually logically correct.
+
+### Cost and latency are unpredictable by design
+
+Agents decide at runtime how many tools to call and how many LLM roundtrips to make. A simple user query might resolve in one LLM call, while a similar query might trigger several tool calls and model invocations depending on the agent's reasoning.
+
+This makes cost and latency inherently unpredictable. Observability lets engineers track token usage, tool call frequency, and per-step latency across runs to identify expensive patterns early. For example, if two models with different pricing tiers perform comparably for a given workload, engineers can switch to the cheaper option — but only if they have the data to make that comparison.
+
+## How does OpenTelemetry enable AI agent observability?
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is a CNCF graduated project for instrumenting applications to emit telemetry data (primarily [traces, metrics, and logs](https://signoz.io/blog/three-pillars-of-observability/)) in a vendor-neutral format. What makes it uniquely suited for agentic applications is that your visibility extends beyond the AI agent to the entire request: what endpoint did the user call, what DB queries ran, were any background jobs enqueued, did the application make any downstream API calls?
 
 <Figure src="/img/blog/2026/10/ai_agent_observability.webp" alt="OpenTelemetry enables developers to instrument entire applications, including their AI agents." caption="OpenTelemetry enables developers to instrument entire applications, including their AI agents." />
 
-In this article, we'll go into more detail on why you need to observe your AI agents, and go over hands-on demo by adding OpenTelemetry to a Python application using the OpenTelemetry Agents SDK.<br />
-During this process, we'll also cover some common challenges you might face while <Tooltip text="instrumenting" content="The process of configuring applications to emit telemetry data (primarily traces, metrics, and logs)." /> your AI agent workflows, and talk about the current maturity levels of <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry GenAI libraries</a>.
 
 
-## Why do AI Agents need observability?
-
-AI agents are fundamentally different from traditional software as they encapsulate LLM API calls, which are non-determinstic in nature. Every single request can trigger multiple agent workflows, each of which might perform multiple operations: tool calls, guardrail checks, context persistence, etc.
-
-You need observability for AI agents because:
-- **LLMs are non-deterministic:** 
-
-
-
-
-
-If you are already familiar with the challenges of maintaining LLM applications across their lifecycle, feel free to [skip to the next section](#what-is-opentelemetry) that discusses OpenTelemetry.
-
-#### LLMs are non-deterministic
-
-Now you might think that observing your LLM integrations is not that different from classic observability. The key difference is that the output generated by LLMs is **non-deterministic**: the same input can produce completely different outputs across runs.
-
-Developers often equip LLMs with dedicated tools since models can hallucinate unpredictably on tasks that require precise, deterministic output.
-
-<Figure src="/img/blog/2026/06/opentelemetry-llm-hallucination-tools.webp" alt="Developers must equip LLMs with tools to handle their non-deterministic nature, when precision is required." caption="Developers must equip LLMs with tools to handle their non-deterministic nature, when precision is required." />
-
-#### Ensuring context-appropriate responses
-
-Non-determinism **does not** mean that the responses are actually incorrect. In most scenarios though, developers likely want their responses to be structured in a certain way.
-
-For example, while the response "very likely" for a query like "chances of rain tomorrow" might be suitable, the same response for a query like "chances of stock market climbing tomorrow" might be unacceptable, where the user likely expects more nuance from the application system.
-
-Ensuring that responses remain consistent across a range of user queries is one of the key factors that separates a polished LLM product from an unreliable one.
-
-#### Managing quality across updates
-
-LLM providers frequently release model updates, modify their backends, and provide optimal usage guides. Meanwhile, developers also experiment with model configurations and share the ones which work for them. All in all, the space is developing quickly, and each of these factors can affect the response quality of your LLM setup.
-
-As a practical example, LLM providers can suffer "brown-outs" where their infrastructure cannot keep up with user demand, leading to latency spikes, timeouts, or even degraded response quality in certain scenarios, making it critical to observe how your LLM setup holds up over time.
-
-## What is OpenTelemetry?
-
-[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is a Cloud Native Computing Foundation (CNCF) project aimed at standardizing the way we instrument applications for generating telemetry data. Before OpenTelemetry arrived, telemetry data lived in silos and often had little or no correlation between signals.
-
-It follows a <a href="https://github.com/open-telemetry/opentelemetry-specification?tab=readme-ov-file" rel="noopener noreferrer nofollow" target="_blank">specification-driven development</a> model that standardizes telemetry generation and collection details, meaning any compatible backend can process and visualize telemetry data emitted via its SDKs. <br />As there is no need to rewrite the entire instrumentation plumbing each time you change observability backends, there is **no vendor lock-in**.
 
 ## Implementing OpenTelemetry in LLM Applications
 
