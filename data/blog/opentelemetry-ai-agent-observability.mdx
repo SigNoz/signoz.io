@@ -20,7 +20,7 @@ AI agents don't just call a model and return its response. Instead, they orchest
 AI agent observability is the practice of capturing these agent execution flows so you can understand _what_ the agent did, _why_ it chose that path, and _how_ it performed. In terms of the implementation, it means tracing every step in an agent run, such as tool calls and model invocations, and correlating them with system-level signals like latency, token usage, and error rates.
 
 Tracing builds the foundation for agent observability, as a single trace maps an agent's decision graph per-run, revealing which tools were called and what their output was, what the model returned, what input context was passed to the model, and so on.<br />
-Without tracing, debugging an AI agent becomes a game of trying to guess what event triggered what decision in the agentic loop, and why.
+Without tracing, debugging an AI agent becomes a game of trying to guess which event triggered what decision in the agentic loop, and why.
 
 ## Why do AI agents need observability?
 
@@ -54,65 +54,67 @@ This makes cost and latency inherently unpredictable. Observability lets enginee
 <Figure src="/img/blog/2026/10/ai_agent_observability.webp" alt="OpenTelemetry enables developers to instrument entire applications, including their AI agents." caption="OpenTelemetry enables developers to instrument entire applications, including their AI agents." />
 
 
-
-
-## Implementing OpenTelemetry in LLM Applications
+## Setting up AI agent observability with OpenTelemetry
 
 ### Prerequisites
 
 - Python 3.12 or newer. Download the <a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank">latest version</a>.
-- A [SigNoz Cloud account](https://signoz.io/teams/) for visualizing the telemetry data.
-- An <a href="https://platform.openai.com/api-keys" rel="noopener noreferrer nofollow" target="_blank">OpenAI API key</a> to use with the application.
-- An API client like <a href="https://www.postman.com/" rel="noopener noreferrer nofollow" target="_blank">Postman</a> or <a href="https://www.usebruno.com/" rel="noopener noreferrer nofollow" target="_blank">Bruno</a> for managing API payloads and visualizing responses.
-
-While earlier Python versions like 3.10 may technically work, they are nearing their <a href="https://devguide.python.org/versions/#supported-versions" rel="noopener noreferrer nofollow" target="_blank">end of life</a>. Python 3.12 will continue to receive security updates till late 2028.
+- A [SigNoz Cloud account](https://signoz.io/teams/) for visualizing telemetry data.
+- An <a href="https://platform.openai.com/api-keys" rel="noopener noreferrer nofollow" target="_blank">OpenAI API key</a> to run the agent.
+- An API client like <a href="https://www.usebruno.com/" rel="noopener noreferrer nofollow" target="_blank">Bruno</a> or <a href="https://www.postman.com/" rel="noopener noreferrer nofollow" target="_blank">Postman</a> to test endpoints.
 
 ### Setting up SigNoz
 
-SigNoz is an OpenTelemetry-native observability platform that provides logs, traces, and metrics in a unified platform.
+SigNoz Cloud is an OpenTelemetry-native observability platform that unifies traces, metrics, and logs in a single interface.
 
-- [Sign up](https://signoz.io/teams/) for a free SigNoz Cloud account.
-- [Follow the documentation](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to create ingestion keys for your account.
-- Ensure the region and ingestion key values are readily accessible for the following steps.
-
-Once done, you’re ready to configure the application and point it towards your SigNoz instance.
+- [Sign up](https://signoz.io/teams/) for a free SigNoz Cloud account.
+- [Follow the documentation](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate an ingestion key.
+- Keep your workspace region (e.g., `us`, `in`, `eu`) and ingestion key handy for the application configuration.
 
 ### Running the Demo Application
 
-#### Application Setup
-
-Clone the SigNoz Examples repository and navigate to the application folder:
+Clone the SigNoz Examples repository and navigate to the demo folder:
 
 ```bash
 git clone https://github.com/SigNoz/examples.git
-cd examples/python/opentelemetry-llm-demo
+cd examples/python/otel-ai-agent-observability-demo
 ```
 
-Create and activate a Python virtual environment.
+Create and activate a Python virtual environment:
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
-The `requirements.txt` file contains all the necessary [OpenTelemetry Python](https://signoz.io/docs/instrumentation/opentelemetry-python/) packages. Install them by running:
+Install the application and [OpenTelemetry Python](https://signoz.io/opentelemetry/python/) dependencies:
 
 ```bash
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-The following dependencies enable the OpenTelemetry instrumentation process:
+The <a href="https://github.com/SigNoz/examples/blob/main/python/otel-ai-agent-observability-demo/requirements.txt" rel="noopener noreferrer nofollow" target="_blank">`requirements.txt` file</a> pins the following OTel packages:
 
-- `opentelemetry-distro`: This provides a convenient mechanism to automatically configure some of the more common options for users, helping us get started with OpenTelemetry auto-instrumentation quickly.
-- `opentelemetry-exporter-otlp`: This package installs [the OTLP](https://signoz.io/blog/what-is-otlp/) exporters required to transmit telemetry data to any [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/).
+- `opentelemetry-distro`: Provides a convenient mechanism to configure some of the more common options for Python auto-instrumentation.
+- `opentelemetry-exporter-otlp`: Installs [the OTLP exporters](https://signoz.io/blog/what-is-otlp/) needed to deliver telemetry data to any [OpenTelemetry-compatible backend](https://signoz.io/blog/opentelemetry-backend/).
+- `opentelemetry-instrumentation-genai-openai` and `opentelemetry-instrumentation-genai-openai-agents`: Modern OpenAI Agents and OpenAI client SDK instrumentation packages from the dedicated <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry GenAI repository</a>.
 
-The following command detects standard libraries or frameworks (such as FastAPI) used in our application, and installs their respective instrumentation libraries:
+Next, run `opentelemetry-bootstrap` to detect widely used Python libraries (like the [FastAPI web framework](https://signoz.io/blog/opentelemetry-fastapi/) and HTTPX client library) and install their corresponding instrumentation packages:
 
 ```bash
 opentelemetry-bootstrap --action=install
 ```
 
-Finally, we will configure our environment variables and start the application, wrapping the entrypoint within `opentelemetry-instrument` to auto-instrument our application code.
+<KeyPointCallout title="Dangling OpenAI instrumentation library">
+
+`opentelemetry-bootstrap` currently installs a deprecated `opentelemetry-instrumentation-openai-v2` package by default.<br />
+However, because our `requirements.txt` explicitly installs the modern `opentelemetry-instrumentation-genai-*` libraries, OpenTelemetry resolves to the newer packages at runtime.
+
+You can safely leave the v2 package alone or uninstall it.
+
+</KeyPointCallout>
+
+Start the application using `opentelemetry-instrument` to automatically instrument our application, including the AI agent workflow:
 
 ```bash
 OPENAI_API_KEY="<your-openai-api-key>" \
@@ -121,37 +123,48 @@ OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_SERVICE_NAME="otel-ai-agent-observability-demo" \
 OTEL_RESOURCE_ATTRIBUTES="service.version=1.0.0,deployment.environment=dev" \
 OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=span_only \
 opentelemetry-instrument fastapi run --port 8085 --workers 1
 ```
 
-Replace the `<your-region>` and the `your-ingestion-key` placeholders with the region of your SigNoz workspace (e.g., `us`, `in`) and your newly created ingestion key. You will also need to supply your OpenAI API key.
+Here is what these [OpenTelemetry environment variables](https://signoz.io/blog/otel-environment-variables/) configure:
 
-`OTEL_RESOURCE_ATTRIBUTES` defines the metadata attached to each batch of telemetry that goes out of our application, and the service name `opentelemetry-llm-demo` ensures the OTel backend can correctly identify the telemetry source.<br />
-Setting `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` to `true` ensures that application logs are exported alongside and correlated with the generated traces.
+- `OTEL_SERVICE_NAME="otel-ai-agent-observability-demo"`: Uniquely identifies the application in SigNoz.
+- `OTEL_RESOURCE_ATTRIBUTES`: Attaches metadata (version `1.0.0`, environment `dev`) to all exported telemetry. This is used to organize and filter telemetry in the OpenTelemetry backend.
+- `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=span_only`: Captures model prompts, completions, and tool definitions as span attributes on LLM model spans.
 
-Run the command, and the FastAPI server should start on port 8085.  Calling the `/` endpoint will return a simple success response.
+<KeyPointCallout title="Correlating logs to traces">
+
+Application logs are automatically correlated with traces by the `opentelemetry-bootstrap`-installed logging instrumentation. This eliminates the need to set the `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` environment variable, which has been deprecated in the more recent OpenTelemetry releases.
+
+</KeyPointCallout>
+
+The FastAPI server starts on port 8085. Calling `/` returns a quick health check response:
 
 ```bash
 (.venv)  ❯ curl "http://127.0.0.1:8085/"
 {"message":"OpenTelemetry NBA agent demo is running"}
 ```
 
-Before we move ahead, let’s look at how the OpenTelemetry community is standardizing telemetry standards, capture, and export processes for AI-driven applications.  
+Before we move ahead, let’s look at how the OpenTelemetry community is standardizing telemetry standards, capture, and export processes for agentic applications.
 
-#### Evolving GenAI Standards
+### Evolving GenAI standards
 
-Throughout this article, we’ve used the term "LLMs", but as become familiar with OpenTelemetry, you will see the term `Generative AI` (or `GenAI`) being used almost exclusively. OpenTelemetry uses the umbrella term `GenAI` to refer to any application utilizing AI models.<br />
-Later when we use our application, you’ll see that all telemetry attributes and metrics ingested by SigNoz have the `gen_ai.*` prefix, such as <a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/#gen-ai-agent-name" rel="noopener noreferrer nofollow" target="_blank">`gen_ai.agent.name`</a>.
+While early instrumentation discussions focused solely on "LLM tracing", OpenTelemetry standardizes AI telemetry under the broader umbrella of `Generative AI` (GenAI), using <a href="https://github.com/open-telemetry/semantic-conventions-genai/blob/4f85037ef86e92c510d2ef881a58f1076f6fc0e4/docs/gen-ai/README.md" rel="noopener noreferrer nofollow" target="_blank">semantic conventions prefixed with `gen_ai.*`</a>.
 
-It is crucial to understand that these standards are evolving rapidly and are still technically in <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" rel="noopener noreferrer nofollow" target="_blank">Development status</a>. Because of this fast-paced development, and the criticality of the GenAI project, the OpenTelemetry team recently created a <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">separate, dedicated repository</a> to maintain GenAI instrumentation libraries.
+Because GenAI patterns and agentic harnesses evolve far more rapidly than traditional HTTP or database libraries, OpenTelemetry created a dedicated repository, <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">`open-telemetry/opentelemetry-python-genai`</a>, to enable maintainers to independently develop and publish these libraries.
 
-This "immaturity" has a real-world impact on developers. For example, the `opentelemetry-bootstrap` tool currently doesn’t recognize or install the OpenAI Agents SDK that we’ll be using in our application.
+This migration introduced a cleaner, **split-scope architecture**:
 
-To counter this, we have manually added the corresponding entry to the [`requirements.txt` file](https://github.com/SigNoz/examples/blob/main/python/opentelemetry-llm-demo/requirements.txt#L6).
+1. **`opentelemetry.instrumentation.genai.openai_agents`**: Instruments the agent orchestration harness, emitting spans for workflow execution (`invoke_workflow`) and agent routing (`invoke_agent`).
+2. **`opentelemetry.instrumentation.genai.openai`**: A companion package that instruments the underlying model calls (`chat`), capturing token usage (`gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`), model parameters, and prompt context.
 
-<Figure src="/img/blog/2026/06/opentelemetry-llm-bootstrap-gap.webp" alt="Developers must install certain GenAI instrumentation libraries manually as the `opentelemetry-bootstrap` command does not recognize them yet." caption="Developers must install certain GenAI instrumentation libraries manually as the `opentelemetry-bootstrap` command does not recognize them yet." />
+In the earlier iteration of <a href="https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation-genai/opentelemetry-instrumentation-openai-agents-v2" rel="noopener noreferrer nofollow" target="_blank">the Agents instrumentation library</a>, it attempted to capture both agent workflows and raw model invocations within a single package. Decoupling agent loops from raw model calls ensures each layer strictly follows OpenTelemetry GenAI semantic conventions.
 
-Further, you will often find that the current GenAI instrumentation libraries struggle to maintain full coverage for these rapidly changing AI implementations. We will explore this in more detail when we analyze our app’s trace output.
+Additionally, because `opentelemetry-bootstrap` has not yet added these dedicated GenAI packages to its automated discovery list, you must install and track them separately through your `requirements.txt` or `pyproject.toml` files.
+
+<Figure src="/img/blog/2026/06/opentelemetry-llm-bootstrap-gap.webp" alt="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." caption="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." />
+
 
 ### Dissecting the OpenTelemetry LLM Application
 
