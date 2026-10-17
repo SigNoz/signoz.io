@@ -3456,6 +3456,11 @@ module.exports = () => {
           destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
+        {
+          source: '/blog/opentelemetry-llm/',
+          destination: '/blog/opentelemetry-ai-agent-observability/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
