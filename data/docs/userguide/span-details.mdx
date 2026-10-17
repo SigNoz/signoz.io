@@ -1,5 +1,5 @@
 ---
-date: 2026-09-29
+date: 2026-10-16
 title: Trace Details
 description: Visualize and analyze individual traces using the flamegraph, waterfall chart, and span inspection tools in SigNoz.
 doc_type: howto
@@ -80,6 +80,14 @@ Hover over any attribute value to see quick action icons:
   caption="Quick actions on span attributes — Pin, Filter for/out Value, Group By, Copy Field Name/Value"
   className="box-shadowed-image"
 />
+
+### LLM Conversation Messages
+
+When the selected span is a large language model (LLM) call that carries conversation content, SigNoz formats the input and output messages into readable conversation turns instead of showing them as raw attributes. This works for spans instrumented with the OpenTelemetry GenAI semantic conventions (`gen_ai.input.messages` and `gen_ai.output.messages`) and for spans instrumented with OpenInference (`llm.input_messages.*` and `llm.output_messages.*`), so SDKs such as Arize Phoenix and the `openinference-instrumentation-*` packages render in the same panel.
+
+Each turn shows the parts the model sent or received: text, media (image, audio, or video), reasoning steps, tool calls with their name and arguments, linked tool results, and the finish reason on the output message. If only one side of the conversation has structured message attributes and the other falls back to a different format, the panel surfaces a warning so the gap is visible.
+
+Message content is captured only when your instrumentation is configured to record it, which is off by default for privacy. For how to enable content capture and which attributes drive this view, see [Viewing LLM conversations in trace detail](https://signoz.io/docs/llm-observability/#viewing-llm-conversations-in-trace-detail).
 
 ### Span Percentile
 

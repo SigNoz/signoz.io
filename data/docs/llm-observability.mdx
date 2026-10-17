@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-08
-updated_date: 2026-10-12
+updated_date: 2026-10-16
 title: LLM Observability Overview
 meta_title: "LLM Observability with OpenTelemetry"
 description: Learn what LLM observability is and how to instrument LLM apps with OpenTelemetry. Trace token usage, latency, cost, and tool calls in SigNoz.
@@ -73,7 +73,7 @@ Three community projects provide most of the LLM-specific instrumentation in use
 
 - <a href="https://github.com/traceloop/openllmetry" target="_blank" rel="noopener noreferrer nofollow">OpenLLMetry</a> from Traceloop, a set of instrumentations covering provider SDKs and frameworks. See the [Traceloop integration guide](https://signoz.io/docs/traceloop/).
 - <a href="https://github.com/openlit/openlit" target="_blank" rel="noopener noreferrer nofollow">OpenLIT</a>, which covers LLM SDKs along with vector databases and GPU metrics. See the [OpenLIT integration guide](https://signoz.io/docs/openlit/).
-- <a href="https://github.com/Arize-ai/openinference" target="_blank" rel="noopener noreferrer nofollow">OpenInference</a> from Arize, which has strong coverage of agent and orchestration frameworks such as LangChain, LlamaIndex, and CrewAI.
+- <a href="https://github.com/Arize-ai/openinference" target="_blank" rel="noopener noreferrer nofollow">OpenInference</a> from Arize, which has strong coverage of agent and orchestration frameworks such as LangChain, LlamaIndex, and CrewAI. OpenInference records model calls under its own `llm.*` attribute namespace rather than `gen_ai.*`. SigNoz understands both: it reads `gen_ai.*` for the [AI Observability](https://signoz.io/docs/ai-observability/) dashboard (through [attribute mapping](https://signoz.io/docs/ai-observability-attribute-mapping/)), and it renders OpenInference conversation attributes directly in trace detail. See [Viewing LLM conversations in trace detail](#viewing-llm-conversations-in-trace-detail).
 
 Some providers are also covered by instrumentation maintained in the <a href="https://github.com/open-telemetry/opentelemetry-python-contrib" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry contrib repositories</a> directly, such as `opentelemetry-instrumentation-openai-v2`. Where an official instrumentation exists, the integration guides prefer it.
 
@@ -143,6 +143,43 @@ These share the `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.request
 ### Prompt and response content
 
 Prompt and completion content is not captured by default. `gen_ai.input.messages`, `gen_ai.output.messages`, and `gen_ai.system_instructions` are all **Opt-In** in the specification, which means an instrumentation should only record them when explicitly enabled. This is a deliberate privacy default: prompts frequently contain user data. Turn content capture on knowingly, and check what your data retention policy implies before you do.
+
+## Viewing LLM Conversations in Trace Detail
+
+When a model call carries conversation content, SigNoz renders the input and output messages as structured conversation turns in the [trace detail view](https://signoz.io/docs/userguide/span-details/#llm-conversation-messages), instead of leaving them as raw attribute blobs. The rendering is automatic. There is no setting to enable in SigNoz once your instrumentation captures the content.
+
+SigNoz recognizes two attribute formats and shows both in the same conversation panel:
+
+| Format | Attribute namespace | Written by |
+|---|---|---|
+| OpenTelemetry GenAI semantic conventions | `gen_ai.input.messages`, `gen_ai.output.messages` | OpenLLMetry, OpenLIT, OpenTelemetry contrib instrumentations |
+| OpenInference | `llm.input_messages.*`, `llm.output_messages.*` | Arize Phoenix and the `openinference-instrumentation-*` packages |
+
+Each turn can show the parts the model sent or received:
+
+- **Text** content, rendered as readable message text.
+- **Media** parts for image, audio, and video content, shown as a URI or an embedded blob.
+- **Reasoning** parts for chain-of-thought steps that some models emit, shown within the assistant turn.
+- **Tool calls** made by the assistant, with the tool name and arguments. SigNoz recognizes both the modern and legacy OpenInference tool-call attribute shapes.
+- **Tool results** returned to the model, linked to the tool call that produced them.
+- **Finish reasons** reported by the model, such as `stop` or `tool_calls`, shown on the output message. Anthropic's `tool_use` stop reason is recognized as a tool-call finish reason.
+
+### OpenInference-instrumented SDKs
+
+Any instrumentation that writes the OpenInference `llm.*` message attributes renders in this view. Common sources include:
+
+- <a href="https://docs.arize.com/phoenix" target="_blank" rel="noopener noreferrer nofollow">Arize Phoenix</a>
+- `openinference-instrumentation-openai`
+- `openinference-instrumentation-anthropic`
+- `openinference-instrumentation-strands-agents`
+- `openinference-instrumentation-pipecat`
+
+### Mixed-format spans
+
+A single span can carry more than one representation of the same call. SigNoz resolves this predictably:
+
+- When a span has both OpenInference message attributes and a raw provider request or response payload, the OpenInference attributes are used and the raw payload is ignored, so the conversation view always reflects the richer structured data.
+- When only one side of the conversation (input or output) has OpenInference attributes and the other falls back to a different format, the trace detail view surfaces a warning, so the data gap is visible rather than silent. Some pipecat-instrumented spans produce this warning. It flags a format mismatch, not a broken trace.
 
 ## What to Alert On
 
