@@ -13,6 +13,7 @@ import readingTime from 'reading-time'
 import { mdxOptions, generateTOC, ensureTrailingSlash } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
+import { withMarkdownAlternate } from '@/utils/markdownAlternate'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -94,6 +95,7 @@ export async function generateMetadata(props: {
       return {
         title: seoTitle,
         description: content?.description || `${content?.title} - SigNoz FAQ`,
+        alternates: withMarkdownAlternate(`/faqs/${path}`),
         authors: (authorNames.length > 0 ? authorNames : ['SigNoz Team']).map((name) => ({
           name,
         })),

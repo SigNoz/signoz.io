@@ -19,6 +19,7 @@ import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsS
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { buildMetadataImages } from '@/utils/metadataImages'
+import { withMarkdownAlternate } from '@/utils/markdownAlternate'
 
 const defaultLayout = 'GuidesLayout'
 const layouts = {
@@ -59,6 +60,7 @@ export async function generateMetadata(props: {
   return {
     title: seoTitle,
     description: post?.description,
+    alternates: withMarkdownAlternate(`/guides/${slug}`),
     openGraph: {
       title: seoTitle,
       description: post?.description,

@@ -18,6 +18,7 @@ import { resolveLatestDate } from '@/utils/dateUtils'
 import { buildMetadataImages } from '@/utils/metadataImages'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import { withMarkdownAlternate } from '@/utils/markdownAlternate'
 const defaultLayout = 'BlogLayout'
 const layouts = {
   OpenTelemetryLayout,
@@ -56,6 +57,7 @@ export async function generateMetadata(props: {
   return {
     title: seoTitle,
     description: post.description,
+    alternates: withMarkdownAlternate(`/blog/${slug}`),
     openGraph: {
       title: seoTitle,
       description: post.description,
