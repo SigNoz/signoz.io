@@ -1,5 +1,5 @@
 ---
-date: 2026-10-15
+date: 2026-10-17
 description: Information about Bar Chart
 doc_type: reference
 title: Bar Chart Panel Type
@@ -45,6 +45,17 @@ The following graph shows the requests per second (req/s) for a service over a p
 - **Series layout** (formerly "Stack Series"): `Side by side` gives each series its own bar, next to the others. This is the default. `Stacked` combines the series into one bar per time bucket, with each series as a colored segment, so you see the total and each series' share.
 
 When bars are stacked, the tooltip shows the raw value of each series, not its stacked value. If you switch the panel to an [Area Chart](https://signoz.io/docs/dashboards/panel-types/area/), **Stacked** stays **Stacked** and **Side by side** becomes **Overlap**. For the **100%** layout, use the Area Chart panel.
+
+#### Partial bucket indicator
+
+The rightmost time bucket on a panel is often still collecting data when the panel loads, so its bar can look like a sudden drop. SigNoz marks that in-progress bucket so you do not read it as a real metric change:
+
+- The bar for the partial bucket renders with a dotted outline instead of a solid edge, which sets it apart from the settled bars to its left.
+- Hovering the partial bucket adds `(partial)` in italics next to the timestamp in the tooltip header (for example, `15:42:00 (partial)`), for every series in that bucket.
+
+The marker appears automatically whenever the query result flags a bucket as still filling. No dashboard setting or query change is needed, and it works on dashboards built with either the older or newer panel engine.
+
+Traces and logs panels show the marker most often. Metrics queries round the query end time down to the last completed minute, so their final bucket is rarely partial and the marker seldom appears.
 
 #### Formatting & Units
 
