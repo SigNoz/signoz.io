@@ -1,7 +1,7 @@
 ---
 
 title: Timeseries Panel Type
-date: 2026-10-14
+date: 2026-10-17
 description: Learn how to use the Timeseries Chart panel type in SigNoz dashboards to visualize metrics over time.
 doc_type: reference
 ---
@@ -75,6 +75,17 @@ A panel saved with **Break long gaps** on and no (or a zero) gap length fails va
 #### Tooltip
 
 Hover over a point to see its value in the tooltip. The tooltip header shows the timestamp of the point. For a point from today, the header shows only the time (for example, `14:32:05`). For a point from an earlier day, it shows the full date and time.
+
+#### Partial bucket indicator
+
+The rightmost time bucket on a panel is often still collecting data when the panel loads, so its value can look like a sudden drop. SigNoz marks that in-progress bucket so you do not read it as a real metric change:
+
+- The partial point shows a filled dot wrapped in a dotted ring, which sets it apart from the settled points to its left. The line itself is unchanged.
+- Hovering the partial bucket adds `(partial)` in italics next to the timestamp in the tooltip header (for example, `15:42:00 (partial)`), for every series in that bucket.
+
+The marker appears automatically whenever the query result flags a bucket as still filling. No dashboard setting or query change is needed, and it works on dashboards built with either the older or newer panel engine.
+
+Traces and logs panels show the marker most often. Metrics queries round the query end time down to the last completed minute, so their final bucket is rarely partial and the marker seldom appears.
 
 #### Formatting & Units
 
