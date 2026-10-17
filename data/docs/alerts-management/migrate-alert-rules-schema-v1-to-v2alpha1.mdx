@@ -11,7 +11,7 @@ The `/api/v1/rules` endpoints and the deprecated `GET /api/v2/rules` list will b
 
 ## Who needs to act
 
-- **Scripts and integrations** that call `/api/v1/rules`, `/api/v1/testRule`, or `GET /api/v2/rules`. Those endpoints are going away, so the calls move to the replacements below. Scripts already on the v2 endpoints are affected by the schema too: every write after the upgrade requires `"schemaVersion": "v2alpha1"` and is rejected without it.
+- **Scripts and integrations** that call `/api/v1/rules`, `/api/v1/testRule`, or `GET /api/v2/rules`. Those endpoints are going away, so the calls move to the replacements below. Scripts already on the v2 endpoints are affected by the schema too. After the upgrade, SigNoz rejects a create (`POST`), replace (`PUT`), or test body without `"schemaVersion": "v2alpha1"`. A `PATCH` merges into the stored rule and does not need it.
 - **Terraform** users on the `signoz_rule` resource, provider `v0.1.0` and later, need nothing. It already uses the v2 endpoints and the `v2alpha1` schema. Configurations still on the older `signoz_alert` resource have to move to `signoz_rule`. See [Terraform Provider](https://signoz.io/docs/alerts-management/terraform-provider-signoz/).
 - **Anything that reads rules** and expects the v1 fields back. A rule fetched by id after the upgrade comes back in the `v2alpha1` shape, migrated or new, and the list returns a summary instead of full rules.
 - **UI-only users** need to do nothing.
@@ -48,17 +48,17 @@ The v1 schema described a rule with one threshold spread across top-level fields
 | `schemaVersion` (absent or empty) | `schemaVersion: "v2alpha1"` | Required. A missing or any other value is rejected. |
 | `evalWindow` | `evaluation.spec.evalWindow` | Required, no default. v1 filled `5m` when omitted; send it explicitly. |
 | `frequency` | `evaluation.spec.frequency` | Required, no default. v1 filled `1m` when omitted; send it explicitly. |
-| — | `evaluation.kind` | `rolling` is the v1 behavior. `cumulative` anchors the window to an hourly, daily, weekly, or monthly schedule in a timezone. |
+| None (new) | `evaluation.kind` | `rolling` is the v1 behavior. `cumulative` anchors the window to an hourly, daily, weekly, or monthly schedule in a timezone. |
 | `condition.target` | `condition.thresholds.spec[0].target` | Required per threshold. For anomaly rules the sign changes, see below. |
 | `condition.op` | `condition.thresholds.spec[0].op` | Same values. Prefer the names (`above`, `below`, and so on) over the numeric codes. |
 | `condition.matchType` | `condition.thresholds.spec[0].matchType` | Same values. Prefer the names (`at_least_once`, `all_the_times`, and so on). |
 | `condition.targetUnit` | `condition.thresholds.spec[0].targetUnit` | Unchanged meaning. |
-| `preferredChannels` | `condition.thresholds.spec[0].channels` | Channel names, per threshold. An empty list notifies nobody, see below. |
-| `labels.severity` | `condition.thresholds.spec[0].name` (keep `labels.severity` too) | The threshold name is what alerts carry as `severity` and what routing matches on. Must be non-empty. |
-| — | `condition.thresholds.kind` | Always `basic`. |
-| — | `condition.thresholds.spec[0].recoveryTarget` | Optional. A separate value the series must cross back over before the alert resolves. `null` or omitted keeps the v1 behavior. |
+| `preferredChannels` | `condition.thresholds.spec[0].channels` | Channel names, per threshold. SigNoz rejects an empty list unless `usePolicy` is `true`, see below. |
+| `labels.severity` | `condition.thresholds.spec[0].name` | Alerts carry the threshold name as `severity`, and routing matches on it. Must be non-empty. A static `labels.severity` overrides the threshold name, so remove it from rules with more than one threshold. |
+| None (new) | `condition.thresholds.kind` | Always `basic`. |
+| None (new) | `condition.thresholds.spec[0].recoveryTarget` | Optional. A separate value the series must cross back over before the alert resolves. `null` or omitted keeps the v1 behavior. |
 | `condition.alertOnAbsent` | `condition.alertOnAbsent` and `notificationSettings.renotify.alertStates` | The field stays. To keep re-notifying on no data, add `nodata` to `alertStates`; v1 did this implicitly. |
-| — | `notificationSettings` | Required. `renotify` and `usePolicy` are described below. |
+| None (new) | `notificationSettings` | Required. `renotify` and `usePolicy` are described below. |
 | `version`, `source` | `version`, `source` | Still accepted and echoed, marked deprecated. Nothing reads or validates them. |
 
 Everything else is unchanged: `alert`, `alertType`, `ruleType`, `description`, `disabled`, `labels`, `annotations`, `condition.compositeQuery`, `condition.selectedQueryName`, `condition.absentFor`, `condition.requireMinPoints`, `condition.requiredNumPoints`, `condition.algorithm`, and `condition.seasonality`.
@@ -82,7 +82,7 @@ Everything else is unchanged: `alert`, `alertType`, `ruleType`, `description`, `
 v1 derived several values on the server. `v2alpha1` stores them, so a script has to write them out.
 
 - **Re-notification.** Every v1 rule re-notified every 4 hours while firing. To keep that, send `"renotify": {"enabled": true, "interval": "4h", "alertStates": ["firing"]}`. Include `"nodata"` in `alertStates` when `alertOnAbsent` is true, otherwise a no-data alert notifies once and goes quiet. Omitting `renotify`, or sending `"enabled": false`, means notify once per alert.
-- **Channels.** In v1 an empty `preferredChannels` meant every channel in the organization. In `v2alpha1` an empty `channels` list means no channel: alerts fire but reach nobody. List the channels on each threshold, or set `"usePolicy": true` to route through the organization's [routing policies](https://signoz.io/docs/alerts-management/routing-policy/) instead and leave `channels` empty.
+- **Channels.** In v1 an empty `preferredChannels` meant every channel in the organization. In `v2alpha1`, SigNoz rejects an empty `channels` list with `at least one channel is required`. List the channels on each threshold, or set `"usePolicy": true` to route through the organization's [routing policies](https://signoz.io/docs/alerts-management/routing-policy/) instead and leave `channels` empty. A migrated rule that had no channels comes back with an empty `channels` list. Add channels or set `usePolicy` on that rule.
 - **Anomaly targets.** The threshold is compared against the signed anomaly score. A v1 anomaly rule with `"op": "2"` (below) and `"target": 3` fired on a score under -3. Write it as `"op": "below", "target": -3`. No other rule type or operator changes the number.
 
 ## Example
@@ -150,14 +150,14 @@ The same rule in both schemas. The `compositeQuery` body is unchanged and omitte
 }
 ```
 
-A second threshold is another entry in `spec`, for example a `critical` one at `95` with its own channels. Alerts carry the threshold name as `severity`, and each threshold routes to its own channels.
+A second threshold is another entry in `spec`, for example a `critical` one at `95` with its own channels. Alerts carry the threshold name as `severity`, and each threshold routes to its own channels. When you add a second threshold, remove `severity` from `labels`. Otherwise every alert from the rule carries the static value.
 
 ## What a v1 payload gets back after the upgrade
 
-A write without `"schemaVersion": "v2alpha1"` is rejected before anything is stored.
+SigNoz rejects a create, replace, or test body without `"schemaVersion": "v2alpha1"` before it stores anything.
 
 - `POST /api/v2/rules` and the other v2 writes return `400` with `error.message` of `alert rule is not valid` and the reasons under `error.errors`, for example `schemaVersion: unsupported value ""; must be "v2alpha1"`. With the version set but the new objects missing, the reasons name them: `condition.thresholds: field is required for schemaVersion "v2alpha1"`, and the same for `evaluation` and `notificationSettings`.
-- Calls to `/api/v1/rules`, `/api/v1/testRule`, and `GET /api/v2/rules` fail, because the endpoints are removed.
+- Calls to `/api/v1/rules` and `/api/v1/testRule` return `404`. `GET /api/v2/rules` returns `405`, because that path still serves `POST`.
 - A `PATCH` that sends v1 field names does not fail. Fields that no longer exist are ignored, so a patch of `condition.target` changes nothing. Patch the `v2alpha1` paths instead, such as `condition.thresholds`.
 
 ## What reads return after the upgrade
@@ -174,4 +174,4 @@ A write without `"schemaVersion": "v2alpha1"` is rejected before anything is sto
 6. Add `notificationSettings` with the re-notification the rule relied on: `enabled`, `"interval": "4h"`, and `alertStates` with `nodata` when `alertOnAbsent` is set.
 7. For anomaly rules with `below`, negate `target`.
 8. Update readers to the new paths.
-9. Send the rule to `POST /api/v2/rules/test` before writing it.
+9. Optional: send the rule to `POST /api/v2/rules/test` before you write it. This endpoint sends a test notification to the channels on the rule, so point it at a test channel when you run it from a script.
