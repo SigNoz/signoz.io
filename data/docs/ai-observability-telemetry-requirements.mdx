@@ -1,5 +1,5 @@
 ---
-date: 2026-10-12
+date: 2026-10-16
 title: AI Observability Telemetry Requirements - GenAI Attributes
 description: Check which OpenTelemetry GenAI span attributes the SigNoz AI Observability dashboard and filters need, and how SigNoz counts LLM calls and tool calls.
 doc_type: reference
@@ -30,6 +30,32 @@ An AI trace is a trace with at least one LLM, tool, or agent span. Error panels 
 | `service.name` | The **service_name** filter and **Cost by service**. |
 
 Tool spans do not carry a model. As a result, the **model** and **provider** filters do not affect the **Tool calls** panels or **Calls per AI trace**.
+
+## Message content
+
+The [Explorer](https://signoz.io/docs/ai-observability-explorer/) shows the prompt and completion of each LLM span in its **input** and **output** columns, and SigNoz renders the same messages for a span, including tool calls and image parts, in [Trace Details](https://signoz.io/docs/userguide/span-details/). SigNoz reads this content from two attributes:
+
+| Attribute | Holds |
+| --- | --- |
+| `gen_ai.input.messages` | The prompt sent to the model: text, tool calls, tool results, and image parts. |
+| `gen_ai.output.messages` | The completion returned by the model, including tool calls. |
+
+These follow the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a> and are opt-in, because prompts often carry user data. See [prompt and response content](https://signoz.io/docs/llm-observability/#prompt-and-response-content) before you turn capture on. [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/) also normalizes framework-specific keys, such as `ai.prompt.messages` or `input.value`, into these two attributes.
+
+### Legacy OpenLLMetry format
+
+Some instrumentations predate the GenAI message conventions and instead write the prompt and completion as flattened, indexed keys:
+
+| Key pattern | Holds |
+| --- | --- |
+| `gen_ai.prompt.<n>.role`, `gen_ai.prompt.<n>.content`, `gen_ai.prompt.<n>.tool_calls.<m>.{id,name,arguments}` | One prompt message per index `<n>`. |
+| `gen_ai.completion.<n>.role`, `gen_ai.completion.<n>.content`, `gen_ai.completion.<n>.tool_calls.<m>.{id,name,arguments}` | One completion message per index `<n>`. |
+
+SigNoz parses these keys and shows them the same as `gen_ai.input.messages` and `gen_ai.output.messages`, so prompts, completions, tool calls (including multi-call completions), and OpenAI content-block vision prompts (text and image parts) all render. This covers instrumentations that still emit the legacy keys:
+
+- **mistralai** 0.61.0.
+- **crewai**, when instrumented through the <a href="https://github.com/traceloop/openllmetry" target="_blank" rel="noopener noreferrer nofollow">OpenLLMetry</a> OpenAI instrumentation 0.45.6 or earlier.
+- **litellm**, including a completion whose tool call is present only in the `gen_ai.completion.<n>` keys and not in its GenAI message.
 
 ## Next steps
 
