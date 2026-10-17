@@ -1,5 +1,5 @@
 ---
-date: 2026-09-29
+date: 2026-10-16
 title: Trace Details
 description: Visualize and analyze individual traces using the flamegraph, waterfall chart, and span inspection tools in SigNoz.
 doc_type: howto
@@ -120,6 +120,22 @@ The flame graph and waterfall views remain perfectly synchronized. Clicking a sp
   caption="Synchronized views — selecting a span highlights it in both the Flame Graph and Waterfall"
   className="box-shadowed-image"
 />
+
+## Gen AI span messages
+
+For LLM and tool-call spans, SigNoz renders the Gen AI messages in a readable, formatted layout inline with the span, so you can follow the conversation without reading the raw `gen_ai.input.messages` and `gen_ai.output.messages` attributes.
+
+- **LLM spans** show the formatted **input messages** (such as system and user role messages) and the formatted **output messages** (such as the assistant response and any tool calls the model requested).
+- **Tool-call spans** show the tool call response inline.
+- If SigNoz cannot fully parse a message payload, it shows the formatting warnings next to the messages.
+
+Spans that are not related to AI, such as HTTP requests or database queries, are unaffected and show no message fields.
+
+SigNoz identifies LLM and tool-call spans from their OpenTelemetry GenAI attributes. For the attributes each span needs, see [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/). To open an LLM trace from a list of AI traces, use the [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/).
+
+<Admonition type="info">
+Inline formatted Gen AI messages require the `use_trace_attributes_json` feature flag on your organization. If LLM spans do not show formatted messages, contact SigNoz support to enable it.
+</Admonition>
 
 ## Analytics
 
