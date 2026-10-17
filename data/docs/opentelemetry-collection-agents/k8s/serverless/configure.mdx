@@ -1,199 +1,418 @@
 ---
-date: 2026-08-03
+date: 2026-10-15
 title: K8s Serverless (EKS Fargate) - Configure
-description: How to configure the SigNoz OpenTelemetry Collector agent for EKS Fargate (k8s-serverless) workloads.
+description: Configure the OpenTelemetry Collector of the EKS Fargate collection agent through Foundry to send Kubernetes metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
-This guide explains how to configure the OpenTelemetry Collectors deployed in EKS Fargate. You'll learn how to set up telemetry data collection and enable the collection of metrics, logs, and traces from your Kubernetes cluster.
-
-To install OpenTelemetry Collector in your EKS Fargate Kubernetes cluster, please check out the [EKS Fargate Installation guide](/docs/opentelemetry-collection-agents/k8s/serverless/install/).
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) provides a working config: one collector Deployment collects kubelet metrics from every Fargate node, cluster metrics, Kubernetes events, and data from instrumented applications. This page explains what each component in that config does and how to customize it through Foundry's `casting.yaml`.
 
 ## Prerequisites
 
-- An EKS cluster with Fargate profiles set up
-- A SigNoz backend (either SigNoz Cloud or self-hosted)
-- `kubectl` access to update your app Deployment/Pod specs
-- A Kubernetes ServiceAccount mapped to your workloads with sufficient RBAC permissions
+- EKS Fargate Collection Agent installed with Foundry (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/))
+- SigNoz Cloud account or self-hosted SigNoz instance
+- Access to the cluster with `kubectl`, and the `casting.yaml` and `foundryctl` you installed with
 
-## Logs Collection 
+## Apply Changes
 
-<Admonition type="info">
-Kubernetes stores logs from the Pod/Containers under the `/var/log/containers/` directory, but Fargate does not allow mounting host volumes, which blocks the use of the filelog receiver in the OpenTelemetry Collector Pipeline. The same applies to Fluent Bit, as log collection from files will not be possible.
+For each change:
+
+1. Add the section's snippet to `casting.yaml`. Foundry already generates the default receivers and processors, so add only what you change.
+
+2. Run this from the directory that contains `casting.yaml` to apply the change:
+
+   ```bash
+   foundryctl cast -f casting.yaml
+   ```
+
+   Foundry updates the collector's config, and the collector pod restarts with it.
+
+3. Run this on the machine where you use `kubectl` to check that the pod restarts:
+
+   ```bash
+   kubectl get pods -n signoz
+   ```
+
+   Then view the collector logs to confirm there are no configuration errors:
+
+   ```bash
+   kubectl logs -n signoz deployment/signoz-collector-deployment --since=5m
+   ```
+
+4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for node, pod, and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for Kubernetes events and container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
+
+## Send Data from Applications to the Collector
+
+Kubelet and cluster metrics and Kubernetes events flow as soon as the collector is running.
+
+### Where and how to send data from your application
+
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then add this to the application's container in its manifest:
+
+```yaml
+env:
+  - name: K8S_POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+  - name: K8S_POD_UID
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.uid
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://signoz-collector-deployment.signoz.svc.cluster.local:4318
+  - name: OTEL_SERVICE_NAME
+    value: <service-name>
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
+```
+
+**Verify these values:**
+
+- `<service-name>`: The name your application shows under in SigNoz.
+- `signoz` in the address: `metadata.name`, which is also the namespace unless the `foundry.signoz.io/kubernetes-namespace` annotation sets another.
+
+The collector adds the Kubernetes resource attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`. Use port `4317` for OTLP over gRPC.
+
+Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz, and its traces carry `k8s.namespace.name` and `k8s.pod.name`.
+
+## Export to SigNoz
+
+The OTLP/HTTP exporter sends the telemetry the collector gathers to SigNoz.
+
+Foundry generates this by default: the `otlphttp/signoz` exporter sends every pipeline to `SIGNOZ_INGESTION_ENDPOINT`.
+
+## Collect Kubelet Metrics
+
+Use the `kubeletstats` receiver to collect node, pod, container, and volume metrics from the kubelet of each Fargate node, through the Kubernetes API server's node proxy.
+
+Foundry collects kubelet metrics by default from every Fargate node, every 30s, with the metrics in the table below enabled. The `receiver_creator` receiver starts one `kubeletstats` scrape per node, so its settings sit under `receiver_creator.receivers.kubeletstats.config`. In `casting.yaml`, add this to change the interval and enable one more metric:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              receiver_creator:
+                receivers:
+                  kubeletstats:
+                    config:
+                      collection_interval: 60s
+                      metrics:
+                        k8s.pod.memory.node.utilization:
+                          enabled: true
+```
+
+`metrics` is a map, so the metrics you add join Foundry's defaults.
+
+These container-level metrics are disabled by default in the upstream `kubeletstats` receiver but enabled by default by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
+
+| Metric | Powers |
+|---|---|
+| `k8s.container.cpu_request_utilization` | CPU request utilization column |
+| `k8s.container.cpu_limit_utilization` | CPU limit utilization column |
+| `k8s.container.memory_request_utilization` | Memory request utilization column |
+| `k8s.container.memory_limit_utilization` | Memory limit utilization column |
+| `container.uptime` | Uptime chart |
+| `k8s.container.cpu.node.utilization` | Node-utilization chart (CPU) |
+| `k8s.container.memory.node.utilization` | Node-utilization chart (memory) |
+
+## Collect Cluster Metrics
+
+Use the `k8s_cluster` receiver to collect cluster-level metrics from the Kubernetes API server.
+
+Foundry collects cluster metrics by default, every 30s. In `casting.yaml`, add this to change the interval and report ephemeral storage too:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_cluster:
+                collection_interval: 60s
+                allocatable_types_to_report: [cpu, memory, ephemeral-storage]
+```
+
+Lists replace, so `allocatable_types_to_report` holds only the types you list.
+
+## Collect Kubernetes Events
+
+Use the `k8s_events` receiver to collect Kubernetes events as logs.
+
+Foundry collects Kubernetes events by default, for all namespaces. In `casting.yaml`, add this to watch specific namespaces:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_events:
+                namespaces: [default, production]
+```
+
+## Collect Container Logs
+
+Application logs reach the collector over OTLP from the application, or through CloudWatch Logs from Fargate's log router. For both routes and the CloudWatch setup, see [Collect EKS Fargate Logs with OpenTelemetry and CloudWatch](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/eks-fargate-logs/?fargate-setup=deployment).
+
+## Resource Detection and Kubernetes Attributes
+
+The `k8sattributes` processor adds Kubernetes resource attributes, so you can filter and group by namespace, workload, or pod in SigNoz. The `resourcedetection` processor adds the resource attributes set in the collector's `OTEL_RESOURCE_ATTRIBUTES`.
+
+Foundry enriches telemetry by default with `k8sattributes`, and its `resource/identity` processor sets `cloud.provider: aws`, `cloud.platform: aws_eks`, and `k8s.cluster.name` from `K8S_CLUSTER_NAME`. In `casting.yaml`, add this to extract a pod label:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            processors:
+              k8sattributes:
+                extract:
+                  labels:
+                    - tag_name: service.name
+                      key: app.kubernetes.io/name
+                      from: pod
+```
+
+Lists replace, so restating `extract.metadata` or `pod_association` drops Foundry's defaults: include every entry you keep, as the warning below describes.
+
+<Admonition type="info" title="Note: extracting labels and annotations from other Kubernetes objects" defaultCollapsed="true">
+
+The `from:` field selects which Kubernetes object the processor reads the label or annotation from. The example above uses `pod`, but other workload kinds are supported as well, and each reads from its own metadata.
+
+Refer to the OpenTelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">`k8sattributes` processor documentation</a> for the full list of supported sources and the exact behavior of each.
+
 </Admonition>
 
-Amazon EKS on Fargate offers a built-in log router based on Fluent Bit. This means that you don't explicitly run a Fluent Bit container as a sidecar, but Amazon runs it for you. All you have to do is configure the log router. 
+<Admonition type="info" title="Warning: customizing pod_association replaces all defaults" defaultCollapsed="true">
 
-To enable log collection, please follow these steps:
+If telemetry suddenly stops getting Kubernetes attributes (`k8s.pod.name`, `k8s.namespace.name`, etc.) after a config change, a change to `pod_association` is the most likely cause.
 
-### 1. Create AWS Managed Observability Namespace
+The default rules match telemetry by `k8s.pod.ip`, then `k8s.pod.uid`, then `connection`, the source IP of the OTLP connection. A `pod_association` list that drops these rules leaves the processor unable to associate telemetry with a pod, and `extract.labels` / `extract.annotations` stop producing attributes.
 
-Create a dedicated Kubernetes namespace which AWS requires to be named `aws-observability` with the label `aws-observability: enabled`.
+If you customize `pod_association`, include the default rules alongside your additions.
 
-```yaml:aws-observability-namespace.yaml
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: aws-observability
-  labels:
-    aws-observability: enabled
-```
-
-Apply the manifest with kubectl:
-
-```shell
-kubectl apply -f aws-observability-namespace.yaml
-```
-
-### 2. FluentBit Configuration
-
-Create a `ConfigMap` with a Fluent Conf data value to ship container logs to a destination. Fluent Conf is a fast and lightweight log processor configuration language used by Fluent Bit to route container logs to a log destination of your choice. For more information, see [Configuration](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file) in the Fluent Bit documentation.
-
-<Admonition type="warning">
-AWS validates against following configuration for Fluent Bit:
-- The Fargate log router manages the `Service` and `Input` sections, which cannot be modified and are not needed in your ConfigMap.
-- `[FILTER]`, `[OUTPUT]`, and `[PARSER]` are supposed to be specified under each corresponding key. For example, `[FILTER]` must be under `filters.conf`. You can have one or more `[FILTER]` sections under `filters.conf`. The `[OUTPUT]` and `[PARSER]` sections should also be under their corresponding keys. By specifying multiple `[OUTPUT]` sections, you can route your logs to different destinations at the same time.
-- Fargate validates against the following supported outputs: `es`, `firehose`, `kinesis_firehose`, `cloudwatch`, `cloudwatch_logs`, and `kinesis`.
-
-For more details, check out the [AWS Managed Fargate Log Router Documentation](https://docs.aws.amazon.com/eks/latest/userguide/fargate-logging.html#fargate-logging-log-router-configuration).
 </Admonition>
 
-<Tabs entityName="output">
+## Scrape Prometheus Metrics from Pods
 
-<TabItem value="cloudwatch" label="cloudwatch">
+The collector can scrape metrics from pods that expose a Prometheus endpoint. In `casting.yaml`, add this to scrape pods annotated `signoz.io/scrape: "true"` every 60s, at the path in `signoz.io/path` and the port in `signoz.io/port`:
 
-Since AWS Fargate does not allow the use of either `fluent-forward` or `OpenTelemetry` output, we will be using the `CloudWatch` output to ship the logs to CloudWatch and then ingest logs from there to the OpenTelemetry Collector. 
-
-The following Fluent Bit configuration uses the [Kubernetes Filter](https://docs.fluentbit.io/manual/data-pipeline/filters/kubernetes):
-
-```yaml:fluentbit-config-map.yaml defaultCollapsed minimap
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: aws-logging
-  namespace: aws-observability # Namespace should be aws-observability
-data:
-  flb_log_cw: "false"  # Set to true to ship Fluent Bit process logs to CloudWatch.
-  filters.conf: |
-    [FILTER]
-        Name parser
-        Match *
-        Key_name log
-        Parser crio
-    [FILTER]
-        Name kubernetes # Kubernetes Log Filter
-        Match kube.*
-        Merge_Log On
-        Keep_Log Off
-        Buffer_Size 0
-        Kube_Meta_Cache_TTL 300s
-        K8S-Logging.Parser On
-        K8S-Logging.Exclude On
-  output.conf: |
-    [OUTPUT]
-        Name cloudwatch_logs
-        Match   kube.*
-        region us-east-1
-        log_group_name <LOG_GROUP> # Set to log group
-        log_stream_prefix <LOG_STREAM_PREFIX> # Set the prefix you want to use for Log Stream
-        log_retention_days 60
-        auto_create_group false # Set to true to auto-create the log group if it does not exist
-  parsers.conf: |
-    [PARSER]
-        Name crio
-        Format Regex
-        Regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>P|F) (?<log>.*)$
-        Time_Key    time
-        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+```yaml defaultCollapsed
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              prometheus/scraper:
+                config:
+                  scrape_configs:
+                    - job_name: signoz-scraper
+                      scrape_interval: 60s
+                      kubernetes_sd_configs:
+                        - role: pod
+                      relabel_configs:
+                        - source_labels: [__meta_kubernetes_pod_annotation_signoz_io_scrape]
+                          action: keep
+                          regex: "true"
+                        - source_labels: [__meta_kubernetes_pod_annotation_signoz_io_path]
+                          action: replace
+                          regex: (.+)
+                          target_label: __metrics_path__
+                        - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_signoz_io_port]
+                          action: replace
+                          separator: ":"
+                          target_label: __address__
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, k8s_cluster, receiver_creator, prometheus/scraper]
 ```
 
-</TabItem>
-</Tabs>
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc`, `k8s_cluster`, and `receiver_creator`.
 
-Apply the ConfigMap with kubectl:
+## Tune Batch and Memory Limiter
 
-```shell
-kubectl apply -f fluentbit-config-map.yaml
+Adjust the `batch` processor for throughput and the `memory_limiter` processor for stability based on your workload. See [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices) for detailed guidance.
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">batch processor</a> batches spans, metrics, and logs before export. That reduces connections and improves compression. It supports both size-based and time-based batching.
+
+Foundry's batch processor defaults are `send_batch_size: 1000`, `send_batch_max_size: 2048` and `timeout: 10s`. In `casting.yaml`, add this to change them:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            processors:
+              batch:
+                send_batch_size: 15000
+                send_batch_max_size: 20000
 ```
 
-After creating the ConfigMap, we need to set up permissions for the Fargate Pod execution role to send logs to the destination:
+Keys you leave out keep Foundry's values.
 
-```shell
-## Download the IAM policy for your destination to your computer
-curl -O https://raw.githubusercontent.com/aws-samples/amazon-eks-fluent-logging-examples/mainline/examples/fargate/cloudwatchlogs/permissions.json
+### Resource Requests and Limits
 
-## Create an IAM policy from the policy file that you downloaded
-aws iam create-policy --policy-name eks-fargate-logging-policy --policy-document file://permissions.json
+Fargate sizes each Pod from the CPU and memory requests of its containers, rounded up to one of the Fargate configurations. For the configurations, see <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-pod-configuration.html" target="_blank" rel="noopener noreferrer nofollow">Fargate Pod configuration</a>.
 
-## Attach the IAM policy to the pod execution role specified for your Fargate profile with the following command
-aws iam attach-role-policy \
-  --policy-arn arn:aws:iam::<eks-fargate-logging-policy-arn>:policy/eks-fargate-logging-policy \
-  --role-name <POD_EXECUTION_ROLE>
+In `casting.yaml`, add a patch that sets the collector's requests and memory limit:
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/deployment/workload.yaml
+      operations:
+        - op: replace
+          path: /spec/template/spec/containers/0/resources
+          value:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              memory: 1Gi
 ```
 
-### 3. Configure Receiver in OpenTelemetry Collector
+Foundry's `memory_limiter` processor uses a fixed `limit_mib: 4000`. Size it to the memory limit with percentages, in the same document:
 
-Depending on the output you've configured in Fluent Bit, configure the OpenTelemetry Collector to ingest logs accordingly.
-
-<Tabs entityName="output">
-<TabItem label="CloudWatch" value="cloudwatch">
-
-We will be using the [awscloudwatchreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver) to ingest logs from AWS CloudWatch into the OpenTelemetry Collector. If you've opted for a different output in Fluent Bit, such as Kinesis or Firehose, you can use other receivers made available by the OpenTelemetry community.
-
-Add the following to your OpenTelemetry Collector ConfigMap created during installation:
-```yaml:otel-agent-sidecar-ConfigMap
-receivers:
-  awscloudwatch:
-    region: <region>
-    logs:
-      poll_interval: 1m
-      groups:
-        autodiscover:
-          limit: 100
-          prefix: <LOG_GROUP>
-          streams:
-            prefixes: [<LOG_STREAM_PREFIX>]
-
-service:
-  pipelines:
-    logs:
-      receivers:
-        - awscloudwatch
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            processors:
+              memory_limiter:
+                limit_mib: null
+                spike_limit_mib: null
+                limit_percentage: 80
+                spike_limit_percentage: 25
 ```
 
-</TabItem>
-</Tabs>
-After creating the ConfigMap, we need to set up AWS credentials for the OpenTelemetry Collector to get logs from CloudWatch. We will use this [documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-OTLPSimplesetup.html?utm_source=chatgpt.com#CloudWatch-SetupIAMPermissionsonpremises) to set up the required credentials.
+## Add Custom Processors to Pipelines
 
-1. Create an IAM OIDC identity provider for your cluster using the following command:
+A processor transforms or enriches telemetry once a pipeline lists it under `processors`.
 
-```shell
-eksctl utils associate-iam-oidc-provider --cluster ${CLUSTER_NAME} --region ${REGION} --approve
+Foundry's pipelines are `traces`, `metrics` and `logs`. In `casting.yaml`, add this to define a processor and add it to the `traces` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            processors:
+              attributes/team:
+                actions:
+                  - key: team
+                    value: platform
+                    action: insert
+            service:
+              pipelines:
+                traces:
+                  processors: [memory_limiter, resourcedetection, resource/identity, k8sattributes, attributes/team, batch]
 ```
 
-2. Assign IAM roles to the Kubernetes service account for the OTel Collector using the following command. We will be using the [CloudWatchReadOnlyAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/CloudWatchReadOnlyAccess.html) policy to get the logs from CloudWatch:
+Lists replace, so restate Foundry's default processors in their order (`memory_limiter`, `resourcedetection`, `resource/identity`, `k8sattributes`, `batch`) with yours before `batch`.
 
-```shell
-eksctl create iamserviceaccount \
-  --name ${COLLECTOR_SERVICE_ACCOUNT} \
-  --namespace ${NAMESPACE} \
-  --cluster ${CLUSTER_NAME} \
-  --region ${REGION} \
-  --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess \
-  --approve \
-  --override-existing-serviceaccounts
+## Exposing Ports for Custom Receivers
+
+A receiver that listens on a port needs that port reachable from your applications. The following example adds the `statsd` receiver on port 8125.
+
+In `casting.yaml`, add the `statsd` receiver and list it in the `metrics` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              statsd:
+                endpoint: 0.0.0.0:8125
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, k8s_cluster, receiver_creator, statsd]
 ```
 
-### 4. Restart the Application Deployments
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers. Then open the port on the collector container and on its Service with patches in the same document:
 
-After making all of the above changes, we need to restart the application deployment to allow AWS to start with managed logging.
-
-Once you restart the deployments, you should see the following in the deployment events:
-
-```shell
-Normal  LoggingEnabled  3m5s   fargate-scheduler  Successfully enabled logging for pod
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/deployment/workload.yaml
+      operations:
+        - op: add
+          path: /spec/template/spec/containers/0/ports/-
+          value: {name: statsd, containerPort: 8125, protocol: UDP}
+    - target: collectionagent/collector/deployment/service.yaml
+      operations:
+        - op: add
+          path: /spec/ports/-
+          value: {name: statsd, port: 8125, targetPort: statsd, protocol: UDP}
 ```
+
+Your applications reach the receiver at `signoz-collector-deployment.signoz.svc.cluster.local:8125`.
+
+## Disable Metrics Collection
+
+In `casting.yaml`, add this to remove the `receiver_creator` (kubelet) and `k8s_cluster` receivers:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              receiver_creator: null
+              k8s_cluster: null
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's two OTLP receivers. Kubernetes events keep flowing.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### A custom processor does not appear to run
+
+Defining a processor under `processors` renders it into the collector configuration but does not attach it to any pipeline. Confirm the processor is referenced in the relevant pipeline's `processors` list. `config.data` replaces lists, so restate every processor the pipeline still needs. See [Add Custom Processors to Pipelines](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#add-custom-processors-to-pipelines). After applying the change as shown in [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#apply-changes), verify in SigNoz Explorer that the attribute or transformation introduced by the processor is present on the relevant signal.
+
+### Telemetry stopped getting Kubernetes attributes after customizing `pod_association`
+
+A `pod_association` list that drops the default rules leaves the processor unable to associate telemetry with a pod. See the warning under [Resource Detection and Kubernetes Attributes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#resource-detection-and-kubernetes-attributes) for the rules to keep. After restoring the rules and applying the change, confirm in SigNoz Explorer that resource attributes such as `k8s.pod.name` and `k8s.namespace.name` are populated on traces, metrics, or logs from your workloads.
+
+</details>
 
 ## Next Steps
 
+- [EKS Fargate Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

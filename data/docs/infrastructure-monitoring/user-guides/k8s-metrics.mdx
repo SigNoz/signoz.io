@@ -1,7 +1,7 @@
 ---
-date: 2026-08-25
+date: 2026-10-15
 title: Setup Kubernetes Metrics with OpenTelemetry
-description: Configure the OpenTelemetry kubeletstats and k8scluster receivers (plus k8sattributesprocessor) on top of a running Kubernetes Collection Agent to track node, pod, container, and volume metrics in SigNoz.
+description: Configure the OpenTelemetry Collector kubeletstats and k8s_cluster receivers (plus the k8sattributes processor) on top of a running Kubernetes Collection Agent to track node, pod, container, and volume metrics in SigNoz.
 doc_type: howto
 ---
 
@@ -10,14 +10,14 @@ doc_type: howto
 This guide explains how to set up monitoring for your Kubernetes cluster using two essential OpenTelemetry receivers:
 
 - <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow"><code>kubeletstats</code></a>: Collects metrics from individual Kubernetes nodes
-- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow"><code>k8scluster</code></a>: Gathers cluster-wide metrics
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow"><code>k8s_cluster</code></a>: Gathers cluster-wide metrics
 
 ## Before you start: install the Kubernetes Collection Agent
 
 Make sure you have an OpenTelemetry Collector running in your cluster. Pick the install guide that matches your setup:
 
-- **Standard Kubernetes** → [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/): Helm chart that already wires `kubeletstats`, `k8scluster`, and `k8sattributes`.
-- **EKS Fargate / GKE Autopilot / AKS Virtual Nodes** → [Serverless Kubernetes Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/): for managed clusters that block kubelet scraping on worker nodes.
+- **Standard Kubernetes** → [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/): Helm chart that already wires `kubeletstats`, `k8s_cluster`, and `k8sattributes`.
+- **EKS Fargate** → [Serverless Kubernetes Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/): collects kubelet metrics through the Kubernetes API server, since a Fargate pod cannot reach the kubelet of its node.
 - **OpenTelemetry Operator** → [OTel Operator Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/): if you're already managing collectors via the OpenTelemetry Operator.
 
 Every install path ships a config that already includes the receivers and processors covered below. The sections that follow explain the receiver / processor options so you can adjust the shipped config for your needs.
@@ -205,12 +205,12 @@ Read more about the <a href="https://github.com/open-telemetry/opentelemetry-col
 
 #### Overview
 
-The k8scluster receiver provides cluster-wide metrics by collecting data directly from the Kubernetes API server. Unlike the kubeletstats receiver which runs on each node, you only need a single instance of this receiver per cluster.
+The `k8s_cluster` receiver provides cluster-wide metrics by collecting data directly from the Kubernetes API server. Unlike the kubeletstats receiver which runs on each node, you only need a single instance of this receiver per cluster.
 
 #### Quick Start with k8s-infra Helm Chart
 
 The k8s-infra Helm chart provides a production-ready configuration by:
-1. Deploying a single, properly configured k8scluster receiver
+1. Deploying a single, properly configured `k8s_cluster` receiver
 2. Setting up secure API access with appropriate RBAC permissions
 3. Enabling commonly needed metrics by default
 
@@ -241,7 +241,7 @@ Monitor resource allocation across your cluster:
 - `ephemeral-storage`: Temporary storage allocation
 - `storage`: Persistent storage allocation
 
-These allocations are exposed via the `k8s.node.allocatable_cpu`, `k8s.node.allocatable_memory`, etc. metrics. They are **disabled by default** in the upstream `k8scluster` receiver. Opt in via the `allocatable_types_to_report` config option (shown in the manual configuration example below).
+These allocations are exposed via the `k8s.node.allocatable_cpu`, `k8s.node.allocatable_memory`, etc. metrics. They are **disabled by default** in the upstream `k8s_cluster` receiver. Opt in via the `allocatable_types_to_report` config option (shown in the manual configuration example below).
 
 #### 3. Optional Metrics
 Key optional metrics for enhanced monitoring:
@@ -252,7 +252,7 @@ Key optional metrics for enhanced monitoring:
 
 `k8s.pod.status_reason`, `k8s.container.status.reason`, and `k8s.container.status.state` are disabled by default in the upstream receiver but enabled by default in the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart. `k8s.pod.status_reason` and `k8s.container.status.reason` drive the kubectl-style **Pod Status** column, while `k8s.container.status.reason` and `k8s.container.status.state` together drive the **Status** column on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view. Enable them manually only if you run the `k8s_cluster` receiver without the chart (or on a chart version older than the one that ships them on by default).
 
-For a comprehensive list of available metrics, conditions, and resources, refer to the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">k8sclusterreceiver documentation</a>.
+For a comprehensive list of available metrics, conditions, and resources, refer to the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">`k8s_cluster` receiver documentation</a>.
 
 ### Manual Configuration Guide
 
@@ -370,6 +370,6 @@ Verify:
 
 #### Metric metadata is missing
 
-By default, the kubeletstats/k8scluster receivers do not have rich metadata. To enable rich metadata, you need to enable the `k8sattributes` processor.
+By default, the `kubeletstats` and `k8s_cluster` receivers do not have rich metadata. To enable rich metadata, you need to enable the `k8sattributes` processor.
 
 </details>
