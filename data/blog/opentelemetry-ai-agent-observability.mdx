@@ -415,9 +415,46 @@ In our FastAPI exception handler, intercepting `InputGuardrailTripwireTriggered`
 
 ### Monitoring agent performance and metrics
 
-In addition to distributed traces, the OpenTelemetry GenAI instrumentation exposes standard metrics like `gen_ai.client.operation.duration` and token usage counters out of the box. 
+While individual traces let you debug specific agent executions, understanding production behavior requires aggregated metrics across turns, models, and sessions. 
 
-TODO...
+The OpenTelemetry GenAI instrumentation automatically emits standard metrics—such as `gen_ai.client.operation.duration` and token usage counters—alongside your traces. SigNoz captures this telemetry in a dedicated AI Observability interface that aggregates operational health, latency percentiles, and agent loop behaviors in one unified view.
+
+<Figure src="/img/blog/common/ai-observability-overview.gif" alt="SigNoz AI Observability dashboard tracking agent performance, latency, finish reasons, and tool executions." caption="SigNoz AI Observability correlates latency percentiles, finish reasons, and tool execution metrics across your AI agent runs." />
+
+#### Executive KPIs and contextual drilldowns
+
+The top-level overview surfaces high-level operational indicators across your agent infrastructure:
+
+- **Total cost and token volume**: Tracks cumulative spend ($0.32 for 592.9K tokens) spanning AI costs across services.
+- **Latency percentiles and TTFT**: Evaluates worst-case execution performance (p95 latency of 21.22s that includes other models such as `gpt-6-astra` used by other services) alongside Time to First Token (TTFT) for streaming responses.
+- **LLM call volume and error rates**: Monitors traffic spikes and model failure rates across services.
+
+Every dashboard panel in the view supports **direct drilldowns into traces and logs**. Clicking any card or opening a panel in View Mode lets you inspect the exact ClickHouse query and aggregation powering the visualization. For example, opening the cost panel enables dissection by attributes such as model name.<br />
+This immediately attributes spend to individual models, such as our NBA agent's `gpt-6-luna` runs ($0.06).
+
+#### Evaluating model latency and response times
+
+Multi-turn reasoning and tool selection introduce variable latency across agent interactions. The **LLM latency by model** table and time-series charts track execution performance across percentiles:
+
+- **Percentile breakdowns**: Compares median (p50 of 9.48s), p90 (19.28s), and p95 (20.21s) latencies for `gpt-6-luna`.
+- **Interactive time-series**: Hovering over latency points (e.g., 16.14s) provides one-click drilldown into the matching traces, making it easy to isolate whether a slow response was caused by upstream model generation or downstream tool execution.
+
+#### Diagnosing agent loops with finish reasons
+
+The **Finish reasons** panel tracks how model invocations terminate, revealing whether an agent concluded cleanly with a final user response (`["stop"]`) or triggered external tools (`["tool_calls"]`) requiring another turn.
+
+- **`["stop"]`**: Indicates the model finished generating a final response to the user.
+- **`["tool_calls"]`**: Indicates the model requested one or more tool executions, prompting the agent loop to execute the tool and start another turn.
+
+Spikes in `["tool_calls"]` relative to `["stop"]` can be signals of recursive agent behavior, repetitive tool retries, or agents struggling to synthesize an answer.
+
+#### Tool call performance and span distribution
+
+The **Tool calls** section aggregates telemetry from the tools invoked by the agent:
+
+- **Tool call rate and error tracking**: Measures execution frequency and error rates for specific tools—confirming that our deterministic `calculate_win_percentage` tool executed 12 times with a 0% error rate.
+- **Tool duration**: Tracks tool execution time (sub-3ms for arithmetic operations), confirming that external tool latency did not bottleneck the broader agent turn.
+- **Top span names**: Surfaces the distribution across agent layers, highlighting 46 `invoke_agent NBA_Reporter` spans and 37 `chat gpt-6-luna` invocations. Requests that invoke the agent loop but fail input guardrails abort immediately, preventing unnecessary downstream LLM invocations and keeping raw `chat` calls lower than total agent turns.
 
 ## Wrapping up
 
