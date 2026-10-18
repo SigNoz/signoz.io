@@ -97,7 +97,7 @@ The <a href="https://github.com/SigNoz/examples/blob/main/python/otel-ai-agent-o
 
 - `opentelemetry-distro`: Provides a convenient mechanism to configure some of the more common options for Python auto-instrumentation.
 - `opentelemetry-exporter-otlp`: Installs [the OTLP exporters](https://signoz.io/blog/what-is-otlp/) needed to deliver telemetry data to any [OpenTelemetry-compatible backend](https://signoz.io/blog/opentelemetry-backend/).
-- `opentelemetry-instrumentation-genai-openai` and `opentelemetry-instrumentation-genai-openai-agents`: Modern OpenAI Agents and OpenAI client SDK instrumentation packages from the dedicated <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry GenAI repository</a>.
+- `opentelemetry-instrumentation-genai-openai` and `opentelemetry-instrumentation-genai-openai-agents`: Modern OpenAI Agents and OpenAI Python API instrumentation packages from the dedicated <a href="https://github.com/open-telemetry/opentelemetry-python-genai" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry GenAI repository</a>.
 
 Next, run `opentelemetry-bootstrap` to detect widely used Python libraries (like the [FastAPI web framework](https://signoz.io/blog/opentelemetry-fastapi/) and HTTPX client library) and install their corresponding instrumentation packages:
 
@@ -166,41 +166,26 @@ Additionally, because `opentelemetry-bootstrap` has not yet added these dedicate
 <Figure src="/img/blog/2026/06/opentelemetry-llm-bootstrap-gap.webp" alt="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." caption="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." />
 
 
-### Dissecting the OpenTelemetry LLM Application
+### Dissecting the agent implementation
 
-Now let's go over the key implementation details to fully understand how the <Tooltip text="agentic workflow" content="Agentic workflows wrap an LLM, enhancing its capabilities by adding tools, context layers, guardrails, and memory to help the model achieve a specific goal." /> has been wired up. [Skip to the next section](#visualizing-agentic-workflows-with-opentelemetry) if you want to jump directly to the interactive part.
+Now let's go over the key implementation details to understand how the AI agent workflow has been wired up and instrumented. [Skip to the next section](#visualizing-agentic-workflows-with-opentelemetry) if you want to jump directly to the interactive trace analysis.
 
-#### Dependency Choices
+#### Dependency choices
 
-Besides the essential OpenTelemetry dependencies we’ve already discussed above, the application features:
+Besides the core OpenTelemetry dependencies we installed earlier, the application relies on:
 
-- **FastAPI** as the web framework, providing strong request-response data validation guarantees, automatic openAPI schema generation, and first-class async support, making it an excellent choice for building performant web APIs to serve AI workloads.
-    
-- **OpenAI Agents SDK** for building our agentic workflow. It ships with all the bells and whistles you expect from an AI framework, such as sandbox mode, human in the loop mechanism, etc.
-    
-    OpenAI has published <a href="https://openai.github.io/openai-agents-python/" rel="noopener noreferrer nofollow" target="_blank">extensive documentation</a> making it easy to get started, and the project has amassed about <a href="https://github.com/openai/openai-agents-python" rel="noopener noreferrer nofollow" target="_blank">27,000 GitHub stars</a> at the time of writing.
-    
-- **OpenAI Agents SDK Instrumentation**, which is not included via `opentelemetry-bootstrap` command, was added manually to ensure our workflow generates telemetry upon execution.
+- **FastAPI**: Serves as the web framework, providing request-response validation, automatic OpenAPI schema generation, and async support.
+- **OpenAI Agents SDK**: Orchestrates the agent loop, handling tool selection, input guardrails, and multi-turn session persistence.
+OpenAI has published <a href="https://openai.github.io/openai-agents-python/" rel="noopener noreferrer nofollow" target="_blank">extensive documentation</a>, and the project has garnered 30,000+ GitHub stars at the time of writing this blog.
+- **OpenAI Python API library**: Serves as the core LLM execution layer. All LLM calls go through the OpenAI Python API library.
 
-<KeyPointCallout title="Using the OpenAI Python SDK">
+#### The core agentic setup
 
-The <a href="https://github.com/openai/openai-python" rel="noopener noreferrer nofollow" target="_blank">OpenAI Python SDK</a> is a completely fine choice for building production-ready LLM applications that don’t need the complete set of agentic orchestration capabilities.
+Our web application exposes an NBA Reporter agent that answers questions on NBA topics (e.g., `general` news or `finals`), performs web research, calculates team win percentages, and retains conversation history across turns via server-managed session persistence.
 
-Note that the corresponding OTel instrumentation library currently lacks meaningful support for the newer Responses API, meaning you must rely on the Chat Completions API—a real handicap, since OpenAI recommends the Responses API for most projects due to its better API design, built-in agentic support, and improved cache utilization that cuts down on usage costs.
+The <a href="https://github.com/SigNoz/examples/blob/main/python/otel-ai-agent-observability-demo/app/agent_service.py" rel="noopener noreferrer nofollow" target="_blank">`agent_service.py` file</a> defines the agent configuration and the execution function used by our FastAPI endpoint.
 
-The OpenTelemetry GenAI team is hard at work, however: a PR for instrumenting the `create` method of the Responses API was <a href="https://github.com/open-telemetry/opentelemetry-python-contrib/pull/4474" rel="noopener noreferrer nofollow" target="_blank">merged in April</a>. We should expect more targeted updates in the near future.
-
-</KeyPointCallout>
-
-#### The Core Agentic Setup
-
-Our web application exposes an NBA Reporter agent that reports the latest NBA news given a topic (e.g., `general`, or `finals`), and performs on-demand analysis. When the user asks follow-up questions, our agent utilizes server sessions to analyze conversation history and provide context-aware output.
-
-**Defining the Agentic Workflow**
-
-The [`agent_service.py`](https://github.com/SigNoz/examples/blob/main/python/opentelemetry-llm-demo/app/agent_service.py) file defines the agent configuration and the executor function used in our FastAPI endpoint to serve user queries.
-
-We initialize the agent with the system prompt, tools, input guardrails, and the model name. Since our agent is not expected to perform complex operations, we use the latest available version of GPT-5.4 Mini to minimize our usage costs without sacrificing the output quality.
+We initialize the agent with a system prompt, tools, input guardrails, and model selection. The application uses **`gpt-6-luna`** (`OPENAI_MODEL = "gpt-6-luna"` in `app/config.py`), which delivers consistent multi-turn reasoning and tool formatting:
 
 ```python
 NBA_AGENT = Agent(
@@ -212,7 +197,7 @@ NBA_AGENT = Agent(
 )
 ```
 
-The `calculate_win_percentage` tool helps the agent accurately calculate and display a team’s win percentage consistently.
+The `calculate_win_percentage` function tool gives the agent a deterministic way to calculate and display team win percentages without the risk of arithmetic hallucinations:
 
 ```python
 @function_tool
@@ -226,7 +211,7 @@ def calculate_win_percentage(wins: int, losses: int) -> str:
     return f"{wins / total_games:.3f}".lstrip("0")
 ```
 
-In our case, we use an input guardrail to limit discussions to basketball topics. On detecting a user query that does not contain any of the pre-defined keywords, our function returns a `GuardrailFunctionOutput` with the `tripwire_triggered` parameter set to `True`.
+To prevent misuse or off-topic queries, we define an input guardrail. When a user prompt does not match relevant basketball keywords, the function returns a `GuardrailFunctionOutput` with `tripwire_triggered=True`:
 
 ```python
 @input_guardrail()
@@ -241,9 +226,9 @@ def nba_content_guardrail(
         "nba",
         "basketball",
         "player",
-        ... # removed for brevity
+        ... # truncated for brevity
     ]
-		
+
     # extract the last user message from chat history
     if isinstance(input_data, list):
         latest_user_message = next(
@@ -272,7 +257,7 @@ def nba_content_guardrail(
     )
 ```
 
-The `tripwire_triggered=True` parameter signals the Agent to raise the `InputGuardrailTripwireTriggered` exception and stop the agent execution loop. We intercept these exceptions through the FastAPI exception handlers to record the exception event and return an appropriate response.
+Setting `tripwire_triggered=True` instructs the Agents SDK to abort execution and raise an `InputGuardrailTripwireTriggered` exception. We intercept this in a FastAPI exception handler to record the exception event directly on the active OpenTelemetry span before returning an HTTP 400 response:
 
 ```python
 @app.exception_handler(InputGuardrailTripwireTriggered)
@@ -285,16 +270,13 @@ async def handle_guardrail_block(
 
     span.record_exception(exc)
     return JSONResponse(status_code=400, content={"detail": guardrail_msg})
-
 ```
 
-**Running the Agent and Managing Session Context**
+#### Managing session context across turns
 
-The `run_agent_turn` function completes our agentic implementation.
+The `run_agent_turn` function completes our implementation. The agent uses the `OpenAIConversationsSession` object to persist and gather conversation context across turns.
 
-The <a href="https://openai.github.io/openai-agents-python/sessions/" rel="noopener noreferrer nofollow" target="_blank">`OpenAIConversationsSession` object</a> signals the workflow to leverage OpenAI-managed server sessions to maintain conversation context across turns. Each API response includes a `session_id` that uniquely identifies the session context: user and agent responses, tool call metadata, etc.
-
-If the user includes this `session_id` in a follow-up request, the agent automatically retrieves the conversation context before processing the latest query, otherwise creating a new session to store the context for the current query.
+If no `session_id` was passed, the session object triggers the creation of a new conversation session. In a follow-up request, the user can attach this ID to ensure the agent has context of the conversation thus far.
 
 ```python
 def run_agent_turn(
@@ -311,7 +293,7 @@ def run_agent_turn(
     result = Runner.run_sync(NBA_AGENT, prompt, session=session)
 
     message = sanitize_agent_message((result.final_output or "").strip())
-		... # skipped for brevity
+    ... # truncated for brevity
 
     return {
         "topic": topic,
