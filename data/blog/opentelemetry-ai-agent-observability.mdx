@@ -105,7 +105,7 @@ Next, run `opentelemetry-bootstrap` to detect widely used Python libraries (like
 opentelemetry-bootstrap --action=install
 ```
 
-<KeyPointCallout title="Dangling OpenAI instrumentation library">
+<KeyPointCallout title="Dangling OpenAI instrumentation package">
 
 `opentelemetry-bootstrap` currently installs a deprecated `opentelemetry-instrumentation-openai-v2` package by default.<br />
 However, because our `requirements.txt` explicitly installs the modern `opentelemetry-instrumentation-genai-*` libraries, OpenTelemetry resolves to the newer packages at runtime.
@@ -159,11 +159,22 @@ This migration introduced a cleaner, **split-scope architecture**:
 1. **`opentelemetry.instrumentation.genai.openai_agents`**: Instruments the agent orchestration harness, emitting spans for workflow execution (`invoke_workflow`) and agent routing (`invoke_agent`).
 2. **`opentelemetry.instrumentation.genai.openai`**: A companion package that instruments the underlying model calls (`chat`), capturing token usage (`gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`), model parameters, and prompt context.
 
-In the earlier iteration of <a href="https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation-genai/opentelemetry-instrumentation-openai-agents-v2" rel="noopener noreferrer nofollow" target="_blank">the Agents instrumentation library</a>, it attempted to capture both agent workflows and raw model invocations within a single package. Decoupling agent loops from raw model calls ensures each layer strictly follows OpenTelemetry GenAI semantic conventions.
+The <a href="https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation-genai/opentelemetry-instrumentation-openai-agents-v2" rel="noopener noreferrer nofollow" target="_blank">earlier iteration of Agents instrumentation</a> attempted to capture both agent workflows and raw model invocations within a single package. Decoupling agent loops from raw model calls ensures each layer strictly follows OpenTelemetry GenAI semantic conventions.
 
 Additionally, because `opentelemetry-bootstrap` has not yet added these dedicated GenAI packages to its automated discovery list, you must install and track them separately through your `requirements.txt` or `pyproject.toml` files.
 
 <Figure src="/img/blog/2026/06/opentelemetry-llm-bootstrap-gap.webp" alt="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." caption="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." />
+
+<KeyPointCallout title="Varying maturity across GenAI instrumentation packages">
+
+Maturity currently varies across the OpenTelemetry GenAI instrumentation libraries:
+
+- **Core provider SDKs**: Packages for underlying LLM clients (such as OpenAI, Anthropic, and Google GenAI) have solid coverage, reliably capturing model calls, token usage metrics, latency, and streaming chunks.
+- **Agent frameworks**: Higher-level agentic libraries (such as OpenAI Agents, LangChain, and Agno) are in active beta and continuing to evolve rapidly. Agent-centric primitives—such as cross-agent handoffs and guardrail evaluations—are active areas of development as the broader GenAI semantic conventions expand.
+
+We recommend that you pin your instrumentation packages explicitly and check their changelogs when upgrading dependencies.
+
+</KeyPointCallout>
 
 
 ### Dissecting the agent implementation
