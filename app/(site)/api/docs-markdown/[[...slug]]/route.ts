@@ -5,6 +5,9 @@ import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 import { fetchDocBySlug } from '@/utils/cachedData'
 import { agentResponse } from '@/utils/agentResponseHeaders'
 
+export const revalidate = 86400
+export const dynamicParams = true
+
 export async function generateStaticParams() {
   return []
 }
@@ -23,7 +26,10 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
   const slug = resolveDocsMarkdownSlug(params.slug)
 
   if (slug === 'introduction') {
-    return agentResponse(buildIntroductionAgentMarkdown(), { varyAccept: true })
+    return agentResponse(buildIntroductionAgentMarkdown(), {
+      varyAccept: true,
+      cacheControlledByIsr: true,
+    })
   }
 
   const doc = await fetchDocBySlug(slug)
@@ -34,5 +40,5 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
 
   const markdown = await renderDocMarkdownForAgents(doc)
 
-  return agentResponse(markdown, { varyAccept: true })
+  return agentResponse(markdown, { varyAccept: true, cacheControlledByIsr: true })
 }

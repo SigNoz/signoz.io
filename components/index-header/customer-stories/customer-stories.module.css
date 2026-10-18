@@ -22,6 +22,8 @@
   height: 132px;
   overflow: hidden;
   border-bottom: 1px solid var(--l2-border);
+  /* Keeps marquee invalidations out of page-wide style/layout passes. */
+  contain: layout paint style;
 }
 
 .wrapper {
@@ -38,6 +40,21 @@
   width: max-content;
   will-change: transform;
   backface-visibility: hidden;
+}
+
+/* Mobile marquee; the distance is measured in JS — a percentage translate
+   would land mid-gap and produce a visible seam. */
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-1 * var(--marquee-distance)), 0, 0);
+  }
+}
+
+.cssMarquee {
+  animation: marquee-scroll var(--marquee-duration, 60s) linear infinite;
 }
 
 .card {
@@ -433,6 +450,10 @@
 @media (prefers-reduced-motion: reduce) {
   .track {
     transform: none !important;
+  }
+
+  .cssMarquee {
+    animation: none;
   }
 
   .card {

@@ -1,7 +1,7 @@
 ---
-date: 2026-08-03
-title: Docker Swarm Collection Agent - Install
-description: Install the OpenTelemetry Collector on your Docker Swarm cluster to collect metrics, logs, and traces and send them to SigNoz.
+date: 2026-10-13
+title: Docker Swarm Collection Agent - Install the OTel Collector
+description: Install the OpenTelemetry Collector on your Docker Swarm cluster to collect host metrics, container metrics, logs, and traces and send them to SigNoz.
 doc_type: howto
 ---
 
@@ -14,7 +14,7 @@ This guide walks you through installing the OpenTelemetry Collector **contrib** 
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Ports `4317`, `4318` available on each Swarm node
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -134,7 +134,7 @@ Create a `docker-stack.yaml` file:
 ```yaml:docker-stack.yaml defaultCollapsed minimap
 services:
   signoz-collection-agent:
-    image: otel/opentelemetry-collector-contrib:0.139.0
+    image: otel/opentelemetry-collector-contrib:0.162.0
     user: "0:0"
     hostname: "{{.Node.Hostname}}"
     environment:
@@ -208,7 +208,7 @@ docker service create \
   --mount type=bind,source=/,target=/hostfs,readonly \
   --publish target=4317,published=4317,protocol=tcp,mode=host \
   --publish target=4318,published=4318,protocol=tcp,mode=host \
-  otel/opentelemetry-collector-contrib:0.139.0
+  otel/opentelemetry-collector-contrib:0.162.0
 ```
 
 To update the config later, create a new config (for example `otelcol_config_v2`), update the service to use it, and remove the old config.

@@ -1,8 +1,8 @@
 ---
-date: 2026-09-10
+date: 2026-10-13
 title: Install the OpenTelemetry Collector on a Virtual Machine
 meta_title: Install OpenTelemetry Collector on a VM
-description: Install the OpenTelemetry Collector binary on your virtual machine to collect telemetry data.
+description: Install the OpenTelemetry Collector binary on a Linux, macOS, or Windows virtual machine to collect host metrics, logs, and traces and send them to SigNoz.
 doc_type: howto
 ---
 
@@ -14,7 +14,7 @@ This guide walks you through installing the OpenTelemetry Collector **contrib** 
 - SigNoz ingestion endpoint accessible from the VM
 - Availability of ports: `4317`, `4318`, `8888`, `1777`, `13133`
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -44,13 +44,13 @@ sudo apt-get update
 
 ```bash
 ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.deb"
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.162.0/otelcol-contrib_0.162.0_linux_${ARCH}.deb"
 ```
 
 ### Step 3: Install the package
 
 ```bash
-sudo dpkg -i otelcol-contrib_0.139.0_linux_${ARCH}.deb
+sudo dpkg -i otelcol-contrib_0.162.0_linux_${ARCH}.deb
 ```
 
 ### Step 4: Create OpenTelemetry Collector Configuration
@@ -166,13 +166,13 @@ sudo yum update
 
 ```bash
 ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.rpm"
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.162.0/otelcol-contrib_0.162.0_linux_${ARCH}.rpm"
 ```
 
 ### Step 3: Install the package
 
 ```bash
-sudo rpm -ivh otelcol-contrib_0.139.0_linux_${ARCH}.rpm
+sudo rpm -ivh otelcol-contrib_0.162.0_linux_${ARCH}.rpm
 ```
 
 ### Step 4: Create OpenTelemetry Collector Configuration
@@ -284,13 +284,13 @@ Download the Collector as a gzipped tarball and run the binary yourself. No pack
 
 ```bash
 ARCH=$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_${ARCH}.tar.gz"
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.162.0/otelcol-contrib_0.162.0_linux_${ARCH}.tar.gz"
 ```
 
 ### Step 2: Extract
 
 ```bash
-tar -xvf otelcol-contrib_0.139.0_linux_${ARCH}.tar.gz
+tar -xvf otelcol-contrib_0.162.0_linux_${ARCH}.tar.gz
 ```
 
 ### Step 3: Create OpenTelemetry Collector Configuration
@@ -395,13 +395,13 @@ Download the Collector as a gzipped tarball for macOS (Intel or Apple Silicon). 
 
 ```bash
 ARCH=$(uname -m | sed 's/x86_64/amd64/g')
-curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz"
+curl -sSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.162.0/otelcol-contrib_0.162.0_darwin_${ARCH}.tar.gz"
 ```
 
 ### Step 2: Extract
 
 ```bash
-tar -xvf otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz
+tar -xvf otelcol-contrib_0.162.0_darwin_${ARCH}.tar.gz
 ```
 
 ### Step 3: Create OpenTelemetry Collector Configuration
@@ -567,7 +567,7 @@ Verify the following values:
 ### Step 2: Run the Collector
 
 ```powershell
-Start-Process msiexec -ArgumentList "/i", "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.msi", "CONFIG=config.yaml" -Wait
+Start-Process msiexec -ArgumentList "/i", "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.162.0/otelcol-contrib_0.162.0_windows_x64.msi", "CONFIG=config.yaml" -Wait
 ```
 
 ### Step 3: Validate
@@ -600,13 +600,13 @@ Download the Collector as a gzipped tarball and run the executable yourself. No 
 ### Step 1: Download the tarball
 
 ```powershell
-curl -sSL -o "otelcol-contrib_0.139.0_windows_amd64.tar.gz" "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.tar.gz"
+curl -sSL -o "otelcol-contrib_0.162.0_windows_amd64.tar.gz" "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.162.0/otelcol-contrib_0.162.0_windows_amd64.tar.gz"
 ```
 
 ### Step 2: Extract
 
 ```powershell
-tar -xvzf otelcol-contrib_0.139.0_windows_amd64.tar.gz
+tar -xvzf otelcol-contrib_0.162.0_windows_amd64.tar.gz
 ```
 
 ### Step 3: Create OpenTelemetry Collector Configuration
