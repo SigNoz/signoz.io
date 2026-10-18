@@ -1,375 +1,799 @@
 ---
-date: 2026-10-13
-title: Docker Collection Agent - Configure Metrics and Logs
-description: Configure the OpenTelemetry Collector on your Docker host to customize host metrics, container metrics, and log collection before you send data to SigNoz.
+date: 2026-10-19
+title: Docker OpenTelemetry Collection Agent - Configure
+description: Configure the OpenTelemetry Collector of the Docker Collection Agent to customize host metrics, container metrics, and container logs sent to SigNoz.
 doc_type: howto
 ---
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) provides a working config that collects host metrics, container metrics, container logs, and forwards application traces out of the box. This page explains what each component in that config does and how to customize it for your environment.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) provides a working config: one agent container on each Docker host collects host metrics, container metrics, container logs, and data from instrumented applications. This page shows how to customize it, in `config.yaml` for Docker or in `casting.yaml` for Foundry.
 
 ## Prerequisites
 
-- OpenTelemetry Collector installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/))
+- Docker Collection Agent installed with Docker Compose, `docker run`, or Foundry (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/))
 - SigNoz Cloud account or self-hosted SigNoz instance
-- Access to create and edit the collector configuration file
-
-## Send Data from Applications to the Collector
-
-Configure the OTLP receiver so instrumented applications on the Docker host can send traces, metrics, and logs to the collector.
-
-```yaml:config.yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-
-service:
-  pipelines:
-    traces:
-      receivers: [otlp]
-    metrics:
-      receivers: [otlp]
-    logs:
-      receivers: [otlp]
-```
-
-### Where and how to send data from your application
-
-Set your app's OTLP endpoint to the collector (gRPC `4317`, HTTP `4318`):
-
-```bash
-# Same Docker host (with --network host)
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
-# Different host
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://<DOCKER_HOST_IP>:4317"
-# Set the service name
-export OTEL_RESOURCE_ATTRIBUTES="service.name=my-app"
-```
-
-See [Instrumentation](https://signoz.io/docs/instrumentation/) for language-specific setup.
-
-## Collect Host Metrics
-
-Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from the Docker host.
-
-```yaml:config.yaml defaultCollapsed
-receivers:
-  hostmetrics:
-    collection_interval: 60s
-    root_path: /hostfs
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-        mute_process_user_error: true
-      processes: {}
-
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp, hostmetrics]
-```
-
-You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
-
-<KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed="true">
-Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk metrics instead of the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
-
-In most cases you mount the host root at `/hostfs` (e.g. `-v /:/hostfs:ro`). If you prefer to expose only certain paths to the collector, mount those under `/hostfs` so paths line up—for example `docker run -v /proc:/hostfs/proc` for process-related metrics.
-
-- The `root_path` value in config must match the volume mount path in your `docker run` or Compose file (e.g. `/hostfs`).
-- This applies to **Linux only**.
-- If you run multiple hostmetrics receiver instances, they must all share the same `root_path`.
-
-See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md#collecting-host-metrics-from-inside-a-container-linux-only" target="_blank" rel="noopener noreferrer nofollow">upstream docs</a> for more details.
-</KeyPointCallout>
-
-### Exclude filesystem mounts
-
-The `filesystem` scraper in the `hostmetrics` receiver may report virtual or Docker overlay mounts that add noise. Use `exclude_mount_points` and `exclude_fs_types` to filter them out.
-
-```yaml:config.yaml defaultCollapsed minimap
-receivers:
-  hostmetrics:
-    collection_interval: 60s
-    root_path: /hostfs
-    scrapers:
-      filesystem:
-        exclude_mount_points:
-          match_type: regexp
-          mount_points:
-            - /dev/.*
-            - /proc/.*
-            - /sys/.*
-            - /run/.*
-            - /var/lib/docker/.*
-        exclude_fs_types:
-          match_type: strict
-          fs_types:
-            - autofs
-            - binfmt_misc
-            - bpf
-            - cgroup2
-            - configfs
-            - debugfs
-            - devpts
-            - devtmpfs
-            - fusectl
-            - hugetlbfs
-            - mqueue
-            - nsfs
-            - overlay
-            - proc
-            - procfs
-            - pstore
-            - rpc_pipefs
-            - securityfs
-            - selinuxfs
-            - squashfs
-            - sysfs
-            - tracefs
-```
-
-## Collect Container Metrics
-
-Use the `docker_stats` receiver to collect per-container resource metrics from the Docker Engine API. For full setup details and a pre-configured dashboard, see [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/).
-
-```yaml:config.yaml defaultCollapsed
-receivers:
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    metrics:
-      # Following metrics are enabled by default in the docker_stats receiver
-      container.cpu.utilization:
-        enabled: true
-      container.memory.percent:
-        enabled: true
-      container.memory.usage.limit:
-        enabled: true
-      container.memory.usage.total:
-        enabled: true
-      container.network.io.usage.rx_bytes:
-        enabled: true
-      container.network.io.usage.tx_bytes:
-        enabled: true
-      container.network.io.usage.rx_dropped:
-        enabled: true
-      container.network.io.usage.tx_dropped:
-        enabled: true
-      container.blockio.io_service_bytes_recursive:
-        enabled: true
-
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp, hostmetrics, docker_stats]
-```
-
-The Docker socket must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
-
-<KeyPointCallout title="Docker socket permissions" defaultCollapsed="true">
-The install guide runs the collector as root (`user: "0:0"`) so it can read the Docker socket and host filesystem. For production, you can avoid running as root by adding the container to the host's `docker` group: `docker run --group-add $(getent group docker | cut -d: -f3) ...`. If you see permission errors on the socket, see [Troubleshooting](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/#troubleshooting) in the install guide.
-</KeyPointCallout>
-
-### Map container labels to metric attributes
-
-Use `container_labels_to_metric_labels` on the `docker_stats` receiver to promote Docker container labels into metric resource attributes. This enables filtering and grouping by Compose service, project, or any custom label in SigNoz dashboards.
-
-```yaml:config.yaml
-receivers:
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    container_labels_to_metric_labels:
-      com.docker.compose.service: docker.compose.service
-      com.docker.compose.project: docker.compose.project
-```
-
-The keys are Docker label names (check with `docker inspect <container> --format '{{json .Config.Labels}}'`), and the values are the metric attribute names that appear in SigNoz.
-
-### Exclude containers from metrics
-
-Use `excluded_images` on the `docker_stats` receiver to filter out the collector itself or infrastructure containers you don't want metrics for.
-
-```yaml:config.yaml
-receivers:
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    excluded_images:
-      - opentelemetry-collector-contrib
-      - /.*pause.*/
-```
-
-Values can be exact image names or regex patterns (wrapped in `/`).
-
-## Collect Container Logs
-
-Use the `filelog` receiver to tail Docker container JSON log files. For full setup details, see [Collecting Docker Container Logs](https://signoz.io/docs/userguide/collect_docker_logs/).
-
-```yaml:config.yaml
-receivers:
-  filelog:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-    operators:
-      - id: container-parser
-        type: container
-        format: docker
-        add_metadata_from_filepath: false
-
-service:
-  pipelines:
-    logs:
-      receivers: [otlp, filelog]
-```
-
-The container log directory must be mounted as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
-
-## Tune Batch and Memory Limiter
-
-Adjust the `batch` processor for throughput and the `memory_limiter` processor for stability based on your workload. See [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices) for detailed guidance.
-
-```yaml:config.yaml
-processors:
-  batch:
-    send_batch_size: 1000       # number of items per batch
-    send_batch_max_size: 2048   # hard cap per batch
-    timeout: 10s                # flush interval
-  memory_limiter:
-    check_interval: 5s
-    limit_mib: 4000             # ~80% of container memory limit
-    spike_limit_mib: 800
-```
-
-<KeyPointCallout title="Setting memory limits" defaultCollapsed="false">
-Set `limit_mib` to approximately 80% of the memory limit you assign to the collector container. If your Docker host is resource-constrained, reduce both `limit_mib` and `spike_limit_mib` accordingly.
-</KeyPointCallout>
-
-## Resource Detection
-
-The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and Docker metadata to your telemetry so you can filter and group by environment, hostname, or container in SigNoz.
-
-```yaml:config.yaml
-processors:
-  resourcedetection:
-    detectors: [env, system, docker]
-    timeout: 2s
-    system:
-      hostname_sources: [os]
-service:
-  pipelines:
-    traces:
-      processors: [resourcedetection]
-    metrics:
-      processors: [resourcedetection]
-    logs:
-      processors: [resourcedetection]
-```
-
-### Custom resource attributes
-
-You can attach custom resource attributes (for example, `deployment.environment`, `team`, or any custom key) to **all telemetry** sent by the collector by setting the `OTEL_RESOURCE_ATTRIBUTES` environment variable in the collector's environment.
-
-```bash
-OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,team=backend"
-```
-
-## Scrape Prometheus Metrics from Containers
-
-Use the [Prometheus receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#prometheus-receiver) to scrape Prometheus-compatible endpoints exposed by application containers.
-
-```yaml:config.yaml
-receivers:
-  prometheus:
-    config:
-      global:
-        scrape_interval: 60s
-      scrape_configs:
-        - job_name: my-app
-          static_configs:
-            - targets:
-                - my-app-container:9090
-
-service:
-  pipelines:
-    metrics:
-      receivers: [prometheus]
-```
-
-Replace `my-app-container:9090` with the hostname (or IP) and port of the Prometheus endpoint. If the collector uses `--network host`, use `localhost:<port>`. If it shares a Docker network with the target container, use the container name as hostname.
-
-## Docker Compose Networking
-
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) uses `network_mode: host` by default. This gives the collector direct access to host ports and simplifies configuration, but exposes all collector ports on the host.
-
-For environments where you need network isolation, use bridge mode with explicit port mapping:
-
-```yaml:docker-compose.yaml defaultCollapsed
-services:
-  signoz-collection-agent:
-    image: otel/opentelemetry-collector-contrib:0.162.0
-    container_name: signoz-collection-agent
-    restart: unless-stopped
-    user: "0:0"
-    ports:
-      - "4317:4317"
-      - "4318:4318"
-    environment:
-      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
-    volumes:
-      - ./config.yaml:/etc/otelcol-contrib/config.yaml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /:/hostfs:ro
-    networks:
-      - monitoring
-
-networks:
-  monitoring:
-    driver: bridge
-```
-
-With bridge mode, application containers that send OTLP data to the collector must be on the same Docker network (`monitoring` in this example) or use the published host ports.
-
-## Validate
-
-- **Config and logs:** Check the collector logs to confirm the config is valid and the collector is running without errors.
-
-  ```bash
-  docker logs signoz-collection-agent
-  ```
-
-- **In SigNoz:** Confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for host and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
+- A shell on the Docker host, and the files you installed from: `config.yaml` and `docker-compose.yaml` (or your `docker run` command) for Docker, or `casting.yaml` and `foundryctl` for Foundry
 
 ## Apply Changes
 
-After editing the config:
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
 
-1. Restart the collector to apply changes:
+For each change:
+
+1. Add the section's snippet to `config.yaml`, merging it into the keys the file already has.
+
+2. Run this on the Docker host to apply the change:
 
    ```bash
    docker restart signoz-collection-agent
    ```
 
-   Or with Docker Compose:
+   The agent restarts and reads the new config. For a change to `docker-compose.yaml`, run `docker compose up -d` from its directory instead; with `docker run`, remove the container with `docker rm -f signoz-collection-agent` and run it again with the new flags.
+
+3. View the agent's logs to confirm there are no configuration errors:
 
    ```bash
-   docker compose restart
+   docker logs --since 5m signoz-collection-agent
    ```
 
-2. View collector logs to confirm there are no configuration errors.
+4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for host metrics, the [Docker container metrics dashboard](https://signoz.io/docs/metrics-management/docker-container-metrics/) for container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+For each change:
+
+1. Add the section's snippet to `casting.yaml`. Foundry already generates the default receivers and processors, so add only what you change.
+
+2. Run this from the directory that contains `casting.yaml` to apply the change:
+
+   ```bash
+   foundryctl cast -f casting.yaml
+   docker restart signoz-collector-agent
+   ```
+
+   Foundry updates the agent's config, and the agent restarts with it.
+
+3. View the agent's logs to confirm there are no configuration errors:
+
+   ```bash
+   docker logs --since 5m signoz-collector-agent
+   ```
+
+4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for host metrics, the [Docker container metrics dashboard](https://signoz.io/docs/metrics-management/docker-container-metrics/) for container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
+
+</TabItem>
+</Tabs>
+
+## Send Data from Applications to the Collector
+
+Host metrics, container metrics, and container logs flow as soon as the agent is running.
+
+### Where and how to send data from your application
+
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then point it at the agent. For an application in a container, add this to its service in its Compose file:
+
+```yaml
+services:
+  <your-app>:
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://host.docker.internal:4318
+      OTEL_SERVICE_NAME: <service-name>
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+```
+
+**Verify these values:**
+
+- `<your-app>`: Your application's service in its Compose file.
+- `<service-name>`: The name your application shows under in SigNoz.
+
+The <a href="https://docs.docker.com/reference/cli/docker/container/run/#add-host" target="_blank" rel="noopener noreferrer nofollow">`host-gateway`</a> entry points `host.docker.internal` at the Docker host, where the agent listens. For an application on the host itself, use `http://localhost:4318`, and from another host, the Docker host's address. For OTLP over gRPC, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and port `4317`.
+
+Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz.
+
+## Collect Host Metrics
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To collect host metrics every 30s, add this to `config.yaml`:
+
+```yaml
+receivers:
+  hostmetrics:
+    collection_interval: 30s
+```
+
+To stop a scraper, delete its entry under `scrapers`.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To collect host metrics every 30s, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                collection_interval: 30s
+```
+
+To stop a scraper, set it to `null` under `scrapers`, for example `paging: null`.
+
+</TabItem>
+</Tabs>
+
+### Exclude filesystem mounts
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To stop reporting the filesystem mounted at `/mnt/backup`, add this to `config.yaml`:
+
+```yaml
+receivers:
+  hostmetrics:
+    scrapers:
+      filesystem:
+        exclude_mount_points:
+          mount_points:
+            - /dev/*
+            - /proc/*
+            - /sys/*
+            - /run/credentials/*
+            - /run/k3s/containerd/*
+            - /var/lib/docker/*
+            - /var/lib/containers/storage/*
+            - /var/lib/kubelet/*
+            - /snap/*
+            - ^/mnt/backup$
+```
+
+Entries are unanchored regular expressions matched against each mount point.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To stop reporting the filesystem mounted at `/mnt/backup`, add this to `casting.yaml`:
+
+```yaml defaultCollapsed
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                scrapers:
+                  filesystem:
+                    exclude_mount_points:
+                      mount_points:
+                        - /dev/*
+                        - /proc/*
+                        - /sys/*
+                        - /run/credentials/*
+                        - /run/k3s/containerd/*
+                        - /var/lib/docker/*
+                        - /var/lib/containers/storage/*
+                        - /var/lib/kubelet/*
+                        - /snap/*
+                        - ^/mnt/backup$
+```
+
+Lists replace, so restate Foundry's nine default entries, the ones above `^/mnt/backup$`.
+
+</TabItem>
+</Tabs>
+
+## Collect Container Metrics
+
+For the metrics and a dashboard, see [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/).
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To collect container metrics every 30s, add this to `config.yaml`:
+
+```yaml
+receivers:
+  docker_stats:
+    collection_interval: 30s
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To collect container metrics every 30s, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              docker_stats:
+                collection_interval: 30s
+```
+
+Foundry collects container metrics every 60s by default.
+
+</TabItem>
+</Tabs>
+
+### Map container labels to resource attributes
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To add container labels to container metrics as resource attributes, add this to `config.yaml`:
+
+```yaml
+receivers:
+  docker_stats:
+    container_labels_to_metric_labels:
+      com.docker.compose.project: docker.compose.project
+      com.docker.compose.service: docker.compose.service
+      com.example.team: team
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To add the `com.example.team` container label to container metrics as `team`, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              docker_stats:
+                container_labels_to_metric_labels:
+                  com.example.team: team
+```
+
+The map merges, so Foundry's default `com.docker.compose.project` and `com.docker.compose.service` mappings stay.
+
+</TabItem>
+</Tabs>
+
+### Exclude containers from metrics
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To stop collecting metrics for containers by image, add this to `config.yaml`:
+
+```yaml
+receivers:
+  docker_stats:
+    excluded_images:
+      - 'otel/opentelemetry-collector-contrib*'
+      - /.*pause.*/
+```
+
+Entries match the image name exactly, as a glob, or as a regular expression between slashes.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To stop collecting metrics for containers by image, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              docker_stats:
+                excluded_images:
+                  - 'otel/opentelemetry-collector-contrib*'
+                  - /.*pause.*/
+```
+
+Entries match the image name exactly, as a glob, or as a regular expression between slashes.
+
+</TabItem>
+</Tabs>
+
+## Collect Container Logs
+
+For Docker daemon logs and other log sources, see [Collecting Docker Logs](https://signoz.io/docs/userguide/collect_docker_logs/).
+
+To keep a container's logs out of the agent's collection, add this to its service in its Compose file and redeploy it:
+
+```yaml
+services:
+  <your-app>:
+    logging:
+      driver: local
+```
+
+**Verify these values:**
+
+- `<your-app>`: The service whose logs you keep out.
+
+The agent collects the logs of containers that use the `json-file` log driver, Docker's default.
+
+### Disable Logs Collection
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To stop collecting container logs, add this to `config.yaml`:
+
+```yaml
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+```
+
+Logs that applications send over OTLP keep flowing.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To stop collecting container logs, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog: null
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+Lists replace, so the `logs` pipeline is restated with Foundry's two OTLP receivers.
+
+</TabItem>
+</Tabs>
+
+## Resource Detection
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To detect only host and Docker attributes on a host outside AWS, GCP, and Azure, add this to `config.yaml`:
+
+```yaml
+processors:
+  resourcedetection:
+    detectors: [env, system, docker]
+```
+
+The first detector to set an attribute wins.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To detect only host and Docker attributes on a host outside AWS, GCP, and Azure, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              resourcedetection:
+                detectors: [env, system, docker]
+```
+
+Lists replace, so `detectors` holds only the detectors you list.
+
+</TabItem>
+</Tabs>
+
+### Custom resource attributes
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To add `team=backend` to all telemetry, set it in the agent's environment in `docker-compose.yaml`, or in the `-e` flag of `docker run`:
+
+```yaml
+services:
+  signoz-collection-agent:
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>,team=backend
+```
+
+**Verify these values:**
+
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To add `team=backend` to all telemetry, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      env:
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<your-environment>,team=backend
+```
+
+**Verify these values:**
+
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+</TabItem>
+</Tabs>
+
+## Scrape Prometheus Metrics from Containers
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To scrape a Prometheus endpoint every 60s, add this to `config.yaml`:
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: my-app
+          scrape_interval: 60s
+          static_configs:
+            - targets: [localhost:9090]
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics, docker_stats, prometheus]
+```
+
+The agent shares the host's network, so `localhost:9090` reaches port `9090` published by a container.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To scrape a Prometheus endpoint every 60s, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              prometheus:
+                config:
+                  scrape_configs:
+                    - job_name: my-app
+                      scrape_interval: 60s
+                      static_configs:
+                        - targets: [localhost:9090]
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, docker_stats, hostmetrics, prometheus]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers.
+
+</TabItem>
+</Tabs>
+
+## Tune Batch and Memory Limiter
+
+For sizing guidance, see [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices).
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To send larger batches, add this to `config.yaml`:
+
+```yaml
+processors:
+  batch:
+    send_batch_size: 2000
+    send_batch_max_size: 4000
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To send larger batches, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              batch:
+                send_batch_size: 2000
+                send_batch_max_size: 4000
+```
+
+Foundry's defaults are `send_batch_size: 1000`, `send_batch_max_size: 2048`, and `timeout: 10s`.
+
+</TabItem>
+</Tabs>
+
+### Container Memory Limit
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To cap the agent's memory at 1 GiB, add this to its service in `docker-compose.yaml`, or pass `--memory 1g` to `docker run`:
+
+```yaml
+services:
+  signoz-collection-agent:
+    mem_limit: 1g
+```
+
+Then replace the `memory_limiter` block in `config.yaml` with this, which sizes it to that limit:
+
+```yaml
+processors:
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To cap the agent's memory at 1 GiB, add this patch to `casting.yaml`:
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/compose.yaml
+      operations:
+        - op: add
+          path: /services/signoz-collector-agent/mem_limit
+          value: 1g
+```
+
+Foundry's `memory_limiter` processor uses a fixed `limit_mib: 4000`. Size it to the memory limit with percentages, in the same document:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              memory_limiter:
+                limit_mib: null
+                spike_limit_mib: null
+                limit_percentage: 80
+                spike_limit_percentage: 25
+```
+
+</TabItem>
+</Tabs>
+
+## Add Custom Processors to Pipelines
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To add a processor to the `traces` pipeline, add this to `config.yaml`:
+
+```yaml
+processors:
+  attributes/team:
+    actions:
+      - key: team
+        value: platform
+        action: insert
+service:
+  pipelines:
+    traces:
+      processors: [memory_limiter, resourcedetection, attributes/team, batch]
+```
+
+Processors run in the order listed, so put yours before `batch`.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To add a processor to the `traces` pipeline, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              attributes/team:
+                actions:
+                  - key: team
+                    value: platform
+                    action: insert
+            service:
+              pipelines:
+                traces:
+                  processors: [memory_limiter, resourcedetection, attributes/team, batch]
+```
+
+Lists replace, so restate Foundry's processors `memory_limiter`, `resourcedetection`, and `batch`, with yours before `batch`.
+
+</TabItem>
+</Tabs>
+
+## Common Deployment Scenarios
+
+### Run on the same host as self-hosted SigNoz
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To run the agent on the host that runs self-hosted SigNoz, add this to `config.yaml`:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14317
+      http:
+        endpoint: 0.0.0.0:14318
+exporters:
+  otlphttp:
+    endpoint: http://localhost:4318
+```
+
+Applications on the host then send to `localhost:14318`.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To run the agent on the host that runs self-hosted SigNoz, add this to `casting.yaml`:
+
+```yaml
+metadata:
+  name: signoz-agent
+spec:
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: http://localhost:4318
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              otlp/grpc:
+                protocols:
+                  grpc:
+                    endpoint: 0.0.0.0:14317
+              otlp/http:
+                protocols:
+                  http:
+                    endpoint: 0.0.0.0:14318
+```
+
+Remove the old agent with `docker rm -f signoz-collector-agent` before you apply this. The agent then runs as `signoz-agent-collector-agent` in its own Compose project, the name commands and patch paths use from then on, and applications on the host send to `localhost:14318`.
+
+</TabItem>
+</Tabs>
+
+### Use bridge networking
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker" default>
+
+To run the agent on a bridge network, remove `network_mode: host` from `docker-compose.yaml` and add this to the agent's service:
+
+```yaml
+services:
+  signoz-collection-agent:
+    hostname: <host-name>
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - monitoring
+networks:
+  monitoring:
+    driver: bridge
+```
+
+**Verify these values:**
+
+- `<host-name>`: The Docker host's name.
+
+On a bridge network, host network metrics report the agent container's network interfaces.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+To run the agent on a bridge network, add this patch to `casting.yaml`:
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/compose.yaml
+      operations:
+        - op: remove
+          path: /services/signoz-collector-agent/network_mode
+        - op: add
+          path: /services/signoz-collector-agent/hostname
+          value: <host-name>
+        - op: add
+          path: /services/signoz-collector-agent/ports
+          value: ["4317:4317", "4318:4318"]
+        - op: add
+          path: /services/signoz-collector-agent/networks
+          value: [monitoring]
+        - op: add
+          path: /networks
+          value:
+            monitoring:
+              driver: bridge
+```
+
+**Verify these values:**
+
+- `<host-name>`: The Docker host's name.
+
+On a bridge network, host network metrics report the agent container's network interfaces.
+
+</TabItem>
+</Tabs>
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Host or container metrics stop after adding a receiver
+
+After a change that adds a receiver to the `metrics` pipeline, host or container metrics stop arriving in SigNoz.
+
+**Cause:** the pipeline's `receivers` list replaces the whole list, so a list without `hostmetrics` and `docker_stats` drops them.
+
+**Fix:** restate every receiver the pipeline still needs, as [Scrape Prometheus Metrics from Containers](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/#scrape-prometheus-metrics-from-containers) shows, then apply the change as [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/#apply-changes) shows.
+
+After the fix, host and container metrics arrive in SigNoz again.
+
+### A custom processor has no effect
+
+After a change that adds a processor, its attribute or transformation is missing from the data in SigNoz.
+
+**Cause:** the processor is defined under `processors` but not listed in a pipeline's `processors`.
+
+**Fix:** list it before `batch` as [Add Custom Processors to Pipelines](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/#add-custom-processors-to-pipelines) shows, then apply the change as [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/#apply-changes) shows.
+
+After the fix, the attribute or transformation appears on the signal in SigNoz Explorer.
+
+</details>
 
 ## Next Steps
 
