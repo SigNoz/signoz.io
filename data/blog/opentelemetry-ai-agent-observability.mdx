@@ -1,6 +1,6 @@
 ---
 title: AI Agent Observability with OpenTelemetry
-description: Learn how to setup observability for your AI Agents using OpenTelemetry GenAI Instrumentation libraries, and how tracing helps capture agent execution context in detail. 
+description: Learn how to set up observability for your AI agents using OpenTelemetry GenAI instrumentation libraries, and how tracing helps capture agent execution context in detail.
 date: 2026-10-16
 tags: [OpenTelemetry, AI]
 authors: [dhruv_ahuja]
@@ -37,7 +37,7 @@ This means variance doesn't just exist at one point. Rather, it compounds across
 
 ### Agents can silently produce incorrect results
 
-Traditional software either succeeds or throws an error. Very rarely do you have situations where application response quality degrades without notice. Agents introduce a failure mode that's harder to catch: the workflow completes without any error, but the agent selected the wrong tool, retrieved stale context, or returned a response that is confidently incorrect.
+Traditional software can also return incorrect results without throwing an error. With agents, these failures can be harder to catch because each run can take a different path: the workflow completes without any error, but the agent selected the wrong tool, retrieved stale context, or returned a response that is confidently incorrect.
 
 Without observability, these silent failures only surface when a user complains or when downstream systems consume bad output. Tracing each decision in the agentic loop, such as which tool was selected, what context was available, what the model actually returned, is the only reliable way to evaluate whether an agent's "successful" run was actually logically correct.
 
@@ -163,7 +163,7 @@ The <a href="https://github.com/open-telemetry/opentelemetry-python-contrib/tree
 
 Additionally, because `opentelemetry-bootstrap` has not yet added these dedicated GenAI packages to its automated discovery list, you must install and track them separately through your `requirements.txt` or `pyproject.toml` files.
 
-<Figure src="/img/blog/2026/06/opentelemetry-llm-bootstrap-gap.webp" alt="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." caption="Developers must install latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." />
+<Figure src="/img/blog/2026/06/opentelemetry-llm-bootstrap-gap.webp" alt="Developers must install the latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." caption="Developers must install the latest GenAI instrumentation libraries manually as they aren't yet registered with opentelemetry-bootstrap." />
 
 <KeyPointCallout title="Varying maturity across GenAI instrumentation packages">
 
@@ -319,9 +319,9 @@ def run_agent_turn(
 
 ### Interacting with the agent
 
-Let’s start by asking the NBA Reporter agent a question about the Lakers' win percentage in the 2025-26 season, as well as LeBron and his future in the team. This query asks three distinct questions, setting us up for follow-up questions in the next turn, and the win percentage ask should trigger the `calculate_win_percentage` tool.
+Let’s start by asking the NBA Reporter agent a question about the Lakers' win percentage in the 2025-26 season, as well as LeBron and his future with the team. This query asks three distinct questions, setting us up for follow-up questions in the next turn, and the win percentage ask should trigger the `calculate_win_percentage` tool.
 
-<Figure src="/img/blog/2026/10/otel-ai-agent-initial-response.webp" alt="The agent response to queries includes the session_id to continue the conversation across the turn." caption="The agent response to queries includes the session_id to continue the conversation across the turn." />
+<Figure src="/img/blog/2026/10/otel-ai-agent-initial-response.webp" alt="The agent response to queries includes the session_id to continue the conversation across turns." caption="The agent response to queries includes the session_id to continue the conversation across turns." />
 
 The agent responds first with the win percentage calculation — the format matches our tool's response shape. It makes a prediction about the upcoming NBA season, and informs us that LeBron is no longer with the LA Lakers.
 
@@ -329,7 +329,7 @@ The response JSON also contains the model name, token usage details at a glance,
 
 Let's now add the `session_id` to our request payload and ask why LeBron switched teams. We'll refer to LeBron as `he` to test the agent's context retrieval capabilities. 
 
-<Figure src="/img/blog/2026/10/otel-ai-agent-followup.webp" alt="The agent retrieves conversation history to continue conversation across turns." caption="The agent retrieves conversation history to continue conversation across turns." />
+<Figure src="/img/blog/2026/10/otel-ai-agent-followup.webp" alt="The agent retrieves conversation history to continue the conversation across turns." caption="The agent retrieves conversation history to continue the conversation across turns." />
 
 The agent correctly identifies `he` as LeBron in the context of the conversation, and outlines why he moved to a new team. It also returns the same `session_id` in the response, further confirming continuation of the previous conversation.
 
@@ -337,7 +337,7 @@ Finally, let’s ask an off-topic question to see whether the input guardrails t
 
 <Figure src="/img/blog/2026/10/otel-ai-agent-guardrail-trigger.webp" alt="The AI agent triggers a guardrail and aborts the workflow to prevent abuse." caption="The AI agent triggers a guardrail and aborts the workflow to prevent abuse." />
 
-Because the prompt lacks basketball-related keywords, the tripwire fires immediately. This aborts execution before the agent can invoke tools or call the model, preventing unneeded API spend and latency.
+Because the prompt lacks basketball-related keywords, the tripwire fires immediately. This helps the agent abort execution before executing tools or calling the model, preventing unneeded API spend and latency.
 
 ### Exploring the trace hierarchy in SigNoz
 
@@ -408,7 +408,7 @@ This retains model timing, token counts, and span hierarchies while omitting raw
 
 When an off-topic query triggers the input guardrail tripwire, the agent stops execution before calling the model. 
 
-In our FastAPI exception handler, intercepting `InputGuardrailTripwireTriggered` and invoking `span.record_exception(exc)` marks the root span as an error. Clicking into the span's Events tab on the right reveals the recorded exception event.
+In our FastAPI exception handler, intercepting `InputGuardrailTripwireTriggered` and invoking `span.record_exception(exc)` captures the exception event on the root span.
 
 <Figure src="/img/blog/2026/10/otel-ai-agent-guardrail-trace.gif" alt="Root spans capture the guardrail triggered exception events." caption="Root spans capture the guardrail triggered exception events." />
 
@@ -426,7 +426,7 @@ The OpenTelemetry GenAI instrumentation automatically emits standard metrics—s
 The top-level overview surfaces high-level operational indicators across your agent infrastructure:
 
 - **Total cost and token volume**: Tracks cumulative spend ($0.32 for 592.9K tokens) spanning AI costs across services.
-- **Latency percentiles and TTFT**: Evaluates worst-case execution performance (p95 latency of 21.22s that includes other models such as `gpt-6-astra` used by other services) alongside Time to First Token (TTFT) for streaming responses.
+- **Latency percentiles and TTFT**: Tracks tail latency (p95 latency of 21.22s that includes other models such as `gpt-6-astra` used by other services) alongside Time to First Token (TTFT) for streaming responses.
 - **LLM call volume and error rates**: Monitors traffic spikes and model failure rates across services.
 
 Every dashboard panel in the view supports **direct drilldowns into traces and logs**. Clicking any card or opening a panel in View Mode lets you inspect the exact ClickHouse query and aggregation powering the visualization. For example, opening the cost panel enables dissection by attributes such as model name.<br />
@@ -454,7 +454,7 @@ The **Tool calls** section aggregates telemetry from the tools invoked by the ag
 
 - **Tool call rate and error tracking**: Measures execution frequency and error rates for specific tools—confirming that our deterministic `calculate_win_percentage` tool executed 12 times with a 0% error rate.
 - **Tool duration**: Tracks tool execution time (sub-3ms for arithmetic operations), confirming that external tool latency did not bottleneck the broader agent turn.
-- **Top span names**: Surfaces the distribution across agent layers, highlighting 46 `invoke_agent NBA_Reporter` spans and 37 `chat gpt-6-luna` invocations. Requests that invoke the agent loop but fail input guardrails abort immediately, preventing unnecessary downstream LLM invocations and keeping raw `chat` calls lower than total agent turns.
+- **Top span names**: Surfaces the distribution across agent layers, highlighting 46 `invoke_agent NBA_Reporter` spans and 37 `chat gpt-6-luna` invocations. Guardrail failures often end runs early, which might contribute to lower LLM calls compared to the number of agent runs.
 
 ## Conclusion
 
