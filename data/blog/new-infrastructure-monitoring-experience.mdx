@@ -1,0 +1,108 @@
+---
+title: "Introducing a new infrastructure monitoring experience"
+date: 2026-10-13
+tags: [Product, Infrastructure Monitoring, Kubernetes]
+authors: [avishek_kataria]
+description: "SigNoz Cloud infrastructure monitoring now offers deeper resource health signals, container-level visibility, faster queries, and improved filters."
+image: /img/blog/2026/10/new-infrastructure-monitoring-experience.webp
+keywords: [infrastructure monitoring, kubernetes monitoring, container monitoring, opentelemetry, signoz cloud]
+related_articles:
+  - '/blog/new-trace-detail-view'
+  - '/blog/signoz-mcp-observability-workflows'
+  - '/blog/why-engineering-first-teams-choose-signoz'
+---
+<h2 className="!mb-2">TL;DR</h2>
+
+SigNoz Cloud has made major improvements to infrastructure monitoring to deliver deeper visibility and faster troubleshooting.
+
+In the infrastructure monitoring view, we're now surfacing more data. We've added container monitoring as a new level in the resource hierarchy. For each resource, we've added new columns such as status, restarts, and age, giving you more visibility into your infrastructure health.
+
+We've also updated the backend query engine to v5 for faster query processing. We've reworked filters and search to make host and Kubernetes data easier to navigate.
+
+<Figure
+  src="/img/blog/2026/10/new-infrastructure-monitoring-experience.webp"
+  alt="New infrastructure monitoring experience in SigNoz Cloud"
+  caption="The new infrastructure monitoring experience in SigNoz Cloud"
+/>
+
+We've made several upgrades to the infrastructure monitoring page, with a new query engine, more data surfaced in the tables, and improved search and filters.
+
+Together, these updates help you troubleshoot resource issues faster and give you deeper visibility into the health and performance of your resources.
+
+## What's new in SigNoz Cloud infrastructure monitoring
+
+### More signals, more visibility into your infrastructure
+
+#### New health signals for each resource
+
+We've added three new health signals as columns in the resource tables: status, restarts, and age. This gives you a read on the overall health of a resource right from the table.
+
+- **Restarts** show how many times the containers in a pod have restarted. This helps you spot crash loops as soon as they start.
+- **Age** gives restarts more context. A pod with 30 restarts that's 2 days old could mean a slow, recurring issue. A pod with 30 restarts that's 10 minutes old could mean a bad deploy.
+- **Status** shows the current state of the pod. When there's a failure, it shows the actual Kubernetes reason, such as `CrashLoopBackOff`, `ImagePullBackOff`, or `ErrImagePull`, instead of simply showing running or failed.
+
+<Figure
+  src="/img/blog/2026/10/infra-monitoring-health-signals.gif"
+  alt="Status, restarts, and age signals in SigNoz Cloud infrastructure monitoring"
+  caption="View health signals for each infrastructure resource"
+/>
+
+SigNoz Cloud is one of the few observability platforms that shows the specific Kubernetes reason right next to CPU, memory, restarts, and age, so you can tell the type of failure from the table itself.
+
+#### Introducing the container view
+
+The new container view breaks each pod down into the containers running inside it. Every container gets its own row with health and performance signals like status, readiness, and CPU and memory usage. This makes it easy to see which container in a pod is crash-looping or running out of memory.
+
+Each container row also shows its pod name, which makes investigation simple. Find the pod with a health or performance issue, switch to the container view, filter by that pod name, and you'll see which container is at fault.
+
+<Figure
+  src="/img/blog/2026/10/infra-monitoring-container-view.gif"
+  alt="Container-level health and performance signals in SigNoz Cloud"
+  caption="Investigate every container running inside a pod"
+/>
+
+Let's say a worker pod keeps restarting, but the application's memory usage looks normal. Go to the container view and filter by the pod name. You might find the issue there. Something like a sidecar could be hitting its memory limit and getting killed.
+
+### A faster query engine in the backend
+
+We've moved infrastructure monitoring from the v4 query range API to v5. This makes queries faster in three ways.
+
+- v5 uses better indexing, so attribute and value lookups are faster.
+- Filtering now happens at query time. Previously, data was fetched first and then filtered and sorted.
+- Pagination has moved to the backend. Previously, all rows were sent to the browser and paginated there.
+
+As a result, searching and filtering for the resources you need is faster. And because it only fetches the data that's needed, queries stay efficient even as your clusters grow.
+
+### A smarter filter and search panel
+
+We've improved the filter panel on the left, making it easier to narrow down to the required resources during your troubleshooting process.
+
+- **Filters now show only related values.** When you select a filter, the other filters only show values that are part of it. Before, if you selected `deployment.environment = otel-demo`, the node list showed every node across all environments, including ones that were not part of the selected filter. Now it only shows the nodes in `otel-demo`.
+- **"Only" selection now works as expected.** This option existed before but had some gaps. Click "Only" on any value to see just the resources for that value, without having to uncheck a long list of other values.
+- **Filter resources by their status.** You can now narrow resources down by their current state. For example, get a list of only the pods that are failing.
+
+<Figure
+  src="/img/blog/2026/10/infra-monitoring-filters.gif"
+  alt="Improved infrastructure monitoring filters in SigNoz Cloud"
+  caption="Use related values, Only selection, and status to filter resources"
+/>
+
+Together, these make it much quicker and easier to narrow down the resources based on your issues.
+
+### One interface across hosts and Kubernetes
+
+This one's small, but it's been bugging us for a while. So, we're happy it's finally done and want to share it with you.
+
+The hosts and Kubernetes views used to look and behave a bit differently. Now, they both look and work almost the same. There is a clear selector at the top, so you always know which resource you're on. The same habits carry over from one to the other.
+
+It helps us too. Adding a new resource type is now much simpler for us. The container view was the first one we built this way, and it came together quickly. Expect more to land here soon. 🚀
+
+## Watch the new infrastructure monitoring experience in action
+
+<YouTube id="KixCU03L_70" mute="false" />
+
+## Get Started with SigNoz
+
+If you're looking for an observability platform that brings infrastructure monitoring, APM, logs, traces, and LLM observability together in one place, try SigNoz. It's built on OpenTelemetry.
+
+Get started with the option that fits you best. Sign up for a free trial on [SigNoz Cloud](https://signoz.io/teams/), explore the [self-hosted Enterprise](https://signoz.io/contact-us/) version, or self-host the [open source version](https://signoz.io/docs/install/self-host/).

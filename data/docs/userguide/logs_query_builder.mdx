@@ -1,5 +1,5 @@
 ---
-date: 2026-08-24
+date: 2026-10-15
 title: Logs Explorer
 meta_title: "Logs Explorer: Query, Search & Analyze Logs Efficiently"
 description: Explore logs with SigNoz Logs Explorer. Query, search and analyze logs efficiently using powerful log explorer queries and real-time insights.
@@ -9,7 +9,7 @@ doc_type: howto
 The Logs Explorer in SigNoz provides a powerful interface for searching, filtering, and analyzing your log data. It includes quick filters on the left panel, a filter expression bar, and three view modes — List View, Time Series, and Table.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-explorer-overview.webp"
+  src="/img/docs/logs-management/ui/logs-explorer-overview-quick-filters.webp"
   alt="Logs Explorer with quick filters and list view"
   caption="Logs Explorer with quick filters, filter expression, and list view"
 />
@@ -24,17 +24,17 @@ After entering your query, click **Run Query** to see results in the selected vi
 
 ## Live View
 
-The Live View streams new log entries continuously as they occur, helping you debug real-time incidents. Live View is only available in the **List View**. The active log explorer query continues to filter the stream, so only matching entries appear.
+The Live View streams new log entries continuously as they occur, helping you debug real-time incidents. Live View is only available in the **List View**. To start it, select **Live** in the time picker. To stop it, select another time range. The active log explorer query continues to filter the stream, so only matching entries appear.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-live-view.webp"
+  src="/img/docs/logs-management/ui/logs-explorer-live-view.webp"
   alt="Live View in Logs Explorer"
   caption="Live View streaming logs in real time"
 />
 
 It supports:
 - **Search filters** with a histogram showing log counts over time
-- **Format options** — Raw, Default, and Column. You can also adjust **Max Lines Per Row** by hovering over the Format button.
+- **Format options** — Raw, Default, and Column. You can also adjust **Max Lines Per Row** from the **Options** icon on the right of the toolbar.
 - **Pause and Resume** — stop the real-time feed to scroll through logs, then resume when ready
 
 ## Views
@@ -46,7 +46,7 @@ There are three views available in the Logs Explorer.
 The List View displays logs as individual rows with timestamp and body columns. The timestamp column uses the [timezone](https://signoz.io/docs/manage/timezone/) that you select in the time range picker.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-list-view.webp"
+  src="/img/docs/logs-management/ui/logs-explorer-list-view.webp"
   alt="List View in Logs Explorer"
   caption="List View in Logs Explorer"
 />
@@ -56,7 +56,7 @@ The List View displays logs as individual rows with timestamp and body columns. 
 Toggle on the **Frequency chart** to see a bar chart of log volume over time, color-coded by severity text (INFO, WARN, ERROR, etc.). This gives you a quick visual overview of log distribution and helps identify spikes in errors or warnings.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-frequency-chart.webp"
+  src="/img/docs/logs-management/ui/logs-explorer-frequency-chart.webp"
   alt="Frequency chart in List View showing log distribution by severity"
   caption="Frequency chart showing log volume over time, grouped by severity text"
 />
@@ -67,7 +67,7 @@ You can download your logs by choosing the export format (JSONL or CSV), specify
 
 #### Settings
 
-The settings panel (accessible via the gear icon in the toolbar) has four sections:
+The settings panel opens from the **Options** icon on the right of the toolbar. It has four sections:
 
 **Format**
 
@@ -86,10 +86,10 @@ Set the maximum number of lines of text that each log entry is allowed to displa
 
 **Columns**
 
-Add or remove columns for different attributes available in your logs. This works for **Default** and **Column** formats. By default, logs are formatted into `Timestamp` and `Body` columns.
+Click **Edit columns** to add or remove columns for different attributes available in your logs. This works for **Default** and **Column** formats. By default, logs are formatted into `Timestamp` and `Body` columns.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-list-view-settings.webp"
+  src="/img/docs/logs-management/ui/logs-explorer-list-settings.webp"
   alt="List View Settings in Logs Explorer"
   caption="List View settings showing Format, Font Size, Max Lines Per Row, and Columns options"
 />
@@ -106,22 +106,22 @@ A path written with a leading `body.` prefix, such as `body.orderId`, is still a
 
 #### Show in Context
 
-When you hover over a log line, you will find a **Show in Context** option on the right side. This shows 10 logs before and 10 logs after the selected log by default, which is useful for faster debugging. You can load more logs and filter them by a particular attribute.
+When you hover over a log line, a **Show in Context** icon appears on the right side. Click it to open the log details drawer on the [Context](#context) tab. The tab shows the logs before and after the selected log.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-show-in-context.webp"
-  alt="Show in Context feature in List View"
-  caption="Show in Context feature showing surrounding log entries"
+  src="/img/docs/logs-management/ui/logs-explorer-show-in-context.webp"
+  alt="Show in Context and Copy Link icons on a hovered log line, with the Show in Context tooltip"
+  caption="The Show in Context icon on a log line"
 />
 
 #### Copy Link
 
-You can copy a direct link to a particular log line, which can be shared with anyone who has access to the same SigNoz instance.
+When you hover over a log line, a **Copy Link** icon appears on the right side. Click it to copy a direct link to that log line. Anyone with access to the same SigNoz instance can open the link.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-copy-link.webp"
-  alt="Copy Link feature in List View"
-  caption="Copy Link feature for sharing a specific log line"
+  src="/img/docs/logs-management/ui/logs-explorer-copy-link.webp"
+  alt="Show in Context and Copy Link icons on a hovered log line, with the Copy Link tooltip"
+  caption="The Copy Link icon on a log line"
 />
 
 ### Time Series View
@@ -135,8 +135,8 @@ The query builder supports:
 - **Having / Order By / Limit / Legend format**: Refine and customize the output
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-timeseries-view.webp"
-  alt="Time Series View in Logs Explorer"
+  src="/img/docs/logs-management/ui/logs-explorer-time-series-view.webp"
+  alt="Time Series View in Logs Explorer showing count() grouped by service.name"
   caption="Time Series View in Logs Explorer"
 />
 
@@ -165,102 +165,109 @@ The download button appears whenever the Time Series chart has data to export. N
 The Table View provides a tabular representation of different operations like the count of logs, average of duration etc., based on the filters applied.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-table-view.webp"
-  alt="Table View in Logs Explorer"
+  src="/img/docs/logs-management/ui/logs-explorer-table-view.webp"
+  alt="Table View in Logs Explorer showing count() grouped by service.name"
   caption="Table View in Logs Explorer"
 />
 
 ## Log Details
 
-Click on any log line to open the **Log details** panel. This gives a comprehensive view of your log including the full body, attributes, and resource fields. The detail panel has four tabs — Overview, JSON, Context, and Metrics.
+Click a log line to open the log details drawer. The drawer shows the full body, the attributes, and the resource fields of the log.
+
+The header of the drawer shows the timestamp of the log. Use the up and down arrow buttons in the header, or the up and down arrow keys, to move to the previous or next log. The **⋯** menu in the header has **Copy log** and **Copy link to log**.
+
+Below the log body, the drawer shows the service, severity, namespace, environment, trace ID, and span ID of the log. It shows only the fields that the log has.
+
+Below these fields, the drawer has three tabs: **Overview**, **Context**, and **Metrics**.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-view.webp"
-  alt="Log Details Panel in Logs Explorer"
-  caption="Log Details Panel in Logs Explorer"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-overview.webp"
+  alt="Log details drawer with the Overview tab open in Pretty view, showing the timestamp, body, attributes, and resource fields"
+  caption="The log details drawer, with the Overview tab in Pretty view"
 />
 
 ### Overview
 
-The Overview tab has two sections:
+The Overview tab shows each field of the log. Use the **Pretty** and **JSON** toggle to pick a view:
 
-**Body**
+- **Pretty** shows the fields as a tree: `timestamp`, `body`, `attributes`, `resource`, and the other top-level fields. If the body is JSON, the tree shows its keys as nested fields. Type in **Search for a field...** to find a field by name.
+- **JSON** shows the full log as a JSON document.
 
-Shows the complete body of the log. You can toggle **Wrap text** to switch between formatted and raw display.
-
-<Figure
-  src="/img/docs/logs-management/ui/logs-detail-body.webp"
-  alt="Log Body in Overview section of Log Details"
-  caption="Log Body in the Overview section showing body content with Wrap text toggle"
-/>
-
-**Attributes**
-
-Shows all log attributes in a tabular format with the attribute name and its value. You can search for specific attributes using the search bar.
+To copy the full log as JSON, click the copy button on the right of the toggle.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-search-attribute.webp"
-  alt="Search for an attribute in Log Details"
-  caption="Search for a specific attribute in the Log Details panel"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-json.webp"
+  alt="Overview tab in JSON view, showing the log as a JSON document with line numbers"
+  caption="The Overview tab in JSON view"
 />
 
-In the log details panel, hover over any attribute value to see quick action icons. These let you instantly filter for or against a value, group by the attribute, or replace the current filters — all without manually editing the query in log explorer.
+In Pretty view, hover over a field and click **⋯** to open its menu. In the Logs Explorer, the menu has these items:
 
-From the attribute values, you can:
-- **Filter for value** — add the attribute as an `IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter for Value will create a filter `container_id IN debian`. This will list the logs where the `container_id` attribute is `debian`.
-- **Filter out value** — add the attribute as a `NOT IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter out Value will create a filter `container_id NOT_IN debian`. This will list the logs where the `container_id` attribute is not `debian`.
-- **Group By Attribute** — add the attribute to Group By
-- **Replace filters with this value** — replace the current filter with this specific value
+- **Copy Value**: Copies the value of the field.
+- **Filter for value**: Adds a filter that keeps only the logs with this value.
+- **Filter out value**: Adds a filter that removes the logs with this value.
+- **Group by field**: Adds the field to **Group by**.
+- **Replace filters with this value**: Replaces the current filters with a filter on this value.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-overview-actions.webp"
-  alt="Quick actions on attribute values in Log Details"
-  caption="Quick actions on attribute values: Filter for value, Filter out value, Group By Attribute, Replace filters"
+  src="/img/docs/logs-management/ui/logs-detail-field-menu.webp"
+  alt="Field menu for k8s.pod.name with Copy Value, Filter for value, Filter out value, Group by field, and Replace filters with this value"
+  caption="The menu of a field in the Logs Explorer"
 />
 
-### JSON
-
-Displays the log in JSON format. You can toggle **Wrap text** to switch to raw format, and use **Copy Log** to copy your log in either JSON or raw form.
-
-<Figure
-  src="/img/docs/logs-management/ui/logs-detail-json.webp"
-  alt="JSON tab in Log Details panel"
-  caption="JSON tab showing the complete log in JSON format with Copy Log option"
-/>
+The drawer also opens from other parts of SigNoz, and there the menu has fewer items. For example, on the **Logs** tab of [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/), the menu has **Copy Value**, **Filter for value**, and **Filter out value**. In a dashboard [List panel](https://signoz.io/docs/dashboards/panel-types/list/), the menu has only **Copy Value**.
 
 ### Context
 
-Shows surrounding logs for the selected log entry — 10 logs before and 10 logs after by default. You can load more logs and filter by a particular attribute. This is useful for faster debugging by seeing what happened around a specific log event.
+The Context tab shows the logs before and after the selected log. It starts with 10 logs on each side, or 12 when the font size is small. The selected log is highlighted. To see older or newer logs, click **Load more** above or below the list.
+
+To narrow the context logs, click the filter icon on the right of the tabs and enter a filter query.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-context.webp"
-  alt="Context tab in Log Details panel"
-  caption="Context tab showing surrounding log entries for debugging"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-context.webp"
+  alt="Context tab showing surrounding logs with the selected log highlighted and Load more buttons above and below"
+  caption="The Context tab, with the selected log highlighted"
 />
 
 ### Metrics
 
-The Metrics tab shows infrastructure metrics (CPU usage, Memory usage, Pod CPU/Memory usage) for the node and pod associated with the selected log entry. This helps you correlate log events with resource utilization.
+The Metrics tab shows infrastructure metrics around the time of the log, for the node and the pod that sent it. Use the **Node** and **Pod** toggle to switch between them. The **Node** view shows CPU usage, memory usage (WSS), network IO, and filesystem usage.
+
+The tab finds the node and the pod from the `k8s.node.name`, `k8s.pod.name`, `k8s.cluster.name`, and `host.name` resource attributes of the log.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-metrics.webp"
-  alt="Metrics tab in Log Details panel"
-  caption="Metrics tab showing CPU and Memory usage for the associated node and pod"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-metrics.webp"
+  alt="Metrics tab in the Node view, showing node CPU usage, memory usage (WSS), and network IO charts"
+  caption="The Metrics tab, in the Node view"
 />
 
 ## Create Dashboards and Alerts
 
-At the bottom of the Logs Explorer, you can:
+The **List**, **Time Series**, and **Table** views each have a **Create an alert** button and an **Add to dashboard** icon button in their header, next to the download icon. Both use the query of the current view.
+
+- **Create an alert**: Opens a new [log-based alert](https://signoz.io/docs/alerts-management/log-based-alerts/) with the current query.
+- **Add to dashboard**: Opens the dashboard picker. After you pick a dashboard, SigNoz opens it with a new panel for the query.
+
+In the List view, the same row also has the **Frequency chart** toggle, **Order by**, and the format options.
+
+<Figure
+  src="/img/docs/logs-management/ui/logs-explorer-header-actions.webp"
+  alt="Logs Explorer List view header with the Frequency chart toggle, the Create an alert button, the Add to dashboard icon, Order by, Download, and format options"
+  caption="Create an alert and Add to dashboard in the List view header."
+/>
+
+The same two actions are also available in the bar at the bottom of the Explorer:
 
 - **Save this view** — preserves your current filter and query configuration as a named view for quick access later. Click **Save this view**, enter a descriptive label, and confirm. You can access saved views from the **Select a view** dropdown at the bottom of the Explorer or from the **Views** tab at the top of the page.
 - **Create an Alert** — set up a [log-based alert](https://signoz.io/docs/alerts-management/log-based-alerts/) directly from your current query
 - **Add to Dashboard** — export the current query as a dashboard panel
 
-<Figure
-  src="/img/docs/logs-management/ui/logs-create-dashboard-alert.webp"
-  alt="Create dashboard and alert from logs explorer"
-  caption="Save view, create alert, or add to dashboard directly from the Logs Explorer"
-/>
+<figure align="center">
+  <img src="/img/docs/logs-management/ui/logs-explorer-save-alert-dashboard.webp" alt="Logs Explorer action bar with Select a view, Save this view, Create an Alert, and Add to Dashboard" />
+  <figcaption>
+    <i>Save view, create alert, or add to dashboard directly from the Logs Explorer</i>
+  </figcaption>
+</figure>
 
 ### Managing Saved Views
 

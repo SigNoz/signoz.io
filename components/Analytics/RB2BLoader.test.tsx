@@ -6,7 +6,7 @@ import RB2BLoader from './RB2BLoader'
 const { mockPathname } = vi.hoisted(() => ({ mockPathname: vi.fn() }))
 vi.mock('next/navigation', () => ({ usePathname: mockPathname }))
 
-const SCRIPT_URL = 'https://ddwl4m2hdecbv.cloudfront.net/b/VN080HZ24Y6J/VN080HZ24Y6J.js.gz'
+const SCRIPT_URL = 'https://b2bjsstore.s3.us-west-2.amazonaws.com/b/RGNLKQHLPK6Q/RGNLKQHLPK6Q.js.gz'
 
 beforeEach(() => {
   vi.useFakeTimers()
