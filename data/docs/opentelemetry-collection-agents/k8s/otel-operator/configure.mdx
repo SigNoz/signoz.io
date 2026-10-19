@@ -1,1221 +1,692 @@
 ---
-date: 2026-08-03
+date: 2026-10-15
 title: OpenTelemetry Operator - Configure
-description: How to Configure the daemonset and deployment with OpenTelemetry Operator in your Kubernetes Cluster
+description: Configure the OpenTelemetry Collectors of the OpenTelemetry Operator collection agent on Kubernetes with Foundry to send metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
-This guide explains how to configure the OpenTelemetry Operator to deploy collectors as a DaemonSet or a Deployment, enabling you to send telemetry data to your SigNoz instance. We'll leverage the configurations provided in the OpenTelemetry Operator's documentation, adapting them for SigNoz. If you haven't installed the Operator yet, see the [Install guide](/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/) provides a working config: the agent collects host and kubelet metrics, container logs, and data from instrumented applications on every node, and the cluster collector collects cluster metrics and Kubernetes events. This page explains what each component in that config does and how to customize it through Foundry's `casting.yaml`.
 
-**Prerequisites**
+## Prerequisites
 
-- A SigNoz backend (either SigNoz Cloud or self-hosted)
-- A running Kubernetes cluster and `kubectl` access
-- OpenTelemetry Operator installed with CRDs applied (see [Install guide](/docs/opentelemetry-collection-agents/k8s/otel-operator/install/))
+- Collection Agent installed with Foundry (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/))
+- SigNoz Cloud account or self-hosted SigNoz instance
+- Access to the cluster with `kubectl`, and the `casting.yaml` and `foundryctl` you installed with
 
-## Configuring for DaemonSet
+## Apply Changes
 
-A DaemonSet runs one OpenTelemetry Collector per node to perform node-local collection and enrichment.
+For each change:
 
-### What it collects
+1. Add the section's snippet to `casting.yaml`, in the agent's document or in the cluster collector's document (`collector.kind: deployment`). Foundry already generates the default receivers and processors, so add only what you change.
 
-- Logs: Kubernetes container logs via `filelog/k8s` from `/var/log/pods/*/*/*.log`
-- Host metrics: CPU, disk, filesystem, load, memory, and network via `hostmetrics`
-- Kubelet stats: Container/pod/node/volume metrics via `kubeletstats`
-- OTLP receiver: gRPC (4317) and HTTP (4318) for traces/metrics/logs
-- Metadata enrichment: `k8sattributes`, `resourcedetection`
+2. Run this from the directory that contains `casting.yaml` to apply the change:
 
-Use a DaemonSet when you need node-local collection (logs, host metrics) on every node. See the "DaemonSet RBAC" tab for required permissions and the "DaemonSet Collector" tab for the DaemonSet CR you can apply.
+   ```bash
+   foundryctl cast -f casting.yaml
+   ```
 
-### RBAC
+   Foundry updates the collector resources, and the operator rolls the collector pods with the new config.
 
-```yaml minimap defaultCollapsed
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: signoz-collector-daemonset-collector-role
-  namespace: opentelemetry-operator-system
-rules:
-  - apiGroups: ['']
-    resources: [pods, namespaces, nodes, persistentvolumeclaims]
-    verbs: [get, list, watch]
-  - apiGroups: ['apps']
-    resources: [replicasets]
-    verbs: [get, list, watch]
-  - apiGroups: ['extensions']
-    resources: [replicasets]
-    verbs: [get, list, watch]
-  - apiGroups: ['']
-    resources: [nodes, endpoints]
-    verbs: [list, watch]
-  - apiGroups: ['batch']
-    resources: [jobs]
-    verbs: [list, watch]
-  - apiGroups: ['']
-    resources: [nodes/proxy]
-    verbs: [get]
-  - apiGroups: ['']
-    resources: [nodes/stats, configmaps, events]
-    verbs: [create, get]
-  - apiGroups: ['']
-    resourceNames: [otel-container-insight-clusterleader]
-    resources: [configmaps]
-    verbs: [get, update]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: signoz-collector-daemonset-collector-binding
-  namespace: opentelemetry-operator-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: signoz-collector-daemonset-collector-role
-subjects:
-  - kind: ServiceAccount
-    name: signoz-collector-daemonset-collector
-    namespace: opentelemetry-operator-system
+3. Run this on the machine where you use `kubectl` to check that the pods restart:
+
+   ```bash
+   kubectl get pods -n signoz
+   ```
+
+   Then view the collector logs to confirm there are no configuration errors:
+
+   ```bash
+   kubectl logs -n signoz daemonset/signoz-collector-agent-collector --since=5m
+   ```
+
+   For the cluster collector, use `deployment/signoz-collector-deployment-collector`.
+
+4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for node, pod, and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs and Kubernetes events, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
+
+## Send Data from Applications to the Collector
+
+Node, pod, and container metrics, container logs, and Kubernetes events flow as soon as the collector pods are running.
+
+### Where and how to send data from your application
+
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then add this to the application's container in its manifest:
+
+```yaml
+env:
+  - name: K8S_POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+  - name: K8S_POD_UID
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.uid
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://signoz-collector-agent-collector.signoz.svc.cluster.local:4318
+  - name: OTEL_SERVICE_NAME
+    value: <service-name>
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
 ```
 
-### Collector CR
+**Verify these values:**
 
-<Tabs entityName="plans">
-  <TabItem value="daemonset-cloud" label="SigNoz Cloud">
+- `<service-name>`: The name your application shows under in SigNoz.
+- `signoz` in the address: `metadata.name`, which is also the namespace unless the `foundry.signoz.io/kubernetes-namespace` annotation sets another.
 
-```yaml minimap defaultCollapsed
-apiVersion: opentelemetry.io/v1beta1
-kind: OpenTelemetryCollector
-metadata:
-  name: signoz-collector-daemonset
-  namespace: opentelemetry-operator-system
+The Service keeps each application's traffic on the agent of its own node, which adds the Kubernetes resource attributes, matched by `k8s.pod.ip` and `k8s.pod.uid`. Use port `4317` for OTLP over gRPC.
+
+To have the operator inject this instead, see [Auto-instrumentation](#auto-instrumentation-with-opentelemetry-operator).
+
+Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz, and its traces carry `k8s.namespace.name` and `k8s.pod.name`.
+
+## Export to SigNoz
+
+The OTLP/HTTP exporter sends the telemetry that both collectors gather to SigNoz.
+
+Foundry generates this by default: the `otlphttp/signoz` exporter sends every pipeline to `SIGNOZ_INGESTION_ENDPOINT`.
+
+## Collect Host Metrics
+
+Use the [`hostmetrics`](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each node.
+
+Foundry collects host metrics by default, every 30s. In `casting.yaml`, add this to the agent's document to change the interval and the excluded disk devices:
+
+```yaml
 spec:
-  mode: daemonset
-  image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
-  env:
-    - name: K8S_CLUSTER_NAME
-      value: '<YOUR_CLUSTER_NAME>'
-    - name: K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
-    - name: K8S_POD_IP
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: status.podIP
-    - name: K8S_HOST_IP
-      valueFrom:
-        fieldRef:
-          fieldPath: status.hostIP
-    - name: K8S_POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: K8S_POD_UID
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.uid
-    - name: K8S_NAMESPACE
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
-    - name: SIGNOZ_COMPONENT
-      value: otel-daemonset
-    - name: OTEL_RESOURCE_ATTRIBUTES
-      value: signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME)
-    - name: OTEL_EXPORTER_OTLP_INSECURE
-      value: 'true'
-  volumes:
-    - name: varlog
-      hostPath:
-        path: /var/log
-    - name: varlibdockercontainers
-      hostPath:
-        path: /var/lib/docker/containers
-    - name: hostfs
-      hostPath:
-        path: /
-  volumeMounts:
-    - name: varlog
-      mountPath: /var/log
-      readOnly: true
-    - name: varlibdockercontainers
-      mountPath: /var/lib/docker/containers
-      readOnly: true
-    - name: hostfs
-      mountPath: /hostfs
-      readOnly: true
-      mountPropagation: HostToContainer
-  config:
-    exporters:
-      otlphttp:
-        endpoint: https://ingest.{region}.signoz.cloud:443
-        headers:
-          signoz-ingestion-key: '<your-ingestion-key>'
-    extensions:
-      health_check:
-        endpoint: 0.0.0.0:13133
-      pprof:
-        endpoint: localhost:1777
-      zpages:
-        endpoint: localhost:55679
-    processors:
-      batch:
-        send_batch_size: 10000
-        timeout: 200ms
-      k8sattributes:
-        extract:
-          annotations: []
-          labels: []
-          metadata:
-            - k8s.namespace.name
-            - k8s.deployment.name
-            - k8s.statefulset.name
-            - k8s.daemonset.name
-            - k8s.cronjob.name
-            - k8s.job.name
-            - k8s.node.name
-            - k8s.node.uid
-            - k8s.pod.name
-            - k8s.pod.uid
-            - k8s.pod.start_time
-        filter:
-          node_from_env_var: K8S_NODE_NAME
-        passthrough: false
-        pod_association:
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.ip
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.uid
-          - sources:
-              - from: connection
-      resourcedetection:
-        detectors:
-          - k8snode
-          - env
-          - system
-        k8snode:
-          auth_type: serviceAccount
-          node_from_env_var: K8S_NODE_NAME
-        override: false
-        system:
-          resource_attributes:
-            host.id:
-              enabled: false
-            host.name:
-              enabled: false
-            os.type:
-              enabled: true
-        timeout: 2s
-    receivers:
-      filelog/k8s:
-        exclude:
-          - /var/log/pods/default_my-release*-signoz-*/*/*.log
-          - /var/log/pods/default_my-release*-k8s-infra-*/*/*.log
-          - /var/log/pods/kube-system_*/*/*.log
-          - /var/log/pods/*_hotrod*_*/*/*.log
-          - /var/log/pods/*_locust*_*/*/*.log
-        include:
-          - /var/log/pods/*/*/*.log
-        include_file_name: false
-        include_file_path: true
-        operators:
-          - id: container-parser
-            type: container
-        start_at: end
-      hostmetrics:
-        collection_interval: 30s
-        root_path: /hostfs
-        scrapers:
-          cpu: {}
-          disk:
-            exclude:
-              devices:
-                - ^ram\d+$
-                - ^zram\d+$
-                - ^loop\d+$
-                - ^fd\d+$
-                - ^hd[a-z]\d+$
-                - ^sd[a-z]\d+$
-                - ^vd[a-z]\d+$
-                - ^xvd[a-z]\d+$
-                - ^nvme\d+n\d+p\d+$
-              match_type: regexp
-          filesystem:
-            exclude_fs_types:
-              fs_types:
-                - autofs
-                - binfmt_misc
-                - bpf
-                - cgroup2?
-                - configfs
-                - debugfs
-                - devpts
-                - devtmpfs
-                - fusectl
-                - hugetlbfs
-                - iso9660
-                - mqueue
-                - nsfs
-                - overlay
-                - proc
-                - procfs
-                - pstore
-                - rpc_pipefs
-                - securityfs
-                - selinuxfs
-                - squashfs
-                - sysfs
-                - tracefs
-              match_type: strict
-            exclude_mount_points:
-              match_type: regexp
-              mount_points:
-                - /dev/*
-                - /proc/*
-                - /sys/*
-                - /run/credentials/*
-                - /run/k3s/containerd/*
-                - /var/lib/docker/*
-                - /var/lib/containers/storage/*
-                - /var/lib/kubelet/*
-                - /snap/*
-          load: {}
-          memory: {}
-          network:
-            exclude:
-              interfaces:
-                - ^veth.*$
-                - ^docker.*$
-                - ^br-.*$
-                - ^flannel.*$
-                - ^cali.*$
-                - ^cbr.*$
-                - ^cni.*$
-                - ^dummy.*$
-                - ^tailscale.*$
-                - ^lo$
-              match_type: regexp
-      kubeletstats:
-        auth_type: serviceAccount
-        collection_interval: 30s
-        endpoint: ${env:K8S_HOST_IP}:10250
-        extra_metadata_labels:
-          - container.id
-          - k8s.volume.type
-        insecure_skip_verify: true
-        # Required for the *.node.utilization metrics: the receiver reads the node's
-        # total capacity from the K8s API. Needs `get` on `nodes` for the service account.
-        node: ${env:K8S_NODE_NAME}
-        k8s_api_config:
-          auth_type: serviceAccount
-        metric_groups:
-          - container
-          - pod
-          - node
-          - volume
-        metrics:
-          container.cpu.usage:
-            enabled: true
-          container.uptime:
-            enabled: true
-          k8s.container.cpu_limit_utilization:
-            enabled: true
-          k8s.container.cpu_request_utilization:
-            enabled: true
-          k8s.container.memory_limit_utilization:
-            enabled: true
-          k8s.container.memory_request_utilization:
-            enabled: true
-          k8s.container.cpu.node.utilization:
-            enabled: true
-          k8s.container.memory.node.utilization:
-            enabled: true
-          k8s.node.cpu.usage:
-            enabled: true
-          k8s.node.uptime:
-            enabled: true
-          k8s.pod.cpu.usage:
-            enabled: true
-          k8s.pod.cpu_limit_utilization:
-            enabled: true
-          k8s.pod.cpu_request_utilization:
-            enabled: true
-          k8s.pod.memory_limit_utilization:
-            enabled: true
-          k8s.pod.memory_request_utilization:
-            enabled: true
-          k8s.pod.uptime:
-            enabled: true
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-            max_recv_msg_size_mib: 4
-          http:
-            endpoint: 0.0.0.0:4318
-    service:
-      extensions:
-        - health_check
-        - zpages
-        - pprof
-      pipelines:
-        logs:
-          exporters:
-            - otlphttp
-          processors:
-            - resourcedetection
-            - k8sattributes
-            - batch
-          receivers:
-            - otlp
-            - filelog/k8s
-        metrics:
-          exporters:
-            - otlphttp
-          processors:
-            - resourcedetection
-            - k8sattributes
-            - batch
-          receivers:
-            - otlp
-            - hostmetrics
-            - kubeletstats
-        traces:
-          exporters:
-            - otlphttp
-          processors:
-            - resourcedetection
-            - k8sattributes
-            - batch
-          receivers:
-            - otlp
-      telemetry:
-        logs:
-          encoding: json
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                collection_interval: 60s
+                scrapers:
+                  disk:
+                    exclude:
+                      devices: [^ram\d+$, ^loop\d+$]
 ```
 
-<Admonition>
-- Set your ingestion endpoint according to your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) to find the correct endpoint for your deployment.
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique identifier of the
-  cluster.
-- Replace `<DEPLOYMENT_ENVIRONMENT>` with the deployment environment of your application.
-  Example: "staging", "production", etc.
+Lists replace, so `devices` holds only the entries you list. Foundry's default list is `^ram\d+$`, `^zram\d+$`, `^loop\d+$`, `^fd\d+$`, `^hd[a-z]\d+$`, `^sd[a-z]\d+$`, `^vd[a-z]\d+$`, `^xvd[a-z]\d+$` and `^nvme\d+n\d+p\d+$`; restate the ones you keep. The `filesystem` and `network` exclusion lists work the same way.
+
+## Collect Container Logs
+
+Use the `filelog` receiver to tail the container log files on each node. For full setup details, see [Collecting Kubernetes Pod Logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/).
+
+Foundry collects container logs by default, from the end of each file, without the collectors' own logs and `kube-system`. In `casting.yaml`, add this to the agent's document to read from the beginning and exclude more pods:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/k8s:
+                start_at: beginning
+                exclude:
+                  - /var/log/pods/signoz_signoz-collector-*/*/*.log
+                  - /var/log/pods/kube-system_*/*/*.log
+                  - /var/log/pods/*_hotrod*_*/*/*.log
+                  - /var/log/pods/*_locust*_*/*/*.log
+```
+
+Lists replace, so restate Foundry's two default exclusions (the first two entries) before your own. The first one skips the collectors' own logs and follows `<namespace>_<metadata.name>-collector-*`. Exclude a namespace with `/var/log/pods/<namespace>_*/*/*.log`, a pod with `/var/log/pods/*_<pod>*_*/*/*.log`, or a container with `/var/log/pods/*_*_*/<container>/*.log`.
+
+To collect logs from some namespaces only, replace `include`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/k8s:
+                include:
+                  - /var/log/pods/production_*/*/*.log
+```
+
+### Disable Logs Collection
+
+In `casting.yaml`, add this to the agent's document. It removes the `filelog/k8s` receiver; logs that applications send over OTLP keep flowing:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/k8s: null
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+`null` removes the receiver. Lists replace, so the `logs` pipeline is restated with Foundry's two OTLP receivers.
+
+## Collect Kubelet Metrics
+
+Use the `kubeletstats` receiver to collect node, pod, container, and volume metrics from the kubelet on each node.
+
+Foundry collects kubelet metrics by default, every 30s, with the metrics in the table below enabled. In `casting.yaml`, add this to the agent's document to change the interval, verify the kubelet's certificate, and enable one more metric:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              kubeletstats:
+                collection_interval: 60s
+                insecure_skip_verify: false
+                metrics:
+                  k8s.pod.memory.node.utilization:
+                    enabled: true
+```
+
+`metrics` is a map, so the metrics you add join Foundry's defaults. With `insecure_skip_verify: false`, the receiver checks the kubelet's certificate against the cluster CA.
+
+These container-level metrics are disabled by default in the upstream `kubeletstats` receiver but enabled by default by Foundry. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
+
+| Metric | Powers |
+|---|---|
+| `k8s.container.cpu_request_utilization` | CPU request utilization column |
+| `k8s.container.cpu_limit_utilization` | CPU limit utilization column |
+| `k8s.container.memory_request_utilization` | Memory request utilization column |
+| `k8s.container.memory_limit_utilization` | Memory limit utilization column |
+| `container.uptime` | Uptime chart |
+| `k8s.container.cpu.node.utilization` | Node-utilization chart (CPU) |
+| `k8s.container.memory.node.utilization` | Node-utilization chart (memory) |
+
+## Collect Cluster Metrics
+
+Use the `k8s_cluster` receiver on the cluster collector to collect cluster-level metrics from the Kubernetes API server.
+
+Foundry collects cluster metrics by default from the cluster collector, every 30s, with the metrics in the table below enabled. In `casting.yaml`, add this to the cluster collector's document to change the interval and report storage too:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_cluster:
+                collection_interval: 60s
+                allocatable_types_to_report: [cpu, memory, storage]
+```
+
+Lists replace, so restate every entry you keep. Foundry's defaults are `allocatable_types_to_report: [cpu, memory]` and `node_conditions_to_report: [Ready, MemoryPressure, DiskPressure, PIDPressure, NetworkUnavailable]`.
+
+These metrics are disabled by default in the upstream `k8s_cluster` receiver but enabled by default by Foundry. Keep them enabled to retain pod- and container-status visibility. Without them, status falls back to the lifecycle phase or state only:
+
+| Metric | Powers |
+|---|---|
+| `k8s.pod.status_reason` | Pods view kubectl-style **Pod Status** column (and the per-entity Pod Counts by Status breakdown) |
+| `k8s.container.status.reason` | Pods view **Pod Status** column; [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
+| `k8s.container.status.state` | [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
+
+<Admonition type="info">
+<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusreason" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.reason`</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusstate" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.state`</a> are experimental (development stability) upstream, so their allowed values may change on a collector upgrade.
 </Admonition>
 
-</TabItem>
-  <TabItem value="self-host-daemonset" label="Self-Hosted SigNoz">
+## Collect Kubernetes Events
+
+Use the `k8s_events` receiver on the cluster collector to collect Kubernetes events as logs.
+
+Foundry collects Kubernetes events by default from the cluster collector, for all namespaces. In `casting.yaml`, add this to the cluster collector's document to watch specific namespaces:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_events:
+                namespaces: [default, production]
+```
+
+## Resource Detection and Kubernetes Attributes
+
+The [`resourcedetection` processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and cloud resource attributes, and the `k8sattributes` processor adds Kubernetes resource attributes, so you can filter and group by namespace, workload, or pod in SigNoz.
+
+Foundry enriches telemetry by default with the `k8sattributes` processor, with the default `extract.metadata` attributes and pod association rules. In `casting.yaml`, add this to the agent's document to extract a pod label and a node annotation:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              k8sattributes:
+                extract:
+                  labels:
+                    - tag_name: service.name
+                      key: app.kubernetes.io/name
+                      from: pod
+                  annotations:
+                    - tag_name: node.ttl
+                      key: node.alpha.kubernetes.io/ttl
+                      from: node
+```
+
+Lists replace, so restating `extract.metadata` or `pod_association` drops Foundry's defaults: include every entry you keep, as the warning below describes. Set `passthrough: true` under `k8sattributes` to skip Kubernetes API lookups.
+
+<Admonition type="info" title="Note: extracting labels and annotations from other Kubernetes objects" defaultCollapsed="true">
+
+The `from:` field selects which Kubernetes object the processor reads the label or annotation from. The examples above use `pod` and `node`, but other workload kinds are supported as well, and each reads from its own metadata.
+
+Refer to the OpenTelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">`k8sattributes` processor documentation</a> for the full list of supported sources and the exact behavior of each.
+
+</Admonition>
+
+<Admonition type="info" title="Warning: customizing pod_association replaces all defaults" defaultCollapsed="true">
+
+If telemetry suddenly stops getting Kubernetes attributes (`k8s.pod.name`, `k8s.namespace.name`, etc.) after a `casting.yaml` change, an override of `pod_association` is the most likely cause.
+
+`config.data` replaces lists rather than merging them. When you restate `pod_association`, Foundry's defaults are dropped, including the `connection` rule that matches telemetry by the source IP of the OTLP connection, and the `k8s.pod.uid` rule used by file-based log collection. Without those fallbacks the processor cannot associate telemetry with a pod, and `extract.labels` / `extract.annotations` stop producing attributes.
+
+If you customize `pod_association`, include the rules you need from Foundry's defaults (`k8s.pod.ip`, then `k8s.pod.uid`, then `connection`) alongside your additions.
+
+</Admonition>
+
+## Scrape Prometheus Metrics from Pods
+
+The cluster collector can scrape metrics from pods that expose a Prometheus endpoint. In `casting.yaml`, add this to the cluster collector's document. It scrapes pods annotated `signoz.io/scrape: "true"` every 60s, at the path in `signoz.io/path` and the port in `signoz.io/port`:
 
 ```yaml minimap defaultCollapsed
-apiVersion: opentelemetry.io/v1beta1
-kind: OpenTelemetryCollector
-metadata:
-  name: signoz-collector-daemonset
-  namespace: opentelemetry-operator-system
 spec:
-  mode: daemonset
-  image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
-  env:
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: '<SIGNOZ_OTLP_HTTP_ENDPOINT>'
-    - name: K8S_CLUSTER_NAME
-      value: 'ope'
-    - name: K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
-    - name: K8S_POD_IP
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: status.podIP
-    - name: K8S_HOST_IP
-      valueFrom:
-        fieldRef:
-          fieldPath: status.hostIP
-    - name: K8S_POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: K8S_POD_UID
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.uid
-    - name: K8S_NAMESPACE
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
-    - name: SIGNOZ_COMPONENT
-      value: otel-deployment
-    - name: OTEL_RESOURCE_ATTRIBUTES
-      value: signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME)
-    - name: OTEL_EXPORTER_OTLP_INSECURE
-      value: 'true'
-  volumes:
-    - name: varlog
-      hostPath:
-        path: /var/log
-    - name: varlibdockercontainers
-      hostPath:
-        path: /var/lib/docker/containers
-    - name: hostfs
-      hostPath:
-        path: /
-  volumeMounts:
-    - name: varlog
-      mountPath: /var/log
-      readOnly: true
-    - name: varlibdockercontainers
-      mountPath: /var/lib/docker/containers
-      readOnly: true
-    - name: hostfs
-      mountPath: /hostfs
-      readOnly: true
-      mountPropagation: HostToContainer
-  config:
-    exporters:
-      otlphttp:
-        endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
-    extensions:
-      health_check:
-        endpoint: 0.0.0.0:13133
-      pprof:
-        endpoint: localhost:1777
-      zpages:
-        endpoint: localhost:55679
-    processors:
-      batch:
-        send_batch_size: 10000
-        timeout: 200ms
-      k8sattributes:
-        extract:
-          annotations: []
-          labels: []
-          metadata:
-            - k8s.namespace.name
-            - k8s.deployment.name
-            - k8s.statefulset.name
-            - k8s.daemonset.name
-            - k8s.cronjob.name
-            - k8s.job.name
-            - k8s.node.name
-            - k8s.node.uid
-            - k8s.pod.name
-            - k8s.pod.uid
-            - k8s.pod.start_time
-        filter:
-          node_from_env_var: K8S_NODE_NAME
-        passthrough: false
-        pod_association:
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.ip
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.uid
-          - sources:
-              - from: connection
-      resourcedetection:
-        detectors:
-          - k8snode
-          - env
-          - system
-        k8snode:
-          auth_type: serviceAccount
-          node_from_env_var: K8S_NODE_NAME
-        override: false
-        system:
-          resource_attributes:
-            host.id:
-              enabled: false
-            host.name:
-              enabled: false
-            os.type:
-              enabled: true
-        timeout: 2s
-    receivers:
-      filelog/k8s:
-        exclude:
-          - /var/log/pods/default_my-release*-signoz-*/*/*.log
-          - /var/log/pods/default_my-release*-k8s-infra-*/*/*.log
-          - /var/log/pods/kube-system_*/*/*.log
-          - /var/log/pods/*_hotrod*_*/*/*.log
-          - /var/log/pods/*_locust*_*/*/*.log
-        include:
-          - /var/log/pods/*/*/*.log
-        include_file_name: false
-        include_file_path: true
-        operators:
-          - id: container-parser
-            type: container
-        start_at: end
-      hostmetrics:
-        collection_interval: 30s
-        root_path: /hostfs
-        scrapers:
-          cpu: {}
-          disk:
-            exclude:
-              devices:
-                - ^ram\d+$
-                - ^zram\d+$
-                - ^loop\d+$
-                - ^fd\d+$
-                - ^hd[a-z]\d+$
-                - ^sd[a-z]\d+$
-                - ^vd[a-z]\d+$
-                - ^xvd[a-z]\d+$
-                - ^nvme\d+n\d+p\d+$
-              match_type: regexp
-          filesystem:
-            exclude_fs_types:
-              fs_types:
-                - autofs
-                - binfmt_misc
-                - bpf
-                - cgroup2?
-                - configfs
-                - debugfs
-                - devpts
-                - devtmpfs
-                - fusectl
-                - hugetlbfs
-                - iso9660
-                - mqueue
-                - nsfs
-                - overlay
-                - proc
-                - procfs
-                - pstore
-                - rpc_pipefs
-                - securityfs
-                - selinuxfs
-                - squashfs
-                - sysfs
-                - tracefs
-              match_type: strict
-            exclude_mount_points:
-              match_type: regexp
-              mount_points:
-                - /dev/*
-                - /proc/*
-                - /sys/*
-                - /run/credentials/*
-                - /run/k3s/containerd/*
-                - /var/lib/docker/*
-                - /var/lib/containers/storage/*
-                - /var/lib/kubelet/*
-                - /snap/*
-          load: {}
-          memory: {}
-          network:
-            exclude:
-              interfaces:
-                - ^veth.*$
-                - ^docker.*$
-                - ^br-.*$
-                - ^flannel.*$
-                - ^cali.*$
-                - ^cbr.*$
-                - ^cni.*$
-                - ^dummy.*$
-                - ^tailscale.*$
-                - ^lo$
-              match_type: regexp
-      kubeletstats:
-        auth_type: serviceAccount
-        collection_interval: 30s
-        endpoint: ${env:K8S_HOST_IP}:10250
-        extra_metadata_labels:
-          - container.id
-          - k8s.volume.type
-        insecure_skip_verify: true
-        # Required for the *.node.utilization metrics: the receiver reads the node's
-        # total capacity from the K8s API. Needs `get` on `nodes` for the service account.
-        node: ${env:K8S_NODE_NAME}
-        k8s_api_config:
-          auth_type: serviceAccount
-        metric_groups:
-          - container
-          - pod
-          - node
-          - volume
-        metrics:
-          container.cpu.usage:
-            enabled: true
-          container.uptime:
-            enabled: true
-          k8s.container.cpu_limit_utilization:
-            enabled: true
-          k8s.container.cpu_request_utilization:
-            enabled: true
-          k8s.container.memory_limit_utilization:
-            enabled: true
-          k8s.container.memory_request_utilization:
-            enabled: true
-          k8s.container.cpu.node.utilization:
-            enabled: true
-          k8s.container.memory.node.utilization:
-            enabled: true
-          k8s.node.cpu.usage:
-            enabled: true
-          k8s.node.uptime:
-            enabled: true
-          k8s.pod.cpu.usage:
-            enabled: true
-          k8s.pod.cpu_limit_utilization:
-            enabled: true
-          k8s.pod.cpu_request_utilization:
-            enabled: true
-          k8s.pod.memory_limit_utilization:
-            enabled: true
-          k8s.pod.memory_request_utilization:
-            enabled: true
-          k8s.pod.uptime:
-            enabled: true
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-            max_recv_msg_size_mib: 4
-          http:
-            endpoint: 0.0.0.0:4318
-    service:
-      extensions:
-        - health_check
-        - zpages
-        - pprof
-      pipelines:
-        logs:
-          exporters:
-            - otlphttp
-          processors:
-            - resourcedetection
-            - k8sattributes
-            - batch
-          receivers:
-            - otlp
-            - filelog/k8s
-        metrics:
-          exporters:
-            - otlphttp
-          processors:
-            - resourcedetection
-            - k8sattributes
-            - batch
-          receivers:
-            - otlp
-            - hostmetrics
-            - kubeletstats
-        traces:
-          exporters:
-            - otlphttp
-          processors:
-            - resourcedetection
-            - k8sattributes
-            - batch
-          receivers:
-            - otlp
-      telemetry:
-        logs:
-          encoding: json
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              prometheus/scraper:
+                config:
+                  scrape_configs:
+                    - job_name: signoz-scraper
+                      scrape_interval: 60s
+                      kubernetes_sd_configs:
+                        - role: pod
+                      relabel_configs:
+                        - source_labels: [__meta_kubernetes_pod_annotation_signoz_io_scrape]
+                          action: keep
+                          regex: "true"
+                        - source_labels: [__meta_kubernetes_pod_annotation_signoz_io_path]
+                          action: replace
+                          regex: (.+)
+                          target_label: __metrics_path__
+                        - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_signoz_io_port]
+                          action: replace
+                          separator: ":"
+                          target_label: __address__
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, k8s_cluster, prometheus/scraper]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc` and `k8s_cluster`.
+
+### Custom Scrape Configurations
+
+For more advanced use cases, add a `prometheus` receiver with your own scrape configs to the cluster collector's document:
+
+```yaml
+spec:
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              prometheus:
+                config:
+                  scrape_configs:
+                    - job_name: my-custom-service
+                      static_configs:
+                        - targets: ["my-service.default.svc.cluster.local:9090"]
+                          labels:
+                            environment: production
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, k8s_cluster, prometheus]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc` and `k8s_cluster`.
+
+## Tune Batch and Memory Limiter
+
+Adjust the `batch` processor for throughput and the `memory_limiter` processor for stability based on your workload. See [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices) for detailed guidance.
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">batch processor</a> batches spans, metrics, and logs before export. That reduces connections and improves compression. It supports both size-based and time-based batching.
+
+Foundry's batch processor defaults are `send_batch_size: 1000`, `send_batch_max_size: 2048` and `timeout: 10s`. In `casting.yaml`, add this to the agent's document to change them:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              batch:
+                send_batch_size: 15000
+                send_batch_max_size: 20000
+```
+
+Keys you leave out keep Foundry's values. For the cluster collector, add the same `processors.batch` block to its document under `collector/deployment/deployment.yaml`.
+
+### Resource Requests and Limits
+
+Recommended resource allocations:
+
+| Configuration | CPU Request | Memory Request | CPU Limit | Memory Limit |
+| ------------- | ----------- | -------------- | --------- | ------------ |
+| Minimal       | 100m        | 256Mi          | 200m      | 512Mi        |
+| Standard      | 200m        | 512Mi          | 500m      | 1Gi          |
+| Full          | 500m        | 1Gi            | 1000m     | 2Gi          |
+
+Adjust these values based on your cluster size and monitoring requirements. In `casting.yaml`, add a patch to the agent's document. This one sets the Minimal row:
+
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/values.yaml
+      operations:
+        - op: add
+          path: /collectors/agent/resources
+          value:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+```
+
+For the cluster collector, add the same patch to its document with target `collectionagent/collector/deployment/values.yaml` and path `/collectors/deployment/resources`.
+
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/opentelemetrycollector.yaml
+      operations:
+        - op: replace
+          path: /spec/resources
+          value:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+```
+
+For the cluster collector, add the same patch to its document with target `collectionagent/collector/deployment/opentelemetrycollector.yaml`.
+
+</TabItem>
+</Tabs>
+
+Foundry's `memory_limiter` processor uses a fixed `limit_mib: 4000`. When you set a memory limit, size `memory_limiter` to it with percentages, in the same document:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              memory_limiter:
+                limit_mib: null
+                spike_limit_mib: null
+                limit_percentage: 80
+                spike_limit_percentage: 25
+```
+
+## Add Custom Processors to Pipelines
+
+A processor transforms or enriches telemetry once a pipeline lists it under `processors`.
+
+Foundry's pipelines are `traces`, `metrics` and `logs`, in both collectors. A processor runs once a pipeline lists it. In `casting.yaml`, add this to the agent's document to define a processor and add it to the `traces` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              attributes/team:
+                actions:
+                  - key: team
+                    value: platform
+                    action: insert
+            service:
+              pipelines:
+                traces:
+                  processors: [memory_limiter, resourcedetection, resource/identity, k8sattributes, attributes/team, batch]
+```
+
+Lists replace, so restate Foundry's default processors in their order (`memory_limiter`, `resourcedetection`, `resource/identity`, `k8sattributes`, `batch`) with yours before `batch`.
+
+## Exposing Ports for Custom Receivers
+
+A receiver that listens on a port needs that port open on the agent. The following example opens port 8125 for the `statsd` receiver. In `casting.yaml`, add the `statsd` receiver to the agent's document and list it in the `metrics` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              statsd:
+                endpoint: 0.0.0.0:8125
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, hostmetrics, kubeletstats, statsd]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers. Then open the port on the node and on the agent's Service with a patch in the same document:
+
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/values.yaml
+      operations:
+        - op: add
+          path: /collectors/agent/ports/-
+          value: {name: statsd, port: 8125, hostPort: 8125, protocol: UDP}
+```
+
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/opentelemetrycollector.yaml
+      operations:
+        - op: add
+          path: /spec/ports/-
+          value: {name: statsd, port: 8125, hostPort: 8125, protocol: UDP}
 ```
 
 </TabItem>
 </Tabs>
 
-### Apply the DaemonSet
+## Disable Metrics Collection
 
-```bash
-# Apply DaemonSet RBAC
-kubectl apply -f rbac-daemonset.yaml
+In `casting.yaml`, add this to the agent's document to remove the `hostmetrics` and `kubeletstats` receivers:
 
-# Apply the DaemonSet collector CR
-kubectl apply -f collector-daemonset.yaml
-
-# Notes:
-# - Replace OTLP endpoints/tokens in the manifests or mount via Secrets.
-# - Use secure endpoints for production where possible.
-```
-
-### Verify the DaemonSet
-
-```bash
-# List DaemonSet collector pods
-kubectl get pods -A -l app.kubernetes.io/name=opentelemetry-collector
-
-# Tail DaemonSet logs (replace <NAMESPACE> if different)
-kubectl logs -n <NAMESPACE> ds/signoz-collector-daemonset --since=5m
-```
-
-## Configuring for Deployment
-
-An independent Deployment runs a centralized pool of OpenTelemetry Collectors to aggregate cluster-level data.
-
-### What it collects
-
-- Cluster metrics: Node/pod conditions, resource allocatable, runtime and kubelet metadata via `k8s_cluster`
-- Kubernetes events: Via `k8s_events` receiver
-- Metadata enrichment: `k8sattributes`, `resourcedetection`
-
-Use a Deployment when you want a shared collector service with a smaller number of replicas. See the "Deployment RBAC" tab for required permissions and the "Deployment Collector" tab for the Deployment CR you can apply.
-
-### RBAC
-
-```yaml minimap defaultCollapsed
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: signoz-collector-deployment-collector-role
-  namespace: opentelemetry-operator-system
-rules:
-  - apiGroups: ['']
-    resources:
-      [
-        events,
-        namespaces,
-        namespaces/status,
-        nodes,
-        nodes/spec,
-        pods,
-        pods/status,
-        replicationcontrollers,
-        replicationcontrollers/status,
-        resourcequotas,
-        services,
-      ]
-    verbs: [get, list, watch]
-  - apiGroups: ['apps']
-    resources: [daemonsets, deployments, replicasets, statefulsets]
-    verbs: [get, list, watch]
-  - apiGroups: ['extensions']
-    resources: [daemonsets, deployments, replicasets]
-    verbs: [get, list, watch]
-  - apiGroups: ['batch']
-    resources: [jobs, cronjobs]
-    verbs: [get, list, watch]
-  - apiGroups: ['autoscaling']
-    resources: [horizontalpodautoscalers]
-    verbs: [get, list, watch]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: signoz-collector-deployment-collector-binding
-  namespace: opentelemetry-operator-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: signoz-collector-deployment-collector-role
-subjects:
-  - kind: ServiceAccount
-    name: signoz-collector-deployment-collector
-    namespace: opentelemetry-operator-system
-```
-
-### Collector CR
-
-<Tabs entityName="plans">
-  <TabItem value="deployment-cloud" label="SigNoz Cloud">
-
-```yaml minimap defaultCollapsed
-apiVersion: opentelemetry.io/v1beta1
-kind: OpenTelemetryCollector
-metadata:
-  name: signoz-collector-deployment
-  namespace: opentelemetry-operator-system
+```yaml
 spec:
-  mode: deployment
-  image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
-  env:
-    - name: OTEL_SECRETS_PATH
-      value: /secrets
-    - name: K8S_CLUSTER_NAME
-      value:
-
-    - name: K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
-    - name: K8S_POD_IP
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: status.podIP
-    - name: K8S_HOST_IP
-      valueFrom:
-        fieldRef:
-          fieldPath: status.hostIP
-    - name: K8S_POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: K8S_POD_UID
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.uid
-    - name: K8S_NAMESPACE
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
-    - name: SIGNOZ_COMPONENT
-      value: otel-deployment
-    - name: OTEL_RESOURCE_ATTRIBUTES
-      value: signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME)
-  volumes:
-    - name: varlog
-      hostPath:
-        path: /var/log
-    - name: varlibdockercontainers
-      hostPath:
-        path: /var/lib/docker/containers
-    - name: hostfs
-      hostPath:
-        path: /
-  volumeMounts:
-    - name: varlog
-      mountPath: /var/log
-      readOnly: true
-    - name: varlibdockercontainers
-      mountPath: /var/lib/docker/containers
-      readOnly: true
-    - name: hostfs
-      mountPath: /hostfs
-      readOnly: true
-      mountPropagation: HostToContainer
-  config:
-    exporters:
-      otlphttp:
-        endpoint: https://ingest.{region}.signoz.cloud:443
-        headers:
-          signoz-ingestion-key: '<your-ingestion-key>'
-    extensions:
-      health_check:
-        endpoint: 0.0.0.0:13133
-      pprof:
-        endpoint: localhost:1777
-      zpages:
-        endpoint: localhost:55679
-    processors:
-      batch:
-        send_batch_size: 10000
-        timeout: 1s
-      k8sattributes:
-        extract:
-          metadata:
-            - k8s.namespace.name
-            - k8s.deployment.name
-            - k8s.statefulset.name
-            - k8s.daemonset.name
-            - k8s.cronjob.name
-            - k8s.job.name
-            - k8s.node.name
-            - k8s.node.uid
-            - k8s.pod.name
-            - k8s.pod.uid
-            - k8s.pod.start_time
-        passthrough: false
-        pod_association:
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.ip
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.uid
-          - sources:
-              - from: connection
-      resourcedetection:
-        detectors:
-          - env
-        override: false
-        timeout: 2s
-    receivers:
-      k8s_cluster:
-        allocatable_types_to_report:
-          - cpu
-          - memory
-        collection_interval: 30s
-        metrics:
-          k8s.node.condition:
-            enabled: true
-          k8s.pod.status_reason:
-            enabled: true
-          k8s.container.status.reason:
-            enabled: true
-          k8s.container.status.state:
-            enabled: true
-        node_conditions_to_report:
-          - Ready
-          - MemoryPressure
-          - DiskPressure
-          - PIDPressure
-          - NetworkUnavailable
-        resource_attributes:
-          container.runtime:
-            enabled: true
-          container.runtime.version:
-            enabled: true
-          k8s.container.status.last_terminated_reason:
-            enabled: true
-          k8s.kubelet.version:
-            enabled: true
-          k8s.pod.qos_class:
-            enabled: true
-      k8s_events:
-        auth_type: serviceAccount
-    service:
-      extensions:
-        - health_check
-        - zpages
-        - pprof
-      pipelines:
-        logs:
-          exporters:
-            - otlphttp
-          processors:
-            - k8sattributes
-            - resourcedetection
-            - batch
-          receivers:
-            - k8s_events
-        metrics/internal:
-          exporters:
-            - otlphttp
-          processors:
-            - k8sattributes
-            - resourcedetection
-            - batch
-          receivers:
-            - k8s_cluster
-      telemetry:
-        logs:
-          encoding: json
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics: null
+              kubeletstats: null
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc]
 ```
 
-<Admonition>
-- Set your ingestion endpoint according to your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) to find the correct endpoint for your deployment.
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique identifier of the
-  cluster.
-- Replace `<DEPLOYMENT_ENVIRONMENT>` with the deployment environment of your application.
-  Example: "staging", "production", etc.
-</Admonition>
-</TabItem>
-  <TabItem value="self-host-deployment" label="Self-Hosted SigNoz">
+Add this to the cluster collector's document to remove the `k8s_cluster` receiver:
 
-```yaml minimap defaultCollapsed
-apiVersion: opentelemetry.io/v1beta1
-kind: OpenTelemetryCollector
-metadata:
-  name: signoz-collector-deployment
-  namespace: opentelemetry-operator-system
+```yaml
 spec:
-  mode: deployment
-  image: docker.io/otel/opentelemetry-collector-contrib:0.139.0
-  env:
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: '<SIGNOZ_OTLP_HTTP_ENDPOINT>'
-    - name: OTEL_SECRETS_PATH
-      value: /secrets
-    - name: K8S_CLUSTER_NAME
-      value:
-
-    - name: K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
-    - name: K8S_POD_IP
-      valueFrom:
-        fieldRef:
-          apiVersion: v1
-          fieldPath: status.podIP
-    - name: K8S_HOST_IP
-      valueFrom:
-        fieldRef:
-          fieldPath: status.hostIP
-    - name: K8S_POD_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
-    - name: K8S_POD_UID
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.uid
-    - name: K8S_NAMESPACE
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
-    - name: SIGNOZ_COMPONENT
-      value: otel-deployment
-    - name: OTEL_RESOURCE_ATTRIBUTES
-      value: signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME)
-  volumes:
-    - name: varlog
-      hostPath:
-        path: /var/log
-    - name: varlibdockercontainers
-      hostPath:
-        path: /var/lib/docker/containers
-    - name: hostfs
-      hostPath:
-        path: /
-  volumeMounts:
-    - name: varlog
-      mountPath: /var/log
-      readOnly: true
-    - name: varlibdockercontainers
-      mountPath: /var/lib/docker/containers
-      readOnly: true
-    - name: hostfs
-      mountPath: /hostfs
-      readOnly: true
-      mountPropagation: HostToContainer
-  config:
-    exporters:
-      otlphttp:
-        endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
-        headers:
-          signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-    extensions:
-      health_check:
-        endpoint: 0.0.0.0:13133
-      pprof:
-        endpoint: localhost:1777
-      zpages:
-        endpoint: localhost:55679
-    processors:
-      batch:
-        send_batch_size: 10000
-        timeout: 1s
-      k8sattributes:
-        extract:
-          metadata:
-            - k8s.namespace.name
-            - k8s.deployment.name
-            - k8s.statefulset.name
-            - k8s.daemonset.name
-            - k8s.cronjob.name
-            - k8s.job.name
-            - k8s.node.name
-            - k8s.node.uid
-            - k8s.pod.name
-            - k8s.pod.uid
-            - k8s.pod.start_time
-        passthrough: false
-        pod_association:
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.ip
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.uid
-          - sources:
-              - from: connection
-      resourcedetection:
-        detectors:
-          - env
-        override: false
-        timeout: 2s
-    receivers:
-      k8s_cluster:
-        allocatable_types_to_report:
-          - cpu
-          - memory
-        collection_interval: 30s
-        metrics:
-          k8s.node.condition:
-            enabled: true
-          k8s.pod.status_reason:
-            enabled: true
-          k8s.container.status.reason:
-            enabled: true
-          k8s.container.status.state:
-            enabled: true
-        node_conditions_to_report:
-          - Ready
-          - MemoryPressure
-          - DiskPressure
-          - PIDPressure
-          - NetworkUnavailable
-        resource_attributes:
-          container.runtime:
-            enabled: true
-          container.runtime.version:
-            enabled: true
-          k8s.container.status.last_terminated_reason:
-            enabled: true
-          k8s.kubelet.version:
-            enabled: true
-          k8s.pod.qos_class:
-            enabled: true
-      k8s_events:
-        auth_type: serviceAccount
-    service:
-      extensions:
-        - health_check
-        - zpages
-        - pprof
-      pipelines:
-        logs:
-          exporters:
-            - otlphttp
-          processors:
-            - k8sattributes
-            - resourcedetection
-            - batch
-          receivers:
-            - k8s_events
-        metrics/internal:
-          exporters:
-            - otlphttp
-          processors:
-            - k8sattributes
-            - resourcedetection
-            - batch
-          receivers:
-            - k8s_cluster
-      telemetry:
-        logs:
-          encoding: json
+  collector:
+    kind: deployment
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              k8s_cluster: null
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc]
 ```
 
-</TabItem>
-</Tabs>
+Lists replace, so each `metrics` pipeline is restated with Foundry's two OTLP receivers. Kubernetes events keep flowing from the cluster collector.
 
-### Apply the Deployment
+## Common Deployment Scenarios
 
-```bash
-# Apply Deployment RBAC
-kubectl apply -f rbac-deployment.yaml
+### Production Cluster with Full Monitoring
 
-# Apply the Deployment collector CR
-kubectl apply -f collector-deployment.yaml
+Foundry generates full monitoring by default: host, kubelet, and cluster metrics, container logs without `kube-system`, Kubernetes attributes, and Kubernetes events. In `casting.yaml`, add this to the agent's document to verify the kubelet's certificate:
 
-# Notes:
-# - Replace OTLP endpoints/tokens in the manifests or mount via Secrets.
-# - Use secure endpoints for production where possible.
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              kubeletstats:
+                insecure_skip_verify: false
 ```
 
-### Verify the Deployment
+### Resource-Constrained Environment
 
-```bash
-# List Deployment collector pods
-kubectl get pods -A -l app.kubernetes.io/name=opentelemetry-collector
+In `casting.yaml`, add this to the agent's document:
 
-# Tail Deployment logs (replace <NAMESPACE> if different)
-kubectl logs -n <NAMESPACE> deploy/signoz-collector-deployment --since=5m
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                collection_interval: 60s
+              kubeletstats:
+                collection_interval: 60s
+              filelog/k8s:
+                include:
+                  - /var/log/pods/production_*/*/*.log
+            processors:
+              k8sattributes:
+                passthrough: true
 ```
+
+Lists replace, so `include` collects logs from the `production` namespace only.
+
+### Development Environment
+
+Telemetry can carry a `deployment.environment` resource attribute (such as `development`, `staging`, or `production`), set globally or in your application's `OTEL_RESOURCE_ATTRIBUTES`.
+
+In `casting.yaml`, set this in both documents, the agent's and the cluster collector's:
+
+```yaml
+spec:
+  collector:
+    spec:
+      env:
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+```
+
+**Verify these values:**
+
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `development` or `staging`. Use the same value in both documents.
+
+A `deployment.environment` that an application sets in its own `OTEL_RESOURCE_ATTRIBUTES` takes precedence over this value.
 
 ## Auto-instrumentation with OpenTelemetry Operator
 
-The Operator can also inject language agents automatically into your workloads using the `Instrumentation` CRD and simple pod annotations. This enables traces/metrics/logs without manual code changes.
+The operator can also inject OpenTelemetry auto-instrumentation into your workloads with an `Instrumentation` resource and pod annotations, which produces traces, metrics, and logs without code changes. In the `Instrumentation` resource, set the exporter endpoint to the agent's Service:
 
-- See the upstream guide: [Automatic instrumentation via the Operator](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/)
-- For language-specific steps, use our instrumentation docs. For example, Java: [Kubernetes (OTel Operator) section](/docs/instrumentation/java/opentelemetry-java/#kubernetes)
+```yaml
+spec:
+  exporter:
+    endpoint: http://signoz-collector-agent-collector.signoz.svc.cluster.local:4318
+```
+
+If you changed `metadata.name` or the namespace, find the Service name in [Send Data from Applications to the Collector](#send-data-from-applications-to-the-collector).
+
+- For the `Instrumentation` resource and the annotations, see the upstream guide: <a href="https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/" target="_blank" rel="noopener noreferrer nofollow">Automatic instrumentation via the Operator</a>.
+- For language-specific steps, use the SigNoz instrumentation docs. For example, Java: [OTel Operator steps](https://signoz.io/docs/instrumentation/java/opentelemetry-java/?environment=k8s&k8s-method=otel-operator#step-1-set-up-the-opentelemetry-operator).
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### A custom processor under `config.data` does not appear to run
+
+Defining a processor under `processors` in a `config.data` block renders it into the collector configuration but does not attach it to any pipeline. Confirm the processor is referenced in the relevant pipeline's `processors` list. `config.data` replaces lists, so restate every processor the pipeline still needs. See [Add Custom Processors to Pipelines](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#add-custom-processors-to-pipelines). After running `foundryctl cast -f casting.yaml` again, verify in SigNoz Explorer that the attribute or transformation introduced by the processor is present on the relevant signal.
+
+### Telemetry stopped getting Kubernetes attributes after customizing `pod_association`
+
+`config.data` replaces lists, so an override of `pod_association` drops Foundry's defaults, including the fallbacks the processor needs to associate telemetry with a pod. See the warning under [Resource Detection and Kubernetes Attributes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#resource-detection-and-kubernetes-attributes) for the rules to keep. After restoring the rules and running `foundryctl cast -f casting.yaml` again, confirm in SigNoz Explorer that resource attributes such as `k8s.pod.name` and `k8s.namespace.name` are populated on traces, metrics, or logs from your workloads.
+
+</details>
 
 ## Next Steps
 
+- [OpenTelemetry Operator Overview](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
