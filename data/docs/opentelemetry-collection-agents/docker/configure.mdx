@@ -26,7 +26,7 @@ For each change:
 
    ```bash
    foundryctl cast -f casting.yaml
-   docker restart signoz-collector-agent
+   docker restart signoz-collector-agent-1
    ```
 
    Foundry updates the agent's config, and the agent restarts with it.
@@ -34,7 +34,7 @@ For each change:
 3. View the agent's logs to confirm there are no configuration errors:
 
    ```bash
-   docker logs --since 5m signoz-collector-agent
+   docker logs --since 5m signoz-collector-agent-1
    ```
 
 4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for host metrics, the [Docker container metrics dashboard](https://signoz.io/docs/metrics-management/docker-container-metrics/) for container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
@@ -548,10 +548,10 @@ To cap the agent's memory at 1 GiB, add this patch to `casting.yaml`:
 ```yaml
 spec:
   patches:
-    - target: collectionagent/collector/agent/compose.yaml
+    - target: collectionagent/compose.yaml
       operations:
         - op: add
-          path: /services/signoz-collector-agent/mem_limit
+          path: /services/collector-agent/mem_limit
           value: 1g
 ```
 
@@ -678,7 +678,7 @@ spec:
                     endpoint: 0.0.0.0:14318
 ```
 
-Remove the old agent with `docker rm -f signoz-collector-agent` before you apply this. The agent then runs as `signoz-agent-collector-agent` in its own Compose project, the name commands and patch paths use from then on, and applications on the host send to `localhost:14318`.
+Remove the old agent with `docker rm -f signoz-collector-agent-1` before you apply this. The agent then runs as `signoz-agent-collector-agent-1` in its own Compose project, the name commands use from then on, and applications on the host send to `localhost:14318`.
 
 </TabItem>
 <TabItem value="docker" label="Docker">
@@ -713,18 +713,18 @@ To run the agent on a bridge network, add this patch to `casting.yaml`:
 ```yaml
 spec:
   patches:
-    - target: collectionagent/collector/agent/compose.yaml
+    - target: collectionagent/compose.yaml
       operations:
         - op: remove
-          path: /services/signoz-collector-agent/network_mode
+          path: /services/collector-agent/network_mode
         - op: add
-          path: /services/signoz-collector-agent/hostname
+          path: /services/collector-agent/hostname
           value: <host-name>
         - op: add
-          path: /services/signoz-collector-agent/ports
+          path: /services/collector-agent/ports
           value: ["4317:4317", "4318:4318"]
         - op: add
-          path: /services/signoz-collector-agent/networks
+          path: /services/collector-agent/networks
           value: [monitoring]
         - op: add
           path: /networks

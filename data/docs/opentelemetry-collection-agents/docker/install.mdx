@@ -83,18 +83,18 @@ foundryctl cast -f casting.yaml
 
 This command:
 
-- writes `compose.yaml` and the collector config `agent.yaml` to `pours/collectionagent/collector/agent/`;
+- writes `compose.yaml` to `pours/collectionagent/` and the collector config `agent.yaml` to `pours/collectionagent/collector/agent/`;
 - applies `compose.yaml` with `docker compose up -d`, as the Compose project `signoz`;
-- names the agent's container `signoz-collector-agent`.
+- runs the agent in the container `signoz-collector-agent-1`.
 
-Run the same command again after editing `casting.yaml`, then run `docker restart signoz-collector-agent` so the agent reads the new config.
+Run the same command again after editing `casting.yaml`, then run `docker restart signoz-collector-agent-1` so the agent reads the new config.
 
 <Admonition type="tip" title="Run Docker Compose yourself" defaultCollapsed="true">
 To run Docker Compose directly, generate the files and start them. Run this from the directory that contains `casting.yaml`:
 
 ```bash
-foundryctl forge -f casting.yaml   # writes compose.yaml and agent.yaml under pours/collectionagent/collector/agent
-docker compose -f pours/collectionagent/collector/agent/compose.yaml up -d
+foundryctl forge -f casting.yaml   # writes compose.yaml and agent.yaml under pours/collectionagent
+docker compose -f pours/collectionagent/compose.yaml up -d
 ```
 </Admonition>
 
@@ -103,7 +103,7 @@ docker compose -f pours/collectionagent/collector/agent/compose.yaml up -d
 Run this on the Docker host to check that the agent started:
 
 ```bash
-docker logs signoz-collector-agent
+docker logs signoz-collector-agent-1
 ```
 
 The logs should include a line similar to the following:
@@ -116,7 +116,7 @@ In SigNoz, open **Infrastructure Monitoring** > **Hosts**: your host appears und
 
 ## Customize the Collection Agent
 
-Every change follows the same loop: edit `casting.yaml`, run `foundryctl cast -f casting.yaml` again, then run `docker restart signoz-collector-agent`.
+Every change follows the same loop: edit `casting.yaml`, run `foundryctl cast -f casting.yaml` again, then run `docker restart signoz-collector-agent-1`.
 
 - **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
 
@@ -141,15 +141,15 @@ Every change follows the same loop: edit `casting.yaml`, run `foundryctl cast -f
                   collection_interval: 30s
   ```
 
-- **Compose file** (mounts, user, memory limit): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/collector/agent/compose.yaml`. For example, to mount the host's `/var/log` into the agent:
+- **Compose file** (mounts, user, memory limit): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/compose.yaml`. For example, to mount the host's `/var/log` into the agent:
 
   ```yaml
   spec:
     patches:
-      - target: collectionagent/collector/agent/compose.yaml
+      - target: collectionagent/compose.yaml
         operations:
           - op: add
-            path: /services/signoz-collector-agent/volumes/-
+            path: /services/collector-agent/volumes/-
             value: /var/log:/var/log:ro
   ```
 
@@ -163,33 +163,33 @@ Every change follows the same loop: edit `casting.yaml`, run `foundryctl cast -f
 
 ### The agent logs `at least one endpoint must be specified`
 
-In Step 4, `docker logs signoz-collector-agent` shows `exporters::otlphttp/signoz: at least one endpoint must be specified`, and the agent keeps restarting.
+In Step 4, `docker logs signoz-collector-agent-1` shows `exporters::otlphttp/signoz: at least one endpoint must be specified`, and the agent keeps restarting.
 
 **Cause:** the casting sets no `SIGNOZ_INGESTION_ENDPOINT` under `spec.collector.spec.env`.
 
-**Fix:** add it as in Step 2, then run `foundryctl cast -f casting.yaml` again from the directory that contains it, and `docker restart signoz-collector-agent`.
+**Fix:** add it as in Step 2, then run `foundryctl cast -f casting.yaml` again from the directory that contains it, and `docker restart signoz-collector-agent-1`.
 
-After the fix, `docker logs signoz-collector-agent` shows `Everything is ready`.
+After the fix, `docker logs signoz-collector-agent-1` shows `Everything is ready`.
 
 ### The agent logs `bind: address already in use`
 
-In Step 4, `docker logs signoz-collector-agent` shows `bind: address already in use` for port `4317` or `4318`, and the agent keeps restarting.
+In Step 4, `docker logs signoz-collector-agent-1` shows `bind: address already in use` for port `4317` or `4318`, and the agent keeps restarting.
 
-**Cause:** another process on the host holds the port, such as a self-hosted SigNoz on the same host, or the agent container `signoz-collector-agent-1` that foundryctl v0.3.0 created.
+**Cause:** another process on the host holds the port, such as a self-hosted SigNoz on the same host.
 
-**Fix:** for the v0.3.0 agent, remove it with `docker rm -f signoz-collector-agent-1`, then run `docker restart signoz-collector-agent`. For self-hosted SigNoz, remove the agent with `docker rm -f signoz-collector-agent`, give it its own name and ports as [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/#run-on-the-same-host-as-self-hosted-signoz) shows, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. The agent then runs as `signoz-agent-collector-agent`.
+**Fix:** remove the agent with `docker rm -f signoz-collector-agent-1`, give it its own name and ports as [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/#run-on-the-same-host-as-self-hosted-signoz) shows, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. The agent then runs as `signoz-agent-collector-agent-1`.
 
 After the fix, `docker logs` for the agent shows `Everything is ready`.
 
 ### The agent logs `context canceled` from docker_stats
 
-In Step 4, `docker logs signoz-collector-agent` shows `Could not parse docker containerStats for container id` and `"error": "context canceled"` from `docker_stats`, and some container metrics are missing.
+In Step 4, `docker logs signoz-collector-agent-1` shows `Could not parse docker containerStats for container id` and `"error": "context canceled"` from `docker_stats`, and some container metrics are missing.
 
 **Cause:** a bug in the `docker_stats` receiver of OpenTelemetry Collector 0.139.0, the image Foundry sets by default, <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/45655" target="_blank" rel="noopener noreferrer nofollow">fixed in 0.147.0</a>.
 
-**Fix:** set `spec.collector.spec.image` to `otel/opentelemetry-collector-contrib:0.147.0` or newer, as [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/?setup=foundry#customize-the-collection-agent) shows. Then run `foundryctl cast -f casting.yaml` again from the directory that contains it, and `docker restart signoz-collector-agent`.
+**Fix:** set `spec.collector.spec.image` to `otel/opentelemetry-collector-contrib:0.147.0` or newer, as [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/?setup=foundry#customize-the-collection-agent) shows. Then run `foundryctl cast -f casting.yaml` again from the directory that contains it, and `docker restart signoz-collector-agent-1`.
 
-After the fix, `docker logs signoz-collector-agent` shows no new `context canceled` errors.
+After the fix, `docker logs signoz-collector-agent-1` shows no new `context canceled` errors.
 
 ### foundryctl cast rejects a patch
 
@@ -208,9 +208,9 @@ After the fix, `docker logs signoz-collector-agent` shows no new `context cancel
 foundryctl forge -f casting.yaml
 ```
 
-Take the target and path from the files under `pours/collectionagent/collector/agent/`, add the patch back, then run `foundryctl cast -f casting.yaml` again and `docker restart signoz-collector-agent`.
+Take the target and path from the files under `pours/collectionagent/`, add the patch back, then run `foundryctl cast -f casting.yaml` again and `docker restart signoz-collector-agent-1`.
 
-After the fix, `docker logs signoz-collector-agent` shows `Everything is ready`.
+After the fix, `docker logs signoz-collector-agent-1` shows `Everything is ready`.
 
 </details>
 
