@@ -1,23 +1,20 @@
 ---
 date: 2026-10-19
 title: Docker OpenTelemetry Collection Agent - Install
-description: Install the Docker Collection Agent with Docker Compose, docker run, or Foundry to send host and container metrics, container logs, and traces to SigNoz.
+description: Install the OpenTelemetry Collector on a Docker host with Foundry to collect host metrics, container metrics, and logs and send them to SigNoz.
 doc_type: howto
 ---
 
-This guide explains how to install the Docker Collection Agent on a Docker host, with Foundry, or with Docker Compose or `docker run`.
+This guide explains how to install the Docker Collection Agent on a Docker host with Foundry.
 
 ## Prerequisites
 
 - A Linux host with <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Engine</a> 25.0 or newer.
-- For Docker Compose or Foundry, the Docker Compose plugin (`docker compose`) on the same host.
+- The Docker Compose plugin (`docker compose`) on the same host.
 - Ports `4317`, `4318`, `8888`, and `13133` free on the host. To run the agent on the host that runs self-hosted SigNoz, see [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/#run-on-the-same-host-as-self-hosted-signoz).
 - A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
-
-## Install with Foundry
+## Install the Collection Agent
 
 <Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
 Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
@@ -35,7 +32,7 @@ For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the
 
 ### Step 2: Create casting.yaml
 
-Create a file named `casting.yaml` with one document for the agent described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview/#how-it-works-the-agent-container):
+Create a file named `casting.yaml` on the Docker host, with one document for the agent described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview/#how-it-works-the-agent-container):
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
@@ -83,7 +80,7 @@ foundryctl cast -f casting.yaml
 
 This command:
 
-- writes `compose.yaml` to `pours/collectionagent/` and the collector config `agent.yaml` to `pours/collectionagent/collector/agent/`;
+- writes the Compose file `compose.yaml` to `pours/collectionagent/` and the collector config `agent.yaml` to `pours/collectionagent/collector/agent/`;
 - applies `compose.yaml` with `docker compose up -d`, as the Compose project `signoz`;
 - runs the agent in the container `signoz-collector-agent-1`.
 
@@ -124,7 +121,7 @@ Every change follows the same loop: edit `casting.yaml`, run `foundryctl cast -f
   spec:
     collector:
       spec:
-        image: otel/opentelemetry-collector-contrib:0.147.0
+        image: otel/opentelemetry-collector-contrib:0.139.0
   ```
 
 - **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to collect host metrics every 30s:
@@ -181,16 +178,6 @@ In Step 4, `docker logs signoz-collector-agent-1` shows `bind: address already i
 
 After the fix, `docker logs` for the agent shows `Everything is ready`.
 
-### The agent logs `context canceled` from docker_stats
-
-In Step 4, `docker logs signoz-collector-agent-1` shows `Could not parse docker containerStats for container id` and `"error": "context canceled"` from `docker_stats`, and some container metrics are missing.
-
-**Cause:** a bug in the `docker_stats` receiver of OpenTelemetry Collector 0.139.0, the image Foundry sets by default, <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/45655" target="_blank" rel="noopener noreferrer nofollow">fixed in 0.147.0</a>.
-
-**Fix:** set `spec.collector.spec.image` to `otel/opentelemetry-collector-contrib:0.147.0` or newer, as [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/?setup=foundry#customize-the-collection-agent) shows. Then run `foundryctl cast -f casting.yaml` again from the directory that contains it, and `docker restart signoz-collector-agent-1`.
-
-After the fix, `docker logs signoz-collector-agent-1` shows no new `context canceled` errors.
-
 ### foundryctl cast rejects a patch
 
 `foundryctl cast -f casting.yaml` stops before it starts the agent, with `failed to apply patch for target "<target>"` followed by one of these:
@@ -213,331 +200,6 @@ Take the target and path from the files under `pours/collectionagent/`, add the 
 After the fix, `docker logs signoz-collector-agent-1` shows `Everything is ready`.
 
 </details>
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-## Install with Docker
-
-### Step 1: Create config.yaml
-
-Create a file named `config.yaml` on the Docker host, with the config of the agent described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview/#how-it-works-the-agent-container):
-
-<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collector#cloud-to-self-hosted).
-</Admonition>
-
-```yaml:config.yaml minimap defaultCollapsed
-receivers:
-  # OTLP: accept traces, metrics, and logs from instrumented apps (SDKs, agents)
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-  # Host metrics: CPU, disk, memory, network, etc. (root_path for container)
-  hostmetrics:
-    collection_interval: 60s
-    root_path: /hostfs
-    scrapers:
-      cpu: {}
-      disk:
-        exclude:
-          match_type: regexp
-          devices:
-            - ^ram\d+$
-            - ^zram\d+$
-            - ^loop\d+$
-            - ^fd\d+$
-            - ^hd[a-z]\d+$
-            - ^sd[a-z]\d+$
-            - ^vd[a-z]\d+$
-            - ^xvd[a-z]\d+$
-            - ^nvme\d+n\d+p\d+$
-      load: {}
-      filesystem:
-        exclude_fs_types:
-          match_type: strict
-          fs_types:
-            - autofs
-            - binfmt_misc
-            - bpf
-            - cgroup2
-            - configfs
-            - debugfs
-            - devpts
-            - devtmpfs
-            - fusectl
-            - hugetlbfs
-            - iso9660
-            - mqueue
-            - nsfs
-            - overlay
-            - proc
-            - procfs
-            - pstore
-            - rpc_pipefs
-            - securityfs
-            - selinuxfs
-            - squashfs
-            - sysfs
-            - tracefs
-        exclude_mount_points:
-          match_type: regexp
-          mount_points:
-            - /dev/*
-            - /proc/*
-            - /sys/*
-            - /run/credentials/*
-            - /run/k3s/containerd/*
-            - /var/lib/docker/*
-            - /var/lib/containers/storage/*
-            - /var/lib/kubelet/*
-            - /snap/*
-      memory: {}
-      network:
-        exclude:
-          match_type: regexp
-          interfaces:
-            - ^veth.*$
-            - ^docker.*$
-            - ^br-.*$
-            - ^flannel.*$
-            - ^cali.*$
-            - ^cbr.*$
-            - ^cni.*$
-            - ^dummy.*$
-            - ^tailscale.*$
-            - ^lo$
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-        mute_process_user_error: true
-      processes: {}
-  # Container metrics from Docker daemon
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    collection_interval: 10s
-    timeout: 20s
-  # Container logs: Docker JSON log files
-  filelog:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    start_at: end  # Collect only logs written after the agent starts
-    include_file_name: false
-    include_file_path: true
-    operators:
-      - id: container-parser
-        type: container
-        format: docker
-        add_metadata_from_filepath: false
-      # Set container.id from the log file's directory
-      - type: regex_parser
-        parse_from: attributes["log.file.path"]
-        regex: /var/lib/docker/containers/(?P<container_id>[a-f0-9]{64})/
-        on_error: send
-      - type: move
-        from: attributes.container_id
-        to: resource["container.id"]
-        on_error: send_quiet
-
-processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-  resourcedetection:
-    detectors: [env, ec2, gcp, azure, system, docker]
-    override: false
-    timeout: 2s
-    system:
-      hostname_sources: [os]
-  memory_limiter:
-    check_interval: 5s
-    limit_mib: 4000
-    spike_limit_mib: 800
-
-exporters:
-  otlphttp:
-    endpoint: 'https://ingest.<region>.signoz.cloud:443'
-    headers:
-      'signoz-ingestion-key': '<your-ingestion-key>'
-
-extensions:
-  health_check:
-    endpoint: 0.0.0.0:13133
-
-service:
-  extensions: [health_check]
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlphttp]
-    metrics:
-      receivers: [otlp, hostmetrics, docker_stats]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlphttp]
-    logs:
-      receivers: [otlp, filelog]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlphttp]
-```
-
-**Verify these values:**
-
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-### Step 2: Run the Collection Agent
-
-Both methods run the agent with Docker's `local` log driver, which keeps the agent's own logs out of the container logs it collects.
-
-<Tabs entityName="method">
-<TabItem value="docker-compose" label="Docker Compose" default>
-
-In the directory that contains `config.yaml`, create a file named `docker-compose.yaml`:
-
-```yaml:docker-compose.yaml
-services:
-  signoz-collection-agent:
-    image: otel/opentelemetry-collector-contrib:0.139.0
-    container_name: signoz-collection-agent
-    restart: unless-stopped
-    user: "0:0"
-    network_mode: host
-    logging:
-      driver: local
-    environment:
-      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>
-    volumes:
-      - ./config.yaml:/etc/otelcol-contrib/config.yaml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /:/hostfs:ro
-```
-
-Run this from the same directory to start the agent:
-
-```bash
-docker compose up -d
-```
-
-</TabItem>
-<TabItem value="docker-run" label="Docker Run">
-
-Run this from the directory that contains `config.yaml`:
-
-```bash
-docker run --name signoz-collection-agent \
-  --restart unless-stopped \
-  --detach \
-  --user 0:0 \
-  --network host \
-  --log-driver local \
-  -e OTEL_RESOURCE_ATTRIBUTES="deployment.environment=<your-environment>" \
-  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
-  -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /:/hostfs:ro \
-  otel/opentelemetry-collector-contrib:0.139.0
-```
-
-</TabItem>
-</Tabs>
-
-**Verify these values:**
-
-- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
-
-### Step 3: Verify the Collection Agent
-
-Run this on the Docker host to check that the agent started:
-
-```bash
-docker logs signoz-collection-agent
-```
-
-The logs should include a line similar to the following:
-
-```output
-... Everything is ready. Begin running and processing data.
-```
-
-In SigNoz, open **Infrastructure Monitoring** > **Hosts**: your host appears under its host name as data arrives. Check **Logs Explorer** to confirm container logs are flowing.
-
-## Customize the Collection Agent
-
-Every change to `config.yaml` follows the same loop: edit `config.yaml`, then run `docker restart signoz-collection-agent` on the Docker host.
-
-- **Collector config** (receivers, processors, pipelines): see [Configure the Docker Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/).
-- **Collector version**: change the image tag in `docker-compose.yaml` and run `docker compose up -d` again from its directory, or remove the container with `docker rm -f signoz-collection-agent` and run Step 2's `docker run` command with the new tag. Versions are listed in the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases/releases" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector releases</a>.
-
-<details>
-
-<ToggleHeading>
-## Troubleshooting
-</ToggleHeading>
-
-### Step 2 fails with `The container name "/signoz-collection-agent" is already in use`
-
-In Step 2, `docker run` or `docker compose up -d` stops with `Conflict. The container name "/signoz-collection-agent" is already in use`.
-
-**Cause:** an agent container from an earlier run still exists.
-
-**Fix:** run this on the Docker host to remove it, then run Step 2 again:
-
-```bash
-docker rm -f signoz-collection-agent
-```
-
-After the fix, `docker logs signoz-collection-agent` shows `Everything is ready`.
-
-### The agent logs `bind: address already in use`
-
-In Step 3, `docker logs signoz-collection-agent` shows `listen tcp 0.0.0.0:4318: bind: address already in use`, or the same for port `4317`, and the agent keeps restarting.
-
-**Cause:** another process on the host holds the port, such as a self-hosted SigNoz on the same host.
-
-**Fix:** move the agent's OTLP receivers to free ports, as the `receivers` part of [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/docker/configure/?setup=docker#run-on-the-same-host-as-self-hosted-signoz) shows, then run `docker restart signoz-collection-agent`.
-
-After the fix, `docker logs signoz-collection-agent` shows `Everything is ready`.
-
-### The agent logs `permission denied` on the Docker socket
-
-In Step 3, `docker logs signoz-collection-agent` shows `permission denied while trying to connect to the docker API at unix:///var/run/docker.sock`, and the agent keeps restarting.
-
-**Cause:** the agent runs as a user that cannot access the Docker socket.
-
-**Fix:** run the agent as root, with `user: "0:0"` in `docker-compose.yaml` or `--user 0:0` in `docker run`, as in Step 2. Remove the container with `docker rm -f signoz-collection-agent`, then run Step 2 again.
-
-After the fix, `docker logs signoz-collection-agent` shows `Everything is ready`.
-
-### The agent logs `invalid root_path`
-
-In Step 3, `docker logs signoz-collection-agent` shows `receivers::hostmetrics: invalid root_path: stat /hostfs: no such file or directory`, and the agent keeps restarting.
-
-**Cause:** the host's root filesystem is not mounted at `/hostfs`, the `root_path` of the `hostmetrics` receiver.
-
-**Fix:** add the `/:/hostfs:ro` volume as in Step 2. Remove the container with `docker rm -f signoz-collection-agent`, then run Step 2 again.
-
-After the fix, `docker logs signoz-collection-agent` shows `Everything is ready`, and your host appears under **Infrastructure Monitoring** > **Hosts**.
-
-### The agent exits with `failed to get config`
-
-In Step 3, `docker logs signoz-collection-agent` shows an error that starts with `Error: failed to get config`, and the agent keeps restarting.
-
-**Cause:** `config.yaml` is not valid YAML, names a component that the collector image does not include, or has a setting that a component does not accept.
-
-**Fix:** correct `config.yaml` where the error points, then run `docker restart signoz-collection-agent`.
-
-After the fix, `docker logs signoz-collection-agent` shows `Everything is ready`.
-
-</details>
-
-</TabItem>
-</Tabs>
 
 ## Send data from your applications
 

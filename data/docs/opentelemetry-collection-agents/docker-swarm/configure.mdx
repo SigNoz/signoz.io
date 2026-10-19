@@ -1,22 +1,20 @@
 ---
 date: 2026-10-19
 title: Docker Swarm OpenTelemetry Collection Agent - Configure
-description: Configure the OpenTelemetry Collector of the Docker Swarm Collection Agent to customize host metrics, container metrics, and container logs sent to SigNoz.
+description: Configure the OpenTelemetry Collector on your Docker Swarm with Foundry to customize the host metrics, container metrics, and logs it sends to SigNoz.
 doc_type: howto
 ---
 
-The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/) provides a working config: one agent task on each Swarm node collects host metrics, container metrics, container logs, and data from instrumented applications. This page shows how to customize it, in `casting.yaml` for Foundry or in `config.yaml` for Docker.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/) provides a working config: one agent task on each Swarm node collects host metrics, container metrics, container logs, and data from instrumented applications. This page shows how to customize it in `casting.yaml`.
 
 ## Prerequisites
 
-- Docker Swarm Collection Agent installed with Foundry, `docker stack deploy`, or `docker service create` (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/))
+- Docker Swarm Collection Agent installed with Foundry (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/))
 - SigNoz Cloud account or self-hosted SigNoz instance
-- A shell on a manager node of the Swarm, and the files you installed from: `casting.yaml` and `foundryctl` for Foundry, or `config.yaml` and `docker-stack.yaml` (or your `docker service create` command) for Docker
+- A shell on a manager node of the Swarm
+- The `casting.yaml` and `foundryctl` you installed with
 
 ## Apply Changes
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 For each change:
 
@@ -38,44 +36,6 @@ For each change:
 
 4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for host metrics, the [Docker container metrics dashboard](https://signoz.io/docs/metrics-management/docker-container-metrics/) for container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-For each change:
-
-1. Add the section's snippet to `config.yaml`, merging it into the keys the file already has.
-
-2. A <a href="https://docs.docker.com/engine/swarm/configs/#example-rotate-a-config" target="_blank" rel="noopener noreferrer nofollow">Swarm config</a> keeps the content it was created with, so store the changed `config.yaml` under a new config name and point the agent at it. Run the commands from the directory that contains `config.yaml`.
-
-   With `docker stack deploy`, raise the version at the end of the config's `name` in `docker-stack.yaml`, for example to `signoz-collection-agent-config-v2`, then deploy the stack again:
-
-   ```bash
-   docker stack deploy -c docker-stack.yaml signoz
-   ```
-
-   With `docker service create`, create the new config and swap it in:
-
-   ```bash
-   docker config create signoz-collection-agent-config-v2 ./config.yaml
-   docker service update \
-     --config-rm signoz-collection-agent-config-v1 \
-     --config-add source=signoz-collection-agent-config-v2,target=/etc/otelcol-contrib/config.yaml,mode=0444 \
-     signoz-collection-agent
-   ```
-
-   Swarm replaces the agent's tasks to use the new config, and `docker config rm signoz-collection-agent-config-v1` then removes the old one. Each later change takes the next version. For a change to `docker-stack.yaml` alone, run `docker stack deploy` again; for the service from `docker service create`, apply new flags with `docker service update`.
-
-3. View the agent's logs to confirm there are no configuration errors. For the service from `docker service create`, use `signoz-collection-agent`:
-
-   ```bash
-   docker service logs --since 5m signoz_signoz-collection-agent
-   ```
-
-4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for host metrics, the [Docker container metrics dashboard](https://signoz.io/docs/metrics-management/docker-container-metrics/) for container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
-
-</TabItem>
-</Tabs>
-
 ## Send Data from Applications to the Collector
 
 Host metrics, container metrics, and container logs flow as soon as the agent is running.
@@ -84,9 +44,6 @@ Host metrics, container metrics, and container logs flow as soon as the agent is
 
 To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then point it at the agent. For an application that runs as a Swarm service, attach the agent to the application's overlay network as [Attach the agent to an overlay network](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#attach-the-agent-to-an-overlay-network) shows, then add this to the application's service in its stack file:
 
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
-
 ```yaml
 services:
   <your-app>:
@@ -94,22 +51,6 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz_collector-agent:4318
       OTEL_SERVICE_NAME: <service-name>
 ```
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-```yaml
-services:
-  <your-app>:
-    environment:
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz_signoz-collection-agent:4318
-      OTEL_SERVICE_NAME: <service-name>
-```
-
-For the service from `docker service create`, use `http://signoz-collection-agent:4318`.
-
-</TabItem>
-</Tabs>
 
 **Verify these values:**
 
@@ -121,9 +62,6 @@ The agent's service name balances requests across its tasks on all nodes. For an
 Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz.
 
 ## Collect Host Metrics
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To collect host metrics every 30s, add this to `casting.yaml`:
 
@@ -141,26 +79,7 @@ spec:
 
 To stop a scraper, set it to `null` under `scrapers`, for example `paging: null`.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To collect host metrics every 30s, add this to `config.yaml`:
-
-```yaml
-receivers:
-  hostmetrics:
-    collection_interval: 30s
-```
-
-To stop a scraper, delete its entry under `scrapers`.
-
-</TabItem>
-</Tabs>
-
 ### Exclude filesystem mounts
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To stop reporting the filesystem mounted at `/mnt/backup`, add this to `casting.yaml`:
 
@@ -192,42 +111,9 @@ spec:
 
 Lists replace, so restate Foundry's ten default entries, the ones above `^/mnt/backup$`.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To stop reporting the filesystem mounted at `/mnt/backup`, add this to `config.yaml`:
-
-```yaml
-receivers:
-  hostmetrics:
-    scrapers:
-      filesystem:
-        exclude_mount_points:
-          mount_points:
-            - /dev/*
-            - /proc/*
-            - /sys/*
-            - /run/*
-            - /run/credentials/*
-            - /run/k3s/containerd/*
-            - /var/lib/docker/*
-            - /var/lib/containers/storage/*
-            - /var/lib/kubelet/*
-            - /snap/*
-            - ^/mnt/backup$
-```
-
-Entries are unanchored regular expressions matched against each mount point.
-
-</TabItem>
-</Tabs>
-
 ## Collect Container Metrics
 
 For the metrics and a dashboard, see [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/).
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To collect container metrics every 30s, add this to `casting.yaml`:
 
@@ -245,24 +131,7 @@ spec:
 
 Foundry collects container metrics every 60s by default.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To collect container metrics every 30s, add this to `config.yaml`:
-
-```yaml
-receivers:
-  docker_stats:
-    collection_interval: 30s
-```
-
-</TabItem>
-</Tabs>
-
 ### Map container labels to resource attributes
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To add the `com.example.team` container label to container metrics as `team`, add this to `casting.yaml`:
 
@@ -281,29 +150,7 @@ spec:
 
 The map merges, so Foundry's default mappings of the Swarm stack, service, task, and node labels stay.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To add container labels to container metrics as resource attributes, add this to `config.yaml`:
-
-```yaml
-receivers:
-  docker_stats:
-    container_labels_to_metric_labels:
-      com.docker.stack.namespace: docker.stack.name
-      com.docker.swarm.node.id: docker.node.id
-      com.docker.swarm.service.name: docker.service.name
-      com.docker.swarm.task.name: docker.task.name
-      com.example.team: team
-```
-
-</TabItem>
-</Tabs>
-
 ### Exclude containers from metrics
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To stop collecting metrics for containers by image, add this to `casting.yaml`:
 
@@ -322,24 +169,6 @@ spec:
 ```
 
 Entries match the image name exactly, as a glob, or as a regular expression between slashes.
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To stop collecting metrics for containers by image, add this to `config.yaml`:
-
-```yaml
-receivers:
-  docker_stats:
-    excluded_images:
-      - 'otel/opentelemetry-collector-contrib*'
-      - /.*pause.*/
-```
-
-Entries match the image name exactly, as a glob, or as a regular expression between slashes.
-
-</TabItem>
-</Tabs>
 
 ## Collect Container Logs
 
@@ -362,9 +191,6 @@ The agent collects the logs of containers that use the `json-file` log driver, D
 
 ### Disable Logs Collection
 
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
-
 To stop collecting container logs, add this to `casting.yaml`:
 
 ```yaml
@@ -384,27 +210,7 @@ spec:
 
 Lists replace, so the `logs` pipeline is restated with Foundry's two OTLP receivers.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To stop collecting container logs, add this to `config.yaml`:
-
-```yaml
-service:
-  pipelines:
-    logs:
-      receivers: [otlp]
-```
-
-Logs that applications send over OTLP keep flowing.
-
-</TabItem>
-</Tabs>
-
 ## Resource Detection
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To detect only host and Docker attributes on nodes outside AWS, GCP, and Azure, add this to `casting.yaml`:
 
@@ -422,26 +228,7 @@ spec:
 
 Lists replace, so `detectors` holds only the detectors you list.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To detect only host and Docker attributes on nodes outside AWS, GCP, and Azure, add this to `config.yaml`:
-
-```yaml
-processors:
-  resourcedetection:
-    detectors: [env, system, docker]
-```
-
-The first detector to set an attribute wins.
-
-</TabItem>
-</Tabs>
-
 ### Custom resource attributes
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To add `team=backend` to all telemetry, add this to `casting.yaml`:
 
@@ -457,31 +244,9 @@ spec:
 
 - `<your-environment>`: Your deployment environment, for example `staging` or `production`.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To add `team=backend` to all telemetry, set it in the agent's environment in `docker-stack.yaml`, or with `docker service update --env-add` for the service from `docker service create`:
-
-```yaml
-services:
-  signoz-collection-agent:
-    environment:
-      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>,team=backend
-```
-
-**Verify these values:**
-
-- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
-
-</TabItem>
-</Tabs>
-
 ## Scrape Prometheus Metrics from Containers
 
-Every agent task runs the scrape, so SigNoz receives a target's metrics from each node.
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
+Every agent task runs the scrape, so SigNoz receives a target's metrics from each node. The agent reaches a target by its service name on an overlay network they share, as [Attach the agent to an overlay network](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#attach-the-agent-to-an-overlay-network) shows.
 
 To scrape a Prometheus endpoint every 60s, add this to `casting.yaml`:
 
@@ -508,37 +273,9 @@ spec:
 
 Lists replace, so the `metrics` pipeline is restated with Foundry's default receivers.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To scrape a Prometheus endpoint every 60s, add this to `config.yaml`:
-
-```yaml
-receivers:
-  prometheus:
-    config:
-      scrape_configs:
-        - job_name: my-app
-          scrape_interval: 60s
-          static_configs:
-            - targets: [my-app:9090]
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp, hostmetrics, docker_stats, prometheus]
-```
-
-The agent reaches `my-app` by its service name on an overlay network they share, as [Attach the agent to an overlay network](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/?setup=docker#attach-the-agent-to-an-overlay-network) shows.
-
-</TabItem>
-</Tabs>
-
 ## Tune Batch and Memory Limiter
 
 For sizing guidance, see [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices).
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To send larger batches, add this to `casting.yaml`:
 
@@ -557,25 +294,7 @@ spec:
 
 Foundry's defaults are `send_batch_size: 1000`, `send_batch_max_size: 2048`, and `timeout: 10s`.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To send larger batches, add this to `config.yaml`:
-
-```yaml
-processors:
-  batch:
-    send_batch_size: 2000
-    send_batch_max_size: 4000
-```
-
-</TabItem>
-</Tabs>
-
 ### Container Memory Limit
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To cap the agent's memory at 1 GiB, add this patch to `casting.yaml`:
 
@@ -608,37 +327,7 @@ spec:
                 spike_limit_percentage: 25
 ```
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To cap the agent's memory at 1 GiB, add this to its service in `docker-stack.yaml`, or run `docker service update --limit-memory 1g signoz-collection-agent` for the service from `docker service create`:
-
-```yaml
-services:
-  signoz-collection-agent:
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-```
-
-Then replace the `memory_limiter` block in `config.yaml` with this, which sizes it to that limit:
-
-```yaml
-processors:
-  memory_limiter:
-    check_interval: 5s
-    limit_percentage: 80
-    spike_limit_percentage: 25
-```
-
-</TabItem>
-</Tabs>
-
 ## Add Custom Processors to Pipelines
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To add a processor to the `traces` pipeline, add this to `casting.yaml`:
 
@@ -663,37 +352,11 @@ spec:
 
 Lists replace, so restate Foundry's processors `memory_limiter`, `resourcedetection`, and `batch`, with yours before `batch`.
 
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To add a processor to the `traces` pipeline, add this to `config.yaml`:
-
-```yaml
-processors:
-  attributes/team:
-    actions:
-      - key: team
-        value: platform
-        action: insert
-service:
-  pipelines:
-    traces:
-      processors: [memory_limiter, resourcedetection, attributes/team, batch]
-```
-
-Processors run in the order listed, so put yours before `batch`.
-
-</TabItem>
-</Tabs>
-
 ## Common Deployment Scenarios
 
 ### Run on the same Swarm as self-hosted SigNoz
 
 Self-hosted SigNoz publishes ports `4317` and `4318` through the Swarm routing mesh on every node, so the agent publishes `14317` and `14318` instead and sends to SigNoz's ingester over the `signoz-network` overlay network.
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To run the agent on a Swarm that runs self-hosted SigNoz, add this to `casting.yaml`:
 
@@ -724,49 +387,9 @@ spec:
               external: true
 ```
 
-The agent then runs as `signoz-agent_collector-agent` in its own stack `signoz-agent`, the name commands use from then on.
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To run the agent on a Swarm that runs self-hosted SigNoz, add this to `config.yaml`:
-
-```yaml
-exporters:
-  otlphttp:
-    endpoint: http://signoz-ingester:4318
-```
-
-Then add this to the agent's service in `docker-stack.yaml`, and deploy the stack as `signoz-agent` instead of `signoz`:
-
-```yaml
-services:
-  signoz-collection-agent:
-    ports:
-      - target: 4317
-        published: 14317
-        protocol: tcp
-        mode: host
-      - target: 4318
-        published: 14318
-        protocol: tcp
-        mode: host
-    networks:
-      - signoz-network
-networks:
-  signoz-network:
-    external: true
-```
-
-The agent then runs as `signoz-agent_signoz-collection-agent`. With `docker service create`, set the same ports in `--publish` and add `--network signoz-network`.
-
-</TabItem>
-</Tabs>
+The agent then runs as `signoz-agent_collector-agent` in its own stack `signoz-agent`, the name commands and application endpoints use from then on, and applications on a node send to `localhost:14318`.
 
 ### Attach the agent to an overlay network
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 To attach the agent to an overlay network, add this patch to `casting.yaml`:
 
@@ -788,30 +411,6 @@ spec:
 **Verify these values:**
 
 - `<your-overlay-network>`: The overlay network your application's services use, as `docker network ls` shows it.
-
-</TabItem>
-<TabItem value="docker" label="Docker">
-
-To attach the agent to an overlay network, add this to the agent's service in `docker-stack.yaml`:
-
-```yaml
-services:
-  signoz-collection-agent:
-    networks:
-      - <your-overlay-network>
-networks:
-  <your-overlay-network>:
-    external: true
-```
-
-**Verify these values:**
-
-- `<your-overlay-network>`: The overlay network your application's services use, as `docker network ls` shows it.
-
-With `docker service create`, run `docker service update --network-add <your-overlay-network> signoz-collection-agent`.
-
-</TabItem>
-</Tabs>
 
 <details>
 
