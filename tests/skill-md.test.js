@@ -1,5 +1,7 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
 const { GET } = loadTsModule('app/(site)/skill.md/route.ts')
@@ -57,4 +59,33 @@ test('skill.md markdown links are absolute and parseable', async () => {
   links.forEach((url) => {
     assert.match(url, /^https:\/\//, `link is not absolute: ${url}`)
   })
+})
+
+test('skill.md includes runnable Cloud and self-hosted quick starts', async () => {
+  const body = await getBody()
+
+  assert.match(body, /## Quick start: SigNoz Cloud/)
+  assert.match(body, /## Quick start: self-hosted/)
+  assert.equal(body.includes('https://ingest.<region>.signoz.cloud:443'), true)
+  assert.equal(body.includes('signoz-ingestion-key=<your-ingestion-key>'), true)
+  assert.equal(body.includes('opentelemetry-instrument <your_run_command>'), true)
+  assert.equal(body.includes('curl -fsSL https://signoz.io/foundry.sh | bash'), true)
+  assert.equal(body.includes('foundryctl cast -f casting.yaml'), true)
+  assert.match(body, /## Verify data arrived/)
+})
+
+test('skill.md code fences are balanced', async () => {
+  const body = await getBody()
+  const fences = body.split('\n').filter((line) => line.startsWith('```'))
+
+  assert.equal(fences.length % 2, 0)
+})
+
+test('/docs/skill.md permanently redirects to /skill.md', async () => {
+  const config = fs.readFileSync(path.join(__dirname, '..', 'next.config.js'), 'utf8')
+
+  assert.match(
+    config,
+    /source: '\/docs\/skill\.md',\s*destination: '\/skill\.md',\s*permanent: true,/
+  )
 })
