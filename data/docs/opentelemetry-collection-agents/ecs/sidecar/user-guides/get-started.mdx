@@ -1,64 +1,54 @@
 ---
-date: 2025-10-22
-title: Monitoring ECS Fargate using Opentelemetry Collection Agents
-
-description: Monitor Amazon ECS Fargate using the OpenTelemetry Collector as a sidecar container to send metrics, logs, and traces to SigNoz
+date: 2026-10-16
+title: Monitoring ECS Fargate using OpenTelemetry Collection Agents
+description: Monitor Amazon ECS tasks on Fargate with an OpenTelemetry Collector sidecar, added with Foundry and Terraform, to send task metrics, logs, and traces to SigNoz.
+doc_type: tutorial
 ---
 
-This guide explains how to monitor Amazon ECS Fargate (serverless) using OpenTelemetry and SigNoz. You'll deploy an OpenTelemetry Collector as a sidecar container inside your ECS tasks. Applications send OTLP telemetry to localhost; the sidecar exports to SigNoz.
+This guide explains how to monitor Amazon ECS tasks on Fargate (serverless) using OpenTelemetry and SigNoz. You'll install the ECS Serverless Collection Agent with Foundry and Terraform, which adds an OpenTelemetry Collector to each task as a sidecar container. Applications send OTLP telemetry to the collector in their task, and the collector exports it to SigNoz.
 
 ## What is ECS Fargate Monitoring with OpenTelemetry?
 
-With the Fargate launch type, AWS manages the infrastructure and you cannot run host-level daemons. The OpenTelemetry Collector sidecar runs in the same task as your application and provides:
+On Fargate, AWS manages the infrastructure, so there is no host to run a collector on. The ECS Serverless Collection Agent runs the collector in the same task as your application and provides:
 
-- Local OTLP endpoints (gRPC/HTTP) for app telemetry
-- ECS container/task metrics via the Task Metadata Endpoint
-- Optional app log routing via Fluent Bit/FireLens to the sidecar
+- OTLP endpoints in the task for application telemetry
+- Task CPU, memory, network, and storage metrics from the ECS task metadata endpoint
+- The stdout and stderr of the task's containers, with the collector as the task's log router
 
-Learn the concepts in the [ECS Sidecar - Overview](/docs/opentelemetry-collection-agents/ecs/sidecar/overview/).
+Learn the concepts in the [ECS Serverless (Fargate) - Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/).
 
 ## Prerequisites
 
-- SigNoz backend (SigNoz Cloud or self-hosted)
-- ECS cluster using Fargate launch type
-- AWS CLI with appropriate permissions
-- Ability to update task definitions and IAM roles
+- A SigNoz backend (SigNoz Cloud or self-hosted) to receive OpenTelemetry data
+- An ECS task definition for Fargate that you manage with Terraform
+- Terraform 1.4 or newer and the AWS CLI, with permissions to create SSM parameters and IAM role policies
 
 ## How It Works
 
-1. Add an OpenTelemetry Collector container as a sidecar in your ECS task definition
-2. Configure the sidecar to receive app OTLP and collect ECS metrics
-3. Point your instrumented applications to `http://localhost:4317` (or 4318 for HTTP)
-4. Sidecar enriches and forwards telemetry to SigNoz
+For where the collector runs and what it collects, see [How it works](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/#how-it-works) in the overview.
 
-## Step 1: Install the Sidecar
+## Step 1: Install the Collection Agent
 
-Add the collector container to your ECS task definition and store configuration in SSM Parameter Store.
+Create `casting.yaml`, generate the module with `foundryctl forge`, add it to your task definition, and apply with your usual Terraform workflow.
 
-- Follow [ECS Sidecar - Install](/docs/opentelemetry-collection-agents/ecs/sidecar/install/)
+- Follow [ECS Serverless (Fargate) - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/)
 
-## Step 2: Configure the Sidecar and Applications
+## Step 2: Configure the Collector and Applications
 
-- Set `OTEL_EXPORTER_OTLP_ENDPOINT` in app containers to the sidecar
-- Use `OTEL_RESOURCE_ATTRIBUTES` with `service.name=<your-service>`
-- Optionally configure FireLens/Fluent Bit to send logs to the sidecar
+- Set the application's `OTEL_EXPORTER_OTLP_ENDPOINT` to the [collector in its task](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#send-data-from-applications-to-the-collector)
+- Set `OTEL_SERVICE_NAME` to your service's name
+- Choose which containers send their logs, as [Collect Container Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#collect-container-logs) shows
 
-- Follow [ECS Sidecar - Configure](/docs/opentelemetry-collection-agents/ecs/sidecar/configure/)
-
-## What Data Can You Collect?
-
-- ECS container/task metrics (awsecscontainermetrics)
-- Application traces and metrics via OTLP
-- Application logs via FireLens/Fluent Bit to `fluentforward` receiver
+- Follow [ECS Serverless (Fargate) - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/)
 
 ## Visualize in SigNoz
 
-- Build per-service and per-environment dashboards
-- Filter by cluster, service, task, and resource attributes
-- Correlate traces and logs for rapid debugging
+- Import the <a href="https://github.com/SigNoz/dashboards/tree/main/ecs-infra-metrics" target="_blank" rel="noopener noreferrer nofollow">Container Metrics - ECS</a> dashboard for task metrics
+- Filter by cluster, task, and resource attributes such as `aws.ecs.task.family`
+- Correlate traces and logs by `service.name`
 
 ## Next Steps
 
-1. [ECS Sidecar - Overview](/docs/opentelemetry-collection-agents/ecs/sidecar/overview/)
-2. [ECS Sidecar - Install](/docs/opentelemetry-collection-agents/ecs/sidecar/install/)
-3. [ECS Sidecar - Configure](/docs/opentelemetry-collection-agents/ecs/sidecar/configure/)
+1. [ECS Serverless (Fargate) - Overview](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/)
+2. [ECS Serverless (Fargate) - Install](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/)
+3. [ECS Serverless (Fargate) - Configure](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/)
