@@ -61,7 +61,7 @@ This makes cost and latency inherently unpredictable. Observability lets enginee
 - An <a href="https://platform.openai.com/api-keys" rel="noopener noreferrer nofollow" target="_blank">OpenAI API key</a> to run the agent.
 - An API client like <a href="https://www.usebruno.com/" rel="noopener noreferrer nofollow" target="_blank">Bruno</a> or <a href="https://www.postman.com/" rel="noopener noreferrer nofollow" target="_blank">Postman</a> to test endpoints.
 
-### Setting up SigNoz
+### Setting up SigNoz Cloud
 
 SigNoz Cloud is an OpenTelemetry-native observability platform that unifies traces, metrics, and logs in a single interface.
 
@@ -127,7 +127,7 @@ opentelemetry-instrument fastapi run --port 8085 --workers 1
 
 Here is what these [OpenTelemetry environment variables](https://signoz.io/blog/otel-environment-variables/) configure:
 
-- `OTEL_SERVICE_NAME="otel-ai-agent-observability-demo"`: Uniquely identifies the application in SigNoz.
+- `OTEL_SERVICE_NAME="otel-ai-agent-observability-demo"`: Uniquely identifies the application in SigNoz Cloud.
 - `OTEL_RESOURCE_ATTRIBUTES`: Attaches metadata (version `1.0.0`, environment `dev`) to all exported telemetry. This is used to organize and filter telemetry in the OpenTelemetry backend.
 - `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=span_only`: Captures model prompts, completions, and tool definitions as span attributes on LLM model spans.
 
@@ -327,9 +327,9 @@ Finally, let’s ask an off-topic question to see whether the input guardrails t
 
 Because the prompt lacks basketball-related keywords, the tripwire fires immediately. This helps the agent abort execution before executing tools or calling the model, preventing unneeded API spend and latency.
 
-### Exploring the trace hierarchy in SigNoz
+### Exploring the trace hierarchy in SigNoz Cloud
 
-Now let's visualize in SigNoz the multi-step trace that invoked tool use:
+Now let's visualize in SigNoz Cloud the multi-step trace that invoked tool use:
 
 <Figure src="/img/blog/2026/10/otel-ai-agent-trace-details.gif" alt="Walkthrough of the OpenTelemetry-instrumented multi-step AI agent trace." caption="Walkthrough of the OpenTelemetry-instrumented multi-step AI agent trace." />
 
@@ -402,7 +402,7 @@ In our FastAPI exception handler, intercepting `InputGuardrailTripwireTriggered`
 
 While individual traces let you debug specific agent executions, understanding production behavior requires aggregated metrics across turns, models, and sessions. 
 
-The OpenTelemetry GenAI instrumentation automatically emits standard metrics—such as `gen_ai.client.operation.duration` and token usage counters—alongside your traces. SigNoz captures this telemetry in a dedicated AI Observability interface that aggregates operational health, latency percentiles, and agent loop behaviors in one unified view.
+The OpenTelemetry GenAI instrumentation automatically emits standard metrics—such as `gen_ai.client.operation.duration` and token usage counters—alongside your traces. SigNoz Cloud captures this telemetry in a dedicated AI Observability interface that aggregates operational health, latency percentiles, and agent loop behaviors in one unified view.
 
 <Figure src="/img/blog/common/ai-observability-overview.gif" alt="SigNoz AI Observability dashboard tracking agent performance, latency, finish reasons, and tool executions." caption="SigNoz AI Observability correlates latency percentiles, finish reasons, and tool execution metrics across your AI agent runs." />
 
@@ -451,6 +451,6 @@ As AI applications evolve from simple model prompts into autonomous, multi-turn 
 Instrumenting your agents with OpenTelemetry delivers end-to-end visibility across every layer:
 - **Full request context**: Correlate incoming HTTP requests, session storage lookups, agent decision loops, and downstream API calls in a single trace.
 - **Vendor-neutral GenAI standards**: Leverage official OpenTelemetry semantic conventions (`gen_ai.*`) to standardize metrics, attributes, and span structures without proprietary lock-in.
-- **Unified debugging in SigNoz**: Combine traces, metrics, and logs in one interface to diagnose hallucinated tool calls, identify latency bottlenecks, and govern token spend across production runs.
+- **Unified debugging in SigNoz Cloud**: Combine traces, metrics, and logs in one interface to diagnose hallucinated tool calls, identify latency bottlenecks, and govern token spend across production runs.
 
 If you’re building agentic applications, [sign up for a free SigNoz Cloud trial](https://signoz.io/teams/) to start observing your AI agents with OpenTelemetry today.
