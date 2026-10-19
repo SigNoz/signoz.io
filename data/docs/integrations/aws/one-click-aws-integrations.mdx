@@ -1,7 +1,7 @@
 ---
 date: 2026-10-19
-title: AWS One-Click Integrations
-description: Monitor your AWS infrastructure with SigNoz's One-Click AWS Integration. Automatically discover and collect metrics and logs from services like EC2, Lambda, RDS, and more.
+title: AWS One-Click Integration - Collect AWS Metrics and Logs
+description: Connect AWS accounts to SigNoz with the One-Click AWS Integration to collect metrics and logs from EC2, Lambda, RDS, and more across your regions.
 doc_type: explanation
 tags: [SigNoz Cloud]
 
@@ -85,7 +85,7 @@ To expand monitoring to new regions or services:
 2. Select the additional regions or services you wish to monitor.
 3. The agent will automatically update the configuration to include these new resources.
 
-Log and metric collection is configured per service and applies to every region enabled on that AWS account. Enabling one service in a single region while enabling a different service in another region is not supported. [S3 Sync](https://signoz.io/docs/integrations/aws/s3-sync/) is the exception: buckets are selected individually along with their region.
+You turn on log and metric collection per service, and the setting applies to every region that you enable for the AWS account. You cannot enable one service in one region and a different service in another region. [S3 Sync](https://signoz.io/docs/integrations/aws/s3-sync/) is the exception: you select each bucket together with its region.
 
 <Figure
   src="/img/docs/integrations/one-click-aws/aws-integration-multi-region.webp"
@@ -96,9 +96,9 @@ Log and metric collection is configured per service and applies to every region 
 
 ### Stopping Collection for a Service
 
-Open the service in the AWS integration page and turn off its log collection, metric collection, or both. The change applies across all enabled regions, and the agent removes the corresponding collection resources.
+In SigNoz, go to **Integrations** > **Amazon Web Services**, open the service, and turn off **Log Collection**, **Metric Collection**, or both. The change applies to all enabled regions, and the agent removes the collection resources for that service.
 
-Deleting a regional telemetry CloudFormation stack by hand does not stop collection, because the agent recreates resources to match the configuration stored in SigNoz.
+Do not delete a regional telemetry CloudFormation stack by hand to stop collection. The agent recreates the resources to match the configuration in SigNoz.
 
 ### Adding Multiple Accounts
 
@@ -108,7 +108,7 @@ You can connect multiple AWS accounts to a single SigNoz workspace:
 2. Follow the same CloudFormation deployment steps for the new account.
 3. Data from all accounts will be aggregated in your dashboards, taggable by `account_id`.
 
-Each integration is scoped to a single AWS account, so monitoring many accounts means managing that many integrations. Connecting a parent account does not orchestrate its child accounts. If you provision through infrastructure as code, use the SigNoz cloud integration APIs to configure each account's integration.
+Each integration covers one AWS account, so you manage one integration for each account. If you connect a parent account, SigNoz does not set up its child accounts. If you provision through infrastructure as code, use the SigNoz cloud integration APIs to configure the integration for each account.
 
 ### Updating the Agent
 
@@ -133,7 +133,7 @@ The integration deploys one **AWS Integration Agent** per AWS account, in the re
 - Configures CloudWatch Metric Streams to push metrics to SigNoz.
 - Sets up CloudWatch Log Subscription Filters to forward logs via Kinesis Firehose.
 
-Enabling more regions adds collection pipelines in those regions rather than additional agents.
+When you enable more regions, the agent adds collection pipelines in those regions. It does not add more agents.
 
 <Figure
   src="/img/docs/integrations/one-click-aws/aws-integration-cloudformation-output.webp"
