@@ -1,11 +1,11 @@
 ---
-date: 2026-10-12
+date: 2026-10-19
 title: Filter Noisy HTTP Endpoints in Node.js OpenTelemetry
 description: Learn how to exclude health checks, Express middleware, and net/dns spans from OpenTelemetry traces in Node.js for cleaner, cheaper traces in SigNoz.
 doc_type: howto
 ---
 
-By default, OpenTelemetry automatically instruments all incoming and outgoing HTTP requests. However, endpoints like health checks (`/health`), readiness probes, or metrics (`/metrics`) can generate a lot of noise in your traces. A single request to one of these endpoints produces a whole chain of spans (the HTTP span, the router span, and one span per Express middleware), so excluding those requests removes far more spans than the request count suggests.
+By default, OpenTelemetry automatically instruments all incoming and outgoing HTTP requests. However, endpoints like health checks (`/health`), readiness probes, or metrics (`/metrics`) can generate a lot of noise in your traces. A single request to one of these endpoints produces a chain of spans: the HTTP span plus one or more spans for each Express middleware and request handler. Excluding those requests removes far more spans than the request count suggests.
 
 This guide shows you how to filter out these requests by configuring the `HttpInstrumentation` hook so they don't produce spans, and how to drop two other common sources of span volume: Express middleware spans and `net`/`dns` connection spans.
 
@@ -83,7 +83,12 @@ sdk.start();
 
 ## Filter Express middleware spans
 
-The Express instrumentation creates one span per middleware in the chain (`cors`, `jsonParser`, `helmet`, `logger`, `compression`, and so on) on every request. Set `ignoreLayersType` to skip the middleware layer while keeping router and request handler spans:
+The Express instrumentation creates one span per middleware in the chain (`cors`, `jsonParser`, `helmet`, `logger`, `compression`, and so on) on every request. Set `ignoreLayersType` to skip the middleware layer while keeping router and request handler spans.
+
+<Tabs entityName="instrumentation">
+<TabItem value="automatic" label="Using Auto-Instrumentation SDK" default>
+
+If you use `getNodeAutoInstrumentations`, pass the option to the `@opentelemetry/instrumentation-express` key. On Express 5, also disable `@opentelemetry/instrumentation-router`. Express 5 routes requests through the `router` package, and that instrumentation creates its own middleware and request handler spans.
 
 ```javascript:instrumentation.js
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
@@ -96,6 +101,8 @@ const sdk = new NodeSDK({
       '@opentelemetry/instrumentation-express': {
         ignoreLayersType: ['middleware'],
       },
+      // Express 5 only
+      '@opentelemetry/instrumentation-router': { enabled: false },
     }),
   ],
 });
@@ -103,9 +110,33 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
+</TabItem>
+<TabItem value="manual" label="Manual Instrumentation">
+
+If you add instrumentations manually, pass the option to `ExpressInstrumentation`:
+
+```javascript:instrumentation.js
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+
+const sdk = new NodeSDK({
+  // ... other config
+  instrumentations: [
+    new HttpInstrumentation(),
+    new ExpressInstrumentation({ ignoreLayersType: ['middleware'] }),
+  ],
+});
+
+sdk.start();
+```
+
+</TabItem>
+</Tabs>
+
 ## Disable net and dns spans
 
-The `net` and `dns` instrumentations add `dns.lookup`, `tcp.connect`, and `tls.connect` spans to every outbound call. Disable both when you don't need connection-level detail:
+The `net` instrumentation adds a `tcp.connect` span, plus a `tls.connect` span for HTTPS, to each new outbound connection. The `dns` instrumentation creates a `dns.lookup` span each time `dns.lookup` or `dns/promises.lookup` runs. It patches these functions only after your application or a library loads the `dns` module, so outbound HTTP calls alone may not produce these spans. Disable both when you don't need connection-level detail:
 
 ```bash
 export OTEL_NODE_DISABLED_INSTRUMENTATIONS="net,dns"
@@ -123,6 +154,7 @@ For a code-based setup, pass `{ enabled: false }` for `@opentelemetry/instrument
 3. Generate traffic to included endpoints (e.g., `curl http://localhost:3000/api/users`).
 4. Go to the **Traces** tab in SigNoz.
 5. Verify that you **only** see traces for the included endpoints.
+6. If you filtered Express middleware or disabled `net` and `dns`, open a trace for an included endpoint. Make sure that it has no per-middleware spans and no `tcp.connect`, `tls.connect`, or `dns.lookup` spans.
 
 <Figure
   src="/img/docs/instrumentation/exclude-http-endpoints-nodejs.webp"
