@@ -332,10 +332,10 @@ const Instructions = () => {
 
       <div className="border-t border-signoz_slate-500 pt-6">
         <p className="m-0 text-sm text-signoz_vanilla-100/70">
-          Need help? Reach out to
-          <Button
+          Need help? Reach out to{' '}
+          <a
             href="mailto:cloud-support@signoz.io"
-            className="text-signoz_robin-500 hover:text-signoz_robin-400"
+            className="content-link"
             onClick={() => {
               logEvent({
                 eventName: 'Website Click',
@@ -350,11 +350,9 @@ const Instructions = () => {
               })
             }}
           >
-            <span className="flex items-center gap-1">
-              cloud-support@signoz.io
-              <Mail className="h-3 w-3 text-signoz_robin-500" />
-            </span>
-          </Button>
+            cloud-support@signoz.io
+            <Mail className="ml-1 inline h-3 w-3 align-[-1px]" aria-hidden="true" />
+          </a>
         </p>
       </div>
     </div>
