@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
-const RB2B_ID = 'VN080HZ24Y6J'
+const RB2B_ID = 'RGNLKQHLPK6Q'
 const RB2B_SCRIPT_ID = 'rb2b-script'
 const IDLE_INJECT_TIMEOUT_MS = 2000
 
@@ -21,7 +21,7 @@ export default function RB2BLoader() {
       document.getElementById(RB2B_SCRIPT_ID)?.remove()
       script = document.createElement('script')
       script.id = RB2B_SCRIPT_ID
-      script.src = `https://ddwl4m2hdecbv.cloudfront.net/b/${RB2B_ID}/${RB2B_ID}.js.gz`
+      script.src = `https://b2bjsstore.s3.us-west-2.amazonaws.com/b/${RB2B_ID}/${RB2B_ID}.js.gz`
       script.async = true
       document.body.appendChild(script)
     }
