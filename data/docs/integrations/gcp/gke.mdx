@@ -1,39 +1,81 @@
 ---
-date: 2026-08-18
-title: Monitor GCP Kubernetes Engine (GKE) Metrics
-description: Collect GKE container, pod, and node metrics in SigNoz. Add the metrics to your OpenTelemetry Collector and view them on a pre-built dashboard.
+published_date: 2026-08-18
+updated_date: 2026-10-19
+title: Monitor GCP Kubernetes Engine (GKE) Metrics and Logs
+description: Collect GKE metrics and logs in SigNoz with One-Click Integration, or metrics with Manual Setup, and view them on a pre-built dashboard.
 doc_type: howto
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
-The **Google Kubernetes Engine (GKE)** integration brings cluster metrics (container CPU and memory utilization, container restarts, pod startup latency, pod and node network throughput, volume usage, and node health) into SigNoz, with a pre-built dashboard for the service.
+The **Google Kubernetes Engine (GKE)** integration brings cluster metrics into SigNoz, with a pre-built dashboard for the service. With One-Click Integration, it also brings in your cluster logs.
 
-GKE publishes its system metrics to **Cloud Monitoring**. SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
+GKE publishes its system metrics to **Cloud Monitoring** and its logs to **Cloud Logging**. SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
 
 <Admonition type="info">
-This page covers the **GKE system metrics** that GKE reports to Cloud Monitoring (the `kubernetes.io/*` metrics). If you want to scrape the cluster directly instead, and collect logs and traces from your workloads, use [Kubernetes monitoring with the SigNoz k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/) or the [manual GKE guide](https://signoz.io/docs/gcp-monitoring/gke/). The two approaches are complementary: this one needs nothing installed in the cluster, the other gives finer resolution and covers logs.
+This page reads what GKE already sends to Cloud Monitoring and Cloud Logging, so nothing gets installed in your cluster. If you want finer-grained metrics scraped from inside the cluster, or traces from your workloads, use [Kubernetes monitoring with the SigNoz k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/). The two approaches work well together.
 </Admonition>
 
 ## Choose a setup method
 
 <Tabs entityName="setup">
-<TabItem value="manual" label="Manual setup" default>
+<TabItem value="one-click" label="One-Click Integration" default>
 
-**Available now.** You run the OpenTelemetry Collector in your own GCP project and add the GKE metrics to its configuration. You control which metrics are pulled and how often.
+## One-Click Integration
 
-Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps on this page for each project that hosts the clusters you want to monitor.
+SigNoz deploys and manages the Collector for you. You turn the service on in SigNoz, and the SigNoz agent sets up metrics and logs collection in the background. Collects **metrics and logs**.
+
+### Prerequisites
+
+- Your GCP project is connected with [One-Click Integration](https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/).
+- Your GKE clusters run in that same project. The agent monitors only the project it's deployed in.
+- **System metrics collection is enabled on the cluster.** It's on by default. If it was turned off, turn it back on under the cluster's **Observability** settings. See <a href="https://docs.cloud.google.com/kubernetes-engine/docs/how-to/configure-metrics" target="_blank" rel="noopener noreferrer nofollow">Configure metrics collection</a>.
+- **For logs, Cloud Logging is enabled on the cluster.** It's on by default, but Standard clusters can turn it off, and workload logs can be turned off on any cluster. Check the logging components under the cluster's **Observability** settings: **System** is needed for system logs and events, and **Workloads** for your application logs. See <a href="https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-logs#available-logs" target="_blank" rel="noopener noreferrer nofollow">Available logs</a>.
+
+### Step 1: Turn on the service in SigNoz
+
+1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
+2. Select **GCP Kubernetes Engine** from the service list.
+3. Turn on **Metric Collection**, **Log Collection**, or both.
+4. Click **Save**.
+
+The agent picks up the change within about 30 seconds and updates the Collector and the log sink for you. There's no Collector config to edit.
+
+<Admonition type="warning">
+**Log Collection** forwards every log line your clusters write to Cloud Logging, including the stdout and stderr of all your workloads. Busy clusters can produce a lot of logs, which raises your Pub/Sub and SigNoz ingestion costs. If you only need metrics, leave **Log Collection** off.
+</Admonition>
+
+### Step 2: Turn on the optional logs in GCP
+
+With the default logging settings, system logs, workload logs, Kubernetes events, and audit logs flow with no extra work. Control plane logs from the API server, scheduler, and controller manager are off by default. To collect them, turn them on in the cluster's **Observability** settings. See <a href="https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-logs" target="_blank" rel="noopener noreferrer nofollow">About GKE logs</a>.
+
+Skip this step if you don't need control plane logs.
+
+### Validate
+
+1. Wait about 10 minutes for the first metrics to arrive.
+2. In SigNoz, go to **Dashboards** and open **GCP Kubernetes Engine Overview**. Panels should start filling in.
+3. If you turned on **Log Collection**, open **Logs** in SigNoz and start with this filter to find your project's logs:
+
+   ```text
+   gcp.project = '<deployment-project-id>' AND gcp.resource_type = 'k8s_container'
+   ```
+
+   This shows your application logs. New log lines appear within a few minutes. Drop the `gcp.resource_type` part to see every GKE log, including node, cluster, and audit logs.
+
+   **Verify these values:**
+
+   - `<deployment-project-id>`: the GCP project you connected with One-Click Integration.
 
 </TabItem>
-<TabItem value="agent" label="SigNoz agent (coming soon)">
+<TabItem value="manual" label="Manual Setup">
 
-**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers in the background. No Collector configuration to maintain.
+## Manual Setup
 
-Until then, use the **Manual setup** tab.
+You run the OpenTelemetry Collector in your own GCP project and add the GKE metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics only**.
 
-</TabItem>
-</Tabs>
+Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps below for each project that hosts the clusters you want to monitor.
 
-## Prerequisites
+### Prerequisites
 
 Before configuring this service, complete the shared GCP integration setup:
 
@@ -43,7 +85,7 @@ Before configuring this service, complete the shared GCP integration setup:
 - The **Cloud Monitoring API** is enabled in that project.
 - **System metrics collection is enabled on the cluster.** It is on by default. If it was turned off, re-enable it under the cluster's **Observability** settings, or the `kubernetes.io/*` metrics never reach Cloud Monitoring for the Collector to read. See <a href="https://docs.cloud.google.com/kubernetes-engine/docs/how-to/configure-metrics" target="_blank" rel="noopener noreferrer nofollow">Configure metrics collection</a>.
 
-## Step 1: Enable the service in SigNoz
+### Step 1: Enable the service in SigNoz
 
 1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
 2. Select **GCP Kubernetes Engine** from the service list.
@@ -54,11 +96,11 @@ Before configuring this service, complete the shared GCP integration setup:
 Enabling the toggle does not start collection on its own. The metrics that reach SigNoz are exactly the ones in your Collector's `metrics_list`. If you skip a metric in step 2, its dashboard panel stays empty.
 </Admonition>
 
-## Step 2: Add the metrics to your Collector config
+### Step 2: Add the metrics to your Collector config
 
 Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the GKE metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your clusters run in. Only the `metrics_list` shown below changes; leave the rest of the file as is:
 
-```yaml:otel-collector-config.yaml
+```yaml:otel-collector-config.yaml defaultCollapsed
 receivers:
   googlecloudmonitoring:
     project_id: "<monitored-project-id>"
@@ -101,7 +143,7 @@ The receiver polls every metric in the list once per `collection_interval`, and 
 These metrics carry a series per container, pod, or node, so a large cluster produces many more series than a single database instance does. Start at the default `300s` and lower it only if you need the resolution.
 </Admonition>
 
-## Step 3: Apply the configuration
+### Step 3: Apply the configuration
 
 The Collector loads its config from the `signoz-collector-config` secret, so a config change needs a new secret version and a redeploy:
 
@@ -109,11 +151,14 @@ The Collector loads its config from the `signoz-collector-config` secret, so a c
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
 3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
 
-## Validate
+### Validate
 
 1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
 2. In SigNoz, go to **Dashboards** and open the Kubernetes Engine dashboard. Panels should start filling in.
 3. To check a single metric, open **Metrics Explorer** and query `kubernetes.io/container/cpu/limit_utilization`.
+
+</TabItem>
+</Tabs>
 
 ## What's collected
 
@@ -169,13 +214,39 @@ Node metrics have no namespace dimension, so the **Nodes (namespace agnostic)** 
 </Admonition>
 
 <details>
+<summary>Logs (One-Click Integration only)</summary>
+
+With **Log Collection** turned on, SigNoz collects the <a href="https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-logs" target="_blank" rel="noopener noreferrer nofollow">GKE logs</a> that your clusters write to Cloud Logging:
+
+| Log | What it contains | GCP setup needed |
+| --- | --- | --- |
+| Workload logs | stdout and stderr from your application containers | None by default. Workload logging is optional and can be turned off on any cluster. |
+| System logs | Logs from system components such as kubelet, the container runtime, and `kube-system` pods | None by default. Standard clusters can turn off Cloud Logging entirely. Autopilot clusters always send them. |
+| Kubernetes events | Events such as pod scheduling, image pulls, and restarts | Collected with system logs, on a best-effort basis |
+| Audit logs | Calls to the Kubernetes API and GKE cluster and node pool operations | None. Always on. |
+| Control plane logs | Logs from the API server, scheduler, and controller manager | Turn them on in the cluster's **Observability** settings |
+
+SigNoz uses this log sink filter:
+
+```text
+resource.type=("k8s_container" OR "k8s_pod" OR "k8s_node" OR "k8s_cluster"
+  OR "k8s_control_plane_component" OR "gke_cluster" OR "gke_nodepool")
+```
+
+</details>
+
+<details>
 <ToggleHeading>
 ## Troubleshooting
 </ToggleHeading>
 
-**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+**No logs after turning on Log Collection (One-Click).** SigNoz can only forward logs that GKE writes to Cloud Logging. Open **Logs Explorer** in the GCP Console and filter on `resource.type="k8s_container"`. If nothing shows there, check the cluster's **Observability** settings: Cloud Logging must be on, with **System** selected for system logs and **Workloads** for application logs.
 
-**No GKE metrics at all.** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then confirm system metrics collection is still enabled on the cluster, and check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
+**No metrics at all (One-Click).** Confirm the clusters run in the project the agent is deployed in, that system metrics collection is on for each cluster, and that **Metric Collection** is on and saved. See the [One-Click troubleshooting](https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/#troubleshooting) for agent and Collector checks.
+
+**A dashboard panel is empty (Manual).** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+
+**No GKE metrics at all (Manual).** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then confirm system metrics collection is still enabled on the cluster, and check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
 
 **The Container Restarts table is empty.** That is the healthy state. The panel excludes containers with no restarts, so an empty table means nothing has restarted in the selected window.
 

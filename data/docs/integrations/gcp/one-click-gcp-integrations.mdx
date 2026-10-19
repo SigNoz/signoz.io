@@ -1,0 +1,352 @@
+---
+date: 2026-10-19
+title: GCP One-Click Integration - Monitor Google Cloud Services
+description: Connect a Google Cloud project to SigNoz with a few setup commands. SigNoz deploys an agent that sets up metrics and logs collection for the services you pick.
+doc_type: howto
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+---
+
+SigNoz One-Click GCP Integration monitors your Google Cloud services without manual Collector setup. You run a few setup commands that SigNoz generates for you. They deploy a small **SigNoz agent** and an **OpenTelemetry Collector** into your GCP project. After that, you choose which services to watch from the SigNoz UI, and the agent sets up metrics and logs collection for you.
+
+New to the GCP integration? Read the [Overview](https://signoz.io/docs/integrations/gcp/gcp-integration/) first to see how data flows and what it costs.
+
+## Supported services
+
+<Listicle name="gcp-services" />
+
+## Key capabilities
+
+- **Quick setup**: Copy the setup commands from SigNoz and run them in Cloud Shell. No Collector config to write.
+- **Metrics and logs**: Collects Cloud Monitoring metrics and Cloud Logging logs for each service you turn on.
+- **Toggle from SigNoz**: Turn metrics or logs on or off per service. The agent updates your GCP project to match.
+- **Pre-built dashboards**: Each supported service comes with a ready-made dashboard.
+
+## Prerequisites
+
+- A **SigNoz Cloud** or **SigNoz Enterprise (Self-Hosted)** account, with the Admin role.
+- A GCP project with billing turned on. This is the project the agent runs in, and the project it monitors.
+- <a href="https://cloud.google.com/shell/docs" target="_blank" rel="noopener noreferrer nofollow">Google Cloud Shell</a>, or the gcloud CLI signed in with **your user account**. The commands give your account access to a helper service account, so they don't work if gcloud is signed in as a service account.
+- Enough access in the project to turn on APIs, create secrets, create service accounts, and grant IAM roles. The project **Owner** role covers all of this. If you don't have Owner, you also need `roles/config.admin` to use Infrastructure Manager.
+
+<details>
+<ToggleHeading>
+
+#### Required permissions
+
+</ToggleHeading>
+
+The second command creates a helper service account named `signoz-integration-bootstrap`. Infrastructure Manager uses this account, not your own login, to build the integration resources. It gets these roles:
+
+| Role | Why it's needed |
+| --- | --- |
+| `roles/config.agent` | Lets Infrastructure Manager run the deployment |
+| `roles/serviceusage.serviceUsageAdmin` | Turns on the APIs the integration uses, such as Cloud Run and Pub/Sub |
+| `roles/resourcemanager.projectIamAdmin` | Grants roles to the agent and Collector service accounts |
+| `roles/iam.serviceAccountAdmin` | Creates the agent, Collector, and log delivery service accounts |
+| `roles/iam.serviceAccountUser` | Lets the Cloud Run services run as those service accounts |
+| `roles/run.admin` | Creates the agent and Collector Cloud Run services |
+| `roles/pubsub.admin` | Creates the Pub/Sub topic and push subscription for logs |
+| `roles/logging.configWriter` | Creates the log sink that forwards logs |
+| `roles/secretmanager.admin` | Lets the runtime service accounts read the two SigNoz secrets. Granted on those two secrets only. |
+
+The commands also give **your** account the `roles/iam.serviceAccountUser` role on this one helper account, so you can start the deployment with it.
+
+</details>
+
+## Installation
+
+<Admonition type="info">
+The setup commands on this page are for **reference only**, to help you understand what each step does. You don't need to copy them from here. SigNoz generates the exact commands for you during installation, already filled in with your project, region, and keys.
+</Admonition>
+
+### Step 1: Start the connection in SigNoz
+
+1. In SigNoz, go to **Integrations** and open **Google Cloud Platform**.
+2. Click **Integrate Now**. If you already have a GCP account connected, click **Add New Account** instead. The **Connect Google Cloud Platform** panel opens.
+3. Under **Connection method**, select **Connect via Agent**.
+4. Fill in the two fields:
+   - **Deployment Project ID**: the project where SigNoz deploys the agent. The agent also monitors this project. Use the project ID (for example, `my-project-123`), not the display name.
+   - **Deployment Region**: the GCP region where the agent and Collector run (for example, `us-central1`). Pick a region close to your services.
+5. Check the **Deployment details & ingestion secrets** section. On SigNoz Cloud, these values show **Auto-filled by SigNoz** and you don't need to change them. On SigNoz Enterprise (Self-Hosted), fill in any empty field. See [Fields for self-hosted SigNoz](#fields-for-self-hosted-signoz) below.
+6. Click **Generate Commands**.
+
+<details>
+<ToggleHeading>
+
+#### Fields for self-hosted SigNoz
+
+</ToggleHeading>
+
+The agent and the Collector use two different endpoints. The agent talks to the **SigNoz API** to read your settings. The Collector sends telemetry to the **ingestion endpoint**.
+
+| Field | What to enter | Used by |
+| --- | --- | --- |
+| **SigNoz API URL** | The base URL of your SigNoz instance, the same one you open in the browser. For example, `https://signoz.example.com`. | Agent |
+| **SigNoz API Key** | An API key from a SigNoz [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/). | Agent |
+| **Ingestion URL** | The OTLP/HTTP endpoint of your SigNoz OpenTelemetry Collector. For example, `https://ingest.signoz.example.com`. This is usually a different host or port from the API URL. | Collector |
+| **Ingestion Key** | The key the Collector sends in the `signoz-ingestion-key` header. See [Ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/). | Agent and Collector |
+
+Both URLs must:
+
+- Start with `https://`. The deployment rejects plain `http://` URLs.
+- Be reachable from Google Cloud over the public internet. The agent and the Collector run on Cloud Run and connect out directly, without a VPC connector, so a URL that only resolves inside your private network won't work.
+- Use a TLS certificate that a standard client trusts.
+
+</details>
+
+The form is replaced by a **Deploy the SigNoz agent** section with numbered setup commands.
+
+### Step 2: Run the setup commands
+
+Open <a href="https://shell.cloud.google.com/" target="_blank" rel="noopener noreferrer nofollow">Cloud Shell</a>, or a terminal where gcloud is signed in to your deployment project. Run the commands **in order, in the same shell session**. Earlier commands save values that later ones read.
+
+Click the copy icon on each command in SigNoz, paste it into the shell, and wait for it to finish before you move on. Click **Next** in SigNoz to open the next command.
+
+<Admonition type="info">
+The commands below are shortened for reference. Run the full commands shown in the SigNoz UI.
+</Admonition>
+
+#### 1. Store SigNoz credentials in Secret Manager
+
+**What it does:** turns on the Google Cloud APIs the setup needs, waits about a minute for them to be ready, then saves your SigNoz API key and ingestion key as two secrets in <a href="https://cloud.google.com/secret-manager/docs/overview" target="_blank" rel="noopener noreferrer nofollow">Secret Manager</a> (GCP's safe store for passwords and keys).
+
+```bash
+gcloud services enable config.googleapis.com cloudbuild.googleapis.com \
+  storage.googleapis.com iam.googleapis.com serviceusage.googleapis.com \
+  cloudresourcemanager.googleapis.com secretmanager.googleapis.com \
+  --project="$project_id" &&
+sleep 60 &&
+gcloud secrets create signoz-integration-api-credentials ... &&
+gcloud secrets create signoz-integration-ingestion-key-credential ... &&
+api_secret_version=$(... gcloud secrets versions add ...) &&
+ingestion_secret_version=$(... gcloud secrets versions add ...)
+```
+
+**You should see:** the prompt returns with no errors after about a minute.
+
+<Admonition type="warning">
+This command contains your SigNoz API key and ingestion key. Don't share it or paste it anywhere else. If you run it outside Cloud Shell, clear it from your shell history afterwards.
+</Admonition>
+
+#### 2. Create the bootstrap service account
+
+**What it does:** creates the helper service account `signoz-integration-bootstrap` and gives it the roles listed in [Required permissions](#required-permissions). A service account is a robot identity that GCP tools use to do work on your behalf.
+
+```bash
+gcloud iam service-accounts create signoz-integration-bootstrap \
+  --project="$project_id" --display-name="SigNoz bootstrap executor"
+
+# Grants roles/config.agent, roles/run.admin, roles/pubsub.admin, and the
+# other roles listed in Required permissions, then lets your user account
+# act as this service account.
+```
+
+**You should see:** a list of `Updated IAM policy` messages, one per role.
+
+#### 3. Deploy the agent
+
+**What it does:** asks <a href="https://cloud.google.com/infrastructure-manager/docs/overview" target="_blank" rel="noopener noreferrer nofollow">Infrastructure Manager</a> (GCP's service for creating resources from a template) to build everything the integration needs: the agent, the Collector, and the log pipeline. See [What gets deployed](#what-gets-deployed) for the full list.
+
+```bash
+gcloud infra-manager deployments apply \
+  'projects/<deployment-project-id>/locations/<deployment-region>/deployments/signoz-integration-bootstrap' \
+  --project='<deployment-project-id>' \
+  --service-account='projects/<deployment-project-id>/serviceAccounts/signoz-integration-bootstrap@<deployment-project-id>.iam.gserviceaccount.com' \
+  --gcs-source='<module-source-from-signoz>' \
+  --tf-version-constraint='=1.5.7' \
+  --input-values='project_id=<deployment-project-id>,deployment_region=<deployment-region>,...'
+```
+
+**Verify these values:**
+
+- `<deployment-project-id>` and `<deployment-region>` match what you entered in Step 1.
+- `api_secret_version` and `ingestion_secret_version` at the end of `--input-values` come from command 1. If you opened a new shell, they fall back to `latest`, which also works.
+
+**You should see:** the deployment takes a few minutes and finishes with the deployment state `ACTIVE`.
+
+### Step 3: Verify the connection
+
+Go back to SigNoz. While it waits, the panel shows **Waiting for GCP account connection, retrying in 10 secs...**. Once the agent starts and checks in, SigNoz shows **GCP account connected successfully**, closes the panel, and lists your project ID next to **Account:**.
+
+<Admonition type="info">
+Keep the panel open until the account connects. If you close it before then, you need to start again from Step 1 with new commands.
+</Admonition>
+
+**Check in the GCP Console (optional)**
+
+1. Open **Infrastructure Manager** > **Deployments** and confirm `signoz-integration-bootstrap` is **Active**.
+2. Open **Cloud Run** and confirm `signoz-integration-agent` and `signoz-integration-collector` both show a green check.
+
+## Turn on services
+
+Connecting the account doesn't collect any data yet. Turn on the services you want to monitor:
+
+1. On the Google Cloud Platform integration page, select a service from the list on the left, for example **GCP Cloud Storage**.
+2. Turn on **Metric Collection**, **Log Collection**, or both.
+3. Click **Save**.
+
+Here's what happens next:
+
+- Within about 30 seconds, the agent picks up the change from SigNoz.
+- The agent updates the Collector with the metrics to read, and updates the log sink to forward that service's logs. The Collector restarts with the new settings, which can take a few minutes.
+- **Metrics** show up about 10 minutes later. Open the service's dashboard from the **Dashboards** section on its page.
+- **Logs** start flowing within a few minutes. Open **Logs** in SigNoz and filter on `gcp.project` to see logs from your project. Add `gcp.resource_type` to narrow them down to one service, for example `gcp.project = '<deployment-project-id>' AND gcp.resource_type = 'cloudsql_database'`. Each [service page](#supported-services) lists the resource type to use.
+
+<Admonition type="info">
+SigNoz can only collect logs that GCP already writes to Cloud Logging. Some logs are off by default, such as Cloud SQL database logs and Data Access audit logs. Check each [service page](#supported-services) for the GCP settings to turn on.
+</Admonition>
+
+## Managing the integration
+
+### View account settings
+
+Click **Edit Account** to open **Account Settings**. It shows the deployment project ID and region. You can't change them for an agent connection. To use a different project or region, [disconnect](#uninstall) and connect again.
+
+### Monitor more projects
+
+Each agent monitors one project. To monitor another project, click **Add New Account** and repeat the [installation steps](#installation) in that project.
+
+<Admonition type="warning">
+**Check the project's <a href="https://docs.cloud.google.com/monitoring/settings" target="_blank" rel="noopener noreferrer nofollow">metrics scope</a>.** In Cloud Monitoring, a project can be set up to see the metrics of other projects. The Collector then gets those metrics too. For example, if project A's metrics scope includes project B, connecting project A shows metrics for both A and B in SigNoz. If you also connect project B, B's metrics reach SigNoz twice.
+
+To check, open **Monitoring** > **Settings** in the GCP Console, select the project, and open the **Metric Scope** tab. If project A's metrics scope includes other projects, don't also connect those projects, or remove them from project A's metrics scope. Each metric keeps its `project_id` label, so you can still tell the projects apart in SigNoz. Logs are not affected: each log sink only sends its own project's logs.
+</Admonition>
+
+### Uninstall
+
+1. In SigNoz, click **Edit Account**, then **Disconnect**, and confirm with **Remove Account**. The agent turns off the log sink and stops the Collector from collecting data. All GCP resources stay in place.
+2. Wait a few minutes for logs already in the queue to clear.
+3. Delete the deployment. This removes the agent, the Collector, and the log pipeline:
+
+   ```bash
+   gcloud infra-manager deployments delete \
+     'projects/<deployment-project-id>/locations/<deployment-region>/deployments/signoz-integration-bootstrap' \
+     --project=<deployment-project-id> --delete-policy=delete
+   ```
+
+4. After the delete finishes, remove the secrets and the helper service account:
+
+   ```bash
+   gcloud secrets delete signoz-integration-api-credentials --project=<deployment-project-id>
+   gcloud secrets delete signoz-integration-ingestion-key-credential --project=<deployment-project-id>
+   gcloud iam service-accounts delete \
+     signoz-integration-bootstrap@<deployment-project-id>.iam.gserviceaccount.com \
+     --project=<deployment-project-id>
+   ```
+
+The APIs that command 1 turned on stay on. Turn them off yourself if nothing else in the project uses them.
+
+## Limitations
+
+- **One project per agent**: the agent monitors only the project it runs in, plus the metrics of any projects in that project's metrics scope (see [Monitor more projects](#monitor-more-projects)). To monitor many projects from one Collector, use [Manual Setup](https://signoz.io/docs/integrations/gcp/manual-setup/).
+- **One connection per project**: a project can be connected to only one SigNoz GCP integration at a time.
+- **Project and region are fixed**: you can't change them after connecting. Disconnect and connect again instead.
+- **Logs come from Cloud Logging only**: if GCP doesn't write a log to Cloud Logging, SigNoz can't collect it.
+
+## What gets deployed
+
+When you run the setup commands, your project ends up with an agent, a Collector, and a log pipeline:
+
+- The **SigNoz agent** runs on Cloud Run. Every 30 seconds it asks SigNoz which services are turned on. It then updates two things to match: the Collector's config and the log sink's filter. It doesn't create or delete any other resources.
+- The **OpenTelemetry Collector** runs on Cloud Run. It reads metrics from Cloud Monitoring, receives logs from Pub/Sub, and sends both to SigNoz.
+- The **log pipeline** moves logs from Cloud Logging to the Collector. A log sink picks the logs of the services you turned on and sends them to a Pub/Sub topic. A push subscription then delivers them to the Collector.
+
+For a diagram of how these fit together, see [How it works](https://signoz.io/docs/integrations/gcp/gcp-integration/#how-it-works).
+
+<details>
+<ToggleHeading>
+
+#### Resources created
+
+</ToggleHeading>
+
+All resources created by the deployment carry the label `managed-by=signoz`.
+
+| Resource | Name | Purpose |
+| --- | --- | --- |
+| Cloud Run service | `signoz-integration-agent` | Runs the SigNoz agent. 1 vCPU, 512 MiB, always on, internal traffic only. |
+| Cloud Run service | `signoz-integration-collector` | Runs the OpenTelemetry Collector. Starts at 2 vCPU and 4 GiB, always on, internal traffic only. |
+| Pub/Sub topic | `signoz-integration_logs_push` | Holds logs on their way to the Collector. Messages are stored in the deployment region only. |
+| Pub/Sub push subscription | `signoz-integration_logs_push-signoz-integration-collector` | Delivers logs to the Collector. Keeps undelivered logs for up to 6 hours. |
+| Log sink | `signoz-integration_logs` | Forwards logs of the services you turned on. Starts turned off. |
+| Service accounts | `signoz-integration-agent`, `signoz-integration-collector`, `signoz-integration-logs-push` | Identities for the agent, the Collector, and log delivery. |
+
+Created by commands 1 and 2, outside the deployment:
+
+| Resource | Name |
+| --- | --- |
+| Secret | `signoz-integration-api-credentials` |
+| Secret | `signoz-integration-ingestion-key-credential` |
+| Service account | `signoz-integration-bootstrap` |
+
+</details>
+
+<details>
+<ToggleHeading>
+
+#### Runtime permissions
+
+</ToggleHeading>
+
+| Identity | Role | Scope |
+| --- | --- | --- |
+| Agent service account | `roles/logging.configWriter` | Project. GCP can't limit this role to a single sink, so the agent's code only ever edits `signoz-integration_logs`. |
+| Agent service account | `roles/run.developer` | The Collector service only |
+| Agent service account | `roles/iam.serviceAccountUser` | The Collector service account only |
+| Agent service account | `roles/secretmanager.secretAccessor` | The two SigNoz secrets |
+| Collector service account | `roles/monitoring.viewer` | Project |
+| Collector service account | `roles/secretmanager.secretAccessor` | The ingestion key secret only |
+| Log delivery service account | `roles/run.invoker` | The Collector service only |
+| Pub/Sub service agent | `roles/iam.serviceAccountOpenIdTokenCreator` | The log delivery service account only |
+| Log sink writer identity | `roles/pubsub.publisher` | The log topic only |
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### SigNoz shows "We couldn't establish a connection to your GCP account"
+
+SigNoz waits up to 10 minutes for the agent to check in.
+
+- Confirm command 3 finished and the deployment is **Active** in **Infrastructure Manager** > **Deployments**.
+- In **Cloud Run**, open `signoz-integration-agent` and check its **Logs** tab for errors.
+- Once the agent is running, click **Check Again** in SigNoz.
+
+### SigNoz shows "Failed to generate GCP setup commands"
+
+- Check that **Deployment Project ID** is the project ID, not the display name, and has no extra spaces.
+- On SigNoz Enterprise (Self-Hosted), check that every field under **Deployment details & ingestion secrets** is filled in and the URLs start with `https://`.
+
+### Command 2 fails with an error about `user:`
+
+gcloud is signed in as a service account. Run `gcloud auth login` to sign in with your user account, then rerun command 2. Cloud Shell signs you in as your user account by default.
+
+### Command 3 fails with a permission error
+
+New IAM roles can take a few minutes to apply across GCP. Wait a few minutes, then rerun command 3 with the same inputs. Don't delete the deployment to retry.
+
+### The agent logs "already connected to cloud integration"
+
+Another SigNoz GCP integration already uses this project. Disconnect the other account in SigNoz, or use a different project.
+
+### The agent logs "signoz deployment region ... does not match agent region"
+
+The region in SigNoz is different from the region in the deployment. Disconnect the account, then connect again and use the same region in Step 1 and command 3.
+
+### Metrics or logs don't show up after turning on a service
+
+- Wait at least 10 minutes. The first metrics take a while to arrive after you turn on a service.
+- Confirm **Metric Collection** or **Log Collection** is on for the service, and that you clicked **Save**.
+- In **Cloud Run**, check that `signoz-integration-collector` has a new revision with a green check.
+- For logs, confirm the service writes logs to Cloud Logging. Open **Logs Explorer** in the GCP Console and look for recent entries from the service.
+
+</details>
+
+## Get Help
+
+<GetHelp />
