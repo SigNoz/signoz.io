@@ -412,6 +412,50 @@ spec:
 
 - `<your-overlay-network>`: The overlay network your application's services use, as `docker network ls` shows it.
 
+## Move an Existing Setup to Foundry
+
+If you set up the agent from an earlier version of the install guide, with your own `config.yaml`, move it to Foundry so that `casting.yaml` holds its whole setup and every change follows [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#apply-changes).
+
+1. To describe the agent in Foundry, check that every node runs Docker Engine 25.0 or newer, then [install foundryctl](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/#step-1-install-foundryctl) and [create casting.yaml](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/#step-2-create-castingyaml) as the install guide shows. On a Swarm that runs self-hosted SigNoz, also add the change in [Run on the same Swarm as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#run-on-the-same-swarm-as-self-hosted-signoz).
+
+2. To keep your `config.yaml` customizations, add them to `casting.yaml` under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml`, and your environment variables under `spec.collector.spec.env`. For example, for container metrics every 10s and a `team` resource attribute:
+
+   ```yaml
+   spec:
+     collector:
+       spec:
+         env:
+           OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<your-environment>,team=backend
+         config:
+           data:
+             collector/agent/agent.yaml: |
+               receivers:
+                 docker_stats:
+                   collection_interval: 10s
+   ```
+
+   **Verify these values:**
+
+   - `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+   Foundry merges them over its own config: maps merge and lists replace, so restate whole lists, with Foundry's names `otlp/http` and `otlp/grpc` for your `otlp` receiver and `otlphttp/signoz` for your `otlphttp` exporter.
+
+3. To free the ports the Foundry agent publishes on every node, remove the old agent's service and leave the rest of the stack `signoz`, such as self-hosted SigNoz, running. Run this on a manager node:
+
+   ```bash
+   docker service rm signoz_signoz-collection-agent
+   ```
+
+   If `docker service ls` lists the old agent as `signoz-collection-agent`, remove that service instead.
+
+4. To deploy the agent with Foundry, run this from the directory that contains `casting.yaml`:
+
+   ```bash
+   foundryctl cast -f casting.yaml
+   ```
+
+   Then verify the Collection Agent as [Step 4 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/#step-4-verify-the-collection-agent) shows.
+
 <details>
 
 <ToggleHeading>
