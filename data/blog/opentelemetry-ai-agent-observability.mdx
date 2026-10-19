@@ -17,17 +17,15 @@ related_articles:
 
 AI agents don't just call a model and return its response. Instead, they orchestrate entire workflows that involve selecting tools for LLMs to use, evaluating guardrails, routing between LLM calls, and managing context across conversation turns. This means that a single user request can spawn dozens of internal steps, each one a potential point of failure, latency, or unexpected cost.
 
-AI agent observability is the practice of capturing these agent execution flows so you can understand _what_ the agent did, _why_ it chose that path, and _how_ it performed. In terms of the implementation, it means tracing every step in an agent run, such as tool calls and model invocations, and correlating them with system-level signals like latency, token usage, and error rates.
+AI agent observability is the practice of capturing these execution flows so you can understand _what_ the agent did, _why_ it chose that path, and _how_ it performed. In practice, this means tracing an agent run's execution path, capturing inputs and outputs at each step, and tracking cost, token usage, latency, and error rates.
 
-Tracing builds the foundation for agent observability, as a single trace maps an agent's decision graph per-run, revealing which tools were called and what their output was, what the model returned, what input context was passed to the model, and so on.<br />
-Without tracing, debugging an AI agent becomes a game of trying to guess which event triggered what decision in the agentic loop, and why.
+AI agent tracing builds the foundation for AI agent observability. Without tracing, debugging an AI agent becomes a game of trying to guess which event triggered what decision in the agent workflow, and why.
 
 ## Why do AI agents need observability?
 
-When building traditional software, engineers could start small with application observability, and reach for more comprehensive implementations once the application scaled up or the business asked.<br />
-Consider a startup that found product-market fit and must now adhere to Service Level Agreements (SLAs) for enterprise clients. At this stage, they must observe their entire distributed system to maintain service uptime.
+A request can return successfully while the agent gives an incorrect answer, takes too long on a particular step, or triggers duplicate LLM or tool calls. Agent observability gives engineers the evidence to investigate these problems and compare behavior across runs.
 
-However, the same can't be said for agentic applications. Every request can trigger a different combination of tool calls, guardrail checks, and model invocations, meaning the resulting behaviour can vary significantly across runs.
+Let's look at some of these problems in more detail.
 
 ### LLM non-determinism compounds across agent steps
 
