@@ -30,7 +30,7 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://ddwl4m2hdecbv.cloudfront.net https://b-code.liadm.com https://a.usbrowserspeed.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://b2bjsstore.s3.us-west-2.amazonaws.com https://b-code.liadm.com https://a.usbrowserspeed.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
@@ -143,6 +143,11 @@ module.exports = () => {
     },
     async redirects() {
       return withDocsOnboardingRedirects([
+        {
+          source: '/docs/skill.md',
+          destination: '/skill.md',
+          permanent: true,
+        },
         {
           source: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
           destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
