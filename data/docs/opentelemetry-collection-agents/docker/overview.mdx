@@ -14,19 +14,17 @@ The Docker Collection Agent primarily performs the following:
 - Tails and parses the logs of the containers on the host and sends them to SigNoz.
 - Acts as a gateway to send traces, metrics, and logs from your applications to SigNoz.
 
-## How it Works: The Agent Container
+## How it works
 
-The agent reads the host through read-only mounts of the host's root filesystem and Docker's container log directory, and the Docker Engine API through the Docker socket.
+### Agent (container)
 
-### OpenTelemetry Collector as an Agent: Docker Container
+The agent reads the host through read-only mounts of the host's root filesystem and Docker's container log directory, and the Docker Engine API through the Docker socket. It collects host-level and container-level data:
 
-The agent container collects host-level and container-level data, including:
-
-- **Host Metrics:** CPU usage, memory consumption, disk I/O, filesystem usage, network statistics, and load averages from the Docker host.
-- **Container Metrics:** CPU, memory, network, and block I/O usage of each container, from the Docker Engine API.
-- **Container Logs:** Tailing and parsing the logs of the containers on the host. Each log record carries the `container.id` resource attribute.
-- **Application Telemetry:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318).
-- **Resource Attributes:** `host.name` on every signal, and on AWS, GCP, and Azure virtual machines the cloud provider, region, and instance.
+- **Host metrics:** CPU usage, memory consumption, disk I/O, filesystem usage, network statistics, and load averages from the Docker host.
+- **Container metrics:** CPU, memory, network, and block I/O usage of each container, from the Docker Engine API.
+- **Container logs:** Tailing and parsing the logs of the containers on the host. Each log record carries the `container.id` resource attribute.
+- **OTLP:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318).
+- **Resource attributes:** `host.name` on every signal, and on AWS, GCP, and Azure virtual machines the cloud provider, region, and instance.
 
 The agent runs on the host's network, so its host metrics and `host.name` describe the Docker host itself.
 

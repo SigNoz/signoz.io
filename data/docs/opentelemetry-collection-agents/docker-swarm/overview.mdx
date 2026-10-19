@@ -14,19 +14,17 @@ The Docker Swarm Collection Agent primarily performs the following:
 - Tails and parses the logs of the containers on each node and sends them to SigNoz.
 - Acts as a gateway to send traces, metrics, and logs from your applications to SigNoz.
 
-## How it Works: The Agent Service
+## How it works
 
-The agent reads each node through read-only mounts of the node's root filesystem and Docker's container log directory, and the node's Docker Engine API through the Docker socket.
+### Agent (global service)
 
-### OpenTelemetry Collector as an Agent: Global Swarm Service
+The agent reads each node through read-only mounts of the node's root filesystem and Docker's container log directory, and the node's Docker Engine API through the Docker socket. It runs as a global service, so Swarm runs one agent task on every node, including nodes that join later. Each task collects node-level and container-level data:
 
-The agent runs as a global service, so Swarm runs one agent task on every node, including nodes that join later. Each task collects node-level and container-level data, including:
-
-- **Host Metrics:** CPU usage, memory consumption, disk I/O, filesystem usage, and load averages from the node. Network statistics describe the agent's own container, since the agent runs on its stack's network rather than the node's.
-- **Container Metrics:** CPU, memory, network, and block I/O usage of each container on the node, from the Docker Engine API. Metrics of Swarm tasks carry their stack, service, task, and node as `docker.stack.name`, `docker.service.name`, `docker.task.name`, and `docker.node.id`.
-- **Container Logs:** Tailing and parsing the logs of the containers on the node. Each log record carries the `container.id` resource attribute.
-- **Application Telemetry:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318), published on every node.
-- **Resource Attributes:** `host.name` on every signal, and on AWS, GCP, and Azure virtual machines the cloud provider, region, and instance.
+- **Host metrics:** CPU usage, memory consumption, disk I/O, filesystem usage, and load averages from the node. Network statistics describe the agent's own container, since the agent runs on its stack's network rather than the node's.
+- **Container metrics:** CPU, memory, network, and block I/O usage of each container on the node, from the Docker Engine API. Metrics of Swarm tasks carry their stack, service, task, and node as `docker.stack.name`, `docker.service.name`, `docker.task.name`, and `docker.node.id`.
+- **Container logs:** Tailing and parsing the logs of the containers on the node. Each log record carries the `container.id` resource attribute.
+- **OTLP:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318), published on every node.
+- **Resource attributes:** `host.name` on every signal, and on AWS, GCP, and Azure virtual machines the cloud provider, region, and instance.
 
 Each task takes its node's hostname, so `host.name` names the Swarm node the data comes from.
 
