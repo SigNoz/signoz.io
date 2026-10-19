@@ -1,0 +1,246 @@
+---
+title: How do I find a customer’s failed request using user IDs and nested JSON fields?
+meta_title: Find failed requests by user ID and nested JSON
+description: Find a customer's failed request in SigNoz, search nested JSON errors, and export the complete collected request trail with verified pagination.
+date: 2026-10-19
+authors: [yuvraj]
+tags: [logs]
+deployment_status: draft
+---
+
+Search the customer’s user ID in Logs Explorer. The failed record’s request ID lets you retrieve the collected logs for that request.
+
+Suppose a customer reports a failed payment around **06:55 UTC on 19 October 2026**. You have their user ID: `customer-demo-1042`. We will follow that report through a synthetic example.
+
+Your application must log the user ID and request ID. SigNoz cannot recover an ID that the application never recorded.
+
+## 1. Find the customer’s logs
+
+Open **Logs → Explorer → List View**. Set **Custom Date Range** around the reported failure time.
+
+For this example, use **19 October 2026, 06:54:59–06:56:00 UTC**. The captures show the equivalent **12:24:59–12:26:00 UTC+05:30**.
+
+Here, the log body stores the customer ID under `user.id`. Its search path is `body.user.id`:
+
+```text
+body.user.id = 'customer-demo-1042'
+```
+
+Replace the sample ID with your customer’s ID, then select **Run Query**.
+
+Use your actual stored field path. If the ID is a log attribute, use a path such as `attribute.user.id`.
+
+![The user-ID query and Run Query button are visible above nine matching logs, including successful and failed payments.](/img/faqs/find-failed-requests-with-user-ids-and-json/run-user-query.webp)
+
+The nine results include both successful and failed requests. The captures show `message` and `request.id` as columns. If your view shows the full body, open a row to read those fields.
+
+## 2. Inspect a matching failure
+
+Look for a failure near the reported time. Here, open the **Payment failed** record.
+
+The record contains a nested error and a request ID. This shortened view shows the relevant fields:
+
+```json
+{
+  "logerror": { "stack": "MongooseError: operation timed out…" },
+  "request": { "id": "request-demo-failed-01" }
+}
+```
+
+The error text sits inside `logerror.stack`, so its search path is `body.logerror.stack`. The full stack keeps its line breaks inside one record.
+
+## 3. Filter the nested error
+
+Use the error you observed to narrow the customer’s results. In this example, search for `MongooseError`:
+
+```text
+body.user.id = 'customer-demo-1042' AND body.logerror.stack CONTAINS 'MongooseError'
+```
+
+Select **Run Query**. One payment-failure record remains.
+
+![The nested-stack query returns one Payment failed record for the customer.](/img/faqs/find-failed-requests-with-user-ids-and-json/nested-error-query.webp)
+
+Use your record’s error text and stored path. The sample exception name is not a required SigNoz filter.
+
+## 4. Copy the request ID
+
+Open the remaining record. Find `body` → `request` → `id` and copy its value: `request-demo-failed-01`.
+
+If the record has many fields, enter `request` in **Search for a field...**:
+
+![The opened failure record is filtered to request fields and shows body.request.id with value request-demo-failed-01.](/img/faqs/find-failed-requests-with-user-ids-and-json/copy-request-id.webp)
+
+The user ID identifies the customer. The request ID separates this failed payment from the customer’s other requests.
+
+## 5. Retrieve the request trail
+
+Replace the previous query with the request ID:
+
+```text
+body.request.id = 'request-demo-failed-01'
+```
+
+Remove error, severity, and service filters that could hide related records. The request crosses `checkout-api` and `payment-worker`, so keep both services in scope.
+
+Widen the range to include the request’s start and final response. Select **Run Query**, then **Order by → timestamp (asc)**.
+
+![The request-ID query returns seven collected records in timestamp order, from Checkout received to Checkout returned 500.](/img/faqs/find-failed-requests-with-user-ids-and-json/request-trail.webp)
+
+The seven records show receipt, validation, payment attempts, and the final HTTP 500 response. Keep this absolute range for any count or export.
+
+Two records share a timestamp. Their display order does not establish which event caused another.
+
+## 6. Save the trail if needed
+
+Keep the request-ID filter and time range. First, check the total: switch to **Table**. Use `count()` with no **Group By** fields, then select **Run Query**.
+
+The total here is **seven**. Return to **List View**, then select **Download → jsonl → All → Export**. JSONL stores one JSON record per line.
+
+The download has a selected row cap: **10k, 30k, or 50k**. Compare the downloaded record count with the query total. If they differ, the export is incomplete.
+
+For this request, the file contains **seven unique log IDs**. Those IDs match the API export.
+
+For larger results, use the [Logs API pagination procedure](https://signoz.io/docs/logs-management/logs-api/search-logs/) or the verified example below.
+
+<details>
+<summary>Retrieve every page with the Logs API</summary>
+
+Use a [service account key with read access](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/). An ingestion key does not provide query access. Set `SIGNOZ_URL` to your workspace URL and `SIGNOZ_API_KEY` to that service account key.
+
+The following Python script uses the example range and request ID. Replace both for your incident. Save the script as `export_request.py`, then run `python3 export_request.py`. It writes `request-trail.jsonl` only after the counts agree.
+
+```python
+import json
+import os
+import urllib.request
+from pathlib import Path
+
+url = os.environ['SIGNOZ_URL'].rstrip('/') + '/api/v5/query_range'
+key = os.environ['SIGNOZ_API_KEY']
+start, end = 1792392899000, 1792392960000  # UTC milliseconds
+spec = {'name': 'A', 'signal': 'logs', 'filter': {
+    'expression': "body.request.id = 'request-demo-failed-01'"}}
+
+
+def query(request_type, query_spec):
+    payload = {'start': start, 'end': end, 'requestType': request_type,
+               'compositeQuery': {'queries': [
+                   {'type': 'builder_query', 'spec': query_spec}]}}
+    request = urllib.request.Request(url, json.dumps(payload).encode(), {
+        'Content-Type': 'application/json', 'SIGNOZ-API-KEY': key})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        result = json.load(response)
+    if result.get('status') != 'success':
+        raise RuntimeError('Query failed; inspect the API response')
+    data = result['data']
+    if result.get('warnings') or data.get('warning') or data.get('warnings'):
+        raise RuntimeError('Query returned warnings; check completeness')
+    return data['data']['results'][0]
+
+
+def count():
+    return query('scalar', {**spec, 'aggregations': [
+        {'expression': 'count()'}]})['data'][0][0]
+
+
+expected = count()
+limit, offset = 3, 0  # Small pages make this example test pagination.
+logs, ids = [], set()
+while True:
+    page = query('raw', {**spec, 'limit': limit, 'offset': offset, 'order': [
+        {'key': {'name': 'timestamp'}, 'direction': 'asc'},
+        {'key': {'name': 'id'}, 'direction': 'asc'}]})['rows'] or []
+    for row in page:
+        log = row['data']
+        if log['id'] in ids:
+            raise RuntimeError('Duplicate log ID; restart after ingestion settles')
+        ids.add(log['id'])
+        logs.append(log)
+    offset += len(page)
+    if len(page) < limit:
+        break
+if len(ids) != expected or count() != expected:
+    raise RuntimeError('Count changed or rows are missing; export is incomplete')
+Path('request-trail.jsonl').write_text(
+    ''.join(json.dumps(log) + '\n' for log in logs), encoding='utf-8')
+print(f'Retrieved {len(ids)} unique logs; count={expected}.')
+```
+
+For this request, the verified export returns pages of **3, 3, and 1** at offsets **0, 3, and 6**:
+
+```text
+Retrieved 7 unique logs; count=7.
+```
+
+Keep the range, filter, and ordering unchanged between pages. Increase `limit` for larger trails; the tested raw-query maximum is **10,000 rows per request**.
+
+This procedure uses offsets. Fixed bounds do not freeze the dataset: late arrivals or retention expiry can change results. Export after ingestion settles. Restart if the counts change or log IDs repeat.
+
+</details>
+
+## Ask your agent
+
+You can also investigate through an agent connected to [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/). Use a separate [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) with only Viewer/read access. MCP also has tools that can change resources, so a read-only prompt does not replace access controls.
+
+If Noz is available in your SigNoz Cloud workspace, open **Noz** in Logs Explorer. Its [customer log triage guide](https://signoz.io/docs/ai/use-cases/noz-triage-customer-issue/) covers investigation by a recorded user or tenant ID.
+
+After setup, adapt this prompt to your customer and time range:
+
+```text
+Investigate the failed payment for user customer-demo-1042 from
+2026-10-19 06:54:59 to 06:56:00 UTC. Use read tools only.
+Inspect the stored fields, find the nested error, and identify the request ID.
+Retrieve that request’s logs without error, severity, or service filters.
+Use at most 10 pages of 100 records. Compare unique log IDs with an independent
+count for the same filter and time range. Mark incomplete results.
+Return the filters, UTC range, error field, and supporting log IDs,
+timestamps, services, and messages. Separate observations from possible causes.
+Make no changes.
+```
+
+Check the returned records, filters, time range, and counts before you use the conclusion. The prompt is an example; the verified results above come from Logs Explorer and the API.
+
+## If your fields or results differ
+
+<details>
+<summary>Field setup and less common JSON cases</summary>
+
+**JSON body or log attributes.** The example uses [native JSON log bodies](https://signoz.io/docs/logs-management/features/json-logs/). If your body remains text, [parse its JSON fields](https://signoz.io/docs/logs-pipelines/guides/json/) into log attributes first. Use their stored `attribute.<name>` paths. For service filters, use `resource.service.name`.
+
+**Missing IDs.** `body.user.id NOT EXISTS` finds records without that body field. It returns three records in the synthetic dataset. A missing field does not identify the customer. Use another recorded ID or check collection.
+
+**Dotted keys.** The literal body key `"user.id"` became the nested path `body.user.id` in the test workspace. Use a real nested object or an unambiguous flat key such as `user_id`. Do not assume a quoted-key escape preserves both forms.
+
+**Array positions.** `body.attempts[].status_code = 503` matches any attempt. It does not select the second attempt. The query `body.attempts[1].status_code = 504` returned a syntax error.
+
+For an exact position, extract a named field in the application before ingestion. Here, `event` is the Python dictionary for the application log:
+
+```python
+attempts = event.get('attempts', [])
+if isinstance(attempts, list) and len(attempts) > 1:
+    second = attempts[1]
+    if isinstance(second, dict) and type(second.get('status_code')) is int:
+        event['second_attempt_status'] = second['status_code']
+```
+
+Python index `1` means the second element. Use that position only if your application guarantees the attempt order.
+
+Search `body.second_attempt_status = 504` after ingestion. The synthetic example returns one record; searching that field for `503` returns none. Adding the field affects new logs.
+
+The complete trail contains matching logs that SigNoz collected and still retains. Missing collection, dropped records, expired retention, or a narrow time range can leave gaps.
+
+</details>
+
+## Related questions
+
+- [How do I parse JSON fields from a text log?](https://signoz.io/docs/logs-pipelines/guides/json/)
+- [Which search syntax and field prefixes can I use?](https://signoz.io/docs/userguide/search-syntax/)
+- [How does SigNoz transform native JSON log bodies?](https://signoz.io/docs/logs-management/features/json-logs/)
+
+<details>
+<summary>Example verification</summary>
+
+The example uses 14 synthetic logs. The manual queries, pagination, and JSONL reconciliation were verified on 19 October 2026 in a Cloud staging workspace running `main-da556ab`. No agent response is presented as a tested result.
+
+</details>
