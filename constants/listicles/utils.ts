@@ -18,6 +18,7 @@ export interface ListicleRenderSection {
   id: string
   label: string
   title: string
+  description?: string
   sectionName: string
   gridCols?: string
   items: ListicleItem[]
@@ -42,6 +43,7 @@ const toRenderSection = (section: SectionConfig): ListicleRenderSection => ({
   id: section.id,
   label: section.label,
   title: section.title,
+  description: section.description,
   sectionName: section.sectionName,
   gridCols: section.gridCols,
   items: toItems(section.items),
@@ -57,8 +59,17 @@ const normalizeSectionId = (config: ListicleConfig, sectionId?: string | null): 
   return hasSection ? sectionId : 'all'
 }
 
-export const getListicleConfig = (name: string): ListicleConfig | null =>
-  listicleConfigs[name] || null
+export const getListicleConfig = async (name: string): Promise<ListicleConfig | null> => {
+  try {
+    const { getListicleConfigFromCms } = await import('@/utils/listicles')
+    const config = await getListicleConfigFromCms(name)
+    if (config) return config
+    console.warn(`CMS returned no listicle for "${name}", using local fallback`)
+  } catch (err) {
+    console.warn(`CMS listicle fetch failed for "${name}", using local fallback:`, err)
+  }
+  return listicleConfigs[name] || null
+}
 
 export const getListicleSectionItems = (
   config: ListicleConfig,

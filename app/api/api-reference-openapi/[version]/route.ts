@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import { fetchOpenAPISpec, resolveLatestVersion } from '@/utils/apiReference'
 import { API_SPEC_REVALIDATE_SECONDS } from '@/constants/apiReference'
 
-export const runtime = 'nodejs'
-
 const CACHE_CONTROL_HEADER = `public, s-maxage=${API_SPEC_REVALIDATE_SECONDS}, stale-while-revalidate=86400`
 
 const notFoundResponse = () =>

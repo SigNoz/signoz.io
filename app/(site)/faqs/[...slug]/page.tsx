@@ -1,18 +1,16 @@
-import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
 import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+import JsonLdScript from '@/components/JsonLdScript'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { SidebarIcons } from '@/components/sidebar-icons/icons'
-import Button from '@/components/ui/Button'
 import { getAuthorDirectory, getContentBySlug } from '@/utils/contentRepository'
 import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
-import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { mdxOptions, generateTOC, ensureTrailingSlash } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
 
@@ -25,7 +23,7 @@ const relatedArticleRoutePrefix: Record<string, string> = {
   blog: 'blog',
   faq: 'faqs',
   opentelemetry: 'opentelemetry',
-  case_study: 'case-study',
+  case_study: 'customers',
 }
 
 function getRelatedArticleDoc(entry: MDXContent): { doc: MDXContent; contentType: string } | null {
@@ -52,7 +50,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
         return {
           title: doc.title,
           publishedOn: resolveLatestDate(doc) ?? '',
-          url: `/${routePrefix}${doc.path || ''}`,
+          url: ensureTrailingSlash(`/${routePrefix}${doc.path || ''}`),
         }
       })
       .filter(Boolean) as RelatedArticleProps[]
@@ -62,7 +60,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
     return content.related_faqs.map((faq: MDXContent) => ({
       title: faq.title,
       publishedOn: resolveLatestDate(faq) ?? '',
-      url: `/faqs${faq.path || ''}`,
+      url: ensureTrailingSlash(`/faqs${faq.path || ''}`),
     }))
   }
 
@@ -105,8 +103,8 @@ export async function generateMetadata(props: {
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          publishedTime: content?.date,
-          modifiedTime: content?.updatedAt,
+          publishedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
+          modifiedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
           url: content?.path || './',
           authors: authorNames.length > 0 ? authorNames : ['SigNoz Team'],
         },
@@ -198,6 +196,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const authorList = getAuthorKeys(content)
   const authorNames = authorList.map((author) => authorDirectory[author]?.name || author)
   const tags = getTagValues(content)
+  const breadcrumbs = getSectionArticleBreadcrumbs('faqs', content.title, path)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   // Prepare content for FAQLayout
   const mainContent = {
@@ -229,24 +229,15 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-
-      <div className="container mx-auto">
-        <Button variant={'ghost'} isButton={true} className="ml-3.5 mt-10 hover:bg-transparent">
-          <Link href={`/faqs/`} className="flex items-center">
-            <SidebarIcons.ArrowLeft />
-            <span className="pl-1.5 text-sm">Back to FAQs</span>
-          </Link>
-        </Button>
-      </div>
+      <JsonLdScript data={structuredData} />
+      <JsonLdScript data={breadcrumbJsonLd} />
 
       <FAQLayout
+        breadcrumbs={breadcrumbs}
         content={mainContent}
         authorDetails={authorDetails}
-        authors={authorNames}
+        authors={authorList}
+        authorDirectory={authorDirectory}
         toc={toc}
         tags={tags}
         relatedArticles={relatedArticles}

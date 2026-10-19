@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavDropdownContext } from './NavDropdownContext'
 import { ProductDropdownContent } from './ProductDropdown'
+import { UseCasesDropdownContent } from './UseCasesDropdown'
 import { ResourcesDropdownContent } from './ResourcesDropdown'
 
 export default function NavDropdownPanel() {
@@ -34,7 +35,6 @@ export default function NavDropdownPanel() {
       setIsVisible(false)
       // Keep mounted during close animation (150ms), then unmount
       const id = setTimeout(() => setShouldRender(false), 150)
-      prevActiveId.current = null
       return () => clearTimeout(id)
     }
 
@@ -46,7 +46,12 @@ export default function NavDropdownPanel() {
     setShouldTransition(isSwitching)
 
     // Clamp left so panel doesn't overflow the right viewport edge
-    const panelWidth = activeId === 'product' ? 820 : 500
+    const panelWidths: Record<string, number> = {
+      product: 680,
+      usecases: 380,
+      resources: 500,
+    }
+    const panelWidth = panelWidths[activeId] ?? 400
     const clampedLeft = Math.min(rect.left, window.innerWidth - panelWidth - 16)
     setPosition({ left: Math.max(16, clampedLeft), top: rect.bottom + 4 })
     prevActiveId.current = activeId
@@ -94,17 +99,20 @@ export default function NavDropdownPanel() {
           <div className="absolute -top-1 left-0 right-0 h-1" />
 
           <div
-            className="origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] shadow-[0_12px_48px_rgba(0,0,0,0.55)]"
+            className="origin-top-left overflow-hidden rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background)] shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)]"
             style={{
               opacity: isVisible ? 1 : 0,
               transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(-4px) scale(0.96)',
               transition: 'opacity 150ms ease, transform 150ms ease',
             }}
           >
-            {(activeId === 'product' || prevActiveId.current === 'product') && (
+            {(activeId ?? prevActiveId.current) === 'product' && (
               <ProductDropdownContent onClose={closeImmediate} />
             )}
-            {(activeId === 'resources' || prevActiveId.current === 'resources') && (
+            {(activeId ?? prevActiveId.current) === 'usecases' && (
+              <UseCasesDropdownContent onClose={closeImmediate} />
+            )}
+            {(activeId ?? prevActiveId.current) === 'resources' && (
               <ResourcesDropdownContent onClose={closeImmediate} />
             )}
           </div>

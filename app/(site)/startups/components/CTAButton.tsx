@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 
 export default function CTAButton() {
   const scrollToForm = () => {
@@ -13,10 +13,7 @@ export default function CTAButton() {
   }
 
   return (
-    <Button
-      onClick={scrollToForm}
-      className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90"
-    >
+    <Button variant="default" onClick={scrollToForm}>
       Apply Now
     </Button>
   )

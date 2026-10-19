@@ -1,7 +1,7 @@
 ---
 
 title: Timeseries Panel Type
-date: 2026-05-13
+date: 2026-07-29
 description: Learn how to use the Timeseries Chart panel type in SigNoz dashboards to visualize metrics over time.
 doc_type: reference
 ---
@@ -25,7 +25,7 @@ This panel type supports any time series data. The time series data can be from 
 The following graph shows the requests per second (req/s) for a service over a period of time in line chart.
 
 <Figure
-  src="/img/docs/dashboards/panel-types/timeseries.webp"
+  src="/img/docs/dashboards/panel-types/timeseries-v2.webp"
   alt="Time series chart for req/s over period of time"
   caption="Line chart for req/s over period of time."
 />
@@ -44,10 +44,42 @@ The following graph shows the requests per second (req/s) for a service over a p
 - **Panel Time Preference** — Override the global dashboard time range for this panel. Set to `Global Time` to use the dashboard's time picker, or choose a fixed time range.
 - **Fill Gaps** — The `Fill Gaps` option fills the gaps in the result data with zero. This is useful when you want to interpret the no data as zero. It is more appropriate for when the data is sparse. For example, if the result of a query for 10 minutes is `{t1: 12, t3: 21, t5: 42, t7:29}`, the `Fill Gaps` option will result in `{t1: 12, t2: 0, t3: 21, t4: 0, t5: 42, t6: 0, t7: 29, t8: 0, t9: 0, t10: 0}`.
 
+#### Chart Appearance
+
+Control how the line itself is drawn:
+
+- **Line style**: `Solid` or `Dashed`.
+- **Line interpolation**: `Linear`, `Spline` (a smoothed curve), `Step before`, or `Step after`.
+- **Fill mode**: `None` for a plain line, `Solid` for a flat fill under the line, or `Gradient` for a fill that fades out.
+- **Show points**: Draw a marker at each individual data point in addition to the line. Off by default.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/timeseries-chart-appearance.webp"
+  alt="Chart appearance section showing Line style, Line interpolation, Fill mode, Show points, and Disconnect values"
+  caption="Chart appearance, here set to a dashed spline line."
+/>
+
+#### Disconnect values
+
+Use **Disconnect values** to decide how the line handles gaps in a series, meaning intervals that have no data point:
+
+- **Never**: Connect the line across every gap so the series stays continuous. This is the default.
+- **Threshold**: Disconnect the line when a gap is longer than a duration you set, which keeps genuine outages visible instead of drawing a line over them.
+
+When you switch to **Threshold**, a **Threshold value** input appears. It is seeded from the query's step interval rather than a fixed default, so it reflects the resolution the panel actually queries at. The input accepts durations in seconds (`s`), minutes (`m`), hours (`h`), days (`d`), and weeks (`w`), including compound values such as `1h30m`. It validates as you type and shows an error inline.
+
+<Admonition type="warning">
+A panel saved with the threshold mode on and no (or a zero) threshold value fails validation. Dashboards saved before this validation was added can hit it on save or load. Open the affected time series panels, set **Threshold value** to a positive duration (for example `5m`), and save to migrate them.
+</Admonition>
+
 #### Formatting & Units
 
 - **Y Axis Unit** — The unit of the y-axis (for example, `Milliseconds (ms)`, `Bytes`, `Percent`). The default is `None`.
 - **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
+
+<Admonition type="info">
+When you create a new panel, the **Y Axis Unit** is pre-filled with the unit of the selected metric, so the axis matches how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
+</Admonition>
 
 #### Axes
 
@@ -70,6 +102,10 @@ Add context links to enable click-through navigation from the panel to other das
 #### Thresholds
 
 Thresholds are used to draw a line on the y-axis to highlight the value. The thresholds are defined as a list of tuples. Each tuple contains the value and the color. The color is optional and if not provided, the default color will be used.
+
+Threshold edits stream into the panel preview as you type, so you see the effect on your data before you save. Discarding your changes rolls the panel back to its state from before you started editing, which reverts the live preview as well. Thresholds are preserved when you change the panel's visualization type (for example, from Time Series to Table): their color, value, and unit carry over and are remapped to the new panel type's format.
+
+Thresholds also seed the condition when you [create an alert from the panel](https://signoz.io/docs/dashboards/interactivity/#operator-and-value-from-thresholds).
 
 ### Get Help
 

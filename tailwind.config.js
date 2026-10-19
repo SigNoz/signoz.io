@@ -1,6 +1,7 @@
 // @ts-check
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const colors = require('tailwindcss/colors')
+
 /** @type {import("tailwindcss/types").Config } */
 module.exports = {
   content: [
@@ -12,6 +13,8 @@ module.exports = {
     './data/**/*.mdx',
     './node_modules/@signozhq/pagination/dist/**/*.{js,ts,jsx,tsx}',
     './shared/components/**/**/*.{js,ts,tsx}',
+    './stories/**/*.{js,ts,jsx,tsx,mdx}',
+    './.storybook/**/*.{ts,tsx}',
   ],
   darkMode: 'class',
   theme: {
@@ -46,6 +49,14 @@ module.exports = {
           '0%': { opacity: '0', transform: 'translateY(12px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        'homepage-logo-marquee': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(calc(-50% - 1.5rem))' },
+        },
+        'homepage-customer-proof-rail': {
+          '0%': { transform: 'translate3d(0, 0, 0)' },
+          '100%': { transform: 'translate3d(var(--proof-cycle-distance), 0, 0)' },
+        },
       },
       animation: {
         'nav-popover-in': 'nav-popover-in 150ms cubic-bezier(0.16, 1, 0.3, 1) both',
@@ -59,6 +70,12 @@ module.exports = {
           'homepage-agent-noz-enter 860ms cubic-bezier(0.16, 1, 0.3, 1) 260ms forwards',
         'homepage-agent-response-reveal':
           'homepage-agent-response-reveal 760ms ease 3600ms forwards',
+        'homepage-logo-marquee': 'homepage-logo-marquee 34s linear infinite',
+        'homepage-customer-proof-rail':
+          'homepage-customer-proof-rail var(--proof-cycle-duration) linear infinite',
+      },
+      screens: {
+        wide: '1600px',
       },
       maxWidth: {
         '8xl': '1440px',
@@ -248,12 +265,42 @@ module.exports = {
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
-            a: {
-              color: theme('colors.primary.500'),
+            color: 'var(--l1-foreground)',
+            // Pill treatment is for links without a defined style of their own — component
+            // links (DocCard, pagination, buttons) all carry a class and are excluded.
+            'a:not([class])': {
+              color: 'var(--bg-robin-400)',
+              textDecorationColor: 'color-mix(in srgb, var(--bg-robin-400) 60%, transparent)',
+              textDecorationThickness: '2px',
+              textUnderlineOffset: '3px',
+              borderRadius: '2px',
+              padding: '0 3px',
+              margin: '0 -3px',
+              backgroundImage: 'linear-gradient(var(--bg-robin-400), var(--bg-robin-400))',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: '0 100%',
+              backgroundSize: '100% 0',
+              boxDecorationBreak: 'clone',
+              WebkitBoxDecorationBreak: 'clone',
+              transition:
+                'color 80ms cubic-bezier(0.2, 0.6, 0.2, 1), background-size 80ms cubic-bezier(0.2, 0.6, 0.2, 1), text-decoration-color 80ms cubic-bezier(0.2, 0.6, 0.2, 1)',
               '&:hover': {
-                color: `${theme('colors.primary.600')}`,
+                color: 'var(--l1-background)',
+                backgroundSize: '100% 100%',
+                textDecorationColor: 'transparent',
               },
-              code: { color: theme('colors.primary.400') },
+              code: {
+                color: 'color-mix(in srgb, var(--accent-primary) 80%, var(--l1-foreground))',
+              },
+              '&:hover code': {
+                color: 'var(--l1-background)',
+              },
+            },
+            strong: {
+              color: 'var(--l1-foreground)',
+            },
+            'h1,h2,h3,h4,h5,h6': {
+              color: 'var(--l1-foreground)',
             },
             'h1,h2': {
               fontWeight: '700',
@@ -263,21 +310,32 @@ module.exports = {
               fontWeight: '600',
             },
             code: {
-              color: theme('colors.indigo.500'),
+              // --accent-primary alone is theme-invariant and lands at 3.86:1 on the
+              // light code chip. Mixing it toward --l1-foreground (which does flip)
+              // keeps the accent hue while adapting lightness: 5.09:1 light, 5.97:1 dark.
+              color: 'color-mix(in srgb, var(--accent-primary) 80%, var(--l1-foreground))',
             },
-          },
-        },
-        invert: {
-          css: {
-            a: {
-              color: theme('colors.primary.500'),
-              '&:hover': {
-                color: `${theme('colors.primary.400')}`,
-              },
-              code: { color: theme('colors.primary.400') },
+            blockquote: {
+              color: 'var(--l1-foreground)',
+              borderLeftColor: 'var(--l2-border)',
             },
-            'h1,h2,h3,h4,h5,h6': {
-              color: theme('colors.gray.100'),
+            hr: {
+              borderColor: 'var(--l2-border)',
+            },
+            figcaption: {
+              color: 'var(--l2-foreground)',
+            },
+            'ol > li::marker': {
+              color: 'var(--l2-foreground)',
+            },
+            'ul > li::marker': {
+              color: 'var(--l3-foreground)',
+            },
+            thead: {
+              borderBottomColor: 'var(--l2-border)',
+            },
+            'tbody tr': {
+              borderBottomColor: 'var(--l2-border)',
             },
           },
         },
@@ -285,7 +343,16 @@ module.exports = {
     },
     fontFamily: {
       sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-      mono: ['Geist Mono', 'monospace'],
+      mono: [
+        'ui-monospace',
+        'SFMono-Regular',
+        'Menlo',
+        'Monaco',
+        'Consolas',
+        'Liberation Mono',
+        'Courier New',
+        'monospace',
+      ],
       satoshi: ['Satoshi', 'sans-serif'],
       'satoshi-bold': ['Satoshi Bold', 'sans-serif'],
     },

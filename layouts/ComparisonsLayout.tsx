@@ -3,7 +3,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import type { AuthorDetail, Comparison } from '../types/transformedContent'
-import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 
 interface LayoutProps {
   content: CoreContent<Comparison>
@@ -32,7 +32,6 @@ export default function ComparisonsLayout({
         authors={authors}
         toc={toc}
         contentType="comparison"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

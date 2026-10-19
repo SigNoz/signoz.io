@@ -1,8 +1,10 @@
 ---
-date: 2025-10-21
-
+published_date: 2026-07-10
+updated_date: 2026-08-03
 title: SAML Authentication with Microsoft Entra ID
 description: Configure SAML single sign-on between Microsoft Entra ID (Azure AD) and SigNoz for team authentication.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: tutorial
 ---
 
 ## Overview
@@ -56,7 +58,7 @@ The metadata file contains important configuration details like:
    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://login.microsoftonline.com/323a6......12688fe83e3s30/saml2"/>
 ```
 
-For more details on the metadata page, see [Microsoft's federation metadata documentation](https://learn.microsoft.com/en-us/entra/identity-platform/federation-metadata).
+For more details on the metadata page, see <a href="https://learn.microsoft.com/en-us/entra/identity-platform/federation-metadata" target="_blank" rel="noopener noreferrer nofollow">Microsoft's federation metadata documentation</a>.
 
 ### Step 4: Configure SigNoz for SAML Authentication
 
@@ -99,9 +101,68 @@ Now you'll configure SigNoz to accept authentication from Microsoft Entra ID:
 5. **Complete** the Microsoft Entra ID login process
 6. **Confirm** you're successfully logged into SigNoz
 
+## Configure Group Claims (Optional)
+
+To use group-based role mapping, configure Microsoft Entra ID to include the user's group memberships in the SAML assertion.
+
+### Add a Group Claim in Microsoft Entra ID
+
+1. In your Microsoft Entra ID application, go to **Single sign-on** from the left sidebar
+2. In the **Attributes & Claims** section, click **Edit**
+3. Click **Add a group claim**
+4. Select which groups to return in the claim (e.g., **All groups**, **Security groups**, or **Groups assigned to the application**)
+5. Set **Source attribute** to **Group ID**
+
+### Customize the Group Claim Name
+
+By default, Microsoft Entra ID emits the group claim as `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups`. SigNoz expects the claim to be named `groups` by default, so rename it:
+
+1. In the **Group Claims** panel, expand **Advanced options**
+2. Check **Customize the name of the group claim**
+3. Set **Name** to `groups`
+4. Click **Save**
+
+<Admonition type="note">
+Alternatively, you can keep the default claim name and instead set the **Groups** field in SigNoz under **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains** → edit your domain → **Attribute Mapping (Advanced)** to the full `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` URI.
+</Admonition>
+
+With **Group ID** as the source attribute, the claim contains the group **object IDs** (GUIDs), not group display names. You can find a group's object ID in Microsoft Entra ID under **Groups** → select the group → **Object Id**. Use these object IDs in the SigNoz group mappings below.
+
+## Configure Role Mapping (Optional)
+
+Role mapping automatically assigns SigNoz roles (`signoz-viewer`, `signoz-editor`, `signoz-admin`) to users when they log in via SAML, based on their Microsoft Entra ID group memberships.
+
+### Role Resolution Priority
+
+When a user logs in, SigNoz determines their role using this priority (highest to lowest):
+
+1. **Use Role Attribute Directly**: if enabled and the SAML assertion contains a role attribute, that value is used directly
+2. **Group to Role Mappings**: the user is assigned the roles of all mapped groups they belong to
+3. **Default Role**: fallback role from configuration
+4. **`signoz-viewer`**: the ultimate default if nothing else is configured
+
+### Configure in SigNoz
+
+1. Ensure you have [configured the group claim](#configure-group-claims-optional) in Microsoft Entra ID
+2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+3. Click on your SAML domain to edit it
+4. In the **Role Mapping (Advanced)** section:
+   - Set **Default Role** to `signoz-viewer`
+   - Under **Group to Role Mappings**, add entries mapping each Microsoft Entra ID group **object ID** to a SigNoz role:
+
+     | Microsoft Entra ID Group (Object ID) | SigNoz Role |
+     |--------------------------------------|-------------|
+     | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` | `signoz-admin` |
+     | `b2c3d4e5-f6a7-8901-bcde-f12345678901` | `signoz-editor` |
+     | `c3d4e5f6-a7b8-9012-cdef-123456789012` | `signoz-viewer` |
+
+   - Leave **Use Role Attribute Directly** unchecked
+5. Click **Save**
+
 ## Troubleshooting
 
 **Common issues and solutions:**
 
 - **"Authentication failed" error**: Check that the redirect URI exactly matches `https://${SIGNOZ_BASEURL}/api/v1/complete/saml` in Microsoft Entra ID
+- **Groups not appearing or role not assigned**: Verify the group claim name in Microsoft Entra ID matches the **Groups** field in SigNoz attribute mapping (rename it to `groups`, or set the field to the full claim URI; see [Configure Group Claims](#configure-group-claims-optional)), and that your group mappings use the group **object IDs** (GUIDs), not display names
 - **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`

@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { ChevronDown, Code } from 'lucide-react'
+import React from 'react'
+import { Check, Code } from 'lucide-react'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@signozhq/ui/select'
 
 import { normalizeLanguage } from './navigation'
 import type { LanguageOption } from './types'
 import { LanguageIcon } from './LanguageIcon'
+import { useSelectScrollUnlock } from '@/hooks/useSelectScrollUnlock'
 
 interface LanguageSelectorProps {
   options: LanguageOption[]
@@ -16,6 +18,45 @@ interface LanguageSelectorProps {
   onClose: () => void
 }
 
+const triggerStyle = {
+  '--select-trigger-height': '2rem',
+  '--select-trigger-border-radius': '0.25rem',
+  '--select-trigger-border-color': 'var(--l2-border)',
+  '--select-trigger-background-color': 'var(--l2-background-60)',
+  '--select-trigger-box-shadow': 'none',
+  '--select-trigger-padding': '0 0.75rem',
+  '--select-trigger-font-size': '0.875rem',
+  '--select-trigger-outline-width': '0',
+  '--select-trigger-disabled-opacity': '1',
+  '--select-trigger-disabled-cursor': 'wait',
+  '--select-trigger-icon-size': '0.75rem',
+  color: 'var(--l1-foreground)',
+} as React.CSSProperties
+
+const contentStyle = {
+  '--select-content-border-radius': '0.25rem',
+  '--select-content-border-color': 'var(--l2-border)',
+  '--select-content-background': 'var(--l2-background)',
+  '--select-content-box-shadow': '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+  '--select-content-popper-width': 'var(--radix-select-trigger-width)',
+  '--select-content-popper-min-width': 'var(--radix-select-trigger-width)',
+  '--select-content-open-animation': 'none',
+  '--select-content-close-animation': 'none',
+  '--select-content-slide-up-animation': 'none',
+  '--select-content-slide-down-animation': 'none',
+  animation: 'none',
+  zIndex: 100,
+} as React.CSSProperties
+
+/** Structural vars only — do not set inline `color` here; it overrides Radix highlight styles. */
+const itemStyle = {
+  '--select-item-padding': '0.5rem 2.25rem 0.5rem 0.75rem',
+  '--select-item-font-size': '0.875rem',
+  '--select-item-border-radius': '0',
+  '--select-item-highlight-background': 'var(--l2-background-hover)',
+  '--select-item-highlight-color': 'var(--l1-foreground)',
+} as React.CSSProperties
+
 export function LanguageSelector({
   options,
   selectedLanguage,
@@ -24,88 +65,87 @@ export function LanguageSelector({
   onChange,
   onClose,
 }: LanguageSelectorProps) {
+  useSelectScrollUnlock(isOpen)
   const normalizedSelected = normalizeLanguage(selectedLanguage)
-  const selectorRef = useRef<HTMLDivElement | null>(null)
+  const selectedOption = options.find((opt) => normalizeLanguage(opt.value) === normalizedSelected)
 
-  useEffect(() => {
-    if (!isOpen) {
-      return
-    }
+  const handleChange = (value: string | string[]) => {
+    const val = Array.isArray(value) ? value[0] : value
+    if (!val) return
+    onChange(val)
+  }
 
-    const handleInteraction = (event: MouseEvent | TouchEvent) => {
-      const target = event.target instanceof Node ? event.target : null
-      if (!target || !selectorRef.current) {
-        return
-      }
-
-      if (selectorRef.current.contains(target)) {
-        return
-      }
-
+  const handleOpenChange = (open: boolean) => {
+    if (open === isOpen) return
+    if (open) {
+      onToggle()
+    } else {
       onClose()
     }
+  }
 
-    document.addEventListener('mousedown', handleInteraction)
-    document.addEventListener('touchstart', handleInteraction)
-
-    return () => {
-      document.removeEventListener('mousedown', handleInteraction)
-      document.removeEventListener('touchstart', handleInteraction)
-    }
-  }, [isOpen, onClose])
+  const renderOptionIcon = (value: string) =>
+    normalizeLanguage(value) === 'all' ? (
+      <Code size={16} className="shrink-0 text-[var(--l3-foreground)]" />
+    ) : (
+      <LanguageIcon lang={value} />
+    )
 
   return (
-    <div className="mb-4 px-3" ref={selectorRef}>
-      <div className="mb-1 text-xs uppercase text-gray-400">Language</div>
-      <div className="relative">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/40 px-3 py-2 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500 focus:border-signoz_robin-500 focus:outline-none"
-          onClick={onToggle}
-        >
-          <span className="flex items-center gap-4 truncate">
-            {normalizedSelected && normalizedSelected !== 'all' ? (
-              <LanguageIcon lang={selectedLanguage ?? ''} />
-            ) : (
-              <Code size={16} color="#9ca3af" />
-            )}
-            <span className="truncate">
-              {normalizedSelected && normalizedSelected !== 'all' ? selectedLanguage : 'All'}
-            </span>
-          </span>
-          <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {isOpen && (
-          <div className="absolute z-20 mt-2 w-full rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/80 shadow-lg backdrop-blur-sm">
-            <div className="max-h-72 overflow-y-auto py-2">
-              {options.map((opt) => {
-                const normalizedValue = normalizeLanguage(opt.value)
-                const isActive = normalizedSelected === normalizedValue
-
-                return (
-                  <button
-                    key={opt.value}
-                    className={`flex w-full items-center gap-4 px-3 py-2 text-sm transition-colors ${
-                      isActive
-                        ? 'bg-signoz_ink-400/80 text-white'
-                        : 'text-gray-200 hover:bg-signoz_ink-400/40'
-                    }`}
-                    onClick={() => onChange(opt.value)}
-                  >
-                    {normalizedValue === 'all' ? (
-                      <Code size={16} color="#9ca3af" />
-                    ) : (
-                      <LanguageIcon lang={opt.value} />
-                    )}
-                    <span className="truncate">{opt.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
+    <div className="flex flex-col gap-1 px-2.5 pb-2 pt-3">
+      <div className="flex items-center gap-1.5 pb-2 pl-1.5">
+        <Code size={12} className="text-[var(--l3-foreground)]" />
+        <span className="text-xs font-medium uppercase tracking-wider text-[var(--l3-foreground)]">
+          language
+        </span>
       </div>
+      <Select
+        value={selectedOption?.value}
+        onChange={handleChange}
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+      >
+        <SelectTrigger className="hover:border-[var(--l1-border)]" style={triggerStyle}>
+          <SelectValue placeholder="All">
+            <span className="flex min-w-0 items-center gap-2">
+              {selectedOption && renderOptionIcon(selectedOption.value)}
+              <span className="truncate">{selectedOption?.label ?? 'All'}</span>
+            </span>
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent
+          className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-w-[var(--radix-select-trigger-width)]"
+          style={contentStyle}
+          position="popper"
+          side="bottom"
+          align="start"
+          sideOffset={4}
+        >
+          {options.map((option) => {
+            const isSelected = normalizeLanguage(option.value) === normalizedSelected
+            return (
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                style={itemStyle}
+                className="relative text-[var(--l3-foreground)] data-[highlighted]:bg-[var(--l2-background-hover)] data-[highlighted]:text-[var(--l1-foreground)] data-[selected=true]:text-[var(--l1-foreground)]"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  {renderOptionIcon(option.value)}
+                  <span className="min-w-0 truncate">{option.label}</span>
+                </span>
+                {isSelected && (
+                  <Check
+                    size={14}
+                    className="pointer-events-none absolute right-3 top-1/2 shrink-0 -translate-y-1/2 text-[var(--l1-foreground)]"
+                    aria-hidden
+                  />
+                )}
+              </SelectItem>
+            )
+          })}
+        </SelectContent>
+      </Select>
     </div>
   )
 }

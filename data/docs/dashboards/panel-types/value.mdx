@@ -1,7 +1,7 @@
 ---
 
 title: Number Panel Type
-date: 2026-05-13
+date: 2026-07-29
 description: Learn how to use the Number panel type in SigNoz dashboards to display single aggregated metric values.
 doc_type: reference
 ---
@@ -25,7 +25,7 @@ This panel type supports any time series data that can be aggregated to a single
 The following graph shows the combined average requests per second (req/s) for all services over a period of time.
 
 <Figure
-  src="/img/docs/dashboards/panel-types/value.webp"
+  src="/img/docs/dashboards/panel-types/value-v2.webp"
   alt="Number panel for req/s over period of time"
   caption="Number panel for req/s over period of time."
 />
@@ -56,6 +56,20 @@ The following graph shows the combined average requests per second (req/s) for a
 - **Unit** — The unit of the displayed value (for example, `Bytes`, `Percent`, `Requests/s`). The default is `None`.
 - **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
 
+<Admonition type="info">
+When you create a new panel, the **Unit** is pre-filled with the unit of the selected metric, so the value matches how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
+</Admonition>
+
+#### One value, one query
+
+<Admonition type="warning">
+A Number panel shows a single value, so it renders only the first enabled query. If more than one query is enabled, an amber warning icon appears on the panel, in both the editor preview and the rendered dashboard tile. Hovering the icon shows: "This panel shows a single value, but more than one query is enabled. Disable the queries you don't want to display, keeping only the one whose value you want to show." Disable the extra queries to clear the warning.
+</Admonition>
+
+<Admonition type="info" title="PromQL queries on Number panels">
+A Number panel backed by a PromQL query reduces the resulting series to its **last** data point and displays that single value. For rate-style expressions such as `rate(...)`, "last" is the most recent evaluated point, not an average over the window. If you want a different aggregate, wrap the expression in a range function such as `avg_over_time(...)` so the query itself returns the value you want to display.
+</Admonition>
+
 #### Alerts
 
 Link existing alert rules to this panel or create new alerts directly from the panel configuration.
@@ -67,6 +81,10 @@ Add context links to enable click-through navigation from the panel to other das
 #### Thresholds
 
 Thresholds are used to draw a line on the y-axis to highlight the value. The thresholds are defined as a list of tuples. Each tuple contains the value and the color. The color is optional and if not provided, the default color will be used.
+
+Threshold edits preview live as you type, and thresholds carry over when you change the panel's visualization type. See [Panel editor behavior](https://signoz.io/docs/userguide/manage-dashboards/#panel-editor-behavior).
+
+On a Number panel, the threshold's comparison operator and value also seed the condition when you [create an alert from the panel](https://signoz.io/docs/dashboards/interactivity/#operator-and-value-from-thresholds), and the panel's **Reduce To** setting seeds the alert occurrence.
 
 ### Get Help
 

@@ -1,0 +1,145 @@
+---
+date: 2026-07-31
+title: Stats API - Verify SigNoz Telemetry Ingestion Health
+description: Look up the SigNoz Stats API to fetch telemetry row counts and last-observed timestamps for traces, logs, and metrics, and confirm ingestion is working.
+doc_type: reference
+---
+
+## Overview
+
+The SigNoz Stats API returns telemetry statistics: row counts and last-observed timestamps for traces, logs, and metrics. Use it to programmatically confirm that data is being ingested, build ingestion health checks, or surface storage stats in an external dashboard.
+
+The endpoint is always available. Stats are collected on each request and need no feature flag or configuration change, so the endpoint responds regardless of whether usage analytics reporting is enabled.
+
+## API Endpoint
+
+`GET` `https://<your-signoz-host>/api/v1/stats`
+
+Replace `<your-signoz-host>` with your instance host, e.g., `example.signoz.io`.
+
+## Prerequisites
+
+- **Access level:** The endpoint requires at least the `VIEWER` role, the minimum role in SigNoz. No admin or editor privileges are needed to read stats.
+- **API key:** To call the API with a key, go to **Settings → Service Accounts** in SigNoz, create a service account, and generate an API key from its **Keys** tab. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for step-by-step instructions. Admins can create API keys by default. Any other user can do so through a custom role granting the `factor-api-key:create` and `serviceaccount:attach` transactions. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
+
+## Authentication
+
+The endpoint accepts either of the following credentials:
+
+- **API key**, passed in the `SIGNOZ-API-KEY` header (recommended for scripts and external integrations):
+
+  ```bash
+  SIGNOZ-API-KEY:<your-api-key>
+  ```
+
+- **Session token**, a bearer token issued to a signed-in user, passed in the `Authorization` header:
+
+  ```bash
+  Authorization: Bearer <your-session-token>
+  ```
+
+Either credential must map to a user or service account with at least the `VIEWER` role.
+
+<Admonition type="tip">
+Secure storage and handling of your API key is crucial to prevent unauthorized access.
+</Admonition>
+
+## Example Request
+
+```bash
+curl -H "SIGNOZ-API-KEY: <your-api-key>" \
+     https://<your-signoz-host>/api/v1/stats
+```
+
+**Verify these values:**
+
+- `<your-api-key>`: An API key for a service account with at least the `VIEWER` role.
+- `<your-signoz-host>`: Your instance host, e.g., `example.signoz.io`.
+
+<Admonition type="warning">
+Each call runs full row counts over the trace, log, and metric tables, and the server aborts the request after 10 seconds. On installations with large volumes the response is slow and can time out. Call it for one-off checks or on a low-frequency schedule (for example, every few minutes), not in a tight polling loop.
+</Admonition>
+
+## Response
+
+A successful request returns HTTP `200` with a JSON envelope. All statistics are nested under the top-level `data` object as a flat key-value map; `status` is `"success"`.
+
+```json
+{
+  "status": "success",
+  "data": {
+    "telemetry.traces.count": 4821934,
+    "telemetry.traces.last_observed.time": "2026-06-18T09:14:22.350011Z",
+    "telemetry.traces.last_observed.time_unix": 1781774062,
+    "telemetry.logs.count": 19384726,
+    "telemetry.logs.last_observed.time": "2026-06-18T09:14:25.483198924Z",
+    "telemetry.logs.last_observed.time_unix": 1781774065,
+    "telemetry.metrics.count": 73650281,
+    "telemetry.metrics.last_observed.time": "2026-06-18T09:14:20Z",
+    "telemetry.metrics.last_observed.time_unix": 1781774060,
+    "telemetry.metrics.k8s.exists": true,
+    "telemetry.metrics.system.exists": true
+  }
+}
+```
+
+### Telemetry statistics
+
+| Key | Type | Description |
+| --- | --- | --- |
+| `telemetry.traces.count` | integer | Number of trace (span) rows currently in storage. |
+| `telemetry.traces.last_observed.time` | string | Timestamp of the most recent trace, in UTC (RFC 3339, with fractional seconds). |
+| `telemetry.traces.last_observed.time_unix` | integer | Timestamp of the most recent trace, as a Unix epoch (seconds). |
+| `telemetry.logs.count` | integer | Number of log rows currently in storage. |
+| `telemetry.logs.last_observed.time` | string | Timestamp of the most recent log, in UTC (RFC 3339, with fractional seconds). |
+| `telemetry.logs.last_observed.time_unix` | integer | Timestamp of the most recent log, as a Unix epoch (seconds). |
+| `telemetry.metrics.count` | integer | Number of scalar metric sample rows currently in storage. Exponential histogram samples are stored separately and are not included. |
+| `telemetry.metrics.last_observed.time` | string | Timestamp of the most recent scalar metric sample, in UTC (RFC 3339). Rounded down to the second. |
+| `telemetry.metrics.last_observed.time_unix` | integer | Timestamp of the most recent metric sample, as a Unix epoch (seconds). |
+| `telemetry.metrics.k8s.exists` | boolean | Whether any Kubernetes metrics are present. |
+| `telemetry.metrics.system.exists` | boolean | Whether any host or system metrics are present. |
+
+<Admonition type="info">
+The `telemetry.*.count` values are totals over the rows currently retained in storage, not a time-windowed count. Rows dropped by your retention settings are not counted, and on long-running installations these values can be very large integers. The `last_observed.*` keys for a signal are omitted from the response when that signal has no data yet, so check for their presence before reading them.
+</Admonition>
+
+<Admonition type="info">
+The telemetry counts cover all data in the underlying telemetry tables. On a self-hosted deployment with more than one organization, they are not scoped to the calling user's organization.
+
+`telemetry.metrics.count` and `telemetry.metrics.last_observed.*` are read from the scalar samples table only. If your workloads emit exponential histograms, those samples land in a separate table and are not reflected in these values, so an installation that sends only exponential histograms can report a metric count of zero while ingestion is healthy.
+</Admonition>
+
+### Additional statistics
+
+The `data` object is an extensible flat map. Alongside the telemetry keys above, the response also includes operational statistics contributed by other SigNoz subsystems, such as:
+
+- `user.count`, `user.count.active`, `user.count.pending_invite`, `user.count.deleted`
+- `serviceaccount.count`, `serviceaccount.keys.count`
+- `dashboard.count`, `savedview.count`, `rule.count`
+- `logs_pipeline.total.count`, `logs_pipeline.enabled.count`
+- `alert.firing.count`, `alertmanager.channel.count`
+- `config.cache.provider`, `config.sqlstore.provider`, `config.tokenizer.provider`
+
+Treat `data` as an open key-value map rather than a fixed schema. The exact set of keys changes across SigNoz versions, so read keys by name and tolerate additional, unknown keys.
+
+<Admonition type="info">
+Every key is optional. Stats come from independent collectors, and a collector that fails or is not active in your deployment is skipped without failing the request, so its keys are simply absent from `data`. Check for a key before reading it rather than assuming it is always returned.
+</Admonition>
+
+### Errors
+
+| Status | Cause |
+| --- | --- |
+| `401 Unauthorized` | The API key or bearer token is missing, malformed, or expired. |
+| `403 Forbidden` | The credential is valid but the identity does not have the `VIEWER` role. |
+
+Error responses use the same envelope with `"status": "error"` and an `error` object describing the failure.
+
+## API Specification
+
+The full API specification is available in the [OpenAPI Reference](https://signoz.io/api-reference/).
+
+## Related
+
+- [Verify data ingestion](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/): Use this endpoint to confirm traces, logs, or metrics are arriving.
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/): Create the API key used to authenticate.

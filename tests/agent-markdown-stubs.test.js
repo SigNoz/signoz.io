@@ -18,7 +18,7 @@ test('unknown component stubs preserve titles when children are rendered', async
   const doc = createDoc(
     '<KeyPointCallout title="Using self-hosted SigNoz?">Most steps are identical.</KeyPointCallout>'
   )
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(
       components.KeyPointCallout,
@@ -33,7 +33,7 @@ test('unknown component stubs preserve titles when children are rendered', async
 
 test('Admonition stubs preserve the admonition type label', async () => {
   const doc = createDoc('<Admonition type="warning">Keep existing receivers.</Admonition>')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(
       components.Admonition,
@@ -48,7 +48,7 @@ test('Admonition stubs preserve the admonition type label', async () => {
 
 test('Listicle stubs respect the selected default section', async () => {
   const doc = createDoc('<Listicle name="collection-agents" defaultSection="kubernetes" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'collection-agents',
@@ -67,7 +67,7 @@ test('Listicle stubs respect the selected default section', async () => {
 
 test('Listicle stubs render flat listicle items from JSON', async () => {
   const doc = createDoc('<Listicle name="llm-monitoring" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'llm-monitoring',
@@ -82,7 +82,7 @@ test('Listicle stubs render flat listicle items from JSON', async () => {
 
 test('Listicle stubs render metrics quick start sections from JSON', async () => {
   const doc = createDoc('<Listicle name="metrics-quick-start" defaultSection="databases" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'metrics-quick-start',
@@ -98,7 +98,7 @@ test('Listicle stubs render metrics quick start sections from JSON', async () =>
 
 test('Listicle stubs use the configured markdown title', async () => {
   const doc = createDoc('<Listicle name="aws-monitoring" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'aws-monitoring',
@@ -109,9 +109,40 @@ test('Listicle stubs use the configured markdown title', async () => {
   assert.doesNotMatch(html, /<h2>Listicle<\/h2>/)
 })
 
+test('ListicleDirectory stubs render the integrations item list', async () => {
+  const doc = createDoc('<ListicleDirectory name="integrations" defaultSection="all" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.ListicleDirectory, {
+      name: 'integrations',
+      defaultSection: 'all',
+    })
+  )
+
+  assert.match(html, /Integrations Guides/)
+  assert.match(html, /PostgreSQL/)
+  assert.match(html, /\/docs\/integrations\/redis/)
+  assert.match(html, /One-Click AWS Integrations/)
+})
+
+test('ListicleDirectory stubs respect the selected default section', async () => {
+  const doc = createDoc('<ListicleDirectory name="integrations" defaultSection="databases" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.ListicleDirectory, {
+      name: 'integrations',
+      defaultSection: 'databases',
+    })
+  )
+
+  assert.match(html, /Redis/)
+  assert.match(html, /MongoDB/)
+  assert.doesNotMatch(html, /One-Click AWS Integrations/)
+})
+
 test('HostingDecision stub matches the banner CTA destinations', async () => {
   const doc = createDoc('<HostingDecision />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(React.createElement(components.HostingDecision))
 
   assert.match(html, /Compare Self Host vs Cloud/)
@@ -124,16 +155,68 @@ test('HostingDecision stub matches the banner CTA destinations', async () => {
 
 test('RegionTable stub renders a placeholder for the endpoint table', async () => {
   const doc = createDoc('<RegionTable />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(React.createElement(components.RegionTable))
 
   assert.match(html, /region and endpoint reference/)
   assert.doesNotMatch(html, /Component: RegionTable/)
 })
 
+test('DashboardActions stub renders both schema versions with their URLs', async () => {
+  const v2Url =
+    'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/agno/agno-dashboard.json'
+  const v1Url =
+    'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/agno/v1/agno-dashboard.json'
+  const doc = createDoc(
+    `<DashboardActions dashboardJsonV2Url="${v2Url}" dashboardJsonV1Url="${v1Url}" />`
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.DashboardActions, {
+      dashboardJsonV2Url: v2Url,
+      dashboardJsonV1Url: v1Url,
+    })
+  )
+
+  assert.match(html, /V2 dashboard JSON \(recommended, requires SigNoz v0\.135\.0 or newer\)/)
+  assert.match(html, /V1 dashboard JSON \(deprecated, only for SigNoz older than v0\.135\.0\)/)
+  assert.match(html, /agno\/agno-dashboard\.json/)
+  assert.match(html, /agno\/v1\/agno-dashboard\.json/)
+  assert.match(html, /New dashboard → Import JSON/)
+  assert.doesNotMatch(html, /Component: DashboardActions/)
+})
+
+test('DashboardActions stub omits V1 when a dashboard is V2 only', async () => {
+  const v2Url =
+    'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/openai/openai-dashboard.json'
+  const doc = createDoc(`<DashboardActions dashboardJsonV2Url="${v2Url}" />`)
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.DashboardActions, { dashboardJsonV2Url: v2Url })
+  )
+
+  assert.match(html, /V2 dashboard JSON/)
+  assert.doesNotMatch(html, /V1 dashboard JSON/)
+})
+
+test('DashboardActions stub still handles the legacy dashboardJsonUrl prop', async () => {
+  const url = 'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/nginx.json'
+  const doc = createDoc(`<DashboardActions dashboardJsonUrl="${url}" dashboardName="NGINX" />`)
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.DashboardActions, {
+      dashboardJsonUrl: url,
+      dashboardName: 'NGINX',
+    })
+  )
+
+  assert.match(html, /V2 dashboard JSON/)
+  assert.match(html, /nginx\/nginx\.json/)
+})
+
 test('MCPInstallButton stub renders child text with client context', async () => {
   const doc = createDoc('<MCPInstallButton client="cursor">Add to Cursor</MCPInstallButton>')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.MCPInstallButton, { client: 'cursor' }, 'Add to Cursor')
   )
@@ -141,4 +224,45 @@ test('MCPInstallButton stub renders child text with client context', async () =>
   assert.match(html, /Add to Cursor/)
   assert.match(html, /Add to Cursor \(US\)/)
   assert.match(html, /cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install/)
+})
+
+test('Tooltip stub renders the linked term with its definition in brackets', async () => {
+  const doc = createDoc(
+    '<Tooltip text="spans" content="A span represents a single unit of work in a trace." link="https://signoz.io/docs/glossary/#span" />'
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Tooltip, {
+      text: 'spans',
+      content: 'A span represents a single unit of work in a trace.',
+      link: 'https://signoz.io/docs/glossary/#span',
+    })
+  )
+
+  assert.match(html, /<a href="https:\/\/signoz\.io\/docs\/glossary\/#span">spans<\/a>/)
+  assert.match(html, /\(A span represents a single unit of work in a trace\.\)/)
+})
+
+test('Tooltip stub renders the plain term with its definition in brackets', async () => {
+  const doc = createDoc(
+    '<Tooltip text="metrics" content="A metric is a measurement collected over time." />'
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Tooltip, {
+      text: 'metrics',
+      content: 'A metric is a measurement collected over time.',
+    })
+  )
+
+  assert.match(html, /metrics/)
+  assert.match(html, /\(A metric is a measurement collected over time\.\)/)
+})
+
+test('Tooltip stub keeps the term alone when no definition exists', async () => {
+  const doc = createDoc('<Tooltip text="metrics" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(React.createElement(components.Tooltip, { text: 'metrics' }))
+
+  assert.equal(html, '<span>metrics</span>')
 })

@@ -1,0 +1,142 @@
+---
+date: 2026-09-24
+title: SigNoz Operator Reference - Custom Resources & Spec Fields
+description: Reference for SigNoz Operator custom resources, including supported kinds, shared spec fields and defaults, status conditions, reasons, and operator flags.
+doc_type: reference
+---
+
+## Overview
+
+Look up the custom resources, spec fields, status conditions, and flags of the SigNoz Operator here. To install the operator and create your first resource, see the [SigNoz Operator overview](https://signoz.io/docs/manage/signoz-operator/overview/).
+
+To see every field of a kind in your cluster, run `kubectl explain`, for example `kubectl explain dashboard.spec`.
+
+## Custom Resources
+
+All kinds are in the `resources.signoz.io/v1alpha1` API group.
+
+| Kind | Scope | SigNoz object |
+|---|---|---|
+| `ProviderConfig` | Namespace | A SigNoz endpoint and the API key for it |
+| `ClusterProviderConfig` | Cluster | The same as `ProviderConfig`, for all namespaces |
+| `Dashboard` | Namespace | A [dashboard](https://signoz.io/docs/userguide/manage-dashboards/) |
+| `Rule` | Namespace | An [alert rule](https://signoz.io/docs/alerts/) |
+| `SavedView` | Namespace | A saved view |
+| `PlannedMaintenance` | Namespace | A [planned maintenance](https://signoz.io/docs/alerts-management/planned-maintenance/) window |
+| `RoutePolicy` | Namespace | A notification [routing policy](https://signoz.io/docs/alerts-management/routing-policy/) |
+| `User` | Namespace | A user |
+| `Role` | Namespace | A [role](https://signoz.io/docs/manage/administrator-guide/iam/roles/) |
+| `ServiceAccount` | Namespace | A [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) |
+| `AuthDomain` | Namespace | An [SSO](https://signoz.io/docs/manage/administrator-guide/sso/overview/) auth domain |
+
+The <a href="https://github.com/SigNoz/signoz-operator/tree/main/config/samples" target="_blank" rel="noopener noreferrer nofollow">samples directory</a> of the operator repository has one sample manifest for each kind.
+
+## Shared Spec Fields
+
+Every kind except `ProviderConfig` and `ClusterProviderConfig` has these fields at the root of `spec`:
+
+| Field | Default | Description |
+|---|---|---|
+| `providerConfigRef.name` | None, required | The name of the `ProviderConfig` or `ClusterProviderConfig` to use. |
+| `providerConfigRef.kind` | `ProviderConfig` | `ProviderConfig` or `ClusterProviderConfig`. |
+| `interval` | `10m` | How often the operator compares the object in SigNoz with the manifest and reverts drift. |
+| `retryInterval` | `interval`, then `1m` | How often the operator retries after a temporary failure. If you do not set it, the operator uses `interval`. If you set neither, it uses `--default-resources-retry-interval`. |
+| `timeout` | `30s` | The maximum time for one reconcile, including the calls to SigNoz. |
+| `suspend` | `false` | If `true`, the operator stops acting on the resource. It does not change or delete the object in SigNoz. |
+| `reclaimPolicy` | `Delete` | What happens in SigNoz when you delete the custom resource. `Delete` removes the SigNoz object. `Orphan` keeps it. |
+| `objectTemplate.spec` | None | The SigNoz object as typed fields. The API server validates them when you apply the manifest. |
+| `objectTemplate.jsonSpec` | None | The SigNoz object as a JSON request body. The operator sends it without changes, so the body must include the identity field, such as `name`, and the schema version, such as `"schemaVersion": "v6"` for a dashboard. |
+
+Set exactly one of `objectTemplate.spec` or `objectTemplate.jsonSpec`. The default values of `interval`, `retryInterval`, and `timeout` come from the [operator flags](#operator-flags).
+
+## ProviderConfig Fields
+
+`ProviderConfig` and `ClusterProviderConfig` have the same `spec`:
+
+| Field | Description |
+|---|---|
+| `endpoint.value` | The URL of the SigNoz instance. It must start with `http://` or `https://`. Use `https://`, because the operator sends the API key in a request header. |
+| `endpoint.valueFrom` | Reads the URL from a `secretKeyRef` or a `configMapKeyRef`. |
+| `auth.header.name` | The header that carries the API key. The default is `SIGNOZ-API-KEY`. |
+| `auth.header.scheme` | A prefix for the header value, for example `Bearer`. The operator sends `<scheme> <value>`. |
+| `auth.header.value` | The API key inline. Use `valueFrom` instead, so that the key does not appear in the manifest. |
+| `auth.header.valueFrom` | Reads the API key from a `secretKeyRef` or a `configMapKeyRef`. |
+| `tls.caSecretRef` | A Secret `name` and `key` that hold a CA bundle to trust. The operator reads it from the same namespace as the other references. |
+| `tls.insecureSkipVerify` | If `true`, the operator does not verify the server certificate. |
+
+Set exactly one of `value` or `valueFrom` for `endpoint` and for `auth.header`.
+
+The operator reads the Secrets and ConfigMaps of a `ProviderConfig` from the namespace of the `ProviderConfig`. For a `ClusterProviderConfig`, it reads them from the operator namespace, `signoz-operator-system`.
+
+## Status Conditions
+
+Every managed kind reports the same condition types:
+
+| Condition | Meaning |
+|---|---|
+| `Ready` | The summary of all other conditions. Wait on this one. |
+| `Synced` | `True` when the object in SigNoz matches the manifest. `Unknown` when the operator cannot tell yet. |
+| `Recoverable` | A temporary failure. The operator retries at `retryInterval`. |
+| `Terminal` | A failure that retries cannot fix. The operator stops retrying until you edit the resource, change its `ProviderConfig` or Secret, or restart the operator. |
+| `Suspended` | `spec.suspend` is `true`. |
+
+`kubectl get` shows the status and the reason of the `Ready` condition in the `READY` and `REASON` columns, and the SigNoz ID in the `ID` column.
+
+### Resource reasons
+
+| Reason | Meaning |
+|---|---|
+| `Created`, `Updated`, `Synced` | The object in SigNoz matches the manifest. |
+| `Pending` | The object is missing in SigNoz, for example because someone deleted it in the UI. The operator creates it again. |
+| `InvalidSpec` | The operator cannot read the desired state, for example a `jsonSpec` that is not valid JSON. |
+| `Rejected` | SigNoz rejected the body with a 400 response. |
+| `ImmutableFieldChanged` | You changed a field that you can set only when the operator creates the object. |
+| `Ambiguous` | More than one SigNoz object matches the identity of the resource. |
+| `SigNozResourceIDMismatch` | The `resources.signoz.io/signoz-resource-id` annotation names an object that does not match the identity of the resource. |
+| `Unauthorized` | SigNoz rejected the API key with a 401 or 403 response. |
+| `ProviderConfigNotReady` | The operator cannot read the endpoint or the API key from the `ProviderConfig`. |
+| `BackendError` | SigNoz returned a 5xx or 429 response. |
+| `BackendUnreachable` | A connection, timeout, or TLS failure. |
+| `Suspended` | `spec.suspend` is `true`. |
+| `CompareFailed` | The operator cannot compare the manifest with the object in SigNoz. This is likely a bug in the operator. Report it in the <a href="https://github.com/SigNoz/signoz-operator/issues" target="_blank" rel="noopener noreferrer nofollow">operator issues</a>. |
+
+### ProviderConfig reasons
+
+A `ProviderConfig` reports only the `Ready` condition. `Ready=True` means that the operator can read the endpoint and the API key. The operator does not send a test request to SigNoz.
+
+| Reason | Meaning |
+|---|---|
+| `Resolved` | The operator read the endpoint and the API key. |
+| `SpecInvalid` | The `spec` is not valid. |
+| `EndpointInvalid` | The endpoint is not a valid URL. |
+| `SecretNotFound`, `ConfigMapNotFound` | The referenced Secret or ConfigMap does not exist in the namespace that the operator reads from. |
+| `KeyNotFound` | The Secret or ConfigMap does not have the referenced key. |
+| `ValueEmpty` | The referenced key is empty. |
+| `CABundleInvalid` | The CA bundle in `tls.caSecretRef` is not valid. |
+| `ReferenceReadFailed` | The operator cannot read a referenced Secret or ConfigMap. |
+
+## Resource Identity
+
+When a resource has no SigNoz ID yet, the operator looks for an existing object with the same identity and adopts it. For example, a `Dashboard` matches a dashboard with the same `name`, and a `User` matches a user with the same email. With `reclaimPolicy: Delete`, the operator also deletes an adopted object when you delete the custom resource.
+
+If more than one object matches, set the `resources.signoz.io/signoz-resource-id` annotation on the custom resource to the ID of the object to adopt.
+
+## Operator Flags
+
+The operator reads its configuration from flags. The table lists the common flags. For the full list, including the TLS flags for the metrics and webhook servers, see <a href="https://github.com/SigNoz/signoz-operator/blob/main/cmd/config.go" target="_blank" rel="noopener noreferrer nofollow">cmd/config.go</a>. You can also set each flag as an environment variable with the `SIGNOZ_OPERATOR_` prefix. For example, `--log-level` becomes `SIGNOZ_OPERATOR_LOG_LEVEL`.
+
+| Flag | Default | Description |
+|---|---|---|
+| `--log-level` | `info` | One of `debug`, `info`, `error`, or `panic`. |
+| `--watch-namespaces` | All namespaces | The namespaces that the operator watches. |
+| `--operator-namespace` | None, required | The namespace of the operator. The operator reads the Secrets of a `ClusterProviderConfig` from this namespace. |
+| `--default-resources-interval` | `10m` | The `interval` for resources that do not set one. |
+| `--default-resources-retry-interval` | `1m` | The `retryInterval` for resources that set neither `retryInterval` nor `interval`. |
+| `--default-resources-timeout` | `30s` | The `timeout` for resources that do not set one. |
+| `--leader-elect` | `false` | Enables leader election, so that only one operator replica is active. |
+| `--health-probe-bind-address` | `:8081` | The address of the health probe endpoint. |
+| `--metrics-bind-address` | `0` | The address of the metrics endpoint. `0` turns off the metrics endpoint. |
+
+## Get Help
+
+<GetHelp />

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import { GITHUB_STARS_EDGE_S_MAXAGE_SECONDS } from '@/constants/cache'
 
 const GITHUB_REPO_API_URL = 'https://api.github.com/repos/SigNoz/signoz'
@@ -41,10 +41,12 @@ async function fetchGitHubStars(): Promise<number> {
   return data.stargazers_count
 }
 
-const getCachedGitHubStars = unstable_cache(fetchGitHubStars, ['signoz-github-stars-v1'], {
-  revalidate: GITHUB_STARS_EDGE_S_MAXAGE_SECONDS,
-  tags: [CACHE_TAG],
-})
+async function getCachedGitHubStars(): Promise<number> {
+  'use cache'
+  cacheLife({ revalidate: GITHUB_STARS_EDGE_S_MAXAGE_SECONDS })
+  cacheTag(CACHE_TAG)
+  return fetchGitHubStars()
+}
 
 let pendingStarsRequest: Promise<number> | null = null
 

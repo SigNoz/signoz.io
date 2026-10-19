@@ -3,6 +3,8 @@ import React from 'react'
 import Link from 'next/link'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import { usePathname } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 function WorkspaceReady({
   workspaceData,
@@ -164,7 +166,7 @@ function WorkspaceReady({
       <div className="mt-[28px] flex w-full max-w-[480px] flex-col items-center justify-center gap-4 py-[8px] text-sm font-medium">
         <a
           type="submit"
-          className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
+          className={cn(buttonVariants({ variant: 'default' }), 'mt-[28px] w-full')}
           href={workspaceData?.invite_link}
           onClick={handleSetPassword}
         >
@@ -173,7 +175,7 @@ function WorkspaceReady({
         </a>
 
         <Link href="/docs/introduction/" className="w-full" onClick={handleReadDocs}>
-          <button className="flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
+          <button className={cn(buttonVariants({ variant: 'secondary' }), 'w-full')}>
             <span className="flex text-xs leading-5">Read the docs </span>
             <ArrowRight size={14} />
           </button>

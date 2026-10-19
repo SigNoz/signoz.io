@@ -1,0 +1,90 @@
+---
+published_date: 2026-09-06
+title: Modal Dashboard for Function and Sandbox Metrics
+description: Monitor Modal in SigNoz including input throughput and success rate, cold start and queue wait, container backlog and churn, CPU, memory, and GPU saturation.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your Modal workspace across input throughput and success rate, cold start and queue wait, container backlog and churn, per-function CPU and memory, and GPU saturation.
+
+Modal pushes container metrics to your OTLP endpoint through its workspace-level OpenTelemetry integration, so nothing here depends on code you write. Turning the integration on covers every Function and every Sandbox in the workspace at once.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Monitor Modal Functions and Sandboxes with OpenTelemetry](https://signoz.io/docs/integrations/modal/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/modal-dashboard.webp"
+  alt="Modal Dashboard"
+  caption="Modal Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/modal/modal-dashboard.json"
+  dashboardName="Modal"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Confirm workload health**: See how many inputs Modal accepted, how many failed, and the success rate across every Function.
+- **Separate slow starts from slow work**: Compare cold start, queue wait, and execution time, so you know whether a slow run waited for a container or ran slowly once it had one.
+- **Spot a backlog**: Watch pending inputs against running inputs to see when autoscaling falls behind the work you are sending.
+- **Tell Functions and Sandboxes apart**: Split container counts and terminations by object type, which is the only attribute that separates them.
+- **Find a starved container**: Track CPU and memory per function and per container.
+- **Measure GPU saturation**: Watch compute utilization, memory, temperature, power, and clock on the Functions that use a GPU.
+
+## Metrics Included
+
+### Overview
+
+- **Inputs Processed**, **Failed Inputs**, **Success Rate**: Total inputs (`modal.input_events.total_inputs`), the count that did not succeed, and the share that did. Modal ships no error counter, so failures are `total_inputs` minus `modal.input_events.successes`.
+- **Running Containers**: Containers currently up (`modal.container.running`).
+- **Input Throughput by Function** and **Successful vs Failed Inputs**: Volume over time, and the split between the two outcomes.
+- **Failed Inputs by Function** and **Success Rate by Function**: The same split, per function.
+
+### Latency
+
+- **Cold Start Time**, **Input Queue Wait**, **Execution Time**: Each shown as a mean and a worst case, from `modal.input_events.coldstart_time_us`, `input_queue_time_us`, and `elapsed_time_us`.
+- **Latency Breakdown by Function**: Inputs, all three means, and the worst cold start in one table.
+
+<Admonition type="info" title="Why means and not percentiles" defaultCollapsed="true">
+Modal emits these three histograms with a single `+Inf` bucket and no boundaries, so a p95 or p99 query returns nothing. The mean panels divide the increase in `.sum` by the increase in `.count`, and the worst-case panels read `.max`.
+</Admonition>
+
+### Backlog and Concurrency
+
+- **Backlog: Pending vs Running Inputs**: `modal.function.pending_inputs` against `modal.function.running_inputs`, the clearest signal that work is queuing.
+- **Pending Inputs by Function** and **Running Inputs by Function**: The same two metrics per function.
+- **Running Containers by Object Type** and **by App**: Container counts split by `object_type` and by app.
+- **Container Terminations by Reason** and **by Object Type**: `modal.container.terminations`, where `reason` separates a container that finished on its own from one you cancelled.
+
+### Container Resources
+
+- **CPU Utilisation by Function** and **Peak CPU Utilisation by Function**: Mean and peak `modal.cpu.utilization`. A value of 1 means one full core, so a multi-core container reads above 100%.
+- **Memory Usage by Function** and **by Container**: `modal.memory.usage` in bytes.
+- **Container Resources by Function**: Mean CPU, peak CPU, and peak memory in one table.
+
+### GPU
+
+- **Peak GPU Compute Utilisation**, **Peak GPU Memory**, **Peak GPU Temperature**, **Peak GPU Power**: The worst reading for each over the range.
+- **GPU Compute Utilisation**, **GPU Memory Usage**, **GPU Temperature**, **GPU Power Draw**, **GPU Power Utilisation**, and **GPU SM Clock**, each by function.
+
+<Admonition type="info" title="Why GPU panels use peaks" defaultCollapsed="true">
+Every Modal container reports the `modal.gpu.*` metrics, and containers without a GPU report zero. These panels take the maximum rather than the average, and drop the all-zero series, so the idle containers cannot pull the numbers down.
+</Admonition>
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **environment_name**: Filter by Modal environment.
+- **app_name**: Filter by Modal App.
+- **object_type**: Filter by `function`, `sandbox`, or `image`.
+- **function_name**: Filter by function. It applies to the container and `modal.input_events.*` panels, which use the module-qualified name such as `agent_worker.run`. The `modal.function.*` backlog panels ignore it, because those metrics report the bare name.
+
+## Related Dashboards
+
+- [Baseten](https://signoz.io/docs/dashboards/dashboard-templates/baseten-dashboard/)
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics/)

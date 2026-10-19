@@ -1,5 +1,5 @@
-import docsSideNav from '@/constants/docsSideNav'
-import type { NavItem as DocsSideNavItem } from '@/components/DocsSidebar/types'
+import { getDocsSideNav } from '@/utils/docsSideNav'
+import { fetchAllDocsIndex } from '@/utils/cachedData'
 
 type NavItem =
   | {
@@ -22,7 +22,18 @@ export type DocsRouteTreeItem = {
   children: DocsRouteTreeItem[]
 }
 
+export type LlmStarterLink = {
+  label: string
+  route: string
+  description?: string
+}
+
 const DOCS_ROOT = '/docs/introduction'
+
+// Single source for the docs introduction meta description; the introduction
+// page metadata and /llms.txt both read it (issue #1173 requires this string).
+export const INTRO_DESCRIPTION =
+  'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.'
 
 const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => route === DOCS_ROOT,
@@ -30,6 +41,9 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => /^\/docs\/cloud(?:\/|$)/.test(route),
   (route) => /^\/docs\/opentelemetry-collection-agents\/get-started(?:\/|$)/.test(route),
   (route) => route === '/docs/llm-observability',
+  (route) => route === '/docs/ai/agent-skills',
+  (route) => route === '/docs/ai/signoz-mcp-server',
+  (route) => route === '/docs/ai/use-cases',
   (route) => route === '/docs/aws-monitoring/overview',
   (route) => route === '/docs/gcp-monitoring',
   (route) => route === '/docs/migration/migrate-to-signoz',
@@ -41,6 +55,7 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => route === '/docs/migration/migrate-from-opentelemetry-to-signoz',
   (route) => route === '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud',
   (route) => /^\/docs\/instrumentation(?:\/|$)/.test(route),
+  (route) => route === '/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing',
   (route) => /^\/docs\/traces-management(?:\/|$)/.test(route),
   (route) => /^\/docs\/metrics-management(?:\/|$)/.test(route),
   (route) => /^\/docs\/logs-management(?:\/|$)/.test(route),
@@ -48,6 +63,16 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => /^\/docs\/dashboards(?:\/|$)/.test(route),
   (route) => /^\/docs\/manage\/administrator-guide(?:\/|$)/.test(route),
   (route) => /^\/docs\/migration(?:\/|$)/.test(route),
+  // Access control: agents asking "how do I authenticate against the API?"
+  // had no path to these from /llms.txt, so the docs existed but were
+  // undiscoverable. They render as their own llms.txt section.
+  (route) => route === '/docs/manage/administrator-guide/iam/roles',
+  (route) => route === '/docs/manage/administrator-guide/iam/service-accounts',
+  (route) =>
+    route === '/docs/manage/administrator-guide/iam/user-guides/self-service-api-keys-for-viewers',
+  (route) =>
+    route ===
+    '/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key',
 ]
 
 const normalizeDocsRoute = (route?: string): string | null => {
@@ -97,14 +122,14 @@ const buildRouteLabelLookup = (items: NavItem[], lookup: Map<string, string>) =>
   })
 }
 
-const routeLabelLookup = (() => {
+function getRouteLabelLookup(docsSideNav: NavItem[]): Map<string, string> {
   const lookup = new Map<string, string>()
-  buildRouteLabelLookup(docsSideNav as NavItem[], lookup)
+  buildRouteLabelLookup(docsSideNav, lookup)
   lookup.set(DOCS_ROOT, 'Get Started')
   return lookup
-})()
+}
 
-const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
+const toTree = (items: NavItem[], lookup: Map<string, string>): DocsRouteTreeItem[] => {
   return items
     .map((item): DocsRouteTreeItem | null => {
       if (typeof item === 'string') {
@@ -112,7 +137,7 @@ const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
         if (!route) return null
 
         return {
-          label: routeLabelLookup.get(route) || fallbackLabelFromRoute(route),
+          label: lookup.get(route) || fallbackLabelFromRoute(route),
           route,
           children: [],
         }
@@ -121,7 +146,7 @@ const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
       const label =
         item.label || (item.route ? fallbackLabelFromRoute(item.route) : 'Documentation')
       const route = normalizeDocsRoute(item.route)
-      const children = Array.isArray(item.items) ? toTree(item.items as NavItem[]) : []
+      const children = Array.isArray(item.items) ? toTree(item.items as NavItem[], lookup) : []
 
       if (!route && children.length === 0) {
         return null
@@ -152,17 +177,14 @@ const flattenTree = (nodes: DocsRouteTreeItem[], depth: number, output: DocsRout
   })
 }
 
-export function getDocsRouteTree(
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): DocsRouteTreeItem[] {
-  return toTree(items as NavItem[])
+export async function getDocsRouteTree(): Promise<DocsRouteTreeItem[]> {
+  const docsSideNav = (await getDocsSideNav()) as NavItem[]
+  return toTree(docsSideNav, getRouteLabelLookup(docsSideNav))
 }
 
-export function getDocsRouteList(
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): DocsRouteListItem[] {
+export async function getDocsRouteList(): Promise<DocsRouteListItem[]> {
   const all: DocsRouteListItem[] = []
-  flattenTree(getDocsRouteTree(items), 0, all)
+  flattenTree(await getDocsRouteTree(), 0, all)
 
   const seen = new Set<string>()
   return all.filter((item) => {
@@ -172,12 +194,36 @@ export function getDocsRouteList(
   })
 }
 
-export function getLlmStarterLinks(
-  limit = 24,
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): Array<Pick<DocsRouteListItem, 'label' | 'route'>> {
-  const routes = getDocsRouteList(items)
-  const starters: Array<Pick<DocsRouteListItem, 'label' | 'route'>> = []
+const normalizeDescription = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined
+  const collapsed = value.replace(/\s+/g, ' ').trim()
+  return collapsed.length > 0 ? collapsed : undefined
+}
+
+async function getDocsDescriptionLookup(): Promise<Map<string, string>> {
+  const lookup = new Map<string, string>()
+
+  try {
+    const docs = await fetchAllDocsIndex()
+    docs.forEach((doc) => {
+      if (typeof doc.slug !== 'string' || doc.slug.length === 0) return
+      const description = normalizeDescription(doc.description) ?? normalizeDescription(doc.summary)
+      if (description) {
+        lookup.set(`/docs/${doc.slug}`, description)
+      }
+    })
+  } catch (error) {
+    console.warn('Docs description lookup failed, emitting links without descriptions:', error)
+  }
+
+  lookup.set(DOCS_ROOT, INTRO_DESCRIPTION)
+  return lookup
+}
+
+export async function getLlmStarterLinks(limit = 30): Promise<LlmStarterLink[]> {
+  const routes = await getDocsRouteList()
+  const descriptions = await getDocsDescriptionLookup()
+  const starters: LlmStarterLink[] = []
   const seen = new Set<string>()
   const sortedRoutes = [...routes].sort(
     (a, b) => a.depth - b.depth || a.route.length - b.route.length
@@ -186,7 +232,11 @@ export function getLlmStarterLinks(
   const addStarter = (item: Pick<DocsRouteListItem, 'label' | 'route'> | undefined) => {
     if (!item || starters.length >= limit || seen.has(item.route)) return
     seen.add(item.route)
-    starters.push({ label: item.label, route: item.route })
+    starters.push({
+      label: item.label,
+      route: item.route,
+      description: descriptions.get(item.route),
+    })
   }
 
   LLM_STARTER_ROUTE_MATCHERS.forEach((matcher) => {

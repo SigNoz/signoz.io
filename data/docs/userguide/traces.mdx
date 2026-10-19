@@ -1,5 +1,5 @@
 ---
-date: 2026-05-20
+date: 2026-09-29
 title: Trace Explorer
 description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
 doc_type: explanation
@@ -19,6 +19,8 @@ The Traces Explorer page in SigNoz enables developers to filter, examine, and an
 - [Trace View](#traces-view)
 - [Time Series View](#time-series-view)
 - [Table View](#table-view)
+
+For LLM and agent traces, the [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/) shows one row for each AI trace, with tokens, cost, and call counts. You can also filter and aggregate on these trace totals, for example `trace.total_tokens > 1000`.
 
 ### List View
 
@@ -86,6 +88,22 @@ The Time Series View provides a graphical representation of trace data over time
   caption="Timeseries View in Trace Explorer"
 />
 
+#### Download chart data
+
+Click the **download** icon on the right of the Time Series chart header to export the data behind the chart. A popover opens with a **FORMAT** selector offering **csv** (default) and **jsonl**. Choose a format and click **Export** to download the file.
+
+The export mirrors what the chart shows:
+
+- **Series names match the chart legend**, including any custom legend format or group-by values.
+- **The value column carries the unit.** The value column header includes the human-readable Y-axis unit (for example, `value (ms)`). Display-only formats such as `short` or `none` are omitted.
+- **Duration values are exported in milliseconds** to match what the chart displays, not the raw nanosecond values returned by the API. A `p99` latency query, for example, exports the same millisecond values you see on the chart.
+
+Each row also includes the timestamp, the query name, the series name, and one column per group-by label.
+
+<Admonition type="info">
+The download button appears whenever the Time Series chart has data to export. No configuration or feature flag is required, and export behaves the same on SigNoz Cloud and self-hosted deployments.
+</Admonition>
+
 ### Table View
 
 The Table View provides a tabular representation of the trace data.
@@ -105,6 +123,34 @@ Both Time Series and Table views use the Query Builder for filtering, aggregatio
   alt="Query Builder showing Group By, Having, Order By, and Limit fields"
   caption="Query Builder in Time Series and Table views"
 />
+
+## Missing Spans
+
+A span shows as missing when a collected span references a Parent Span ID that no other span in the trace matches. That parent span still exists in your system but never reached SigNoz, so the waterfall view shows a gap where it should sit. SigNoz marks these traces with a "This trace has missing spans" banner in the trace details view.
+
+<Tooltip text="Tail sampling" content="Deciding whether to keep a trace after all its spans have arrived, so the decision can depend on what happened." link="https://signoz.io/docs/glossary/#tail-sampling" />, spans dropped in transit, and services that never export are the usual causes. For the full explanation and how to identify each cause, see [Why are some spans missing from a trace?](https://signoz.io/docs/traces-management/troubleshooting/faqs/#q-why-are-some-spans-missing-from-a-trace).
+
+## Export Spans and Traces
+
+The **Download** button exports the current results to a file. It appears in the top-right controls of both the [List View](#list-view) and the [Traces View](#traces-view), next to the per-page dropdown.
+
+To export your results:
+
+1. Apply the filters and span scope you want to export. The export honors your current filters and the selected time range.
+2. Click the **Download** icon in the top-right controls.
+3. In the popover, choose a **Format** and the **Number of Rows** to export.
+4. Click **Export** to download the file.
+
+The popover offers the same options in both views:
+
+| Option | Choices | Default |
+|---|---|---|
+| **Format** | `csv`, `jsonl` | `csv` |
+| **Number of Rows** | `10k`, `30k`, `50k` | `10k` |
+
+<Admonition>
+The Download button is available in both the List View and the Traces View, with identical format and row-limit options. To export chart data instead of individual rows, use the download control in the [Time Series View](#time-series-view).
+</Admonition>
 
 ## Trace Matching
 
@@ -197,7 +243,7 @@ To clear a filter, click **Clear All** next to the filter category. To reset all
 
 ### Adding Custom Quick Filters
 
-The quick filters panel shows a set of default filters (like Duration, Service Name, HTTP Method, etc.), but you can add any span or resource attribute as a custom quick filter.
+The quick filters panel shows a set of default filters (like Duration, Service Name, HTTP Method, etc.), but you can add any span or <Tooltip text="resource attribute" content="An attribute on a resource, such as service.name, host.name, or k8s.pod.name." link="https://signoz.io/docs/glossary/#resource-attribute" /> as a custom quick filter.
 
 To customize: click the **settings icon** at the top-right of the quick filters panel, then select **Edit quick filters**. This opens an editor showing your currently added filters and all other available attributes. Search for any attribute and add it to the panel.
 

@@ -1,4 +1,8 @@
-import docsSideNav from '@/constants/docsSideNav'
+import { cache } from 'react'
+import { type BreadcrumbCrumb, BASE_URL } from '@/utils/breadcrumbTypes'
+
+export type { BreadcrumbCrumb }
+export { BASE_URL }
 
 type NavItem =
   | {
@@ -8,11 +12,6 @@ type NavItem =
       items?: Array<NavItem | string>
     }
   | string
-
-export type BreadcrumbCrumb = {
-  name: string
-  url: string
-}
 
 type BreadcrumbItem = {
   '@type': 'ListItem'
@@ -27,14 +26,14 @@ type BreadcrumbListSchema = {
   itemListElement: BreadcrumbItem[]
 }
 
-export const BASE_URL = 'https://signoz.io'
-
 const SECTION_CONFIG: Record<string, BreadcrumbCrumb> = {
   docs: { name: 'Docs', url: `${BASE_URL}/docs/introduction/` },
   blog: { name: 'Blog', url: `${BASE_URL}/blog/` },
   guides: { name: 'Guides', url: `${BASE_URL}/guides/` },
   comparisons: { name: 'Comparisons', url: `${BASE_URL}/comparisons/` },
   opentelemetry: { name: 'OpenTelemetry', url: `${BASE_URL}/opentelemetry/` },
+  customers: { name: 'Customers', url: `${BASE_URL}/customers/` },
+  faqs: { name: 'FAQs', url: `${BASE_URL}/faqs/` },
 }
 
 const HOME_CRUMB: BreadcrumbCrumb = { name: 'SigNoz', url: `${BASE_URL}/` }
@@ -116,15 +115,13 @@ const buildRouteAncestryMap = (
   }
 }
 
-let ancestryMap: Map<string, BreadcrumbCrumb[]> | null = null
-
-const getAncestryMap = (): Map<string, BreadcrumbCrumb[]> => {
-  if (!ancestryMap) {
-    ancestryMap = new Map()
-    buildRouteAncestryMap(docsSideNav as NavItem[], [], ancestryMap)
-  }
-  return ancestryMap
-}
+const getAncestryMap = cache(async (): Promise<Map<string, BreadcrumbCrumb[]>> => {
+  const { getDocsSideNav } = await import('@/utils/docsSideNav')
+  const sideNav = await getDocsSideNav()
+  const map = new Map<string, BreadcrumbCrumb[]>()
+  buildRouteAncestryMap(sideNav as NavItem[], [], map)
+  return map
+})
 
 // --- Exported functions ---
 
@@ -153,9 +150,12 @@ export function buildBreadcrumbSchema(crumbs: BreadcrumbCrumb[]): BreadcrumbList
   }
 }
 
-export function getDocsBreadcrumbs(slug: string, pageTitle: string): BreadcrumbCrumb[] {
+export async function getDocsBreadcrumbs(
+  slug: string,
+  pageTitle: string
+): Promise<BreadcrumbCrumb[]> {
   const targetRoute = normalizeDocsRoute(`/docs/${slug}`)
-  const map = getAncestryMap()
+  const map = await getAncestryMap()
 
   const crumbs: BreadcrumbCrumb[] = [HOME_CRUMB, SECTION_CONFIG.docs]
 
@@ -178,12 +178,15 @@ export function getDocsBreadcrumbs(slug: string, pageTitle: string): BreadcrumbC
   return crumbs
 }
 
-export function generateDocsBreadcrumb(slug: string, pageTitle: string): BreadcrumbListSchema {
-  return buildBreadcrumbSchema(getDocsBreadcrumbs(slug, pageTitle))
+export async function generateDocsBreadcrumb(
+  slug: string,
+  pageTitle: string
+): Promise<BreadcrumbListSchema> {
+  return buildBreadcrumbSchema(await getDocsBreadcrumbs(slug, pageTitle))
 }
 
 export function getSectionArticleBreadcrumbs(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   title: string,
   slug: string
 ): BreadcrumbCrumb[] {
@@ -196,7 +199,7 @@ export function getSectionArticleBreadcrumbs(
 }
 
 export function generateSectionArticleBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   title: string,
   slug: string
 ): BreadcrumbListSchema {
@@ -204,7 +207,7 @@ export function generateSectionArticleBreadcrumb(
 }
 
 export function generateSectionHubBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   page?: string
 ): BreadcrumbListSchema {
   const config = SECTION_CONFIG[section]

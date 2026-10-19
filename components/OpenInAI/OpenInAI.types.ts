@@ -18,7 +18,6 @@ export interface OpenInAIProps {
 export interface AIOption {
   id: string
   name: string
-  description: string
   Icon: IconType
   getUrl: (pageUrl: string) => string
 }

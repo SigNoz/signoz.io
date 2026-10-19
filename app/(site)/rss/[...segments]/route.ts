@@ -5,7 +5,6 @@ import { filterPostsByTag, generateRss } from '../../../../scripts/rssFeed.mjs'
 import { loadPublishedPosts } from '../rssUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
-export const runtime = 'nodejs'
 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const revalidate = 86400
 

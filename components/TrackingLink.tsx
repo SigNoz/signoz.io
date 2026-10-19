@@ -3,7 +3,8 @@
 import Link from '@/components/Link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
-import { useLogEvent } from 'hooks/useLogEvent'
+import { useLogEvent } from '@/hooks/useLogEvent'
+import { useExperimentContext } from '@/components/ExperimentTracker'
 
 interface TrackingLinkProps {
   href: string
@@ -12,6 +13,7 @@ interface TrackingLinkProps {
   clickName: string
   clickLocation: string
   clickText: string
+  eventAttributes?: Record<string, unknown>
   className?: string
   onClick?: () => void
   target?: string
@@ -45,6 +47,7 @@ export default function TrackingLink({
   clickName,
   clickLocation,
   clickText,
+  eventAttributes: additionalEventAttributes,
   className,
   onClick,
   target,
@@ -56,10 +59,14 @@ export default function TrackingLink({
 }: TrackingLinkProps) {
   const pathname = usePathname()
   const logEvent = useLogEvent()
+  const experimentContext = useExperimentContext()
+  const resolvedExperimentId = experimentId ?? experimentContext?.experimentId
+  const resolvedVariantId = variantId ?? experimentContext?.variantId
 
   const handleClick = () => {
     // Create event attributes object with click data
     const eventAttributes: Record<string, any> = {
+      ...additionalEventAttributes,
       clickType,
       clickName,
       clickLocation,
@@ -68,12 +75,10 @@ export default function TrackingLink({
     }
 
     // Add experiment data to click event if available
-    if (experimentId && variantId) {
-      eventAttributes.experiment_id = experimentId
-      eventAttributes.variant_id = variantId
+    if (resolvedExperimentId && resolvedVariantId) {
+      eventAttributes.experiment_id = resolvedExperimentId
+      eventAttributes.variant_id = resolvedVariantId
       eventAttributes.button_type = clickType
-      // Flag this as a conversion event
-      eventAttributes.is_experiment_conversion = true
     }
 
     // Log a single unified event

@@ -1,0 +1,265 @@
+---
+date: 2026-09-25
+title: Migrate the Notification Channel API from v1 to v2 Endpoints
+description: Migrate from the deprecated v1 notification channel API endpoints to the v2 replacements, including the new config schema, authorization, and list changes.
+doc_type: reference
+---
+
+The v1 notification channel API endpoints are deprecated and will be removed in an upcoming release. The v2 endpoints replace them with an enforced request schema and address a security vulnerability. After removal, requests to the v1 endpoints fail.
+
+Equivalent replacements are available under `/api/v2/notification_channels`. The complete v2 specification, including request and response schemas for every endpoint, is available in the [SigNoz API Reference](https://signoz.io/api-reference/).
+
+The v2 endpoints have been under development since SigNoz `v0.141.0`. The release that deprecates the v1 endpoints also moves the v2 endpoints out of development. The v2 routes landed across these releases:
+
+| Release | v2 channel routes added |
+|---|---|
+| `v0.141.0` | `POST` create only |
+| `v0.142.0` | list, get, update, delete, test |
+| `v0.143.0` | `POST /{id}/repair` |
+
+## Endpoint mapping
+
+| v1 (removed) | v2 (replacement) |
+|---|---|
+| `GET /api/v1/channels` | `GET /api/v2/notification_channels` |
+| `GET /api/v1/channels/{id}` | `GET /api/v2/notification_channels/{id}` |
+| `POST /api/v1/channels` | `POST /api/v2/notification_channels` |
+| `PUT /api/v1/channels/{id}` | `PUT /api/v2/notification_channels/{id}` |
+| `DELETE /api/v1/channels/{id}` | `DELETE /api/v2/notification_channels/{id}` |
+| `POST /api/v1/channels/test` | `POST /api/v2/notification_channels/test` |
+| `POST /api/v1/testChannel` | `POST /api/v2/notification_channels/test` |
+| — | `POST /api/v2/notification_channels/{id}/repair` (new) |
+
+Channel IDs are unchanged. An ID that worked with v1 works with v2.
+
+## Authorization
+
+Authentication is unchanged: the same API key or session works. Authorization moves from the fixed v1 role gate to per-resource checks through OpenFGA. Managed roles keep their v1 access. On Enterprise, [custom roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) can be granted the permissions below individually.
+
+| v2 endpoint | Permission | Managed roles |
+|---|---|---|
+| `POST /api/v2/notification_channels` | `notification-channel:create` | admin |
+| `GET /api/v2/notification_channels` | `notification-channel:list` | admin, editor, viewer |
+| `GET /api/v2/notification_channels/{id}` | `notification-channel:read` | admin, editor, viewer |
+| `PUT /api/v2/notification_channels/{id}` | `notification-channel:update` | admin |
+| `DELETE /api/v2/notification_channels/{id}` | `notification-channel:delete` | admin |
+| `POST /api/v2/notification_channels/{id}/repair` | `notification-channel:update` | admin |
+| `POST /api/v2/notification_channels/test` | `notification-channel:create` | admin, editor |
+
+## New request schema
+
+v2 enforces a schema on every request. A channel names its type in `config.kind`, and every setting for that type lives in `config.spec` in camelCase. An unknown field at any level is rejected.
+
+The full schema is in the request payload of the [Create Notification Channel](https://signoz.io/api-reference/#/operations/CreateNotificationChannel) endpoint in the API reference. At a high level, every channel looks like this:
+
+```json
+{
+  "name": "string",
+  "displayName": "string",
+  "generateName": false,
+  "config": {
+    "kind": "slack | email | webhook | pagerduty | opsgenie | msteams | googlechat | jira | jsmops | incidentio",
+    "spec": { /* settings for the kind */ }
+  }
+}
+```
+
+A channel carries two names. `name` is its immutable identifier, a DNS-1123 label. `displayName` is the free-text label shown in the UI and referenced by alert rules and routing policies. The v1 `name` is the v2 `displayName`; the v2 `name` is new. Set `generateName` to `true` to derive `name` from `displayName` with a random suffix, or omit `displayName` to have it default to `name`.
+
+Update and test requests carry only `config`.
+
+## Creating a notification channel
+
+A create request is a `POST` with the envelope above. For example, creating a Slack channel:
+
+```bash
+curl -X POST "https://<your-signoz-host>/api/v2/notification_channels" \
+  -H "SIGNOZ-API-KEY: <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "oncall-slack",
+    "displayName": "On-call Slack",
+    "config": {
+      "kind": "slack",
+      "spec": {
+        "apiUrl": "https://hooks.slack.com/services/T000/B000/XXXX",
+        "channel": "#alerts",
+        "sendResolved": true
+      }
+    }
+  }'
+```
+
+**Verify these values:**
+
+- `<your-signoz-host>`: Your SigNoz instance host, e.g., `example.signoz.io`.
+- `<your-api-key>`: An API key for a service account whose role holds the permission listed under [Authorization](#authorization). Creating a channel needs the Admin role. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for how to create one.
+
+A successful create returns `201` with the stored channel, including its `id`. A body carrying any field the schema does not define, at any level, is rejected with `400`. Nothing is silently dropped.
+
+### The config for each kind
+
+v1 wrapped the settings in a `<kind>_configs` array and let that key name the type. v2 wraps them in `config`, names the type in `kind`, and writes the settings in camelCase. For example, Slack, replacing `slack_configs`:
+
+```json
+// v1
+{
+  "name": "On-call Slack",
+  "slack_configs": [
+    {
+      "api_url": "https://hooks.slack.com/services/T000/B000/XXXX",
+      "channel": "#alerts",
+      "send_resolved": true
+    }
+  ]
+}
+```
+
+```json
+// v2
+{
+  "name": "oncall-slack",
+  "displayName": "On-call Slack",
+  "config": {
+    "kind": "slack",
+    "spec": {
+      "apiUrl": "https://hooks.slack.com/services/T000/B000/XXXX",
+      "channel": "#alerts",
+      "sendResolved": true
+    }
+  }
+}
+```
+
+Every other supported kind follows the same pattern:
+
+| v2 `kind` | Replaces |
+|---|---|
+| `slack` | `slack_configs` |
+| `email` | `email_configs` |
+| `webhook` | `webhook_configs` |
+| `pagerduty` | `pagerduty_configs` |
+| `opsgenie` | `opsgenie_configs` |
+| `msteams` | `msteamsv2_configs` |
+| `googlechat` | `googlechat_configs` |
+| `jira` | `jira_configs` |
+| `jsmops` | `jsmops_configs` |
+| `incidentio` | `incidentio_configs` |
+
+Two kinds also move fields, beyond the change of case. Webhook authentication leaves `http_config`:
+
+```json
+// v1
+"webhook_configs": [
+  {
+    "url": "https://hooks.example.com/signoz",
+    "http_config": {
+      "basic_auth": { "username": "signoz", "password": "s3cret" }
+    }
+  }
+]
+```
+
+```json
+// v2
+"config": {
+  "kind": "webhook",
+  "spec": {
+    "url": "https://hooks.example.com/signoz",
+    "username": "signoz",
+    "password": "s3cret"
+  }
+}
+```
+
+A bearer token, `http_config.authorization` with type `Bearer`, becomes `bearerToken` in the same way. Jira credentials leave `http_config` too:
+
+```json
+// v1
+"jira_configs": [
+  {
+    "site": "https://acme.atlassian.net",
+    "project": "OPS",
+    "issue_type": "Incident",
+    "http_config": {
+      "basic_auth": { "username": "oncall@example.com", "password": "ATATT3xFfGF0..." }
+    }
+  }
+]
+```
+
+```json
+// v2
+"config": {
+  "kind": "jira",
+  "spec": {
+    "site": "https://acme.atlassian.net",
+    "project": "OPS",
+    "issueType": "Incident",
+    "email": "oncall@example.com",
+    "apiToken": "ATATT3xFfGF0..."
+  }
+}
+```
+
+The full field list for every kind is in the [SigNoz API Reference](https://signoz.io/api-reference/).
+
+## Updating a notification channel
+
+An update is a `PUT` to the channel's `id` with a body that carries only `config`. The whole `config` is replaced: anything the update leaves out is removed, not kept from before.
+
+```bash
+curl -X PUT "https://<your-signoz-host>/api/v2/notification_channels/<channel-id>" \
+  -H "SIGNOZ-API-KEY: <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "config": {
+      "kind": "slack",
+      "spec": {
+        "apiUrl": "https://hooks.slack.com/services/T000/B000/XXXX",
+        "channel": "#alerts-prod",
+        "sendResolved": true
+      }
+    }
+  }'
+```
+
+**Verify these values:**
+
+- `<channel-id>`: The channel's `id`, returned by the create and list endpoints.
+
+`name` is immutable. `displayName` cannot be changed yet, because alert rules and routing policies still reference channels by it. Support for updating it is planned.
+
+## Listing notification channels
+
+The list endpoint supports pagination, filtering, and sorting. It returns metadata only: `id`, `name`, `displayName`, `kind`, `createdAt`, and `updatedAt`, alongside the `total` count. Fetch a channel by `id` to read its `config`.
+
+| Parameter | Meaning |
+|---|---|
+| `query` | Case-insensitive match on `displayName`. |
+| `kind` | Only channels of this kind. |
+| `sort` | `updated_at` (default), `created_at`, or `name`, which orders by `displayName`. |
+| `order` | `desc` (default) or `asc`. |
+| `limit` | Page size, 20 by default and at most 200. |
+| `offset` | Number of channels to skip. |
+
+For example, all Slack channels:
+
+```bash
+curl "https://<your-signoz-host>/api/v2/notification_channels?kind=slack" \
+  -H "SIGNOZ-API-KEY: <your-api-key>"
+```
+
+Channels whose display name contains "on-call", alphabetically:
+
+```bash
+curl "https://<your-signoz-host>/api/v2/notification_channels?query=on-call&sort=name&order=asc" \
+  -H "SIGNOZ-API-KEY: <your-api-key>"
+```
+
+The second page of 50:
+
+```bash
+curl "https://<your-signoz-host>/api/v2/notification_channels?limit=50&offset=50" \
+  -H "SIGNOZ-API-KEY: <your-api-key>"
+```

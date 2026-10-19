@@ -2,6 +2,7 @@ import type { ListicleConfig } from '@/components/Listicle/types'
 
 import apmQuickStart from './apm-quick-start.json'
 import apmInstrumentation from './apm-instrumentation.json'
+import auroraDashboards from './aurora-dashboards.json'
 import apmDashboards from './apm-dashboards.json'
 import awsMonitoring from './aws-monitoring.json'
 import awsOneClick from './aws-one-click.json'
@@ -9,6 +10,8 @@ import azureOneClick from './azure-one-click.json'
 import cicdMonitoring from './cicd-monitoring.json'
 import collectionAgents from './collection-agents.json'
 import dashboardTemplates from './dashboard-templates.json'
+import databaseMonitoring from './database-monitoring.json'
+import gcpServices from './gcp-services.json'
 import hostMetricsDashboards from './host-metrics-dashboards.json'
 import integrations from './integrations.json'
 import javaInstrumentation from './java-instrumentation.json'
@@ -28,6 +31,7 @@ import webVitals from './web-vitals.json'
 export const listicleConfigs: Record<string, ListicleConfig> = {
   'apm-quick-start': apmQuickStart as unknown as ListicleConfig,
   'apm-instrumentation': apmInstrumentation as unknown as ListicleConfig,
+  'aurora-dashboards': auroraDashboards as unknown as ListicleConfig,
   'apm-dashboards': apmDashboards as unknown as ListicleConfig,
   'aws-monitoring': awsMonitoring as unknown as ListicleConfig,
   'aws-one-click': awsOneClick as unknown as ListicleConfig,
@@ -35,6 +39,8 @@ export const listicleConfigs: Record<string, ListicleConfig> = {
   'cicd-monitoring': cicdMonitoring as unknown as ListicleConfig,
   'collection-agents': collectionAgents as unknown as ListicleConfig,
   'dashboard-templates': dashboardTemplates as unknown as ListicleConfig,
+  'database-monitoring': databaseMonitoring as unknown as ListicleConfig,
+  'gcp-services': gcpServices as unknown as ListicleConfig,
   'host-metrics-dashboards': hostMetricsDashboards as unknown as ListicleConfig,
   integrations: integrations as unknown as ListicleConfig,
   'java-instrumentation': javaInstrumentation as unknown as ListicleConfig,

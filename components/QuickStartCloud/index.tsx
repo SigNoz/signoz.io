@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ChevronRight } from 'lucide-react'
 
@@ -56,10 +56,10 @@ export default function QuickStartCloud() {
 
           {/* Button remains below the stepper */}
           <div className="mt-8">
-            <Button id="btn-quick-start-cloud">
+            <Button asChild variant="default">
               <TrackingLink
                 href="/teams/" // Link to the signup page
-                className="flex-center"
+                id="btn-quick-start-cloud"
                 clickType="Primary CTA"
                 clickName="Sign Up Button"
                 clickText="Get Started - Free"

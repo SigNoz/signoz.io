@@ -18,6 +18,15 @@ module.exports = async ({ github, context, core }) => {
       console.error('Failed to read sync results:', error.message)
     }
 
+    let listicleResults = null
+    try {
+      const listiclePath = path.join(process.cwd(), 'listicle-sync-results.json')
+      const listicleContent = fs.readFileSync(listiclePath, 'utf8')
+      listicleResults = JSON.parse(listicleContent)
+    } catch (error) {
+      // No listicle results is fine — listicles may not have changed
+    }
+
     if (syncResults) {
       // Build comprehensive summary
       body = `✅ **CMS Sync Successful**\n\n`
@@ -80,11 +89,67 @@ module.exports = async ({ github, context, core }) => {
         body += `</details>\n\n`
         body += `> **Note:** Documents were still synced successfully, but some relations were omitted. Please check the values in your frontmatter.\n`
       }
+
+      if (listicleResults) {
+        const totalListicles =
+          listicleResults.created.length +
+          listicleResults.updated.length +
+          listicleResults.deleted.length
+
+        if (totalListicles > 0 || listicleResults.errors.length > 0) {
+          body += `\n### 📋 Listicle Sync\n\n`
+          body += `| Operation | Count |\n`
+          body += `|-----------|-------|\n`
+          body += `| ✅ Created | ${listicleResults.created.length} |\n`
+          body += `| 🔄 Updated | ${listicleResults.updated.length} |\n`
+          body += `| 🗑️ Deleted | ${listicleResults.deleted.length} |\n\n`
+
+          const allListicles = [
+            ...listicleResults.created.map((item) => ({ ...item, operation: 'Created' })),
+            ...listicleResults.updated.map((item) => ({ ...item, operation: 'Updated' })),
+            ...listicleResults.deleted.map((item) => ({ ...item, operation: 'Deleted' })),
+          ]
+
+          if (allListicles.length > 0) {
+            body += `<details>\n`
+            body += `<summary>View ${allListicles.length} listicle(s)</summary>\n\n`
+            body += `| Operation | Listicle |\n`
+            body += `|-----------|----------|\n`
+            allListicles.forEach((item) => {
+              body += `| ${item.operation} | \`${item.key}\` |\n`
+            })
+            body += `\n</details>\n\n`
+          }
+
+          if (listicleResults.errors.length > 0) {
+            body += `<details>\n`
+            body += `<summary>⚠️ ${listicleResults.errors.length} listicle error(s)</summary>\n\n`
+            listicleResults.errors.forEach((item) => {
+              body += `- \`${item.key}\`: ${item.error}\n`
+            })
+            body += `\n</details>\n`
+          }
+        }
+      }
     } else {
       // Fallback if results file not found
       body = `✅ **CMS Sync Successful**\n\n`
       body += `Content has been synced to Strapi CMS with deployment status: \`${deploymentStatus}\`\n\n`
       body += `Relations have been automatically resolved.`
+
+      if (listicleResults) {
+        const totalListicles =
+          listicleResults.created.length +
+          listicleResults.updated.length +
+          listicleResults.deleted.length
+
+        if (totalListicles > 0) {
+          body += `\n\n### 📋 Listicle Sync\n\n`
+          body += `Created: ${listicleResults.created.length}, `
+          body += `Updated: ${listicleResults.updated.length}, `
+          body += `Deleted: ${listicleResults.deleted.length}`
+        }
+      }
     }
   } else {
     body = `❌ **CMS Sync Failed**\n\nPlease check the workflow logs for details.`

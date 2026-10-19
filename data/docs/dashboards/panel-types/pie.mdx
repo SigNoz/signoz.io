@@ -1,7 +1,7 @@
 ---
 
 title: Pie Chart Panel Type
-date: 2026-05-13
+date: 2026-07-29
 description: Learn how to use the Pie Chart panel type in SigNoz dashboards to visualize proportional data.
 doc_type: reference
 ---
@@ -25,7 +25,7 @@ This panel type supports any time series data. The time series data can be from 
 The following graph shows the distribution of the service requests over the services.
 
 <Figure
-  src="/img/docs/dashboards/panel-types/pie-chart.webp"
+  src="/img/docs/dashboards/panel-types/pie-chart-v2.webp"
   alt="Pie chart for service requests"
   caption="Pie chart for service requests."
 />
@@ -43,14 +43,37 @@ The following graph shows the distribution of the service requests over the serv
 
 - **Panel Time Preference** — Override the global dashboard time range for this panel. Set to `Global Time` to use the dashboard's time picker, or choose a fixed time range.
 
+#### ClickHouse SQL queries
+
+When a pie panel is backed by a ClickHouse SQL query, each aggregation (value) column in the query renders as its own slice.
+
+- A query with two or more value columns, for example `SELECT count() AS total_count, sum(value) AS total_value FROM ...`, produces one slice per column, labelled with the column alias (`total_count`, `total_value`).
+- When the query also has group-by columns, each slice is labelled `<group> · <column>` (with a middle-dot separator) so slices stay distinct across groups.
+- A single-aggregation ClickHouse query renders one slice, and grouped Query Builder (PromQL/metrics) panels are unaffected: each group is one slice as before.
+
+<Admonition type="info">
+Only positive, numeric values are plotted. Columns that resolve to zero, a negative number, or a non-numeric value are dropped from the chart.
+</Admonition>
+
 #### Formatting & Units
 
 - **Unit** — The unit for the displayed values (for example, `Bytes`, `Percent`, `Requests/s`). The default is `None`.
 - **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
 
+<Admonition type="info">
+When you create a new panel, the **Unit** is pre-filled with the unit of the selected metric, so the values match how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
+</Admonition>
+
 #### Legend
 
-Customize the legend position and series colors.
+- **Position**: Set the legend position. When the legend is positioned to the right, its column auto-sizes to fit the longest series name, clamped between 150 px and the smaller of 320 px or 40% of the panel width, so long labels are not truncated and the full donut stays visible without clipping.
+- **Colors**: Assign a custom color to each slice. Pie panels support per-slice color overrides, so you can color every category individually. Select **Reset** to return a slice to its default color, or **Reset All** to reset every slice.
+
+When you group by an attribute, legend and slice labels use the `{key="value"}` format (for example, `{service.name="frontend"}`), matching the time series, bar, and histogram panels. Series colors are keyed by this label, so a custom color override applies only when its key matches the label exactly.
+
+<Admonition type="warning" title="Re-save custom colors set before this change">
+Earlier pie panels showed group-by legends as bare values (for example, `frontend` instead of `{service.name="frontend"}`). If you set custom colors using those bare-value keys, the overrides no longer match the new labels. Open the panel, re-apply the colors against the new `{key="value"}` entries, and save.
+</Admonition>
 
 #### Context Links
 

@@ -2,11 +2,14 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
-const { buildCopyMarkdownDocument, expandTabsInHast } = loadTsModule(
-  'utils/docs/buildCopyMarkdownFromRendered.ts'
-)
+const { buildCopyMarkdownDocument, expandTabsInHast, appendGlossaryDefinitionsInHast } =
+  loadTsModule('utils/docs/buildCopyMarkdownFromRendered.ts')
 const { hastToMarkdown } = loadTsModule('utils/docs/markdownCore.ts')
-const { MORE_DOCS_POINTER } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
+const { MORE_DOCS_POINTER, LLMS_TXT_DIRECTIVE } = loadTsModule(
+  'utils/docs/buildMarkdownDocument.ts'
+)
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 test('expandTabsInHast expands rendered tabs into markdown sections', async () => {
   const { unified } = await import('unified')
@@ -85,4 +88,39 @@ test('buildCopyMarkdownDocument includes tag definitions and more docs footer', 
   assert.match(markdown, /^# Docs Title$/m)
   assert.match(markdown, /^Tag definitions:$/m)
   assert.match(markdown, new RegExp(`${MORE_DOCS_POINTER}$`))
+})
+
+test('buildCopyMarkdownDocument emits the llms.txt directive exactly once, near the top', () => {
+  const markdown = buildCopyMarkdownDocument('Body content.', {
+    title: 'Docs Title',
+    tags: ['Self-Host'],
+  })
+
+  const matches = markdown.match(new RegExp(escapeRegExp(LLMS_TXT_DIRECTIVE), 'g')) || []
+  assert.equal(matches.length, 1)
+  assert.equal(markdown.indexOf(LLMS_TXT_DIRECTIVE) < markdown.indexOf('Body content.'), true)
+})
+
+test('appendGlossaryDefinitionsInHast surfaces tooltip definitions in brackets', async () => {
+  const { unified } = await import('unified')
+  const { default: rehypeParse } = await import('rehype-parse')
+
+  const hast = unified().use(rehypeParse, { fragment: true }).parse(`
+    <p>Each trace is a tree of
+      <a href="https://signoz.io/docs/glossary/#span" data-glossary-definition="A span represents a single unit of work in a trace.">spans<svg class="signoz-icon glossary-info-icon" aria-hidden="true"></svg></a>
+      that shows the request path. High-cardinality
+      <button data-glossary-definition="A label is a key-value pair attached to a metric.">labels<svg class="signoz-icon glossary-info-icon" aria-hidden="true"></svg></button>
+      multiply time series. Plain <span>text</span> stays untouched.</p>
+  `)
+
+  const markdown = await hastToMarkdown(appendGlossaryDefinitionsInHast(hast), {
+    cleanForDocsUi: true,
+  })
+
+  assert.match(
+    markdown,
+    /\[spans\]\(https:\/\/signoz\.io\/docs\/glossary\/#span\) \(A span represents a single unit of work in a trace\.\)/
+  )
+  assert.match(markdown, /labels \(A label is a key-value pair attached to a metric\.\)/)
+  assert.match(markdown, /Plain text stays untouched\./)
 })

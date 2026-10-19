@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import { compareSemverParts, parseSemverTag, type SemverParts } from '@/utils/semverTags'
 import {
   GITHUB_RELEASES_EDGE_S_MAXAGE_SECONDS,
@@ -153,20 +153,16 @@ async function fetchAndBuildPayload(): Promise<GitHubReleasesPayload> {
   return transformRawToPayload(raw, partial)
 }
 
-const getCachedFullReleasesPayload = unstable_cache(
-  async (): Promise<GitHubReleasesPayload> => {
-    const payload = await fetchAndBuildPayload()
-    if (payload.partial) {
-      throw new PartialGitHubPayload(payload)
-    }
-    return payload
-  },
-  ['signoz-github-releases-payload-v1'],
-  {
-    revalidate: GITHUB_RELEASES_REVALIDATE_SECONDS,
-    tags: [CACHE_TAG],
+async function getCachedFullReleasesPayload(): Promise<GitHubReleasesPayload> {
+  'use cache'
+  cacheLife({ revalidate: GITHUB_RELEASES_REVALIDATE_SECONDS })
+  cacheTag(CACHE_TAG)
+  const payload = await fetchAndBuildPayload()
+  if (payload.partial) {
+    throw new PartialGitHubPayload(payload)
   }
-)
+  return payload
+}
 
 /** Same-instance memo when GitHub returns partial data (rate limit) to avoid hammering the API. */
 let partialPayloadMemo: { payload: GitHubReleasesPayload; at: number } | null = null

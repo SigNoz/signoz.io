@@ -1,0 +1,72 @@
+---
+date: 2026-07-31
+title: Firecrawl Dashboard
+description: Monitor Firecrawl SDK usage with call volume, error rate, latency percentiles, credits consumed, and results returned, broken down per operation.
+doc_type: explanation
+---
+
+<Admonition type="info">
+  Before using this dashboard, instrument your Firecrawl application with OpenTelemetry and configure export to SigNoz. See the [Firecrawl monitoring guide](https://signoz.io/docs/firecrawl-monitoring/) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of Firecrawl SDK usage using trace data. It is built on the `firecrawl.*` span attributes exported by the `firecrawl-otel` instrumentation and focuses on call volume, error rate, latency, credits consumed, and results returned, all broken down per operation (`scrape`, `search`, `map`, `crawl`, and `batch_scrape`). Every panel filters on `firecrawl.operation EXISTS` rather than a fixed service name, so the dashboard renders for both short-lived jobs and long-running services.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/firecrawl-dashboard.webp"
+  alt="Firecrawl Dashboard"
+  caption="Firecrawl Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/firecrawl/firecrawl-dashboard.json"
+  dashboardJsonV1Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/firecrawl/v1/firecrawl-dashboard.json"
+  dashboardName="Firecrawl"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks usage, performance, and cost metrics for your Firecrawl workloads using OpenTelemetry trace data to help you:
+
+- **Track Credit Consumption**: Sum `firecrawl.credits_used` overall and per operation to see where spend is concentrated against your Firecrawl plan.
+- **Monitor Scraping Volume**: Watch call counts over time and per operation to understand traffic patterns and which operations dominate.
+- **Catch Errors Early**: Surface the share of calls that fail as a single percentage for an at-a-glance health signal.
+- **Monitor Latency**: Watch p50, p95, and p99 duration to surface both typical performance and the tail latency that shapes worst-case experience.
+- **Compare Operations**: Identify which operations are slowest under load and how they differ in cost and yield.
+- **Measure Yield**: Track how many results each operation returns to spot drops that do not show up as outright errors.
+- **Inspect Recent Calls**: Drill into the most recent Firecrawl spans when investigating an error or a latency spike.
+
+## Panels Included
+
+### Usage Summary (Top Row)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Total Firecrawl Calls** | Value | Count of all Firecrawl operation spans in the selected window, a quick pulse on how much scraping work is running through the SDK |
+| **Error Rate** | Value | Share of calls that failed, computed as errored spans divided by all spans and rendered as a percentage |
+| **Total Credits Used** | Value | Sum of `firecrawl.credits_used` across all calls, tracking consumption against your Firecrawl plan |
+| **Total Results Returned** | Value | Sum of `firecrawl.results` across all calls, showing how much content the operations bring back |
+
+### Call Volume
+
+- **Calls Over Time by Operation**: Time-series graph of call counts grouped by `firecrawl.operation`, revealing traffic patterns and which operations dominate.
+- **Call Distribution by Operation**: Pie chart of each operation's share of total calls, complementing the trend graphs with a clear share-of-traffic view.
+
+### Latency
+
+- **Latency Percentiles (p50 / p95 / p99)**: Time-series graph of duration percentiles across all Firecrawl spans, surfacing both typical performance and tail latency.
+- **p95 Latency by Operation**: Time-series graph of 95th-percentile duration per operation, identifying which operations are slowest under load.
+
+### Credits & Results
+
+- **Credits Used Over Time by Operation**: Time-series graph of credits consumed grouped by operation, showing where spend is concentrated and how it trends.
+- **Results Returned Over Time by Operation**: Time-series graph of results returned grouped by operation, useful for spotting drops in yield that do not show up as outright errors.
+
+### Per-Operation Breakdown
+
+- **Operation Summary**: Table of call count, p95 latency, average latency, results, and credits per operation, giving a full side-by-side comparison across `scrape`, `search`, `map`, `crawl`, and `batch_scrape`.
+
+### Recent Activity
+
+- **Recent Firecrawl Calls**: List of the most recent Firecrawl spans ordered by timestamp descending, for drilling into individual calls when investigating an error or a latency spike.

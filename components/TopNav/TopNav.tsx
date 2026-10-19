@@ -1,35 +1,42 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Menu, X, ArrowRight } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
+import { Menu, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
 import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
-import TrackingButton from '@/components/TrackingButton'
-import { Button } from '@/components/ui/Button'
+import NavCtaButtons from './NavCtaButtons'
+import { NAV_PILL_CLASS } from './NavPill'
+import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
+import UseCasesDropdown from './UseCasesDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
+import { useMobileDocsSidebar } from '@/components/DocsSidebar/MobileDocsSidebarContext'
 
 export default function TopNav() {
   const pathname = usePathname()
-  const router = useRouter()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isDocsBasePath, setIsDocsBasePath] = useState(false)
-  const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
 
+  const docsSidebar = useMobileDocsSidebar()
+  const isDocsBasePath = pathname.startsWith('/docs')
   const visibility = useNavVisibility()
+
+  useEffect(() => {
+    return docsSidebar.onMainMenuRequest(() => setMobileMenuOpen(true))
+  }, [docsSidebar])
 
   const isLoginRoute = pathname === '/login/'
   const isSignupRoute = pathname === '/teams/'
@@ -37,10 +44,6 @@ export default function TopNav() {
   const isWordleRoute = pathname === '/todaysdevopswordle/'
 
   useEffect(() => {
-    const docsBase = pathname.startsWith('/docs')
-    setIsDocsBasePath(docsBase)
-    setShowMainMenu(!docsBase)
-
     const isListingOrPagination = (base: string) =>
       pathname === base || pathname === `${base}/` || pathname.startsWith(`${base}/page/`)
 
@@ -67,13 +70,23 @@ export default function TopNav() {
   }
 
   return (
-    <div className="fixed left-0 right-0 z-[50]">
-      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
+    <div
+      className={cn(
+        'fixed left-0 right-0 z-[50]',
+        (mobileMenuOpen || docsSidebar.isOpen) && 'z-[1200]'
+      )}
+    >
+      <header
+        className={cn(
+          'header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-[var(--l1-border)] text-[var(--l1-foreground)] backdrop-blur-[20px]',
+          (mobileMenuOpen || docsSidebar.isOpen) && '!bg-[var(--l1-background)]'
+        )}
+      >
         <nav
-          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className="mx-auto flex w-full justify-between text-[var(--l1-foreground)]"
           aria-label="Global"
         >
-          <div className="flex justify-start gap-x-6">
+          <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
               className="-m-1.5 flex items-center gap-2 p-1.5"
@@ -81,7 +94,10 @@ export default function TopNav() {
               clickName="SigNoz Logo"
               clickText="SigNoz"
               clickLocation="Top Navbar"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                setMobileMenuOpen(false)
+                docsSidebar.close()
+              }}
             >
               <SigNozLogo
                 className="h-5 w-auto shrink-0"
@@ -90,17 +106,15 @@ export default function TopNav() {
               />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
-
             {!isLoginRoute && (
               <NavDropdownProvider>
-                <div
-                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
-                >
+                <div className="ml-6 hidden items-center gap-x-3 min-[840px]:flex">
                   {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showUseCases && <UseCasesDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      className={NAV_PILL_CLASS}
                       clickType="Nav Click"
                       clickName="Docs Link"
                       clickText="Docs"
@@ -114,13 +128,26 @@ export default function TopNav() {
                   {visibility.showPricing && (
                     <TrackingLink
                       href="/pricing/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      className={NAV_PILL_CLASS}
                       clickType="Nav Click"
                       clickName="Pricing Link"
                       clickText="Pricing"
                       clickLocation="Top Navbar"
                     >
                       Pricing
+                    </TrackingLink>
+                  )}
+                  {visibility.showCustomers && (
+                    <TrackingLink
+                      href="/customers/"
+                      className={NAV_PILL_CLASS}
+                      clickType="Nav Click"
+                      clickName="Customers Link"
+                      clickText="Customers"
+                      clickLocation="Top Navbar"
+                      prefetch={false}
+                    >
+                      Customers
                     </TrackingLink>
                   )}
                 </div>
@@ -133,39 +160,13 @@ export default function TopNav() {
             {!isLoginRoute && (
               <>
                 <SearchButtonDeferred />
-                {visibility.showGithubStars && <GitHubStars location="Top Navbar" />}
-                {visibility.showSignInGetStarted && (
+                {visibility.showGithubStars && (
                   <>
-                    <TrackingButton
-                      className="box-border flex h-8 items-center rounded-full bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
-                      clickType="Secondary CTA"
-                      clickName="Sign In Button"
-                      clickText="Sign In"
-                      clickLocation="Top Navbar"
-                      onClick={() => router.push('/login')}
-                    >
-                      Sign In
-                    </TrackingButton>
-                    <TrackingLink
-                      href="/teams/"
-                      clickType="Primary CTA"
-                      clickName="Sign Up Button"
-                      clickText="Get Started - Free"
-                      clickLocation="Top Navbar"
-                    >
-                      <Button
-                        asChild
-                        rounded="full"
-                        className="start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
-                      >
-                        <span id="btn-get-started-website-navbar">
-                          Get Started - Free
-                          <ArrowRight size={14} />
-                        </span>
-                      </Button>
-                    </TrackingLink>
+                    <span aria-hidden="true" className="h-4 w-px shrink-0 bg-[var(--l2-border)]" />
+                    <GitHubStars location="Top Navbar" />
                   </>
                 )}
+                {visibility.showSignInGetStarted && <NavCtaButtons location="Top Navbar" />}
               </>
             )}
 
@@ -173,11 +174,25 @@ export default function TopNav() {
 
             <button
               type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1280px]:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1320px]:hidden"
+              onClick={() => {
+                if (mobileMenuOpen) {
+                  setMobileMenuOpen(false)
+                  return
+                }
+                if (docsSidebar.isOpen) {
+                  docsSidebar.close()
+                  return
+                }
+                if (isDocsBasePath) {
+                  docsSidebar.toggle()
+                } else {
+                  setMobileMenuOpen(true)
+                }
+              }}
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
+              {mobileMenuOpen || docsSidebar.isOpen ? (
                 <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
               ) : (
                 <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
@@ -189,10 +204,7 @@ export default function TopNav() {
         <MobileMenu
           open={mobileMenuOpen}
           onClose={setMobileMenuOpen}
-          showMainMenu={showMainMenu}
-          isDocsBasePath={isDocsBasePath}
           isSignupRoute={isSignupRoute}
-          onShowMainMenu={() => setShowMainMenu(true)}
         />
       </header>
 

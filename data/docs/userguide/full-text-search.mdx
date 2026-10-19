@@ -1,8 +1,8 @@
 ---
-date: 2026-05-18
-
+date: 2026-07-27
 title: Full-Text Search Guide
-description: Learn how to use full-text search in SigNoz to search log body content. Covers quoted phrases, regex, special character escaping, and combining with field filters.
+description: Learn how to use full-text search in SigNoz to search log body content. Covers quoted phrases, regex, tabs and newlines, escaping, and field filters.
+doc_type: reference
 ---
 
 Full-text search allows you to search through log body content without specifying field names. This guide covers all aspects of text searching in SigNoz.
@@ -41,6 +41,20 @@ This searches for logs where the body contains 'error' AND 'database' AND 'conne
   caption="Unquoted full-text search in the Logs Explorer"
 />
 
+## How Search Text Is Evaluated
+
+SigNoz first tries to compile your search text as an <a href="https://github.com/google/re2/wiki/syntax" target="_blank" rel="noopener noreferrer nofollow">RE2 regular expression</a>. If it compiles, the search runs as a regex. If it doesn't, SigNoz matches the text as a literal substring instead.
+
+This means regex metacharacters stay active even in a search that looks like plain text:
+
+| Search | Evaluated as | Result |
+| --- | --- | --- |
+| `'status != 200'` | Regex with no metacharacters | Matches the literal text |
+| `'array[index] = value'` | Regex, where `[index]` is a character class | Matches `arrayi = value`, not the literal text |
+| `'C:\\Users\\John'` | Not valid regex, so a literal substring | Matches the literal text |
+
+Escape any of `. [ ] ( ) { } * + ? | ^ $ \` that you want to match literally.
+
 ## Escaping Special Characters
 
 When searching for text that contains special characters, enclose your search in single quotes and escape only these two characters:
@@ -63,13 +77,42 @@ Examples:
 'user\'s path: C:\\Users\\John'
 ```
 
-Note: You don't need to escape other special characters like double quotes, brackets, or symbols when they're inside single quotes:
+Those two escapes are for the query parser. Double quotes and other characters that mean nothing to a regex need no escaping:
 ```
-# These work without escaping
 'error: "connection failed"'
-'array[index] = value'
 'status != 200'
+```
+
+Regex metacharacters are a separate matter. Escape them when you want to match them literally:
+```
+# Wrong - [index] reads as a character class, and $ anchors to end of text
+'array[index] = value'
 'price: $99.99'
+
+# Correct
+'array\[index\] = value'
+'price: \$99\.99'
+```
+
+## Tabs, Newlines, and Other Whitespace
+
+Because search text is evaluated as a regex, the standard regex escapes match control characters:
+
+| Escape | Matches |
+| --- | --- |
+| `\t` | Tab |
+| `\n` | Newline |
+| `\r` | Carriage return |
+| `\s` | Any whitespace character |
+
+To find a tab between two values in the log body:
+```
+'error\tconnection refused'
+```
+
+To match a literal backslash followed by `t` instead of a tab, use four backslashes. The parser collapses `\\\\` to `\\`, which the regex engine then reads as an escaped backslash:
+```
+'\\\\t'
 ```
 
 ## Regular Expressions
@@ -128,4 +171,8 @@ searching for AND operator
 2. **Be specific** - More specific searches perform better than broad ones
 3. **Combine with fields** - Add field filters to narrow down results
 4. **Test regex patterns** - Complex regex can be slow; test and optimize
-5. **Escape properly** - Only escape single quotes and backslashes inside quoted strings
+5. **Escape properly** - Escape single quotes and backslashes for the parser, plus any regex metacharacter you want matched literally
+
+## Get Help
+
+<GetHelp />

@@ -46,7 +46,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
             className="inline-flex items-center justify-center rounded-md bg-signoz_ink-400 px-5 py-2.5 text-sm text-white transition-colors hover:bg-signoz_ink-300"
             rel="noreferrer"
           >
-            SigNoz saves you up to 80% on datadog bills.
+            SigNoz Cloud saves you up to 80% on Datadog bills.
             <ArrowUpRight size={18} className="ml-1 inline" />
           </a>
         </div>
@@ -58,7 +58,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
           clickText="Get Started - Free"
           clickLocation="Pricing Calculator"
         >
-          <Button isButton={true} variant={'default'} rounded={'full'} className="w-full">
+          <Button variant={'default'} className="w-full">
             Get Started - Free
             <ArrowRight size={14} className="ml-2" />
           </Button>
@@ -74,13 +74,13 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
             For high volume usage, reach out to us for custom pricing and retention options
           </span>
           <TrackingLink
-            href="https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af"
+            href="/contact-us/?source=pricing-calculator"
             clickType="Secondary CTA"
             clickName="Volume Discount Form Link"
             clickText="Contact Us"
             clickLocation="Pricing Calculator"
           >
-            <Button isButton={true} variant={'secondary'} className="w-full">
+            <Button variant={'secondary'} className="w-full">
               Contact us
             </Button>
           </TrackingLink>

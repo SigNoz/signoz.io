@@ -6,7 +6,6 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const CONTENT_TYPES: Record<string, string> = {

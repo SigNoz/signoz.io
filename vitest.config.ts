@@ -12,6 +12,11 @@ export default defineConfig({
       'hooks/**/*.test.{ts,tsx}',
       'utils/**/*.test.{ts,tsx}',
     ],
+    server: {
+      deps: {
+        inline: ['@signozhq/ui'],
+      },
+    },
   },
   resolve: {
     alias: {

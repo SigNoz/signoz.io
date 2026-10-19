@@ -2,8 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Badge } from '@signozhq/badge'
-import Button from '@/components/ui/Button'
+import { Badge } from '@signozhq/ui/badge'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
 import Tabs from '@/components/Tabs'
@@ -36,23 +35,16 @@ const SourcesTabsGrid: React.FC = () => {
 
       <IconGrid icons={POPULAR_TOOLS_ICONS} title="POPULAR TOOLS" />
 
-      <Button
-        variant="ghost"
-        rounded="full"
-        size={null}
-        className="flex w-fit items-center justify-center gap-2 text-xs hover:bg-transparent"
-        asChild
+      <TrackingLink
+        className="flex w-fit items-center justify-center gap-2 text-xs"
+        href="/docs/logs-management/send-logs-to-signoz/"
+        clickType="Inline Link"
+        clickName={`View Sources Link - ${pathname}`}
+        clickLocation={`Supported Sources Tab - ${pathname}`}
+        clickText="VIEW ALL 50+ SOURCES"
       >
-        <TrackingLink
-          href="/docs/logs-management/send-logs-to-signoz/"
-          clickType="Inline Link"
-          clickName={`View Sources Link - ${pathname}`}
-          clickLocation={`Supported Sources Tab - ${pathname}`}
-          clickText="VIEW ALL 50+ SOURCES"
-        >
-          VIEW ALL 50+ SOURCES
-        </TrackingLink>
-      </Button>
+        VIEW ALL 50+ SOURCES
+      </TrackingLink>
     </div>
   )
 
@@ -94,28 +86,21 @@ const SourcesTabsGrid: React.FC = () => {
         </div>
       </div>
 
-      <Button
-        variant="ghost"
-        rounded="full"
-        size={null}
-        className="justify-start text-xs hover:bg-transparent"
-        asChild
+      <TrackingLink
+        className="justify-start text-xs"
+        href="/docs/logs-management/send-logs-to-signoz/"
+        clickType="Inline Link"
+        clickName={`View Integration Guides Link - ${pathname}`}
+        clickLocation={`Collection Methods Tab - ${pathname}`}
+        clickText="VIEW INTEGRATION GUIDES"
       >
-        <TrackingLink
-          href="/docs/logs-management/send-logs-to-signoz/"
-          clickType="Inline Link"
-          clickName={`View Integration Guides Link - ${pathname}`}
-          clickLocation={`Collection Methods Tab - ${pathname}`}
-          clickText="VIEW INTEGRATION GUIDES"
-        >
-          VIEW INTEGRATION GUIDES
-        </TrackingLink>
-      </Button>
+        VIEW INTEGRATION GUIDES
+      </TrackingLink>
     </div>
   )
 
   return (
-    <Card className="bg-signoz_ink-400 [&>*]:p-4 [&>div]:border-1">
+    <Card className="[&>div]:border-1 bg-signoz_ink-400 [&>*]:p-4">
       <Tabs entityName="sources">
         <TabItem value="supported-sources" label="Supported Sources">
           {sourcesTabContent}

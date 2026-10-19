@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-08-27
 title: Swift OpenTelemetry Instrumentation Guide
 description: Instrument your Swift application with OpenTelemetry and send traces to SigNoz. Setup guide using Swift Package Manager with gRPC exporter configuration.
 doc_type: howto
@@ -7,7 +7,7 @@ doc_type: howto
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Swift applications and view your application traces in SigNoz.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -55,7 +55,7 @@ Verify these values:
 
 Import the necessary OpenTelemetry modules and initialize the tracer. Insert the following code snippet into your `main.swift` file:
 
-```swift
+```swift defaultCollapsed minimap
 import Foundation
 import GRPC
 import NIO
@@ -142,7 +142,7 @@ Use the tracer's `spanBuilder` to start a span, optionally set its kind and attr
 
 Set a parent span as the active span using `OpenTelemetry.instance.contextProvider` so that any child spans created within its scope are automatically linked:
 
-```swift
+```swift defaultCollapsed
         func handleRequest() {
             let parentSpan = tracer.spanBuilder(spanName: "handleRequest")
                 .setSpanKind(spanKind: .server)
@@ -220,6 +220,8 @@ To ensure everything is working:
 
 </ToggleHeading>
 
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
+
 ### No data appearing in SigNoz
 
 - **Invalid Credentials**: Ensure that `<your-ingestion-key>` and `ingest.<region>.signoz.cloud` are correctly populated without the angle brackets.
@@ -255,7 +257,7 @@ Change your tracer initialization to send data without TLS to `localhost` (or yo
 
 > Use the same imports from Step 2, adding `import NIOSSL`. Only the connection and provider setup changes:
 
-```swift
+```swift defaultCollapsed minimap
 import Foundation
 import GRPC
 import NIO

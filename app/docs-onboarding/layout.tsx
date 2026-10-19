@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import { TooltipProviderWrapper } from '@/components/TooltipProviderWrapper'
+import { getDocsSideNav } from '@/utils/docsSideNav'
+import { DocsSideNavProvider } from '@/components/DocsSidebar/DocsSideNavContext'
 
 export const metadata: Metadata = {
   robots: {
@@ -10,10 +12,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function DocsOnboardingLayout({ children }: { children: ReactNode }) {
+export default async function DocsOnboardingLayout({ children }: { children: ReactNode }) {
+  const sideNav = await getDocsSideNav()
+
   return (
     <TooltipProviderWrapper>
-      <RegionProvider>{children}</RegionProvider>
+      <DocsSideNavProvider sideNav={sideNav}>
+        <RegionProvider>{children}</RegionProvider>
+      </DocsSideNavProvider>
     </TooltipProviderWrapper>
   )
 }

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Info } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import {
   CheckSolid,
@@ -8,7 +9,11 @@ import {
   ServerSolid,
 } from '@/components/homepage-icons/icons'
 import Line from '@/components/ui/Line'
-import ChatbaseScrollTrigger from './ChatbaseScrollTrigger'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
+import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 // Plan header type
 type PlanHeader = {
@@ -36,12 +41,15 @@ const ALL_FEATURES_DATA = {
   HEADER: [
     { heading: '', desc: '' },
     {
-      heading: 'Community Edition',
+      heading: 'Self Hosted SigNoz (Community)',
       desc: 'Install & manage yourself',
       action: (
         <TrackingLink
           href={'/docs/introduction/'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'w-full truncate !text-[9px] sm:!text-sm'
+          )}
           clickType="Secondary CTA"
           clickName="Docs Link"
           clickText="Read Documentation"
@@ -53,12 +61,15 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Teams',
-      desc: 'Cloud ⎯ starts at $49/mo',
+      heading: 'SigNoz Cloud (Teams)',
+      desc: 'Starts at $49/mo',
       action: (
         <TrackingLink
           href={'/teams/'}
-          className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'default', size: 'sm' }),
+            'w-full truncate !text-[9px] sm:!text-sm'
+          )}
           clickType="Primary CTA"
           clickName="Sign Up Button"
           clickText="Get Started - Free"
@@ -70,12 +81,15 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Enterprise',
-      desc: 'Cloud / Self-Hosted',
+      heading: 'SigNoz Enterprise',
+      desc: 'Cloud, BYOC, or Self-Hosted',
       action: (
         <TrackingLink
           href={'/contact-us/?source=pricing'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'w-full !text-[9px] sm:!text-sm'
+          )}
           clickType="Secondary CTA"
           clickName="Enterprise Contact Button"
           clickText="Contact Us"
@@ -588,13 +602,33 @@ const ALL_FEATURES_DATA = {
           ),
         },
         {
-          feature: 'Finer RBAC with custom roles',
+          feature: 'Fine-grained RBAC',
           inCommunity: <CrossSolid />,
           inTeams: <CrossSolid />,
           inEnterprise: (
-            <div className="flex items-center">
-              <ClockSolid height="15" width="15" />
-              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+            <div className="flex items-center gap-1.5">
+              <CheckSolid />
+              <span className="text-[8px] text-signoz_vanilla-400 sm:text-xs">BETA</span>
+              <Tooltip
+                content={
+                  <div className="max-w-xs">
+                    <p className="mb-1 font-medium text-signoz_vanilla-100">Beta availability:</p>
+                    <p className="m-0 text-sm text-signoz_vanilla-400">
+                      Fine-grained RBAC is available in beta for Enterprise plans. It currently
+                      supports selected resources, with more being added gradually.
+                    </p>
+                  </div>
+                }
+                contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+              >
+                <button
+                  type="button"
+                  aria-label="Fine-grained RBAC beta details"
+                  className="inline-flex cursor-pointer items-center text-signoz_robin-400"
+                >
+                  <Info size={14} />
+                </button>
+              </Tooltip>
             </div>
           ),
         },
@@ -697,20 +731,72 @@ const ALL_FEATURES_DATA = {
   ],
 }
 
+function cellToMarkdown(node: React.ReactNode): string {
+  if (React.isValidElement(node)) {
+    if (node.type === CheckSolid) return '✓'
+    if (node.type === CrossSolid) return '✗'
+  }
+  // Empty string defers to the rendered cell text (e.g. "COMING SOON", "ADD ON").
+  return ''
+}
+
+function toPricingSections(): ComparisonSection[] {
+  return ALL_FEATURES_DATA.ROWS.map((section) => ({
+    title: section.section,
+    id: section.section === 'Choose When' ? 'choose-when-section' : undefined,
+    rows: section.features.map((f) => ({
+      feature: (
+        <h4 className="col-span-3 m-0 py-4 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 sm:py-5 md:col-span-1 md:text-left">
+          {f.feature}
+        </h4>
+      ),
+      markdownFeature: f.feature,
+      cells: {
+        community: f.inCommunity,
+        teams: f.inTeams,
+        enterprise: f.inEnterprise,
+      },
+      markdownCells: {
+        community: cellToMarkdown(f.inCommunity),
+        teams: cellToMarkdown(f.inTeams),
+        enterprise: cellToMarkdown(f.inEnterprise),
+      },
+    })),
+  }))
+}
+
+const PRICING_GRID = 'grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]'
+
+const PRICING_COLUMNS = [
+  {
+    key: 'community',
+    cellClassName: 'flex items-center justify-center rounded-lg p-4 sm:p-5',
+    sectionCellClassName: '',
+  },
+  {
+    key: 'teams',
+    cellClassName:
+      'relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-signoz_slate-400/20 bg-signoz_ink-500 p-4 shadow-2xl sm:bg-signoz_ink-300 sm:p-5',
+    sectionCellClassName:
+      'relative z-10 scale-105 transform border-x border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-signoz_ink-300',
+  },
+  {
+    key: 'enterprise',
+    cellClassName: 'flex items-center justify-center rounded-lg p-4 sm:p-5',
+    sectionCellClassName: '',
+  },
+]
+
 const ExploreAllFeatures: React.FC = () => {
   return (
     <>
-      <ChatbaseScrollTrigger
-        triggerElementId="choose-when-section"
-        messages={[
-          '👋 Hey, how can I help you get started?',
-          'Exploring SigNoz Pricing or Features? Share your usecase to find the right plan for you and see the relevant docs.',
-        ]}
-      />
       <div className="mx-auto mb-10 mt-6" id="all-features">
         {/* Header - Using CSS sticky positioning for smoother scrolling */}
-        <div className="sticky top-[74px] z-20 bg-[#0f1013]">
-          <div className="my-12">
+        <div
+          className="sticky top-[74px] z-20 bg-[#0f1013] before:absolute before:inset-x-0 before:-top-10 before:h-10 before:bg-[#0f1013] before:content-['']"
+          data-markdown-ignore
+        >
+          <div className="mb-20 mt-12 sm:my-12">
             <div className="grid grid-cols-1">
               <div className="mx-6 flex justify-center">
                 <TrackingLink
@@ -732,13 +818,13 @@ const ExploreAllFeatures: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
+          <div className={`grid ${PRICING_GRID}`}>
             {ALL_FEATURES_DATA.HEADER.map((header, idx) => (
               <div
                 key={idx}
                 className={`${
                   idx === 2
-                    ? `relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border border-signoz_slate-400/20 bg-signoz_ink-500 p-3 shadow-2xl sm:bg-[#16181d]`
+                    ? `relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border border-signoz_slate-400/20 bg-signoz_ink-500 p-3 shadow-2xl sm:bg-signoz_ink-300`
                     : idx !== 0
                       ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
                       : 'hidden md:block'
@@ -755,55 +841,24 @@ const ExploreAllFeatures: React.FC = () => {
           <Line />
         </div>
 
-        {/* Feature sections */}
-        {ALL_FEATURES_DATA.ROWS.map((section, sectionIdx) => (
-          <div
-            key={sectionIdx}
-            id={section.section === 'Choose When' ? 'choose-when-section' : undefined}
-          >
-            {/* Section header */}
-            <div className="sticky top-[220px] z-10 bg-[#0f1013]">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-[3fr_1fr_1fr_1fr]">
-                <div className="mb-3 mt-8 py-2 pl-6 pr-2 text-center text-sm font-medium sm:text-lg md:text-left">
-                  {section.section}
-                </div>
-                <div></div>
-                <div className="relative z-10 scale-105 transform border-x border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]"></div>
-                <div></div>
-              </div>
-            </div>
-            <Line />
-
-            {/* Features in this section */}
-            <div className="grid grid-cols-1">
-              {section.features.map((feature, featureIdx) => (
-                <div key={featureIdx}>
-                  <div className="grid grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
-                    <h4 className="col-span-3 m-0 py-4 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 sm:py-5 md:col-span-1 md:text-left">
-                      {feature.feature}
-                    </h4>
-                    <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
-                      {feature.inCommunity}
-                    </div>
-                    <div className="relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-signoz_slate-400/20 bg-signoz_ink-500 p-4 shadow-2xl sm:bg-[#16181d] sm:p-5">
-                      {feature.inTeams}
-                    </div>
-                    <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
-                      {feature.inEnterprise}
-                    </div>
-                  </div>
-                  <Line />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+        {/* Feature sections using shared grid */}
+        <FeatureComparisonGrid
+          columns={PRICING_COLUMNS}
+          sections={toPricingSections()}
+          gridClassName={PRICING_GRID}
+          sectionHeadingSize="lg"
+          stickyOffset="top-[220px]"
+          stickyBg="bg-[#0f1013]"
+          featureCellClassName="col-span-3 md:col-span-1"
+          featureSectionClassName="col-span-3 pl-6 pr-2 md:col-span-1"
+          markdownColumnLabels={['Feature', 'Community Edition', 'Teams', 'Enterprise']}
+        />
 
         {/* Bottom rounded corner for Teams column */}
-        <div className="grid h-[18px] grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
+        <div className={`grid h-[18px] ${PRICING_GRID}`}>
           <div />
           <div />
-          <div className="relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]" />
+          <div className="relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-signoz_ink-300" />
           <div />
         </div>
       </div>

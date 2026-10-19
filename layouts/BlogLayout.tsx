@@ -3,7 +3,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import type { AuthorDetail, Blog } from '../types/transformedContent'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -32,7 +32,6 @@ export default function BlogLayout({
         authors={authors}
         toc={toc}
         contentType="blog"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

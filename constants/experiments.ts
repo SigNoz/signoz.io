@@ -95,16 +95,6 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'without-self-host-tab',
   },
-  CHATBASE_BUBBLE: {
-    id: 'chatbase-bubble-experiment',
-    variants: {
-      CONTROL: 'no-chatbase-bubble',
-      VARIANT: 'with-chatbase-bubble',
-    },
-    flagName: 'chatbase-bubble-experiment',
-    concluded: true,
-    defaultVariant: 'with-chatbase-bubble',
-  },
   HOMEPAGE_EMAIL_SIGNUP: {
     id: 'homepage-email-signup',
     variants: {
@@ -122,7 +112,8 @@ export const EXPERIMENTS = {
       VARIANT: 'new-homepage-hero',
     },
     flagName: 'homepage-hero-redesign',
-    defaultVariant: 'existing-homepage-hero',
+    concluded: true,
+    defaultVariant: 'new-homepage-hero',
   },
   // Add more experiments here as needed
 } as const

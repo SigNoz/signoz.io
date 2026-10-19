@@ -7,7 +7,7 @@
 - App/UI: `app/`, `components/`, `layouts/`, `hooks/`, `utils/`, `constants/`
 - Docs/content: `data/docs/`, `data/blog/`, docs images in `data-assets/img/docs/`
 - Docs navigation and URLs:
-  - sidebar: `constants/docsSideNav.ts`
+  - sidebar: `data/docs-side-nav/main.json`
   - redirects: `next.config.js`
 - Scripts/tests: `scripts/`, `tests/`
 
@@ -18,6 +18,8 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
 - Docs changes (`data/docs/**`, docs images, docs nav, redirects/scripts):
   - `yarn check:docs-metadata` + `yarn test:docs-metadata`
   - `yarn check:doc-redirects` + `yarn test:doc-redirects`
+- CMS-synced content changes (`data/{docs,blog,guides,comparisons,opentelemetry,faqs,case-study}/**` or `scripts/cms-sync/schemas/**`):
+  - `yarn check:cms-frontmatter` + `yarn test:cms-frontmatter`
 - Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, etc.):
   - `yarn check:stale-urls` + `yarn test:stale-urls`
   - `yarn lint` (auto-fixes)
@@ -36,7 +38,7 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
   - **External links must use the MDX anchor form** with the required `rel` attributes: `<a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">Example</a>`. Do not use plain markdown `[text](https://...)` for non-signoz.io URLs.
 - If a docs path/URL changes:
   - add a permanent redirect in `next.config.js`
-  - update links and `constants/docsSideNav.ts`
+  - update links and `data/docs-side-nav/main.json`
   - update discovery surfaces when relevant (see the redirects and discovery section in `contributing/docs-authoring.md`)
 - For OpenTelemetry technical claims, verify against official sources first:
   1. `https://opentelemetry.io/docs/*`
@@ -61,3 +63,13 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
 
 When building, write to a file and then read the file to look what you want, stop combining build with grep or any other command.
 This avoids multiple builds because the command to grep is wrong.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

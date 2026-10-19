@@ -1,0 +1,414 @@
+---
+title: Are Claude’s Models Actually Getting Better? I Instrumented Claude Code to Find Out
+published_date: 2026-06-25
+tags: [OpenTelemetry]
+authors: [goutham_karthi]
+description: Benchmark scores tell you whether a model solved a task, not what it cost to get there. I instrumented Claude Code with OpenTelemetry and SigNoz to compare Claude Sonnet 4.6, Opus 4.7, and Opus 4.8 across accuracy, cost per solved task, tokens, cache utilization, error rate, and active time, on a fixed Terminal-Bench task suite.
+image: /img/blog/2026/06/claude-code-blog-cover.webp
+keywords: [Claude Code, Claude models, model comparison, Opus 4.8, OpenTelemetry, SigNoz, observability, LLM benchmarking]
+related_articles:
+  - '/blog/claude-code-monitoring-with-opentelemetry'
+  - '/blog/opentelemetry-tracing'
+  - '/blog/health-check-monitoring-with-opentelemetry'
+  - '/blog/claude-code-measure-degradation-opentelemetry'
+---
+
+<Figure
+src="/img/blog/2026/06/claude-code-blog-cover.webp"
+alt="Comparing Claude models by instrumenting Claude Code with OpenTelemetry and SigNoz"
+/>
+
+Every few months there’s a new model, new benchmark numbers, and a post telling you the latest one is the best yet. I believe them, mostly. The scores go up. But “scores go up” isn’t the question I care about when a release lands. The question is whether the new model does *my* work better, and what it costs me to find out.
+
+Those are different questions, and the gap between them is bigger than the leaderboards let on.
+
+A benchmark score tells you whether a model solved a task. It doesn’t tell you what the model spent getting there:
+
+- how many tokens it burned
+- how many tools it called
+- how long it churned
+- how often it retried
+- where it got stuck
+
+A model that solves slightly more tasks while spending three times as much, or taking twice as long, isn’t obviously the better choice. It depends on what you’re optimizing for.
+
+So when the latest Claude models came out, I went after the practical version of “are they getting better.” Same agent, same tasks, three models, full instrumentation on every run, so I could see not just *whether* each one finished but *how*. I used OpenTelemetry and SigNoz to collect and read the data.
+
+The short answer is yes, they’re getting better. The longer answer is that “better” splits into many things once you can measure them, and those things don’t all point the same direction.
+
+You can’t see that with just a number. You need two things: a task set worth trusting, and metrics on every run.
+
+## Which tasks, and why
+
+The first instinct is to write your own task. I tried that and threw it out. A homemade task has a credibility problem: you designed it, so any result can be criticized by saying: “well, you built the test to make your point.” It also means you decide what counts as correct, which is exactly the subjectivity that makes a benchmark arguable.
+
+So I used Terminal-Bench: <a href="https://github.com/harbor-framework/terminal-bench" target="_blank" rel="noopener noreferrer nofollow">https://github.com/harbor-framework/terminal-bench</a>. It’s a public benchmark for agents doing real work in a real terminal, with a few properties that matter. Every task ships with:
+
+- its own containerized environment
+- an instruction
+- a test script that decides pass or fail
+- a reference solution that proves it’s solvable
+
+The verdict is a script’s, not mine. And it supports running Claude Code as the agent directly, so I’m measuring the agent the way it’s meant to be driven.
+
+I didn’t run the whole test suite, since running that would have taken an absurd amount of tokens and time. Instead, I picked 10 tasks, chosen so they actually exercise code comprehension and generation, the two things I think “coding agent” really means. Tasks where the agent has to read existing code and understand it before it can write anything correct.
+
+The 10 lean that way, and I spread them across difficulty on purpose: some easy enough that I expected every model to pass (a floor), some hard enough that I expected none to (headroom), and a handful in the middle to separate the models.
+
+**Easy**
+
+- **countdown-game**: build an arithmetic expression from a fixed set of numbers that evaluates exactly to a target.
+- **cpp-compatibility**: downgrade a C++ template function so it compiles under C++11 while keeping the same interface.
+- **count-call-stack**: parse profiler stack traces and report the top `10` unique call sites by frequency.
+
+**Medium**
+
+- **debug-long-program**: find and fix every bug in a program you can’t see, using only two HTTP endpoints (`/checkpoint` and `/fix`).
+- **ode-solver-rk4**: write a numeric IVP solver (RK4 or similar) under strict step-size and accuracy limits, no SciPy allowed.
+- **schemelike-metacircular-eval**: read a Scheme-like interpreter and write an evaluator in that language that can interpret the test programs and itself.
+
+**Hard**
+
+- **reverse-engineering**: recover a binary’s password and run it.
+- **write-compressor**: given only a decompressor, produce a file under `2500` bytes that decompresses to an exact target text.
+- **cancel-async-tasks**: write an async runner with a concurrency cap that still runs each task’s cleanup when a run is cancelled.
+- **polyglot-rust-c**: write one source file that compiles and runs correctly as both Rust and C++, printing the kth Fibonacci number.
+
+None of them reward guessing. You read, or you fail. And three of them, all in the harder tiers, ended up doing most of the work of separating the models.
+
+I picked these 10 before running anything and before seeing a single result. If you choose tasks after seeing scores, even with the best intentions, you can nudge the set toward whatever flatters your story. Picking first and saying so takes that off the table.
+
+## What I actually ran
+
+I ran those 10 tasks through Claude Code with three models: Claude Sonnet 4.6, Claude Opus 4.7, Claude Opus 4.8. The only thing that changed between runs was the `--model` flag. (I left Fable out, following the recent access changes around it.)
+
+I followed the <a href="https://github.com/harbor-framework/terminal-bench/blob/main/README.md" target="_blank" rel="noopener noreferrer nofollow">Terminal-Bench README</a> to get set up. Each model was then driven with the same command, swapping only the `--model` value:
+
+```bash
+tb run --agent claude-code --model anthropic/claude-opus-4-8 \
+  --task-id countdown-game \
+  --task-id cpp-compatibility \
+  --task-id count-call-stack \
+  --task-id debug-long-program \
+  --task-id ode-solver-rk4 \
+  --task-id schemelike-metacircular-eval \
+  --task-id reverse-engineering \
+  --task-id polyglot-rust-c \
+  --task-id write-compressor \
+  --task-id cancel-async-tasks \
+  --dataset-path original-tasks
+```
+
+The reason to drive the actual agent, rather than hit the API in a loop, is that the agent is what people use. Its tool-calling, retries, context management, its little decisions about when to read a file versus just edit it: all of that is part of what you’re comparing when you compare models for coding work. Strip the agent out and you’re measuring something narrower than what you care about.
+
+Claude Code supports [monitoring with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) natively, which made this trackable. Every run produces metrics and traces for tokens, cost, tool calls, model requests, and more. I sent all of it to SigNoz and built one dashboard with template variables for model and session, so the same panels re-render for whichever model I’m viewing.
+
+What I put on the dashboard, and why each earned a spot:
+
+**Tokens, by type.** Not just total. Claude Code reports four kinds separately: fresh input, output, cache reads, cache creation. This split matters more than I expected, and it’s why one of the later findings is visible at all.
+
+<Figure
+src="/img/blog/2026/06/claude-tokens-by-type.webp"
+alt="Claude Code token usage broken down by type in SigNoz"
+caption="Tokens by type: fresh input, output, cache reads, and cache creation"
+/>
+
+**Cost, in dollars.** The only honest measure of spend. Tokens are a proxy for it, but don’t tell the whole story.
+
+<Figure
+src="/img/blog/2026/06/claude-cost.webp"
+alt="Claude Code cost in dollars per model in SigNoz"
+caption="Cost in dollars, the only honest measure of spend"
+/>
+
+**Cache utilization.** What fraction of input came from the prompt cache versus being processed fresh. Derived from the token breakdown, so model-specific too.
+
+<Figure
+src="/img/blog/2026/06/claude-cache-utilization.webp"
+alt="Claude Code cache utilization per model in SigNoz"
+caption="Cache utilization: fraction of input served from the prompt cache"
+/>
+
+**LLM requests.** Round-trips to the model. A rough measure of how much back-and-forth a task took.
+
+<Figure
+src="/img/blog/2026/06/claude-llm-requests.webp"
+alt="Claude Code LLM request count per model in SigNoz"
+caption="LLM requests: round-trips to the model per task"
+/>
+
+**Lines of code.** How much code the agent wrote and kept. Blunt, but a usable proxy for output volume.
+
+<Figure
+src="/img/blog/2026/06/claude-lines-of-code.webp"
+alt="Claude Code lines of code written per model in SigNoz"
+caption="Lines of code the agent wrote and kept"
+/>
+
+**Tool calls.** How much the agent *did* versus *thought*. Reads, edits, bash commands, etc
+
+<Figure
+src="/img/blog/2026/06/claude-tool-calls.webp"
+alt="Claude Code tool call counts per model in SigNoz"
+caption="Tool calls: reads, edits, and bash commands the agent ran"
+/>
+
+**Active time.** Time the agent spent actually working, idle excluded.
+
+<Figure
+src="/img/blog/2026/06/claude-active-time.webp"
+alt="Claude Code active working time per model in SigNoz"
+caption="Active time: time the agent spent working, idle excluded"
+/>
+
+**Error rate and error spans.** How often tool executions failed, plus a table of the actual failures.
+
+<Figure
+src="/img/blog/2026/06/claude-error-rate.webp"
+alt="Claude Code error rate and error spans per model in SigNoz"
+caption="Error rate and error spans: how often tool executions failed"
+/>
+
+Claude Code’s telemetry attaches the model name to some signals but not others. Cost, token usage, cache utilization, LLM requests, and lines of code all carry the model as an attribute, so those panels are genuinely filtered to one model. The rest (tool calls, active time, error rate, error spans) don’t carry it at all. They’re emitted per run.
+
+The cost numbers also needed one correction. Claude Code uses a smaller model, Haiku 4.5, for cheap internal work, and that spend shows up in raw totals. It’s separable in the telemetry (a `query_source` attribute marks auxiliary calls) and came to about `1%` of cost on average so I decided to exclude them.
+
+## What the runs actually showed
+
+I’ll walk through this one metric at a time, because not all the metrics point to the same conclusion. Look at one number by itself and you’ll come away with a confident but partly wrong conclusion. The interesting part is what happens when you put them side by side. (If you’d rather see every number at once, the [consolidated table](#putting-it-side-by-side) is at the end.)
+
+Here are the three dashboards, one per model. The panels are identical; only the model filter changed between them. Switch models to see the same panels re-render.
+
+<Tabs variant="pill">
+
+<TabItem value="sonnet-4-6" label="Sonnet 4.6" default>
+
+<Figure
+src="/img/blog/2026/06/claude-4-6-dashboard.webp"
+alt="Claude Sonnet 4.6 run dashboard in SigNoz"
+caption="Claude Sonnet 4.6: full run dashboard"
+/>
+
+</TabItem>
+
+<TabItem value="opus-4-7" label="Opus 4.7">
+
+<Figure
+src="/img/blog/2026/06/claude-4-7-dashboard.webp"
+alt="Claude Opus 4.7 run dashboard in SigNoz"
+caption="Claude Opus 4.7: full run dashboard"
+/>
+
+</TabItem>
+
+<TabItem value="opus-4-8" label="Opus 4.8">
+
+<Figure
+src="/img/blog/2026/06/claude-4-8-dashboard.webp"
+alt="Claude Opus 4.8 run dashboard in SigNoz"
+caption="Claude Opus 4.8: full run dashboard"
+/>
+
+</TabItem>
+
+</Tabs>
+
+### Accuracy
+
+<Tabs variant="pill">
+
+<TabItem value="sonnet-4-6" label="Sonnet 4.6" default>
+
+<Figure
+src="/img/blog/2026/06/claude-4-6-results.webp"
+alt="Claude Sonnet 4.6 Terminal-Bench results"
+caption="Claude Sonnet 4.6: Terminal-Bench results"
+/>
+
+</TabItem>
+
+<TabItem value="opus-4-7" label="Opus 4.7">
+
+<Figure
+src="/img/blog/2026/06/claude-4-7-results.webp"
+alt="Claude Opus 4.7 Terminal-Bench results"
+caption="Claude Opus 4.7: Terminal-Bench results"
+/>
+
+</TabItem>
+
+<TabItem value="opus-4-8" label="Opus 4.8">
+
+<Figure
+src="/img/blog/2026/06/claude-4-8-results.webp"
+alt="Claude Opus 4.8 Terminal-Bench results"
+caption="Claude Opus 4.8: Terminal-Bench results"
+/>
+
+</TabItem>
+
+</Tabs>
+
+How many of the 10 tasks each model solved:
+
+- Sonnet 4.6 solved `5`
+- Opus 4.7 solved `7`
+- Opus 4.8 solved `8`.
+
+If I stopped here, the post would be three sentences and the conclusion would be “use Opus 4.8.” That isn’t wrong, exactly. But accuracy is the one number that was never in doubt, and it says nothing about what you’d pay or wait for those extra solves.
+
+One thing to note: the failures weren’t all the same kind, which matters. Two of Sonnet’s misses were timeouts, where it ran out the clock still working. Opus 4.8’s single miss was different: it finished quickly and was simply wrong.
+
+### Cost
+
+Here’s the first place the clean story breaks. Total spend across the 10 tasks:
+
+- Sonnet 4.6: `$6.30`
+- Opus 4.7: `$8.51`
+- Opus 4.8: `$8.06`
+
+Look at the ordering. Opus 4.7, the middle model, was the most expensive of the three, more than 4.8, which is newer and solved more. The tidy “more capable costs more” intuition is wrong. The newest model was better and cheaper than the one before it.
+
+And Sonnet, cheapest in raw dollars, is cheap partly because it did less: it failed half the tasks, two by timing out. Which raises the question raw cost can’t answer. Cheapest per what?
+
+The number I trust is cost per solved task: total spend divided by tasks completed.
+
+- Sonnet 4.6: ~`$1.26`
+- Opus 4.7: ~`$1.22`
+- Opus 4.8: ~`$1.01`
+
+The newest model is the cheapest way to get a task *actually done*, even though it’s not the cheapest to run.
+
+That gap between “cheapest to run” and “cheapest to get work done” is the whole reason cost-per-outcome beats cost-per-token. Sonnet looks like the budget option until you account for what it didn’t finish, at which point the advantage mostly evaporates.
+
+### Tokens versus cache
+
+If you rank the models by total tokens alone, you get a story that sounds reasonable but can be misleading.
+
+Here’s the raw count:
+
+- Sonnet 4.6: ~`2.88 million` tokens
+- Opus 4.7: ~`5.88 million` tokens
+- Opus 4.8: ~`6.06 million` tokens
+
+So Sonnet used less than half of either Opus model. If tokens directly meant cost, it’d be less than half the price. It wasn’t: `$6.30` against 4.8’s `$8.06`. Half the tokens, roughly three-quarters of the cost. Those facts don’t fit until you break the tokens apart, which is exactly why I put the per-type breakdown on the dashboard.
+
+Two things are going on.
+
+First, cache. Utilization was pinned near `100%` across all three, meaning almost every input token came from the prompt cache rather than being read fresh. Those `6 million` tokens on the Opus runs are mostly cache reads, the cheapest thing the model does. The total count is huge because the cheap category is huge. Counting it as “usage” tells you almost nothing about the bill.
+
+Second, cost is driven by the expensive tokens: output. Sonnet’s expensive tokens, the output generated and cache created, are in the same ballpark as the Opus runs, so its cost lands there too. Fewer total tokens, comparable expensive tokens, similar cost.
+
+The simple token counter would have told you Sonnet was more than twice as efficient. The cost panel says it wasn’t. The only way to know which is true is to split tokens by type. This is a clear reason why instrumenting your coding agent instead of trusting a summary number is very important.
+
+### Active time and iteration
+
+The numbers:
+
+- Sonnet 4.6: `36.8 minutes`
+- Opus 4.7: `35.6 minutes`
+- Opus 4.8: `49.75 minutes`
+
+The naive read is “4.8 is slowest, you’ll wait longest.” That’s wrong.
+
+This panel tracks active time: time the agent spent working, idle excluded, summed across concurrently running tasks. It’s not wall-clock and not how long a human waits. So 4.8’s `49.75 minutes` doesn’t mean “slower to respond,” it means “did more work.”
+
+Line it up with the other effort signals and they agree. On the hard tasks, 4.8 led on every measure of effort:
+
+- the most model requests (`119` against Sonnet’s `68`)
+- the most tool calls
+- the most active time
+
+The newest model worked harder on the hard tasks.
+
+The extra effort converted into the highest accuracy and the best cost-per-solved. It worked more, and the work paid off.
+
+Which brings back the failure modes. Sonnet’s two losses were timeouts: it spent its whole budget and never got there. It worked hard too, but the work didn’t convert. It simply got stuck and the clock ran out. Opus 4.8’s one loss was a clean miss: finished in a couple of minutes and was simply wrong on a genuinely hard task.
+
+This is only visible because the telemetry records *how* a run ended, not just whether it passed. Failing by timeout says the model couldn’t fit the problem into the budget. Failing fast and wrong says something different: it understood the shape of the task, committed, and missed. The weaker model’s failures clustered in the first category, while the stronger model’s single failure was in the second.
+
+### Reliability
+
+This points the same way as everything else. Error rate, how often a tool execution failed during a run:
+
+- Sonnet 4.6: `1.72%`
+- Opus 4.7: `1.6%`
+- Opus 4.8: `0.85%`
+
+Roughly halving from oldest to newest. The error-spans table backs it up with the actual failures, mostly tool executions that didn’t complete cleanly, durations attached.
+
+Every failed tool call is wasted time and spend: the agent has to notice, recover, and retry, burning tokens and minutes that produced nothing. So a lower error rate isn’t just more reliable. It’s part of why the more capable model gets more done per dollar. It wastes less of its budget on its own mistakes.
+
+### Lines of code
+
+Lines written and kept:
+
+- Sonnet 4.6: `317`
+- Opus 4.7: `929`
+- Opus 4.8: `979`
+
+Lines of code is a crude measure and more code isn’t necessarily better code. But as a proxy for working output, it tracks the capability ordering cleanly, and the gap between Sonnet and the two Opus models is clear. The number is something to look at though I’d never rely on it alone.
+
+### Per-task
+
+Per-task cost ranged from about `$0.06` to about `$3.56`, two orders of magnitude on the same suite. The easy tasks are nearly free and every model breezes them. The hard ones are where the money goes and the models pull apart. The totals make the models look different across the board. They aren’t: nearly identical on the easy tasks, very different on a few hard ones.
+
+One caveat: the two Sonnet timeout costs are partial, what the run spent before it was killed, not what finishing would have cost. A number on a timed-out task means money spent with nothing to show, not a task solved cheaply.
+
+## Putting it side by side
+
+Here’s every metric in one place:
+
+| Axis | Sonnet 4.6 | Opus 4.7 | Opus 4.8 |
+| --- | --- | --- | --- |
+| Tasks solved (of `10`) | `5` | `7` | `8` |
+| Total cost | `$6.30` | `$8.51` | `$8.06` |
+| Cost per solved task | `$1.26` | `$1.22` | `$1.01` |
+| Total tokens | `2.88M` | `5.88M` | `6.06M` |
+| Cache utilization | `100%` | `100%` | `99.5%` |
+| Active time | `36.8 min` | `35.6 min` | `49.75 min` |
+| LLM requests | `68` | `109` | `119` |
+| Lines of code | `317` | `929` | `979` |
+| Error rate | `1.72%` | `1.6%` | `0.85%` |
+
+Raw cost says Sonnet, cheapest to run, full stop. Total tokens seem to say Sonnet too, until you remember that’s almost all cache reads and means nothing for the bill. Active time points at Sonnet or 4.7 as “fastest,” though we’ve established that’s work done, not time waited. And the metrics that track whether the work was any good, tasks solved, cost per solved task, error rate, point at Opus 4.8.
+
+So which model is best? The uncomfortable answer is that it depends on your specific needs. If your binding constraint is the cheapest possible run regardless of outcome, Sonnet. If it’s the most work done per dollar, Opus 4.8. If it’s raw capability, Opus 4.8 again. The only way to answer it for *your* situation is to know which metric you care about, and the only way to see the metrics is to instrument the agent. A leaderboard hands you the accuracy column but without observability, you have to just assume the rest.
+
+## So, are they getting better?
+
+Yes, and I don’t want to hide that. Across three generations the newest model solved the most tasks, made the fewest errors, and got the most work done per dollar. If you came for a one-line answer, Opus 4.8 is the one I’d reach for.
+
+But “getting better” turned out to mean several things:
+
+- **Capability went up.** The newest model solved the most tasks.
+- **Cost per solved task went down**, even though raw cost didn’t rise in a straight line: the middle model was the most expensive, which no capability score would have told me.
+- **Reliability improved.** Fewer failed tool calls.
+- **Effort on hard tasks went up, and converted** into solved tasks instead of being spent and lost like Sonnet’s timeouts.
+- **Token counts roughly doubled while cost barely moved**, because the tokens that doubled were the cheap ones.
+
+None of that is visible with a single number. It showed up because every run was instrumented and I could lay the metrics next to each other and watch them disagree.
+
+The useful skill isn’t picking today’s best model. It’s being able to ask “best at what, and at what cost” against your own workload and get a real answer. A token counter can mislead you, an accuracy score hides what you paid and how the failures failed. Which model to run is a decision about which constraint binds you, and you can’t make it well if all you can see is whether a task passed.
+
+The nice part is none of this required custom work. Claude Code already emits the telemetry. I pointed it at SigNoz, built one dashboard, and read it. To run the same comparison against your own tasks, you just have to turn on OpenTelemetry, and send that data to any OTel compatible platform to query and visualize. The models will keep changing and getting better, but how you can tell whether the new one is better for you doesn’t have to.
+
+## Caveats
+
+- **One run per task.** I didn’t average multiple trials, so there could be some variance I’m not capturing, especially on borderline tasks that could go either way. I wouldn’t treat any single task’s metrics as exactly precise. The rankings and trend are clear, but the exact figures have noise.
+- **Auxiliary Haiku spend excluded.** The cost numbers leave out the cheap internal calls Claude Code makes, mentioned earlier. ~1% on average, but you can add it back if you want whole-agent cost.
+- **Public benchmark, so contamination is real** and absolute pass rates are probably generous. This affects all three models similarly, so the comparison holds.
+- **The harness reported `0` tokens for failed tasks.** The benchmark’s own per-task results file showed `0` input and output tokens for failed or incomplete tasks, which may be misleading. That confused me at first. The real data is in the OpenTelemetry data that fed the dashboards, just not in the harness summary. If you see `0`s there, don’t panic, the numbers are in the telemetry.
+- **Active time, not wall-clock.** The easiest thing to get wrong: the time panel measures work performed across tasks, excluding idle time. It’s not how long you’d wait for a single task. For human-facing latency you’d want a different measure.
+
+## How to run it yourself
+
+If you want your own version:
+
+1. Install the benchmark and its runner, and pick your tasks.
+2. Run Claude Code as the agent with the `--model` flag set to whatever you’re comparing, holding everything else constant.
+3. Turn on the OpenTelemetry export and point it to an OTLP endpoint. Check out the [Claude Code monitoring guide](https://signoz.io/docs/claude-code-monitoring/) for detailed instructions on setting up OpenTelemetry instrumentation.
+4. Build a dashboard with the signals that matter and a way to filter by model.
+5. Run each model and read across the rows.
+
+At the end you’ll know, for your tasks rather than someone’s leaderboard, whether the new model is the one you should be using.

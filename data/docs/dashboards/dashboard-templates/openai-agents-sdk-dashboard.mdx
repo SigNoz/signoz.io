@@ -1,0 +1,81 @@
+---
+date: 2026-08-25
+title: OpenAI Agents SDK Dashboard
+meta_title: OpenAI Agents SDK OpenTelemetry Dashboard
+description: Monitor OpenAI Agents SDK apps in SigNoz. Track agent runs, token usage by model, latency percentiles, tool activity, handoffs, guardrails, and errors.
+doc_type: explanation
+---
+
+<Admonition type="info" title="Instrument your application first">
+  Before using this dashboard, instrument your OpenAI Agents SDK application with OpenTelemetry and configure export to SigNoz. See the [OpenAI Agents SDK observability guide](https://signoz.io/docs/openai-agents-sdk-observability/) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of applications built on the OpenAI Agents SDK using trace data. It is built on the `gen_ai.*` OpenTelemetry span attributes produced by `opentelemetry-instrumentation-openai-agents-v2`, and covers agent runs, token usage per model, latency percentiles, tool activity, handoffs between agents, guardrail checks, and errors.
+
+Every panel is scoped through two template variables, `$service_name` and `$environment`, so one dashboard serves every agent service you run. Select the services you want rather than leaving the picker on ALL, which applies no filter at all and mixes in every other service in the workspace.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/openai-agents-sdk-dashboard.webp"
+  alt="OpenAI Agents SDK Dashboard"
+  caption="OpenAI Agents SDK Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/openai-agents-sdk/openai-agents-sdk-dashboard.json"
+  dashboardName="OpenAI Agents SDK"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the trace data the OpenAI Agents SDK emits to help you:
+
+- **Track Token Usage**: Break down input and output tokens per model to understand what drives consumption and how it trends over time.
+- **Compare Models**: See call volume and token totals for every model in use, which makes a migration or a stray legacy model obvious.
+- **Monitor Latency**: Watch p50, p95, and p99 for model calls, and p95 per agent, to separate a slow model from an agent taking too many turns.
+- **Understand Agent Activity**: Count completed runs, see requests and average latency per agent, and follow handoffs between agents.
+- **Watch Tool Behavior**: Track call volume and failure rate per tool, and catch an agent loop that is not terminating before it shows up in spend.
+- **Audit Guardrails**: See how often each guardrail runs and how often it trips.
+- **Catch Errors Early**: Surface error rate by operation and read the failure text on recent errored spans.
+
+## Panels Included
+
+### Overview (Top Row)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Agent Runs** | Value | Count of root `Agent workflow` spans, one per `Runner.run()` |
+| **LLM Calls** | Value | Count of spans where `gen_ai.operation.name` is `chat` |
+| **Input Tokens** | Value | Sum of `gen_ai.usage.input_tokens` across all model calls |
+| **Output Tokens** | Value | Sum of `gen_ai.usage.output_tokens` across all model calls |
+
+Agent Runs counts root spans rather than `invoke_agent` spans on purpose. A guardrail nests a full agent run of its own inside the run it checks, so counting `invoke_agent` overstates how many requests your service actually handled.
+
+### Tokens and Models
+
+- **Token Usage Over Time**: Time-series of input and output tokens. Input normally dwarfs output, because each agent turn resends the accumulated conversation and tool results. A rise in the input line alone usually means prompt or context construction changed rather than traffic growing.
+- **LLM Calls by Model**: Call volume grouped by `gen_ai.response.model`, useful for confirming a model migration actually moved traffic.
+- **Tokens by Model**: Table of calls, input tokens, and output tokens per model, the figures to multiply against your own per-model rates. Note that `gen_ai.request.model` is already resolved to the dated version, so it always equals `gen_ai.response.model` here.
+- **Model Distribution**: Share of calls per model. A small model holding the majority is the healthy shape for an agent fleet, since most turns are routing and tool selection rather than generation.
+
+### Latency
+
+- **LLM Call Latency**: p50, p95, and p99 of `chat` span duration. LLM latency is driven by output length, so a wide p50 to p99 gap is normal. Watch p99 pulling away while p50 holds steady, which points at a few very long generations rather than a general slowdown.
+- **Agent Latency (p95)**: p95 duration per agent, covering the whole agent turn including tool execution and any nested guardrail run. Reads `gen_ai.agent.name` from `invoke_agent` spans, the only spans where it holds the real agent name.
+
+### Agents, Tools and Handoffs
+
+- **Agents**: Requests and average latency per agent, scoped to `invoke_agent` spans because `gen_ai.agent.name` is the literal default string `OpenAI Agent` on chat, tool, and guardrail spans. Latency is reported in raw nanoseconds.
+- **Tools**: Calls and average latency per tool. Tool spans measure your own function rather than the model, so anything in the hundreds of milliseconds here is your I/O and is usually the cheapest latency to fix. Latency is reported in raw nanoseconds.
+- **Tool Calls Over Time**: Tool invocation volume per tool. A sustained climb without matching growth in Agent Runs is the clearest early signal of an agent loop that is not terminating.
+- **Agent Handoffs**: Counts for each from-agent to to-agent pair. In a triage design most handoffs flow outward from the router, so a pair flowing back the other way means the routing prompt is no longer deciding cleanly.
+
+### Errors and Guardrails
+
+- **Error Rate**: Errored spans as a share of all spans. The denominator is every span rather than the non-errored ones, because `has_error` is absent rather than false on success, which makes negative filters unreliable.
+- **Tool Error Rate**: Share of tool executions that failed. Tool failures are non-fatal, so a tool can fail steadily without the run ever erroring.
+- **Aborted LLM Calls**: Model calls that closed with no model and no tokens, which is what an in-flight call looks like when a guardrail tripwire cancels it. These carry an Ok status, so they never reach the error panels and drop out of any breakdown grouped by model.
+- **Errors by Operation**: Errored spans over time split by operation, which separates a provider problem on `chat` from a broken tool on `execute_tool`. Errors do not propagate to the root span, so `Agent workflow` stays Ok even when a child fails.
+- **Guardrails**: Each guardrail and how often it tripped. Read the triggered rows as a share of that guardrail's total: a rate near zero suggests the guardrail is not earning its cost.
+- **Recent Errors**: The latest errored spans with their status message. This instrumentation emits no `error.type` attribute, so this free-text message is the only place the failure class lives.

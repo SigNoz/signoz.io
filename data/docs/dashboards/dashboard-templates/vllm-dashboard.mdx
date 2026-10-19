@@ -1,0 +1,74 @@
+---
+published_date: 2026-09-20
+title: "vLLM Dashboard: Monitor Token Throughput and Latency"
+description: Monitor a self-hosted vLLM inference server in SigNoz. Track tokens per second, time to first token, queue time, KV cache usage, and preemptions.
+doc_type: explanation
+---
+
+Use this dashboard to watch a self-hosted vLLM inference server. It answers four questions. How many tokens per second does the GPU produce? How long do requests wait for their first token? How deep is the queue? How much of the key-value cache is in use?
+
+vLLM exposes its own `vllm:*` metrics in Prometheus format on the same port as its OpenAI-compatible API. It needs no flag to turn them on. The OpenTelemetry Collector scrapes that endpoint and forwards the metrics to SigNoz, so this dashboard needs no instrumentation inside your application. It reads the server, not the code that calls it.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [vLLM Monitoring and Observability](https://signoz.io/docs/vllm-observability/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/vllm-dashboard.webp"
+  alt="vLLM Dashboard"
+  caption="vLLM Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/vllm/vllm-dashboard.json"
+  dashboardName="vLLM"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Answer "how many tokens per second"**: Read the decode rate as a single number, and compare it against the prefill rate next to it.
+- **Separate prefill cost from decode cost**: Prompt and generation tokens scale differently, and prompts are the cheaper half to shrink.
+- **Tell a slow first token from a slow stream**: Time to first token and inter-token latency fail for different reasons and need different fixes.
+- **Find where a slow request spent its time**: Queue time sits next to end-to-end latency. Together they separate a busy server from a long generation.
+- **See saturation before users do**: Waiting requests above zero mean the server is at capacity. Preemptions mean it ran out of key-value cache and re-ran work.
+
+## Metrics Included
+
+### Token Throughput
+
+- **Output Token Throughput (tokens/s)**: A rate over `vllm:generation_tokens_total`. vLLM publishes no throughput gauge, so this is derived from the counter.
+- **Prompt vs Generation Token Rate**: `vllm:prompt_tokens_total` and `vllm:generation_tokens_total` as per-second rates.
+
+### Latency
+
+All four panels read the `.bucket` series, because the Collector splits each Prometheus histogram into `.bucket`, `.count`, and `.sum`.
+
+- **Time to First Token (p50 / p95 / p99)**: `vllm:time_to_first_token_seconds.bucket`. What users feel as responsiveness.
+- **Inter-Token Latency (p50 / p95 / p99)**: `vllm:inter_token_latency_seconds.bucket`. The gap between consecutive output tokens during decode.
+- **End-to-End Request Latency (p50 / p95 / p99)**: `vllm:e2e_request_latency_seconds.bucket`. Queueing plus prefill plus decode.
+- **Request Queue Time (p50 / p95 / p99)**: `vllm:request_queue_time_seconds.bucket`. Time spent waiting before the request ran.
+
+### Scheduler and KV Cache
+
+- **Running vs Waiting Requests**: `vllm:num_requests_running` against `vllm:num_requests_waiting`.
+- **KV Cache Usage**: `vllm:kv_cache_usage_perc`, the fraction of the key-value cache in use.
+- **Prefix Cache Hit Rate**: A formula dividing `vllm:prefix_cache_hits_total` by `vllm:prefix_cache_queries_total`. vLLM publishes the two counters but no ready-made rate.
+- **Preemption Rate**: A rate over `vllm:num_preemptions_total`. Preemptions mean the scheduler ran out of key-value cache and re-ran requests, which shows up as latency spikes the token rate does not explain.
+
+## Dashboard Variables
+
+Use this filter variable:
+
+- **model_name**: Filter every panel to one model. A single vLLM server can host several models, and each metric carries the `model_name` label.
+
+<Admonition type="info" title="Waiting requests can read zero while queue time does not">
+  `vllm:num_requests_waiting` is a gauge sampled once per scrape, so short bursts of queueing pass between samples and leave it at zero. The queue time histogram still records them. Read the two panels together rather than treating either as the whole picture.
+</Admonition>
+
+## Related Dashboards
+
+- [SGLang](https://signoz.io/docs/dashboards/dashboard-templates/sglang-dashboard/)
+- [Ollama](https://signoz.io/docs/dashboards/dashboard-templates/ollama-dashboard/)
+- [NVIDIA DCGM Metrics](https://signoz.io/docs/metrics-management/nvidia-dcgm-metrics/)

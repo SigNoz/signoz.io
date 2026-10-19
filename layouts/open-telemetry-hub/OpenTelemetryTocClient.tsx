@@ -1,9 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
-import PageFeedback from '@/components/PageFeedback/PageFeedback'
+import {
+  TOC_SCROLL_CONTAINER_CLASS,
+  TOC_SECTION_LABEL_CLASS,
+  useTocScrollFade,
+} from '@/components/TableOfContents/tocScrollFade'
+import { useScrollSpy } from '@/hooks/useScrollSpy'
 import type { TocItemProps } from './types'
 
 interface OpenTelemetryTocClientProps {
@@ -16,54 +19,24 @@ interface OpenTelemetryTocClientProps {
  * layout.
  */
 export default function OpenTelemetryTocClient({ toc }: OpenTelemetryTocClientProps) {
-  const [activeSection, setActiveSection] = useState<string>('')
-  const tocContainerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries.filter((entry) => entry.isIntersecting)
-        if (visibleEntries.length > 0) {
-          const sortedEntries = visibleEntries.sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-          )
-          const id = sortedEntries[0].target.getAttribute('id')
-          if (id) setActiveSection(`#${id}`)
-        }
-      },
-      {
-        rootMargin: '-10% -20% -80% -20%',
-        threshold: 0,
-      }
-    )
-
-    const headings = document.querySelectorAll('h2, h3')
-    headings.forEach((heading) => observer.observe(heading))
-
-    return () => {
-      headings.forEach((heading) => observer.unobserve(heading))
-    }
-  }, [])
+  const { activeSection, setActiveSection } = useScrollSpy(toc, { offset: 120 })
+  const { tocItemsRef, scrollFadeStyle } = useTocScrollFade(toc.length)
 
   if (!toc.length) {
     return null
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-1">
-      <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
-      <div
-        ref={tocContainerRef}
-        className="relative z-[1] min-h-0 flex-1 overflow-y-auto border-l border-signoz_slate-500 pl-3"
-      >
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
+      <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
         <TableOfContents
           toc={toc}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
-          scrollableContainerRef={tocContainerRef}
+          scrollableContainerRef={tocItemsRef}
         />
       </div>
-      <PageFeedback placement="toc" />
     </div>
   )
 }

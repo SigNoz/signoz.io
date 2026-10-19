@@ -1,0 +1,119 @@
+---
+title: How Appvia uses SigNoz MCP to debug alerts with coding agents
+description: Appvia builds Wayfinder, an agentic platform for cloud-native teams. With SigNoz Cloud and SigNoz MCP, its engineering team brings telemetry into coding-agent workflows so alerts can move from symptoms to code-level evidence.
+image: /img/case_study/appvia-blog-cover.webp
+authors: [mahak_kaur]
+company: Appvia
+person: Lewis Marshall
+role: Senior Developer & Tech Evangelist
+logo: /img/case_study/logos/appvia-logo-white.webp
+logo_alt: Appvia
+tags:
+  - AI & agent workflows
+  - Tracing & performance
+date: 2026-09-07
+---
+
+At [Appvia](https://www.appvia.io/), the team builds Wayfinder, an agentic platform for cloud-native teams. The product helps developers work with infrastructure, environments, and deployments without having to become experts in every underlying system.
+
+That makes Appvia an interesting team to learn from because it is not only building around agents. It is also using them inside its own engineering workflow.
+
+Inside that setup, alert triage is where the shift shows up most clearly. When an alert comes in, the team can give a coding agent the alert, the relevant codebase, and telemetry from SigNoz Cloud through [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/). The agent can inspect traces, spans, logs, and metrics, compare possible causes, and bring back evidence that points to the code path behind the issue.
+
+For [Lewis Marshall](https://uk.linkedin.com/in/lewismarshall), Senior Developer and Tech Evangelist at Appvia, this is quickly becoming table stakes. He put it bluntly: in 2026, he would not use a service that does not have an MCP, because asking people to inspect every line of telemetry manually is "a waste of human time."
+
+Lewis is not talking about MCP as a feature checkbox. He is describing why observability now has to fit the way agent-led engineering work is starting to happen.
+
+<YouTube id="510lYQBj6I4" mute="false" />
+
+## Before MCP, context took time to gather
+
+Appvia runs a Go-based SaaS product on Kubernetes. The team already had production telemetry in SigNoz Cloud, and that data was useful. Engineers could search traces, inspect spans, look through logs, and use dashboards to understand what was happening.
+
+The harder part was moving between those signals while also keeping the code and platform context in mind. If a service became slow, an engineer still had to decide where to look first. Was the issue in the application code? Was it caused by another service? Was the traffic pattern unusual? Did the traces show the same thing as the logs? Was a metric actually meaningful, or was it misleading because there was too little traffic?
+
+That kind of work is familiar to most engineering teams. The telemetry is there, but someone has to connect it.
+
+[Mark Hughes](https://uk.linkedin.com/in/mark-hughes-4ba46b20), Software Engineering Manager at Appvia, described the older workflow as moving through the data by hand: finding the right spans, opening the right traces, checking the relevant logs, and then tying that back to what the code was doing. SigNoz MCP changed where that investigation starts. Instead of asking an engineer to gather every signal manually, Appvia can let the agent perform the first sweep across SigNoz Cloud telemetry and return with a focused path.
+
+## When an alert has to lead back to code
+
+Most of the time, Mark said, an alert starts a fresh background agent session. The prompt is shaped around the alert. The agent has the codebase and SigNoz MCP available, so it can look at telemetry, inspect related traces and logs, test a few hypotheses, and explain what it thinks is happening.
+
+Sometimes the output is a diagnosis. Sometimes it is a strong lead. And often, it gets closer than that. Mark later sharpened the point: "six times out of ten," the agent gets to "the actual solution," not just a diagnosis. In his words, it can "literally find the line of code to fix the problem."
+
+That is the strongest proof point in Appvia's workflow. The alert does not just become a summary. It becomes the start of a code-level investigation that the engineer can review.
+
+<YouTube id="ql3Uvbt9ayM" mute="false" />
+
+The important part is not just that an agent can summarize an alert. A useful agent has to move from the symptom to the evidence.
+
+In Appvia's workflow, that might mean checking whether latency changed, whether the request volume makes the latency signal trustworthy, whether a downstream call is responsible, or whether a specific span points to a specific piece of code. The agent can move between those questions faster because SigNoz MCP gives it a structured way to read the same telemetry an engineer would normally inspect in the UI.
+
+Mark described this as the agent moving across multiple systems and then coming back to the code. It looks at the alert, reads the telemetry, forms a theory, checks that theory against the data, and then follows the trail back into the repository. Work that might have taken half an hour, an hour, or two hours by hand can become a first pass the engineer can review.
+
+That is what makes the workflow useful. The agent is not simply saying, "Something is slow." It is helping answer, "Where should I look next, and why?"
+
+## The team can ask earlier
+
+Appvia does not only use observability after code reaches production.
+
+Lewis explained that the team has remote development environments that look close to production. Those environments also have metrics and logs wired in. As he put it, the team's "dev remote cloud environment has metrics wired in the same way prod does."
+
+This is where the setup becomes especially useful. SigNoz Cloud is not only something the team checks after a production issue; it can also give agents real signals while engineers are still working through a change.
+
+<YouTube id="y5ikPNUcdpU" mute="false" />
+
+That matters for agent workflows because the agent needs real signals. If a developer is testing a change in an environment that already emits useful telemetry, the agent can reason from the behavior of the system, not only from static code.
+
+It also changes the developer experience. Instead of waiting for a production alert before asking deep questions about latency, errors, or request paths, engineers can bring those questions into the normal development loop.
+
+For Appvia, that fits the broader direction of Wayfinder. The platform is built around helping teams use agents in practical engineering workflows. Observability becomes one more part of that context: not a separate place to visit after something breaks, but a source of evidence the agent can use while work is happening.
+
+## Mark still makes the call
+
+Appvia's team was clear that this is not a push-button replacement for engineering judgment.
+
+Agents still need good prompts. They can get distracted, follow the wrong path, or treat weak signals as stronger than they are. The value comes from giving the agent useful context and then having an engineer review what it brings back.
+
+Mark shared a simple example. In one investigation, latency looked acceptable on the surface. But there was almost no traffic at that moment, which meant the latency signal should not be trusted in the same way. A human engineer could understand that context and redirect the investigation.
+
+That distinction matters. Appvia is not handing judgment to the agent. The agent can do a lot of low-level investigation quickly, while the engineer stays responsible for deciding what the evidence actually means.
+
+The quality of the telemetry also matters. If traces, logs, and metrics are incomplete or noisy, the agent has less to work with. If the signals are clean and connected, the agent can move further on its own.
+
+That is why SigNoz Cloud and SigNoz MCP work well together in this workflow. SigNoz Cloud holds the observability data. SigNoz MCP gives the coding agent a way to query that data from inside the engineering workflow. The engineer decides what to trust.
+
+## What changed for Appvia
+
+The biggest change is not that Appvia has stopped debugging. It is that debugging starts with more context.
+
+Before SigNoz MCP, an engineer might open SigNoz Cloud, search through traces, inspect spans, compare logs, and then move back to the codebase. With SigNoz MCP, the agent can do much of that first pass. It can return with links, evidence, and a suggested code path.
+
+That changes the amount of work that feels worth attempting. Lewis described using MCP against a metrics and logging tool as "like making you superhuman," because the team can now investigate things they would not previously have had time to chase.
+
+Mark described the practical version of that shift. Before MCP, he could still inspect spans and traces in SigNoz Cloud by hand. With SigNoz MCP, the agent can find the right path faster, return the links, and make the telemetry more useful inside the workflow.
+
+<YouTube id="h77pgwcRRoQ" mute="false" />
+
+For Appvia, SigNoz MCP has made SigNoz Cloud more valuable because telemetry is no longer only something an engineer reads directly. It is also something agents can use while helping with real engineering tasks.
+
+That shift is easy to underestimate. Dashboards are still useful. Alerts are still useful. Manual investigation is still useful. But as engineering teams bring coding agents into everyday development, observability data needs to be available in the same place those agents work.
+
+Appvia's workflow shows what that can look like:
+
+- An alert arrives.
+- A coding agent gets the alert, repository context, and SigNoz Cloud telemetry through SigNoz MCP.
+- The agent investigates traces, logs, metrics, and related service behavior.
+- It comes back with evidence, links, and a likely code path.
+- An engineer reviews the reasoning and decides the next step.
+
+That is a practical version of [agent-native observability](https://signoz.io/agent-native-observability/). It does not remove engineers from the loop. It gives them a faster way to move from alert to evidence.
+
+If your team is already using coding agents, the next question is whether those agents can see what your production systems are doing. [SigNoz Cloud](https://signoz.io/teams/) gives teams a hosted observability platform, and [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/) brings that telemetry into agent workflows.
+
+---
+
+**SigNoz Cloud** is the easiest way to get started. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)

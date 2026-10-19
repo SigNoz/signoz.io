@@ -1,24 +1,29 @@
 ---
-title: "Kubernetes in Datadog: What It Costs and How Teams Replace It"
-date: 2026-06-02
+title: "Why Datadog Costs More on Kubernetes (and What Teams Switch To)"
+date: 2026-07-13
 tags: [datadog, kubernetes, opentelemetry]
 authors: [aayush_sharma]
-description: "Datadog monitors Kubernetes through a node Agent, a Cluster Agent, and the Datadog Operator. Here's what each piece does, where the per-host and cardinality costs add up, and how teams replace it with OpenTelemetry and SigNoz."
-keywords: [datadog kubernetes, datadog kubernetes monitoring, datadog agent kubernetes, datadog operator, datadog kubernetes pricing, datadog kubernetes architecture, datadog cluster agent, datadog k8s]
+description: "Datadog on Kubernetes ships a node Agent, a Cluster Agent, an Operator, and vendor-specific env vars on every pod. Here's what each piece does, where the cost and complexity actually come from, and how teams replace the stack with SigNoz Cloud."
+keywords: [datadog kubernetes, datadog kubernetes monitoring, datadog agent kubernetes, datadog operator, datadog helm chart, datadog kubernetes pricing, datadog kubernetes architecture, datadog cluster agent, kubernetes monitoring datadog, datadog k8s]
 related_articles:
+  - '/blog/datadog-custom-metrics-pricing/'
+  - '/blog/dd-trace/'
   - '/blog/kubernetes-monitoring/'
 ---
 
 **TL;DR**
 
-- **SigNoz**: OpenTelemetry-native, priced on data volume rather than node or container count, with a Datadog dashboard migrator and Datadog Receiver support for staged migrations.
-- **Datadog**: Per-host APM, per-container, and custom-metrics charges compound with cluster size; newer OTLP and DDOT paths exist but the per-host billing model still applies.
+- **SigNoz Cloud**: Standard OpenTelemetry config on your pods, no vendor SDK in your application code, priced on data volume regardless of how many nodes or containers you run.
+- **Datadog**: Three Kubernetes components to operate (Agent, Cluster Agent, Operator), Datadog-specific env vars and labels on every Deployment, and per-host plus per-container plus custom-metric charges that all scale with cluster size.
 
 ---
 
-Datadog Kubernetes monitoring is the bundle of components Datadog ships to pull metrics, logs, traces, and events out of a Kubernetes cluster and into the Datadog backend. It usually consists of three moving parts - the `Datadog Agent` running as a DaemonSet on every node, the `Datadog Cluster Agent` running as a centrally managed Deployment that talks to the Kubernetes API server, and the `Datadog Operator` (or the older Helm chart) that manages those deployments through a Kubernetes-native interface. 
+Datadog is one of the most widely used platforms for monitoring Kubernetes clusters today, in large part because the install path is straightforward. A Helm chart brings up the Agent as a DaemonSet, the Cluster Agent surfaces Kubernetes events and cluster-level metrics, and pods, deployments, and traces appear in a single UI within minutes. The cost and complexity of running Datadog on Kubernetes long-term show up in three places that are not obvious at install time: 
+- A bill that scales with cluster shape rather than telemetry volume
+- Vendor-specific env vars and labels on every pod template
+- A migration path that touches application code, workload manifests, and cluster RBAC at the same time.
 
-Once installed, the Agent auto-discovers workloads through pod annotations, scrapes `kubelet` and `kube-state-metrics`, tails container stdout for logs, and forwards everything to Datadog (with OTLP ingest available as a more recent option). The setup is straightforward and the Kubernetes dashboards in Datadog look good in a demo, but the friction shows up at month-end when Datadog APM is billed at `$31` per APM host per month with Pro or Enterprise Infrastructure Monitoring (or `$36` standalone), Infrastructure Monitoring starts at `$15` per infra host per month with additional usage-based charges for containers, logs, and custom metrics, and Datadog's auto-tagging on Kubernetes can attach `pod_name`, `container_id`, `kube_namespace` and similar tags depending on the Agent's cardinality settings, which drives custom metrics counts to numbers that turn into surprise invoice lines. 
+This article walks through what Datadog actually deploys to your cluster, the structural reasons the cost and complexity grow with cluster size, and what changes when you replace the Datadog Agent with the OpenTelemetry Collector and send the same data to [SigNoz Cloud](https://signoz.io/teams/) instead.
 
 <Figure
   src="/img/blog/2026/06/datadog-kubernetes-otel-comparison-2.webp"
@@ -26,189 +31,306 @@ Once installed, the Agent auto-discovers workloads through pod annotations, scra
   caption="Datadog versus OpenTelemetry on Kubernetes"
 />
 
-Most teams running Datadog on Kubernetes report that the K8s monitoring side of the bill grows faster than the cluster itself.<br />
-This article walks through how Datadog actually monitors Kubernetes, where the costs and operational pain points compound, and how teams replace the Datadog stack with OpenTelemetry and SigNoz.
-
 <KeyPointCallout title="PLANNING TO MOVE OFF DATADOG ON KUBERNETES?" defaultCollapsed="true">
 
-For the full step-by-step replacement path, our [Datadog to SigNoz migration guide](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/) has the commands for swapping the Datadog Agent and Operator out for the OpenTelemetry Collector and pointing your data at SigNoz.
+For the step-by-step replacement path, our [Datadog to SigNoz migration guide](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/) has the commands for swapping the Datadog Agent and Operator out for the OpenTelemetry Collector and pointing your data at SigNoz Cloud.
 
 </KeyPointCallout>
 
-## What Datadog Drops Into Your Cluster
+## What Datadog deploys to your Kubernetes cluster
 
-The classic Datadog install on Kubernetes is four moving parts that ship together. Each one does a different job, and each one is a Datadog component you'll have to swap out if you ever migrate off the Agent path.
+A standard Datadog install on Kubernetes is three components plus a configuration surface, and all four are Datadog-specific:
 
-- **Datadog Agent:** Runs as a DaemonSet, putting one Agent pod on every node to scrape `kubelet`, tail container stdout, forward APM traces from [`dd-trace`-instrumented apps](https://signoz.io/blog/dd-trace/), and collect node-local events. It sends data to Datadog over its native protocol, with OTLP ingest available as an alternative.
-- **Datadog Cluster Agent:** Runs as a centrally managed Deployment, watches the Kubernetes API, runs cluster-level integrations like `kube-state-metrics`, and exposes the External Metrics API for HPA-driven autoscaling.
-- **Datadog Operator (or Helm chart):** Deploys and reconciles both Agents via a `DatadogAgent` Custom Resource, with the older `datadog/datadog` Helm chart as the alternative path on legacy installs.
-- **Pod annotations:** Workload discovery uses `ad.datadoghq.com/*` annotations as one Autodiscovery method. In workload-managed pods, changes to pod-template annotations apply through a normal rollout rather than hot-updating existing pods.
+- **Datadog Agent (DaemonSet):** One Agent pod on every node. It scrapes `kubelet` for container resource metrics, tails container logs from `/var/log/pods`, receives APM traces from your application pods over port 8126, and accepts custom metrics over DogStatsD on UDP 8125. If a node doesn't have a Datadog Agent pod, that node is invisible to Datadog.
+- **Datadog Cluster Agent (Deployment):** A centrally managed replica that watches the Kubernetes API, runs cluster-wide integrations like `kube-state-metrics`, distributes metadata to the node Agents so they can tag workloads correctly, and exposes the External Metrics API so Horizontal Pod Autoscalers can scale on Datadog data. If the Cluster Agent goes unhealthy, autoscaling and a lot of Kubernetes-aware tagging stop working until it recovers.
+- **Datadog Operator (or the `datadog/datadog` Helm chart):** Reconciles the Agent DaemonSet and the Cluster Agent Deployment through a `DatadogAgent` Custom Resource. The Operator is the newer, Datadog-recommended path. The Helm chart is older but still maintained, and a lot of clusters are still on it.
+- **Pod annotations and labels:** Every workload Deployment usually ends up carrying `tags.datadoghq.com/env`, `tags.datadoghq.com/service`, and `tags.datadoghq.com/version` labels on the pod template, plus `ad.datadoghq.com/<container>.*` annotations for any container that uses Datadog Autodiscovery. Changes to these apply through a normal rollout, not a hot-update.
 
-The Operator, Cluster Agent, and annotation schema are Datadog-specific surfaces, so moving off the classic Datadog Agent path is an operational change across the cluster, not just a code one.
+Together with the Datadog libraries inside your application code (`ddtrace`, `dogstatsd`), this is the full surface area your platform team has to operate, and the Cluster Agent, Operator, and annotation schema are usually what makes a migration off Datadog harder than teams expect, even though the Agent is the part everyone interacts with in the UI.
 
-## Why the Datadog Kubernetes Bill Compounds
+## Where Kubernetes makes Datadog harder than it looks
 
-Datadog has several Kubernetes pricing problems that multiply rather than overlap, because every line item on the invoice tracks something Kubernetes naturally produces, like - host count grows as the cluster autoscales, container count grows as more pods spin up, custom metrics cardinality grows with every pod restart, and log volume grows with every sidecar or init container the team adds.<br />
-The bill ends up being the **product of all four** and not the sum.
+The Datadog install above works as documented, but the friction usually shows up only after you have been running it for a longer period of time.
 
-### Per-host pricing scales with node count, not load
+### Per-host pricing on a per-node platform
 
-[Datadog APM and Infrastructure are both priced per host](https://signoz.io/blog/datadog-pricing/). On Kubernetes, "host" means "node," so a cluster that auto-scales from 20 nodes to 200 during peak load is also auto-scaling your Datadog bill. 
+<Figure
+  src="/img/blog/2026/06/datadog-kubernetes-datadog-summary.png"
+  alt="Datadog metrics summary view with queryable tags and host-based pricing context"
+  caption="Datadog Kubernetes metrics summary and tag cardinality view"
+/>
 
-The pricing model rewards you for keeping workloads tightly packed on fewer larger nodes and penalises clusters that scale horizontally, which is the opposite of how most Kubernetes-native architectures are built.
+[Datadog APM is priced per host](https://signoz.io/blog/datadog-pricing/), Infrastructure Monitoring is charged per infra host, and per-container charges sit on top. On Kubernetes, a host is a node, so the bill grows every time the Cluster Autoscaler adds one, regardless of how much telemetry actually changed. 
 
-### Per-container pricing on top
+The model rewards packing workloads onto fewer larger nodes, which is the opposite of how Kubernetes-native architectures are designed to scale.
 
-Datadog's container monitoring tier adds a separate per-container fee on top of the node price. The bill ends up structured as `host count × per-host APM + container count × per-container + log volume + custom metrics`, all of which scale independently with cluster growth.
+### Cardinality from default Kubernetes tags
 
-### Custom metrics cardinality from Kubernetes' default tag set
+<Figure
+  src="/img/blog/2026/06/datadog-kubernetes-datadog-metric-tags.png"
+  alt="Datadog metric tag keys and container tag counts for container.cpu.throttled"
+  caption="Datadog metric tag keys for Kubernetes container metrics"
+/>
 
-Datadog can automatically attach `pod_name`, `container_id`, `kube_namespace`, `kube_deployment`, `kube_replica_set`, and similar tags to Kubernetes metrics, with the exact tag set depending on the Agent's cardinality configuration. Pod names rotate every deploy, container IDs rotate every restart, and replica set names rotate every rolling update.
+Datadog can automatically attach `pod_name`, `container_id`, `kube_deployment`, and similar tags to your metrics. [Billing keys off unique combinations of metric name and tag values](https://signoz.io/blog/datadog-custom-metrics-pricing/), so every pod restart, rollout, or replica-set change produces new billable series. 
 
-Rotating high-cardinality tags increases custom-metric usage because [billing maps off unique metric-name and tag-value combinations](https://signoz.io/blog/datadog-custom-metrics-pricing/). A team that emits one cleanly-named application metric can end up paying for tens of thousands of unique series once high-cardinality Kubernetes tags are attached.
+One cleanly named application metric can become tens of thousands of unique time series on the invoice once Kubernetes tagging is applied.
 
-### Log indexing cost on top of ingestion
+### Vendor-specific config on every pod
 
-[Datadog Logs charges `$0.10/GB` for ingestion and an additional `$1.06–$2.50` per million events for indexing](https://signoz.io/blog/datadog-logs-pricing/), with retention adding further multipliers. Kubernetes log volume tends to be high because every sidecar, init container, and ambient platform component emits its own stream, so the indexing line on the invoice is usually larger than teams estimate going in.
+A Datadog-instrumented Deployment typically carries `DD_*` env vars on every container (`DD_SERVICE`, `DD_ENV`, `DD_VERSION`, `DD_LOGS_INJECTION`, `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, `DD_DOGSTATSD_HOST`) and `tags.datadoghq.com/*` labels on the pod template. 
 
-### DaemonSet resource overhead
+<KeyPointCallout title="WHAT THIS LOOKS LIKE IN A REAL DEPLOYMENT" defaultCollapsed="true">
 
-The Agent runs on every node, and the Cluster Agent runs centrally. On a busy cluster, the Agent's CPU and memory footprint becomes visible in the resource budget, which means the cluster is also paying its cloud provider for the compute that runs the monitoring stack itself.
+```yaml
+template:
+  metadata:
+    labels:
+      app: booking-api
+      tags.datadoghq.com/env: production
+      tags.datadoghq.com/service: booking-api
+      tags.datadoghq.com/version: "1.0.0"
+  spec:
+    containers:
+      - name: booking-api
+        env:
+          - name: DD_SERVICE
+            value: booking-api
+          - name: DD_ENV
+            value: production
+          - name: DD_VERSION
+            value: "1.0.0"
+          - name: DD_LOGS_INJECTION
+            value: "true"
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: DD_TRACE_AGENT_PORT
+            value: "8126"
+          - name: DD_DOGSTATSD_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+```
 
-<InlineCTA message="Running Datadog on Kubernetes and watching the bill grow with the cluster? SigNoz prices on data volume, not nodes or containers. OpenTelemetry-native, with a Datadog dashboard migrator." />
-
-## DaemonSet, Sidecar, or Gateway: The Topology Flexibility OpenTelemetry Gives You
-
-The classic Datadog Agent path on Kubernetes runs as a DaemonSet, one pod per node. Datadog's newer DDOT Collector also supports OpenTelemetry-style pipelines and a gateway deployment is available in Preview, but the default Kubernetes infrastructure-monitoring path is still the node-level DaemonSet. If your cluster runs hundreds of small nodes on that path, you get hundreds of Agent pods consuming CPU and memory on every node whether you need them or not.
-
-OpenTelemetry gives you three patterns and lets you pick per workload:
-
-- **DaemonSet**: Same shape as the Datadog Agent. One Collector per node, scrapes local `kubelet` and `cAdvisor`, tails local container logs. Best when most data is node-local.
-- **Sidecar**: A Collector container injected next to your application pod. Stronger isolation and zero noisy-neighbour risk between workloads, at the cost of a Collector container per pod. Rarely needed, but available.
-- **Gateway**: A centralised Collector deployment that the cluster ships data to. Zero per-pod overhead and horizontally scalable, so your monitoring stack scales independently of cluster size. Best for high-traffic clusters or any team optimising the resource footprint of their observability layer.
-
-<KeyPointCallout title="WHY THE DEPLOYMENT PATTERN MATTERS" defaultCollapsed="true">
-
-An OpenTelemetry deployment can be tuned for the cluster you actually run. A 500-node cluster running batch workloads doesn't need 500 Agent pods sitting idle most of the day, it needs a gateway with two or three replicas.
-
-Datadog's per-host pricing makes this distinction expensive twice over: the Agent is on every node by design, and you pay per node whether the Agent is doing useful work or not.
+Every workload Deployment in a Datadog-instrumented cluster carries this same block. None of these env vars or labels work outside Datadog.
 
 </KeyPointCallout>
 
-## Datadog vs OpenTelemetry for Kubernetes
+None of this is portable, so moving off the Agent later means editing every workload manifest in the cluster, not just the Helm release that installed the Agent.
+
+### Logs billed twice
+
+[Datadog Logs charges \$0.10/GB for ingestion and \$1.06 to \$2.50 per million events for indexing](https://signoz.io/blog/datadog-logs-pricing/), with retention multipliers on top. 
+
+Kubernetes naturally produces high log volume from sidecars, init containers, and platform components, and the indexing line on the invoice is usually larger than teams estimate going in.
+
+### Agent overhead on every node
+
+A 200-node cluster runs as many Datadog Agent pods as there are nodes, plus the Cluster Agent, all consuming CPU and memory you pay your cloud provider for. The Cluster Agent is a single Deployment, which becomes an availability concern when Horizontal Pod Autoscalers depend on its External Metrics API.
+
+<KeyPointCallout title="WHAT THIS LOOKS LIKE IN THE CLUSTER" defaultCollapsed="true">
+
+```
+$ kubectl get pods -n datadog -o wide
+
+NAME                                       READY   STATUS    NODE
+datadog-agent-7jdpx                        4/4     Running   node-1
+datadog-agent-9xnqv                        4/4     Running   node-2
+datadog-agent-rkb2c                        4/4     Running   node-3
+datadog-cluster-agent-7c9d5b6f48-zxqkw     1/1     Running   node-2
+```
+
+One Agent pod per node (the DaemonSet), plus a single Cluster Agent Deployment. The pattern is identical on a 3-node cluster and a 300-node cluster, which is also exactly how the bill scales.
+
+</KeyPointCallout>
+
+These are not bugs but the natural shape of an Agent-based architecture that was designed for the per-VM era and then extended onto Kubernetes, which means the friction is structural rather than something a configuration change can resolve.
+
+<InlineCTA message="Running Datadog on Kubernetes and watching the bill grow faster than the cluster? SigNoz Cloud prices on data volume, not nodes or containers. OpenTelemetry-native, with a Datadog dashboard translator built for this migration." />
+
+## Common scenarios where Datadog and SigNoz behave differently
+
+Five situations any team running Kubernetes hits sooner or later, and what each path looks like.
+
+### Adding a new service
+
+A new Deployment on the Datadog path needs the same block from the manifest snippet above (seven `DD_*` env vars and three `tags.datadoghq.com/*` labels), plus `ddtrace` and DogStatsD in the application code. On the SigNoz Cloud path, the same Deployment needs three standard OpenTelemetry env vars and nothing in the application code.
+
+<KeyPointCallout title="WHAT AN OTEL DEPLOYMENT LOOKS LIKE" defaultCollapsed="true">
+
+```yaml
+template:
+  spec:
+    containers:
+      - name: booking-api
+        env:
+          - name: OTEL_SERVICE_NAME
+            value: booking-api
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://otel-collector:4317
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: deployment.environment=production,service.version=1.0.0
+```
+
+Three env vars, vendor-neutral. The same Deployment works against any OTLP backend.
+
+</KeyPointCallout>
+
+### A custom metric with a high-cardinality tag
+
+Both products will record `bookings_total{user_id="..."}` but the difference is on the invoice. Datadog counts every unique combination of metric name and tag values as a billable custom metric, while SigNoz Cloud prices by sample volume regardless of tag count.
+
+A metric tagged with `user_id` on a cluster with 100,000 distinct users produces 100,000 billable series on Datadog. On SigNoz Cloud, the same data costs the same as the metric without the tag.
+
+### A cluster that autoscales
+
+On Datadog, scaling from 20 nodes to 200 multiplies the per-host APM and Infrastructure Monitoring charges by ten, even when telemetry volume does not change. On SigNoz Cloud, the bill follows data volume, so horizontal scaling stays cheap.
+
+### Migrating to a different observability backend
+
+Moving off `ddtrace` plus the Datadog Agent means rewriting application code, updating every Deployment manifest, removing the Helm release, and rebuilding dashboards. Moving an OpenTelemetry setup to a different OTLP backend means changing one exporter block in the Collector config.
+
+<KeyPointCallout title="WHAT MOVING BETWEEN OTEL BACKENDS LOOKS LIKE" defaultCollapsed="true">
+
+```yaml
+exporters:
+  otlp/signoz:
+    endpoint: ingest.us.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+One config block changes. Application code and workload manifests stay untouched.
+
+</KeyPointCallout>
+
+## Sending data from Kubernetes to SigNoz Cloud
+
+The SigNoz path on Kubernetes is two pieces:
+
+- **An OpenTelemetry Collector Deployment** with a ConfigMap pointing at your SigNoz Cloud OTLP endpoint and an ingestion key from `SigNoz Cloud > Settings > Ingestion`. It receives OTLP traffic from application pods on port 4317 (gRPC) or 4318 (HTTP) and ships it to SigNoz Cloud.
+- **Application Deployments** with three standard OpenTelemetry env vars: `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and `OTEL_RESOURCE_ATTRIBUTES`. These are vendor-neutral, so the same Deployment works against any OTLP backend.
+
+For Kubernetes node, pod, and container metrics plus Kubernetes events, install [SigNoz K8s Infra](https://signoz.io/docs/install/kubernetes/) as a separate Helm release. It runs an OpenTelemetry Collector with the right Kubernetes receivers and the cluster-wide RBAC for the API server scrape. Application telemetry and cluster telemetry stay in separate Helm releases because they are different concerns and easier to operate independently.
+
+<KeyPointCallout title="MINIMAL OTEL COLLECTOR CONFIG FOR SIGNOZ CLOUD" defaultCollapsed="true">
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  otlp/signoz:
+    endpoint: ${env:SIGNOZ_OTLP_GRPC_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+
+service:
+  pipelines:
+    traces:  { receivers: [otlp], exporters: [otlp/signoz] }
+    metrics: { receivers: [otlp], exporters: [otlp/signoz] }
+    logs:    { receivers: [otlp], exporters: [otlp/signoz] }
+```
+
+The Collector receives OTLP from your apps and forwards to SigNoz Cloud over the same protocol. No vendor SDK in your application code, no vendor-specific labels on pods.
+
+</KeyPointCallout>
+
+## Why SigNoz Cloud specifically
+
+The OpenTelemetry community has many backends. [SigNoz Cloud](https://signoz.io/teams/) is the most direct landing spot from a Datadog Kubernetes setup for the reasons below.
+
+### Familiar UI for Datadog users
+
+SigNoz Cloud's primitives map closely to Datadog's: service maps, trace waterfalls, the log explorer, and [Kubernetes resource views](https://signoz.io/kubernetes-monitoring/). Engineers who already know Datadog can usually find their way around SigNoz in hours, not weeks.
 
 <Figure
-  src="/img/blog/2026/06/datadog-kubernetes-otel-comparison-1.webp"
-  alt="Diagram showing the difference between Datadog Kubernetes monitoring and OpenTelemetry"
-  caption="How Datadog Kubernetes compares to OpenTelemetry"
+  src="/img/blog/2026/06/datadog-kubernetes-signoz-trace-view.png"
+  alt="SigNoz trace view showing flame graph and waterfall visualization for distributed requests"
+  caption="SigNoz distributed trace view with flame graph and waterfall"
 />
 
-The contrast comes down to one design choice - Datadog's Kubernetes stack is built around its own Agent, Cluster Agent, and Operator, while OpenTelemetry is an open standard that any backend can implement and any team can run without committing to a single vendor.
+### Migration tooling built for this move
 
-| Aspect | Datadog Kubernetes | OpenTelemetry on Kubernetes |
-| --- | --- | --- |
-| **Maintained by** | Datadog | The CNCF (Cloud Native Computing Foundation) |
-| **Collection agent** | Datadog Agent (DaemonSet) | OpenTelemetry Collector (DaemonSet or sidecar) |
-| **Cluster-level integrations** | Datadog Cluster Agent | OTel Collector + Kubernetes Receiver |
-| **Install path** | Datadog Operator or Helm chart | OTel Operator or Helm chart (CNCF maintained) |
-| **Auto-discovery** | `ad.datadoghq.com/*` pod annotations | OTel target allocator, Kubernetes attributes processor |
-| **Wire protocol** | Datadog-native protocol; OTLP ingest also supported on newer Agent paths | [OTLP (open standard)](https://signoz.io/blog/what-is-otlp/) |
-| **Pricing model** | Per-host, per-container, custom metrics by cardinality | Set by the backend you choose |
-| **Backend** | Datadog is the primary destination; DDOT can participate in multi-destination OTel pipelines | Any OTLP-compatible backend (SigNoz, etc.) |
+SigNoz ships a [Datadog dashboard JSON translator](https://signoz.io/datadog-migration-tool/) that converts Datadog dashboard exports into SigNoz dashboards, and the OpenTelemetry Collector's Datadog Receiver accepts traffic from your existing Datadog Agents and forwards it to SigNoz Cloud over OTLP. That means you can stage the migration without rewriting SDKs on day one.
 
-Most pieces of the Datadog Kubernetes stack have a direct OpenTelemetry equivalent that does the same job without binding the cluster to one vendor.
+<KeyPointCallout title="STAGING WITH THE DATADOG RECEIVER" defaultCollapsed="true">
 
-## Why SigNoz Fits Kubernetes Better Than Datadog
+```yaml
+receivers:
+  datadog:
+    endpoint: 0.0.0.0:8126
 
-<Figure
-  src="/img/blog/2026/06/datadog-kubernetes-signoz.webp"
-  alt="SigNoz Kubernetes resource view showing cluster observability"
-  caption="OpenTelemetry-native Kubernetes observability in SigNoz"
-/>
+exporters:
+  otlp/signoz:
+    endpoint: ${env:SIGNOZ_OTLP_GRPC_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
 
-The Datadog-to-OpenTelemetry swap is the easy part. The harder question is [which OTel backend](https://signoz.io/blog/datadog-alternatives/) the data actually goes to once the Datadog Agent is out, and there are several to choose from. The practical reasons teams coming off Datadog on Kubernetes end up on SigNoz come down to the following.
+service:
+  pipelines:
+    traces:
+      receivers: [datadog]
+      exporters: [otlp/signoz]
+```
 
-### Your Datadog Muscle Memory Carries Over
+The OpenTelemetry Collector listens on the Datadog Agent's port (8126), accepts traffic from your `ddtrace`-instrumented apps, and forwards it to SigNoz Cloud over OTLP. No SDK swap required to start.
 
-<Figure
-  src="/img/blog/2026/06/datadog-kubernetes-signoz-kubernetes.webp"
-  alt="SigNoz Kubernetes dashboard view that resembles Datadog"
-  caption="A Datadog-like Kubernetes experience in SigNoz"
-/>
+</KeyPointCallout>
 
-SigNoz's UI is built around the same primitives a Datadog user already knows. The Kubernetes resource views, pod and node-level dashboards, trace waterfalls, and log explorer map closely to their Datadog equivalents, so the team's existing Datadog muscle memory carries over instead of being thrown away. That tends to keep migration risk lower than picking a tool with a completely different mental model.
+### Pricing follows data, not infrastructure
 
-### Logs, Metrics, and Traces in One Platform
-
-<Figure
-  src="/img/blog/2026/06/datadog-kubernetes-signoz-corelation.webp"
-  alt="SigNoz UI correlating logs, metrics, and traces for Kubernetes"
-  caption="Correlated logs, metrics, and traces in one platform"
-/>
-
-SigNoz keeps logs, metrics, and traces in a single platform with a unified query experience (a visual builder, raw SQL, and Prometheus-style expressions from one UI) and a single bill. Pivoting from a trace to its logs to the host or pod metrics behind it happens inside one product, so an incident never turns into a tab-switching exercise across separate tools and the team isn't juggling four disconnected query UIs to answer one question.
-
-### No Per-Host or Per-Container Bill
+[SigNoz Cloud prices traces and logs at `\$0.30/GB`](https://signoz.io/pricing/) and metrics at \$0.10 per million samples. No per-host charge, no per-container charge, no separate ingestion-versus-indexing tier, and no surcharge for high-cardinality Kubernetes tags. The bill follows the data your workloads actually produce.
 
 <Figure
   src="/img/blog/2026/06/datadog-kubernetes-signoz-pricing.webp"
-  alt="SigNoz price comparison showing volume-based Kubernetes observability costs"
-  caption="Data volume pricing, not node or container bills"
+  alt="SigNoz pricing with usage-based observability costs and no host-based pricing"
+  caption="Usage-based pricing for observability, not host-based billing"
 />
 
-Datadog APM is billed per host (starting at `$31` per APM host per month with Pro or Enterprise Infrastructure Monitoring, or `$36` standalone), per-container charges sit on top, and both scale with cluster size. 
+### Portability built into the choice
 
-[SigNoz prices ingested data at `$0.30/GB`](https://signoz.io/pricing/) for logs and traces and `$0.10` per million metric samples, with no per-host, per-container, or per-user charges. Adding nodes, pods, or engineers doesn't change the line item, and the bill is bounded by data volume alone.
+Because SigNoz Cloud is OpenTelemetry-native end to end, the instrumentation you write for SigNoz works unchanged against any OTLP-compatible backend. If you ever want to switch destinations again, only the Collector's exporter endpoint changes, and the application code and workload manifests stay the same.
 
-### High-Cardinality Kubernetes Tags Without the Bill Penalty
-
-Most teams moving off Datadog on Kubernetes have hit cardinality issues somewhere, often because Datadog's auto-tagging can attach `pod_name`, `container_id`, and `kube_deployment` depending on cardinality settings, and each rotation creates new billable time series. 
-
-SigNoz handles [high-cardinality data](https://signoz.io/blog/high-cardinality-data/) natively and doesn't bill per time series, so the same Kubernetes tags that drove your Datadog overage cost the same as any other tag on SigNoz. You can keep `pod_name`, `container_id`, and any custom tag you actually need for debugging without rewriting your tagging strategy.
-
-### OpenTelemetry-Native, So There's No Second Lock-In
-
-A few backends accept OTLP traffic but push their own agents or SDKs back onto you for full feature parity. Picking those means trading one lock-in for another, which is exactly what you were trying to avoid when leaving the Datadog Agent. 
-
-SigNoz is built on OpenTelemetry from the ground up, so the instrumentation work you do for SigNoz keeps working with any other OTLP-compatible backend if you ever switch again.
-
-### Migration Tooling Built for This Move
-
-Most OTel destinations leave the migration entirely up to you. SigNoz ships a [Datadog dashboard JSON migrator](https://signoz.io/datadog-migration-tool/) that converts your existing Datadog dashboards (including Kubernetes dashboards) into SigNoz dashboards in one step, supports the open-source [OpenTelemetry Datadog Receiver](https://signoz.io/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/) so you can forward Datadog Agent traffic to SigNoz while you swap collectors at your own pace, and publishes migration documentation specifically for the Datadog Agent and Operator. The combined effect is that staged migrations stay in production-readable shape from day one rather than going through a long cutover.
-
-<InlineCTA message="Ready to replace the Datadog Agent on Kubernetes? SigNoz Cloud is OpenTelemetry-native, ships a Datadog dashboard migrator, and runs without per-host or per-container charges." />
+<InlineCTA message="Ready to replace the Datadog Agent on Kubernetes? SigNoz Cloud is OpenTelemetry-native, ships a Datadog dashboard translator, and runs without per-host or per-container charges." />
 
 ## FAQs
 
 **How does Datadog monitor Kubernetes?**
 
-`Datadog Agent` (DaemonSet) + `Cluster Agent` (Deployment) + `Operator` (or Helm chart). SigNoz Cloud collapses all three into one OpenTelemetry Collector.
+Three components: `Datadog Agent` (DaemonSet), `Datadog Cluster Agent` (Deployment), and the `Datadog Operator` or Helm chart. SigNoz Cloud collapses these into one OpenTelemetry Collector.
 
-**Is the Datadog Agent open source?**
+**What does the Datadog Agent need on every pod?**
 
-Source is on GitHub but tied to Datadog's backend. SigNoz Cloud is OpenTelemetry-native end to end.
-
-**Datadog Operator or Helm chart, which one should I use?**
-
-Both still work. Starting fresh, the OpenTelemetry Operator pointed at SigNoz Cloud is the OTel-native equivalent.
+Seven `DD_*` env vars on every container plus `tags.datadoghq.com/*` labels on the pod template. SigNoz Cloud needs three standard OpenTelemetry env vars, vendor-neutral.
 
 **Does Datadog charge per Kubernetes node?**
 
-Yes — Infrastructure Monitoring from `$15`/host, APM from `$31` (Pro/Enterprise) or `$36` standalone, plus per-container and custom-metrics charges. SigNoz Cloud prices on data volume (`$0.30/GB`), so node count doesn't change the bill.
+Yes. Infrastructure Monitoring from \$15/host, APM from \$31 (or \$36 standalone), plus per-container and custom-metric charges. SigNoz Cloud prices on data volume, so node count doesn't move the bill.
 
 **Why does my Datadog bill grow when my cluster auto-scales?**
 
-Per-host pricing scales with node count. SigNoz Cloud's volume-based pricing doesn't.
+Per-host pricing scales linearly with node count. SigNoz Cloud's volume-based pricing doesn't.
 
-**Can I move from the Datadog Agent to the OpenTelemetry Collector on Kubernetes?**
+**Can I send data to SigNoz from Kubernetes without changing application code?**
 
-Yes. Install the OpenTelemetry Operator, deploy a Collector DaemonSet plus gateway, point apps at OTLP, send everything to SigNoz Cloud. Steps in the migration guide linked at the top.
+Yes. If you already use OpenTelemetry, swap the exporter endpoint in your Collector config. If you are on `ddtrace`, the Collector's Datadog Receiver accepts Agent traffic and forwards it to SigNoz Cloud over OTLP while you swap SDKs at your own pace.
 
-**Does SigNoz work with the Datadog Operator?**
+**Do I need the Datadog Operator with SigNoz?**
 
-No. Use the OpenTelemetry Operator with SigNoz Cloud — same Kubernetes-native experience, no per-host bill.
+No. Use the OpenTelemetry Operator, a CNCF project that manages OpenTelemetry Collectors the same Kubernetes-native way, without per-host billing.
 
 **Can I keep dd-trace on Kubernetes and use SigNoz?**
 
-Yes. The OpenTelemetry Collector's Datadog Receiver forwards existing Datadog Agent and `dd-trace` traffic to SigNoz Cloud over OTLP, so you can stage the migration without swapping SDKs.
+Yes. The OpenTelemetry Collector's Datadog Receiver forwards existing `dd-trace` traffic to SigNoz Cloud over OTLP, so you can stage the migration without rewriting SDKs.
 
+**Does SigNoz collect Kubernetes events and node metrics?**
+
+Yes, via SigNoz K8s Infra (a separate Helm release with the right Kubernetes receivers and cluster-wide RBAC).

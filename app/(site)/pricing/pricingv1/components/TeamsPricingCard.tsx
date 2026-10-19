@@ -4,7 +4,7 @@ import Image from 'next/image'
 import draftingCompassIconUrl from '@/public/img/index_features/drafting-compass.svg?url'
 import logsIconUrl from '@/public/img/index_features/logs.svg?url'
 import barChartIconUrl from '@/public/img/index_features/bar-chart-2.svg?url'
-import Button from 'components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { Card } from '@/components/ui/Card'
@@ -43,7 +43,9 @@ export default function TeamsPricingCard() {
           clickText="Get Started with SigNoz Cloud"
           clickLocation="Teams Pricing Card"
         >
-          <Button className="mb-6 w-full px-4 py-3 md:py-6">Get Started with SigNoz Cloud</Button>
+          <Button variant="default" size="lg" className="mb-6 w-full">
+            Get Started with SigNoz Cloud
+          </Button>
         </TrackingLink>
 
         <div className="my-3 w-full border-t border-dashed border-signoz_slate-400"></div>
@@ -51,7 +53,7 @@ export default function TeamsPricingCard() {
         {/* Base pricing table */}
         <div className="mb-6 rounded-md bg-signoz_ink-400 bg-opacity-10 p-3">
           <h5 className="mb-3 text-sm font-medium text-signoz_vanilla-100">
-            After $49, billed at:
+            After the included $49 of usage, SigNoz Cloud bills:
           </h5>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div className="flex items-center gap-2">
@@ -100,7 +102,7 @@ export default function TeamsPricingCard() {
         </div>
 
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
-          What's included in $49/month?
+          What is included in the $49/month minimum?
         </h4>
         <ul className="mb-10 space-y-3">
           <li className="flex items-start gap-2">
@@ -128,7 +130,7 @@ export default function TeamsPricingCard() {
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              Usage worth $49 (e.g. 163 GB logs/traces or 490 mn metric samples)
+              $49 of usage (for example, 163 GB of logs or traces, or 490 mn metric samples)
             </span>
           </li>
           <li className="flex items-start gap-2">
@@ -141,14 +143,14 @@ export default function TeamsPricingCard() {
                     <div className="max-w-xs">
                       <p className="m-0 text-sm text-signoz_vanilla-400">
                         <TrackingLink
-                          href="/agent-native-observability/#ai-assistant"
+                          href="/docs/ai/noz/"
                           clickType="In Page Link"
                           clickName="Agent Native Link"
                           clickText="Learn more"
                           clickLocation="Teams Pricing Card"
                         >
                           <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
-                            Request Early Access
+                            Read Docs
                           </span>
                         </TrackingLink>
                       </p>
@@ -273,7 +275,9 @@ export default function TeamsPricingCard() {
             clickText="Estimate your monthly bill"
             clickLocation="Teams Pricing Card"
           >
-            <Button className="mb-3 w-full px-4 py-3 md:py-6">Estimate your monthly bill</Button>
+            <Button variant="default" size="lg" className="mb-3 w-full">
+              Estimate your monthly bill
+            </Button>
           </TrackingLink>
         </div>
       </div>

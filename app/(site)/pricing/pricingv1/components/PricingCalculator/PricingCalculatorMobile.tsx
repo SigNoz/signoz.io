@@ -16,9 +16,7 @@ export const PricingCalculatorMobile: React.FC<PricingCalculatorMobileProps> = (
       <div className="tabs mb-4 flex justify-between gap-2">
         {isSectionVisible('traces') && (
           <Button
-            isButton={true}
             variant={'secondary'}
-            rounded={'default'}
             className={`w-full bg-transparent hover:bg-transparent ${activeTab === 'traces' ? 'opacity-100' : 'opacity-50'}`}
             onClick={() => setActiveTab('traces')}
           >
@@ -29,9 +27,7 @@ export const PricingCalculatorMobile: React.FC<PricingCalculatorMobileProps> = (
 
         {isSectionVisible('logs') && (
           <Button
-            isButton={true}
             variant={'secondary'}
-            rounded={'default'}
             className={`w-full bg-transparent hover:bg-transparent ${activeTab === 'logs' ? 'opacity-100' : 'opacity-50'}`}
             onClick={() => setActiveTab('logs')}
           >
@@ -43,8 +39,6 @@ export const PricingCalculatorMobile: React.FC<PricingCalculatorMobileProps> = (
         {isSectionVisible('metrics') && (
           <Button
             variant={'secondary'}
-            rounded={'default'}
-            isButton={true}
             className={`w-full bg-transparent hover:bg-transparent ${activeTab === 'metrics' ? 'opacity-100' : 'opacity-50'}`}
             onClick={() => setActiveTab('metrics')}
           >

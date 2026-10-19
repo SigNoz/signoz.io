@@ -1,0 +1,280 @@
+---
+date: 2026-06-29
+title: OTTL - OpenTelemetry Transformation Language
+description: Learn OTTL syntax, contexts, and key functions to filter and transform traces, metrics, and logs in the OpenTelemetry Collector with practical examples.
+doc_type: reference
+---
+
+## Overview
+
+OTTL (OpenTelemetry Transformation Language) is the expression language the OpenTelemetry Collector uses to read, modify, and drop telemetry. You write OTTL statements inside the filter processor and transform processor configuration. The collector evaluates each statement against every span, metric data point, or log record that flows through the pipeline.
+
+Four collector components use OTTL:
+
+- **Filter processor**: drops telemetry that matches a condition
+- **Transform processor**: modifies telemetry in place
+- **Tail Sampling processor**: selects spans for sampling based on conditions
+- **Routing Connector**: routes telemetry to different pipelines based on conditions
+
+## Statement syntax
+
+Every OTTL statement has two parts:
+
+```
+function(arguments) where condition
+```
+
+The `where` clause is optional. Without it, the function runs on every item in scope.
+
+Transform processor statements use unprefixed paths within a declared `context:` block:
+
+```yaml
+# Within context: span — paths are relative to the span
+set(status.code, STATUS_CODE_ERROR) where attributes["http.response.status_code"] == 500
+
+# Within context: resource — no span prefix needed
+set(attributes["deployment.environment"], "production")
+```
+
+Filter processor conditions use context-prefixed paths instead, because there is no surrounding `context:` block:
+
+```yaml
+# Filter processor — context is inferred from the prefix
+span.attributes["http.target"] == "/health"
+resource.attributes["service.name"] == "frontend"
+log.severity_text == "DEBUG"
+metric.name == "go_gc_duration_seconds"
+```
+
+Editors like `set`, `replace_pattern`, and `delete_key` modify data. Converters like `IsMatch`, `HasPrefix`, and `Int` return a value or boolean for use in conditions or as function arguments.
+
+## Contexts
+
+Each statement runs in a scope called a **context**.
+
+| Signal | Available contexts |
+|--------|-------------------|
+| Traces | `resource`, `scope`, `span`, `spanevent` |
+| Metrics | `resource`, `scope`, `metric`, `datapoint` |
+| Logs | `resource`, `scope`, `log` |
+
+Context determines which paths are valid. `span.attributes["http.method"]` is valid in a span context. `metric.name` is valid in a metric context. You cannot reference span fields from a log statement. Contexts are isolated.
+
+In the collector config, you declare context per statement block:
+
+```yaml
+processors:
+  transform:
+    trace_statements:
+      - context: span
+        statements:
+          - set(attributes["redacted"], true) where attributes["user.email"] != nil
+    metric_statements:
+      - context: datapoint
+        statements:
+          - delete_key(attributes, "user.id")
+    log_statements:
+      - context: log
+        statements:
+          - replace_pattern(body, "\\d{3}-\\d{2}-\\d{4}", "***-**-****")
+```
+
+## Key functions
+
+### Editors
+
+Editors modify telemetry data in place.
+
+| Function | What it does |
+|----------|-------------|
+| `set(target, value)` | Assigns `value` to `target` |
+| `delete_key(map, key)` | Removes a key from a map attribute |
+| `replace_pattern(target, regex, replacement)` | Replaces regex matches in a string field |
+| `replace_match(target, glob, replacement)` | Replaces glob matches in a string field |
+| `truncate_all(map, limit)` | Truncates all string values in a map to `limit` characters |
+| `merge_maps(target, source, strategy)` | Merges two maps using `insert`, `update`, or `upsert` strategy |
+
+### Converters
+
+Converters return a value for use as a function argument or in a `where` condition.
+
+| Function | What it does |
+|----------|-------------|
+| `IsMatch(value, regex)` | Returns `true` if `value` matches the regex |
+| `HasPrefix(value, prefix)` | Returns `true` if `value` starts with `prefix` |
+| `HasSuffix(value, suffix)` | Returns `true` if `value` ends with `suffix` |
+| `Int(value)` | Converts `value` to int64 |
+| `String(value)` | Converts `value` to string |
+| `Concat(values, separator)` | Joins values with a separator |
+| `Split(value, delimiter)` | Splits a string into a list |
+| `SHA256(value)` | Returns the SHA-256 hash of `value` |
+
+For the full function list, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/ottlfuncs/README.md" target="_blank" rel="noopener noreferrer nofollow">ottlfuncs reference</a>.
+
+## Examples by signal
+
+### Traces
+
+**Drop health check spans**
+
+```yaml:otel-collector-config.yaml
+processors:
+  filter:
+    error_mode: ignore
+    trace_conditions:
+      - span.attributes["http.target"] == "/health"
+      - span.attributes["http.route"] == "/health"
+```
+
+Add the processor to your traces pipeline:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [filter, batch]
+      exporters: [otlp]
+```
+
+**Hash a sensitive span attribute**
+
+```yaml:otel-collector-config.yaml
+processors:
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(attributes["user.id"], SHA256(attributes["user.id"]))
+            where attributes["user.id"] != nil
+```
+
+**Rename spans from a specific service**
+
+```yaml:otel-collector-config.yaml
+processors:
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(name, Concat([attributes["http.method"], attributes["http.route"]], " "))
+            where attributes["http.method"] != nil and attributes["http.route"] != nil
+```
+
+### Metrics
+
+**Drop a metric by name**
+
+```yaml:otel-collector-config.yaml
+processors:
+  filter:
+    error_mode: ignore
+    metric_conditions:
+      - metric.name == "go_gc_duration_seconds"
+```
+
+**Drop a metric when a data point matches an attribute value**
+
+```yaml:otel-collector-config.yaml
+processors:
+  filter:
+    error_mode: ignore
+    metric_conditions:
+      - datapoint.attributes["env"] == "dev"
+```
+
+**Rename a metric**
+
+```yaml:otel-collector-config.yaml
+processors:
+  transform:
+    error_mode: ignore
+    metric_statements:
+      - context: metric
+        statements:
+          - set(name, "http.server.latency") where name == "http_server_duration"
+```
+
+### Logs
+
+**Drop DEBUG logs**
+
+```yaml:otel-collector-config.yaml
+processors:
+  filter:
+    error_mode: ignore
+    log_conditions:
+      - IsMatch(log.severity_text, "(?i)DEBUG")
+```
+
+**Scrub an email address from the log body**
+
+```yaml:otel-collector-config.yaml
+processors:
+  transform:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - replace_pattern(body, "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}", "***@***.***")
+```
+
+**Add an attribute to every log record**
+
+```yaml:otel-collector-config.yaml
+processors:
+  transform:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["deployment.region"], "us-east-1")
+```
+
+## Filter processor vs transform processor
+
+The two processors use OTTL differently.
+
+| Processor | Purpose | OTTL form |
+|-----------|---------|-----------|
+| Filter | Drop telemetry | Bare condition; item drops when `true` |
+| Transform | Modify telemetry | Full statement: `function(args) where condition` |
+
+In filter processor config, you write bare OTTL conditions. In transform processor config, you write full OTTL statements with a function call and an optional `where` clause.
+
+```yaml
+# Filter processor - context-prefixed path, item drops when true
+filter:
+  trace_conditions:
+    - span.attributes["http.target"] == "/health"
+
+# Transform processor - full statement inside a context block
+transform:
+  trace_statements:
+    - context: span
+      statements:
+        - delete_key(attributes, "user.email") where attributes["user.email"] != nil
+```
+
+## Limitations
+
+- **No cross-signal access.** A span statement cannot read log fields. Contexts are fully isolated from each other.
+- **Stability.** Traces, metrics, and logs contexts are beta. Profile context is in development.
+- **Performance.** Complex regex in `replace_pattern` or `IsMatch` on high-throughput pipelines adds CPU overhead. Test under load before deploying.
+- **error_mode.** The transform processor default is `ignore` (via the `processor.transform.defaultErrorModeIgnore` feature gate, enabled by default in recent collector releases). The filter processor default may differ; check your collector version. Set `error_mode: propagate` to surface type mismatch failures as pipeline errors instead of skipping them silently.
+
+## Next Steps
+
+- [Drop spans at the collector](https://signoz.io/docs/traces-management/guides/drop-spans/)
+- [Drop metrics](https://signoz.io/docs/userguide/drop-metrics/)
+- [Drop logs](https://signoz.io/docs/logs-management/guides/drop-logs/)
+- [PII scrubbing in logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/)
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md" target="_blank" rel="noopener noreferrer nofollow">Learn more about OTTL</a>
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">Transform processor README</a>
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">Filter processor README</a>
+
+## Get Help
+
+<GetHelp />

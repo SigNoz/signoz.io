@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { HubspotFormDefinition, HubspotFieldGroup, HubspotField } from '@/types/hubspotForm'
 
-export const runtime = 'nodejs'
-
 const HUBSPOT_API_BASE = process.env.HUBSPOT_API_BASE || ''
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 

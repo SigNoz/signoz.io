@@ -1,9 +1,17 @@
 import siteMetadata from '@/data/siteMetadata'
 import { MDXContent } from './strapi'
-import { resolvePublishedDate, resolveLatestDate } from './dateUtils'
+import { resolveLatestDate } from './dateUtils'
+
+export const STRUCTURED_DATA_IDS = {
+  organization: `${siteMetadata.siteUrl}/#organization`,
+  website: `${siteMetadata.siteUrl}/#website`,
+  signozCloud: `${siteMetadata.siteUrl}/#signoz-cloud`,
+  selfHostedSignoz: `${siteMetadata.siteUrl}/#self-hosted-signoz`,
+} as const
 
 type Author = {
   '@type': 'Person' | 'Organization'
+  '@id'?: string
   name: string
   url?: string
 }
@@ -33,6 +41,7 @@ type StructuredData = {
   author: Author | Author[]
   publisher: {
     '@type': 'Organization'
+    '@id': string
     name: string
     logo: ImageObject
     sameAs: string[]
@@ -56,11 +65,13 @@ type FAQStructuredData = {
 
 const getDefaultAuthor = (): Author => ({
   '@type': 'Organization',
+  '@id': STRUCTURED_DATA_IDS.organization,
   name: siteMetadata.title,
 })
 
 const getDefaultPublisher = (): StructuredData['publisher'] => ({
   '@type': 'Organization',
+  '@id': STRUCTURED_DATA_IDS.organization,
   name: siteMetadata.title,
   logo: {
     '@type': 'ImageObject',
@@ -161,7 +172,7 @@ export const generateStructuredData = (
       '@id': fullUrl,
     },
     url: fullUrl,
-    datePublished: resolvePublishedDate(content) ?? '',
+    datePublished: resolveLatestDate(content) ?? '',
     dateModified: resolveLatestDate(content) ?? '',
     inLanguage: siteMetadata.language,
     wordCount: getWordCount(content),

@@ -3,7 +3,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import type { AuthorDetail, Guide } from '../types/transformedContent'
-import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 
 interface LayoutProps {
   content: CoreContent<Guide>
@@ -32,7 +32,6 @@ export default function GuidesLayout({
         authors={authors}
         toc={toc}
         contentType="guide"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

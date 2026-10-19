@@ -1,0 +1,236 @@
+---
+date: 2026-08-03
+title: Host Monitoring
+description: Monitor host performance in SigNoz, covering CPU, memory, disk, and network metrics with correlated traces and logs.
+doc_type: explanation
+hide_table_of_contents: true
+---
+
+The Host Monitoring interface displays all monitored hosts with key performance metrics. Use it to identify resource bottlenecks, correlate infrastructure issues with application behavior, and drill into individual hosts for detailed analysis.
+
+## Host List View
+
+The main screen displays a list of all monitored hosts along with key metrics. The table uses color-coded progress bars for CPU and memory usage so you can spot outliers at a glance.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/hosts-list.webp"
+  alt="Host List with progress bars, filters sidebar, and total count"
+  caption="Host List"
+  className="box-shadowed-image"
+/>
+
+### Features
+
+- **Filters sidebar** on the left to narrow hosts by Host Name, OS Type, or Environment
+- **Search Filter** bar to query hosts by any attribute
+- **Group By** dropdown to group hosts by a selected attribute
+- **Columns selector** to choose which columns are visible in the table
+- **Sortable columns**: click any column header to sort
+- **Total count** displayed at the bottom (e.g., "Showing 1 - 4 of 4 Hosts")
+- **Paginated results** with configurable page size
+
+### Group By
+
+Use the **Group By** dropdown to group hosts by an attribute such as `os.type`, `host.name`, `cloud.platform`, or `k8s.cluster.name`. When a group is selected, the table displays group header rows that you can expand to see individual hosts within each group.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/hosts-group-by.webp"
+  alt="Host List grouped by os.type showing group header rows"
+  caption="Host List grouped by os.type"
+  className="box-shadowed-image"
+/>
+
+### Columns Selector
+
+Click the columns icon in the toolbar to open the **Columns** panel. It shows the currently added columns and lets you add or remove columns to customize the table view. Click any added column to remove it, or click an available column to add it.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/hosts-columns-selector.webp"
+  alt="Columns selector panel showing added and available columns"
+  caption="Columns selector for customizing table columns"
+  className="box-shadowed-image"
+/>
+
+### Host List Page Columns
+
+#### Hostname
+
+- This column is derived from the resource attribute `host.name`.
+- Identifier for the machine reporting telemetry. Use it to locate a specific host when investigating an issue.
+
+#### Status
+
+- This column relies on the OTel metric(s): `system.cpu.time`, `system.memory.usage`, `system.cpu.load_average.15m`, `system.filesystem.usage` ( host is `ACTIVE` if any of these reported in the last 10 minutes ).
+- Tells you whether the host is actively reporting data right now. `ACTIVE` means SigNoz received at least one metric sample from this host in the last 10 minutes; `INACTIVE` is a signal to investigate: the host may be down, the collector may have crashed, or networking may be blocking telemetry.
+
+#### CPU Usage
+
+- This column relies on the OTel metric(s): `system.cpu.time`.
+- Share of CPU time being actively spent across all non-idle states (user, system, wait, softirq, steal, etc.), aggregated across all cores. Sustained values above ~80% signal CPU pressure. Processes start queuing for cores and request latency tends to rise.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy), **amber** between 60% and 90% (elevated), and **red** at or above 90% (critical CPU pressure).
+
+#### Memory Usage
+
+- This column relies on the OTel metric(s): `system.memory.usage`.
+- Share of physical RAM in actual use, excluding the kernel's reclaimable page cache and buffers. Values approaching 100% leave no headroom. The OS may start swapping (which slows everything) or kill processes via OOM. Investigate when sustained above ~85%.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **amber** between 60% and 90% (elevated), and **dark red** at or above 90% (critical: risk of swapping or OOM-kills).
+
+#### IOWait
+
+- This column relies on the OTel metric(s): `system.cpu.time`.
+- Share of CPU time when at least one process is blocked on **disk** I/O and the CPU is otherwise idle (does not include network wait). Sustained values above ~10% usually point to storage as the bottleneck: the CPU is fine but operations are stuck on slow disks.
+
+#### Disk Usage
+
+- This column relies on the OTel metric(s): `system.filesystem.usage`.
+- Share of filesystem space in actual use across all mounted filesystems on the host. Values approaching 100% mean writes will start failing: logs unable to rotate, databases halting, applications crashing. Investigate when sustained above ~85%, and remember a single full mountpoint (e.g. `/var`) can break things even if the host's overall percentage looks healthy.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **amber** between 60% and 90% (elevated), and **dark red** at or above 90% (critical: writes likely to start failing).
+
+#### Load Avg
+
+- This column relies on the OTel metric(s): `system.cpu.load_average.15m`.
+- Average number of processes that are either running or in uninterruptible sleep (almost always waiting on disk I/O), smoothed over the last 15 minutes so brief spikes don't dominate. Rule of thumb: sustained load above the host's **logical CPU count** (`nproc`: physical cores × threads-per-core if SMT/hyperthreading is on) means *something* is contended. On a host with 4 logical CPUs, a load of 4 is full utilization and anything materially higher means processes are queuing. Pair with **IOWait** to disambiguate CPU contention (low IOWait + high load) from disk contention (high IOWait + high load).
+
+## Host Details
+
+Click a hostname to open the detail view. The header displays the host's status, operating system, CPU usage, and memory usage at a glance.
+
+The detail view includes three tabs: **Metrics**, **Logs**, and **Traces**.
+
+### Hosts Metrics - Charts and Panels
+
+Monitor host performance metrics across customizable time periods. Charts are zoomable: click and drag to zoom into a specific time range.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-metrics-details.webp"
+  alt="Host Metrics Tab showing CPU Usage, Memory Usage, System Load Average, and Network usage charts"
+  caption="Metrics Tab"
+  className="box-shadowed-image"
+/>
+
+#### CPU Usage
+
+- This chart relies on the OTel metric(s): `system.cpu.time`.
+- Plots `(non-idle / total)` CPU time per `state` as separate colored lines: `user`, `system`, `wait`, `softirq`, `steal`, `nice`, `interrupt`, `idle`. High `user` means application work, high `system` means kernel work, sustained `wait` points to disk I/O blocking, and any sustained `steal` on a cloud VM signals the hypervisor is giving cycles to other tenants.
+
+#### Memory Usage
+
+- This chart relies on the OTel metric(s): `system.memory.usage`.
+- Plots bytes of physical memory in each `state` over time, one colored line per state: `used`, `cached`, `buffers`, `free`. Watch `used`: a steady upward climb usually signals a memory leak while spiky patterns reflect workload bursts; `cached` and `buffers` are reclaimable kernel cache and shouldn't cause alarm even when large.
+
+#### System Load Average
+
+- This chart relies on the OTel metric(s): `system.cpu.load_average.1m`, `system.cpu.load_average.5m`, `system.cpu.load_average.15m`.
+- Plots three load-average values on the same chart as separate lines: `1m`, `5m`, and `15m`. Read them together to see direction of pressure: 1m rising above 5m and 15m means load is building right now; 15m above 1m means load is easing.
+
+#### Queue Size
+
+- This chart relies on the OTel metric(s): `system.disk.pending_operations`.
+- Plots the maximum disk request-queue depth per `device` over each step interval, one line per device. Sustained values above what the device tolerates (typically a handful for spinning disks, dozens for SSDs/NVMe) mean the storage layer is saturated and requests are waiting.
+
+#### Network Usage (Bytes)
+
+- This chart relies on the OTel metric(s): `system.network.io`.
+- Plots throughput in bytes/s with one colored line per `device::direction` combination (e.g., `eth0::transmit`, `eth0::receive`). Use this to identify which Network Interface Card (NIC) is saturating, compare egress vs ingress, and spot when a sustained line approaches the NIC's rated bandwidth, a strong indicator of a network bottleneck.
+
+#### Network Usage (Packets/s)
+
+- This chart relies on the OTel metric(s): `system.network.packets`.
+- Plots packets per second per `device::direction`, one line per NIC and direction. A NIC can saturate on packets-per-second long before it does on bytes: small-packet workloads like DNS, many short keepalives, or SYN floods; flat bytes but rising packets is a signal worth investigating.
+
+#### Network Errors
+
+- This chart relies on the OTel metric(s): `system.network.errors`.
+- Plots the rate of interface-level network errors per `device::direction`, one line per NIC and direction. Any sustained non-zero value warrants attention: common causes are faulty cabling, NIC hardware issues, driver bugs, or a misconfigured switch port.
+
+#### Network Drops
+
+- This chart relies on the OTel metric(s): `system.network.dropped`.
+- Plots the rate of dropped packets per `device::direction`, one line per NIC and direction. Unlike errors, drops without errors usually point to buffer overflow: the kernel or NIC can't drain the queue fast enough; common causes are under-sized rx/tx ring buffers, the CPU being too busy, or QoS/traffic shaping in effect.
+
+#### Network Connections
+
+- This chart relies on the OTel metric(s): `system.network.connections`.
+- Plots active connection counts per `protocol::state` (e.g., `tcp::ESTABLISHED`, `tcp::TIME_WAIT`, `tcp::SYN_RECV`), one line per combination. A steady climb in `ESTABLISHED` often indicates a connection leak; spikes in `TIME_WAIT` typically reflect high connection churn; rising `SYN_RECV` can signal a SYN-flood or a slow accept loop.
+
+#### System Disk I/O (Bytes)
+
+- This chart relies on the OTel metric(s): `system.disk.io`.
+- Plots aggregate disk throughput in bytes per second as a single line across all devices (no per-device breakdown on this chart). Sustained spikes correlate with heavy file I/O, backup jobs, or database flushes. Pair with disk-time charts to tell whether each I/O is slow or just frequent.
+
+#### System Disk Operations/s
+
+- This chart relies on the OTel metric(s): `system.disk.operations`.
+- Plots the per-second rate of completed disk operations per `device::direction`, one line per device and direction (`read`/`write`). High and sustained values indicate I/O-intensive workloads. Pair with `System Disk I/O (Bytes)` to tell large-but-few ops from small-but-many; pair with `System disk operation time/s` to tell whether each op is also slow.
+
+#### System disk operation time/s
+
+- This chart relies on the OTel metric(s): `system.disk.operation_time`.
+- Plots the per-second rate of cumulative disk-busy time per `device::direction`, one line per device and direction. Values approaching `1s/s` on a single line mean that device is effectively saturated: the disk spent ~100% of wall-clock time servicing I/O. Compare against ops/s to distinguish "few slow ops" from "many fast ops".
+
+#### Disk Usage (%) by mountpoint
+
+- This chart relies on the OTel metric(s): `system.filesystem.usage`.
+- Plots each mountpoint's used space as a percentage of its own capacity (`state=used` ÷ total across all states), one line per `mountpoint`. Unlike the host-wide **Disk Usage** column, this breaks the figure out per filesystem, so a single mountpoint filling up (e.g. `/var` or `/`) is visible even when the host's overall usage looks fine. Watch any line trending toward 100%: that mountpoint is running low, which stalls writes for anything using it (log rotation, databases, container writes); a steady climb points to a leak or unrotated logs, a step change usually tracks a deploy or data import.
+
+**Time Range Selection:**
+
+- Choose from preset time ranges (e.g., last 30 minutes, last 24 hours)
+- Set custom time ranges using the date-time picker
+- Change your timezone according to your preference
+
+### Traces
+
+View and analyze distributed traces associated with the selected host.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-traces-details.webp"
+  alt="Host Traces Tab showing trace list with timestamps, service names, and durations"
+  caption="Traces Tab"
+  className="box-shadowed-image"
+/>
+
+**Features:**
+
+- Adjustable time range selection for trace analysis
+- Advanced filtering capabilities using the query builder
+- Direct integration with the Traces Explorer: click **Explore in Traces Explorer** to open the full interface retaining time ranges and filters
+
+**Filter Options:**
+
+- **Service name**: Focus on traces from specific services
+- **Operation type**: Filter by specific operations or endpoints (e.g., GET, POST)
+- **Status/Error codes**: Identify traces with specific success or error statuses
+- **Custom attributes**: Refine traces using user-defined tags or metadata
+
+### Logs
+
+Access and search through host logs with powerful filtering capabilities.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-logs-details.webp"
+  alt="Host Logs Tab showing log lines with timestamps and a query builder"
+  caption="Logs Tab"
+  className="box-shadowed-image"
+/>
+
+**Features:**
+
+- Configurable time range selection for log analysis
+- Query builder for filtering by attributes such as `http.status_code` or `service.name`
+- Click **Run Query** to execute your filter
+- Click **Explore in Logs Explorer** to open the full Logs Explorer retaining time ranges and filters
+- Highlighted warning and error messages
+
+**Filter Categories:**
+
+- **Log Levels**: Filter logs by severity (e.g., INFO, WARN, ERROR)
+- **Service Components**: Focus on specific services or application components generating the logs
+- **Message Content**: Search for specific keywords or patterns in log messages
+- **Custom Fields**: Apply filters based on user-defined metadata fields
+
+## Next steps
+
+- [Setup Host Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/): Configure the OpenTelemetry hostmetrics receiver to start collecting data.
+- [Telemetry Data Requirements](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/): Required resource attributes and metrics.
+- [Understanding CPU Utilization Metrics](https://signoz.io/docs/infrastructure-monitoring/reference/understanding-cpu-metrics/): How aggregation intervals affect CPU metric values.

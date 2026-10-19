@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server'
 import type { SubmissionRelayPayload } from '@/types/submissionRelay'
 import { relaySubmission } from '@/utils/submissionRelay'
 
-export const runtime = 'nodejs'
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MAX_REQUEST_BYTES = 32 * 1024
 

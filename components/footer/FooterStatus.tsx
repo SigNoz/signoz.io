@@ -1,0 +1,73 @@
+'use client'
+
+import Link from 'next/link'
+import { useRef } from 'react'
+
+import { usePeekReveal } from '@/hooks/usePeekReveal'
+
+import styles from './footer-fx.module.css'
+
+export default function FooterStatus() {
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const nozRef = useRef<HTMLDivElement>(null)
+  const eyeRef = useRef<SVGCircleElement>(null)
+  const pupilRef = useRef<SVGGElement>(null)
+
+  usePeekReveal({
+    observeRef: nozRef,
+    liveRefs: [nozRef],
+    liveClass: styles.isLive,
+    readyDelayMs: 1200,
+    threshold: 0.35,
+    eyeRef,
+    pupilRef,
+  })
+
+  return (
+    <div ref={wrapRef} className={styles.statusWrap}>
+      <div ref={nozRef} className={styles.noz} aria-hidden="true" data-markdown-ignore>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ overflow: 'visible' }}
+        >
+          <rect
+            x="4.36"
+            y="8.5"
+            width="15.46"
+            height="11.98"
+            rx="1.76"
+            fill="var(--bg-cherry-500)"
+          />
+          <g className={styles.nozHead}>
+            <circle ref={eyeRef} cx="12.02" cy="14.49" r="3.88" fill="#F5F5F5" />
+            <g ref={pupilRef} className={styles.nozPupil}>
+              <path
+                d="M12.02 12.8c0 .93-.75 1.69-1.68 1.69-.31 0-.59-.08-.84-.22-.03.28 0 .58.08.87.36 1.35 1.75 2.15 3.1 1.79 1.35-.36 2.15-1.75 1.79-3.1-.32-1.2-1.47-1.97-2.67-1.86.14.24.22.53.22.83Z"
+                fill="#0A0C10"
+              />
+            </g>
+            <path
+              d="M8.34 7.95 9.83 4.31a3.56 3.56 0 0 1 1.52-1.68l2.57-1.36c.21-.12.46.08.4.31l-.65 2.49a.85.85 0 0 0 .04.54l1.33 3.34h-3.62l.21-.62.7-.24a.28.28 0 0 0 0-.53l-.7-.23-.24-.71a.28.28 0 0 0-.53 0l-.23.71-.71.23a.28.28 0 0 0 0 .53l.71.24.2.62H8.34Zm-.56-.04h7.82a.56.56 0 1 1 0 1.12H7.78a.56.56 0 1 1 0-1.12Z"
+              fill="var(--bg-robin-500)"
+            />
+          </g>
+        </svg>
+      </div>
+      <svg className={styles.nozHands} viewBox="0 0 34 7" fill="none" aria-hidden="true">
+        <rect width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
+        <rect x="30.47" width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
+      </svg>
+      <Link
+        href="https://status.signoz.io/"
+        target="_blank"
+        prefetch={false}
+        className={styles.status}
+      >
+        <span className={styles.statusDot} aria-hidden="true" />
+        All systems operational
+      </Link>
+    </div>
+  )
+}

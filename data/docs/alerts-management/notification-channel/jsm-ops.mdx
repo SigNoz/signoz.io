@@ -1,0 +1,208 @@
+---
+date: 2026-08-15
+doc_type: howto
+title: Jira Service Management (Ops) Notification Channel Setup for Alerts
+description: Set up Jira Service Management Operations as a notification channel in SigNoz to create, update, and close JSM on-call alerts automatically as alerts fire and resolve.
+---
+
+<Admonition>
+This page covers **Jira Service Management Operations**: sending SigNoz alerts as on-call **alerts** (with deduplication, on-call routing, and paging). Looking to create and manage Jira **issues** (work items) from alerts instead? See the [Jira Cloud notification channel](https://signoz.io/docs/alerts-management/notification-channel/jira/).
+</Admonition>
+
+## Prerequisites
+
+Before configuring Jira Service Management (JSM) Operations as a notification channel in SigNoz, ensure that you have:
+
+- **Jira Service Management on your Atlassian site**: the **Free** plan includes alerts and on-call, so this works on any plan.
+- **A Team with Operations enabled**: in JSM, alerts are managed per **Team** (not per project). You'll enable **Operations** on a team and add an integration to it.
+- **An API integration key**: created on the team's Operations page (steps below). The key is scoped to the **team's integration**, not a personal user account.
+
+<Admonition>
+Only **JSM Cloud** is supported. SigNoz talks to the JSM Operations integration API using the integration **API key**. There is **no region or site to configure**; a single global endpoint routes by the key.
+</Admonition>
+
+## Set up the integration in JSM
+
+JSM Ops alerts hang off a **Team's Operations** page, so the key you need lives on an **API integration** there.
+
+### 1. Create a team and enable Operations
+
+1. In JSM, open the **Teams** navigation and open (or create) the team that should own these alerts.
+2. On the team's page, enable **Operations** (also shown as "View JSM operations").
+
+### 2. Add an API integration
+
+1. On the team's **Operations** page, open **Integrations → Add integration**.
+2. Search for **API** and add it.
+3. Give it a clear name (e.g. `signoz`).
+
+### 3. Copy the API key and turn it on
+
+1. **Copy the API key** shown for the integration. You'll paste it into SigNoz.
+2. **Turn the integration on.**
+
+<Admonition type="warning">
+Leaving the integration **Off** is the most common setup mistake: while it's off, JSM **silently rejects** incoming alerts (requests are accepted but no alert is created). Make sure the integration is **On**.
+</Admonition>
+
+<Admonition type="info">
+Because the key belongs to the team's integration rather than a person, it keeps working when someone leaves the team. You can regenerate it from the same integration settings at any time.
+</Admonition>
+
+## Accessing Notification Channels
+
+To manage your notification channels in SigNoz, navigate to `Settings > Notification Channels`. This tab lists all configured channels.
+
+<Figure src="/img/docs/alert-channels.webp" alt="Notification channels list in SigNoz." caption="Notification channels list in SigNoz." />
+
+## Creating a new Notification channel
+
+To create a new JSM Ops notification channel:
+
+- Navigate to `Settings > Notification Channels` and click on `New Channel`.
+- Enter a **Name** for the channel and select **Jira Service Management Ops** as the channel type.
+- **API key**: the integration API key you copied above.
+- **Message (alert title)** and **Description**: prefilled with default templates that control the created alert's title and body. You can edit them (see [Customizing the message](#customizing-the-message)).
+- **Send resolved alerts**: on by default. When on, SigNoz adds a resolved note and **closes** the JSM alert when the SigNoz alert resolves.
+
+The **Advanced Options** section is optional. The API key alone gives a fully working channel:
+
+- **Priority**: a template that resolves to one of `P1`–`P5`. The default maps the alert's severity (critical → P1, warning → P2, info → P3, otherwise P4).
+- **Tags**: tags added to every alert. `signoz` is added by default.
+
+<Admonition>
+The **Message**, **Description**, and **Priority** fields accept <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">notification templates</a> for customizing the alert.
+</Admonition>
+
+<Figure src="/img/docs/jsm-ops-new-channel.webp" alt="Create a new JSM Ops notification channel." caption="Create a new JSM Ops notification channel." />
+
+**Test Configuration**: Click the **Test** button to create a real alert end-to-end in JSM. This verifies that SigNoz can reach JSM with your API key before you save.
+
+## Editing a Notification channel
+
+To edit an existing JSM Ops channel, open it from the channels list. You can change the **API key**, **Message**, **Description**, the **Send resolved alerts** toggle, and the Advanced Options. The channel **Name** and **Type** cannot be changed after creation.
+
+## Receive Alerts in JSM
+
+Once configured, SigNoz creates and manages a JSM alert over the lifecycle of each alert.
+
+- An alert **firing creates a JSM alert**. The alert body (description) is rendered as rich text with:
+  - The rendered alert details (bold labels, and so on).
+  - A clickable **View in SigNoz** deep-link, and **View related logs** / **View related traces** when the alert carries those links.
+- The body shows the **opening snapshot**: the values from when the alert first fired.
+
+<Figure src="/img/docs/jsm-ops-firing-alert.webp" alt="Firing alerts in the JSM Operations alerts list." caption="Alerts land in the team's Operations → Alerts list, each with its priority and count." />
+
+- The **same alert re-firing does not create a duplicate**: JSM deduplicates by an alias SigNoz sets, so the alert's **count increments** instead.
+- Each fire, and the resolution, is appended to the alert's **notes timeline** (Activity → **Notes**), giving you a running history of the alert's values over time.
+
+<Figure src="/img/docs/jsm-ops-notes-timeline.webp" alt="The notes timeline on a JSM alert." caption="Each fire and the resolution are appended to the JSM alert's notes timeline." />
+
+<Admonition type="info">
+JSM alert **notes are plain text**: markdown and HTML are **not** rendered there, and any URL in a note is shown as **plain, non-clickable text**. The clickable **View in SigNoz** link lives in the alert **body** (description), not in the notes.
+</Admonition>
+
+- When the alert **resolves**, SigNoz adds a resolved note and **closes** the JSM alert.
+- If a **closed** alert fires again, JSM opens a **new** alert. There is **no reopen window**: dedup applies only to open alerts, so a re-fire after close is a fresh occurrence.
+
+The full alert body (the rendered rich text and the **View in SigNoz** deep-link) is shown below on a closed alert:
+
+<Figure src="/img/docs/jsm-ops-resolved-alert.webp" alt="A JSM alert body in the Closed state." caption="A resolved alert closed in JSM, showing the rendered body and the View in SigNoz deep-link." />
+
+### Grouped alerts
+
+When several alerts fire together, they are grouped into a **single JSM alert** whose body lists every alert in the group, with one set of deep-links. This keeps grouped notifications compact.
+
+## Customizing the message
+
+The **Message** is the alert title (plain text). The **Description** is written in **standard markdown**, which SigNoz renders into the HTML subset that JSM alert descriptions support. Both accept Go templates.
+
+The following markdown constructs are supported in the **description**:
+
+- **Render as rich text**: bold, italic, strikethrough, links, inline and fenced code, headings, blockquotes, and ordered/unordered/nested lists.
+- **Flatten**: tables lose their grid (their cells fall back to text).
+
+The default templates use only bold and text, so this only matters if you write a fully custom Description.
+
+### Limits handled automatically
+
+SigNoz truncates anything larger before sending:
+
+- **Message**: 130 characters.
+- **Description**: 15,000 characters.
+- **Notes**: 25,000 characters.
+
+## Turn-off Resolved alerts
+
+The **Send resolved alerts** toggle is on by default. When on, a resolved alert adds a resolved note and **closes** the JSM alert.
+
+To stop SigNoz from closing alerts on resolve:
+
+- Navigate to `Settings > Notification Channels`.
+- Click **Edit** on the channel.
+- Toggle off **Send resolved alerts** and click **Save**.
+
+With the toggle off, alerts are created and updated while firing but are **not** automatically closed when the SigNoz alert resolves.
+
+<Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiving resolved alert notifications." caption="Turn off receiving resolved alert notifications." />
+
+## Configure programmatically
+
+You can also configure the JSM Ops notification channel using the SigNoz API.
+
+**API Endpoint:** `POST /api/v1/channels`
+
+Send a `POST` request to `/api/v1/channels` with the following `curl` command. Replace `<your-api-key>` with an API key from **Settings → Service Accounts** (see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one).
+
+```bash
+curl '<your-signoz-url>/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: <your-api-key>' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "Prod Critical Alerts - JSM Ops",
+    "jsmops_configs": [
+        {
+            "send_resolved": true,
+            "api_key": "<your-jsm-integration-api-key>",
+            "message": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}",
+            "description": "{{ range .Alerts -}}\n**Alert:** {{ .Labels.alertname }}{{ if .Labels.severity }} ({{ .Labels.severity }}){{ end }}{{ if .Annotations.summary }}\n**Summary:** {{ .Annotations.summary }}{{ end }}{{ if .Annotations.description }}\n**Description:** {{ .Annotations.description }}{{ end }}\n{{ if .GeneratorURL }}[View in SigNoz]({{ .GeneratorURL }}){{ end }}\n{{ end }}",
+            "priority": "{{ if eq (index .Alerts 0).Labels.severity \"critical\" }}P1{{ else if eq (index .Alerts 0).Labels.severity \"warning\" }}P2{{ else if eq (index .Alerts 0).Labels.severity \"info\" }}P3{{ else }}P4{{ end }}",
+            "tags": "signoz"
+        }
+    ]
+}'
+```
+
+**Request Body Attributes:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
+| `jsmops_configs` | `array` | List of JSM Ops configurations. |
+| `jsmops_configs[].api_key` | `string` | The JSM Ops integration API key (secret). **Required**. |
+| `jsmops_configs[].send_resolved` | `boolean` | Whether to add a resolved note and close the alert when the SigNoz alert resolves. On by default in the UI. |
+| `jsmops_configs[].message` | `string` | Templated alert title. Go templates are supported. A default is applied if omitted. Capped at 130 characters. |
+| `jsmops_configs[].description` | `string` | Templated alert body in markdown (rendered to rich text). Go templates are supported. A default is applied if omitted. Capped at 15,000 characters. |
+| `jsmops_configs[].priority` | `string` | Optional templated priority; must resolve to one of `P1`–`P5`. |
+| `jsmops_configs[].tags` | `string` | Optional comma-separated tags added to every alert. |
+
+## Troubleshooting
+
+If you encounter issues:
+
+- **No alerts appear in JSM** → the integration is **Off**. Open the team's Operations → Integrations and turn it on.
+- **401 / 403** → the API key is wrong or was regenerated. Re-copy it from the integration settings.
+- **Alerts aren't closing on resolve** → the **Send resolved alerts** toggle is off, or an on-call/automation rule on the JSM side is re-opening them.
+- **Accepted but nothing happens** → JSM accepts create/close requests **asynchronously** (HTTP `202`), so a malformed request can be accepted without creating an alert. Use the **Test** button, which surfaces synchronous validation errors (e.g. an invalid priority).
+- **Test the setup**: use the **Test** button in SigNoz to create an alert end-to-end.
+
+<Admonition type="tip">
+
+If you encounter any unexpected challenges during the use of this integration, please contact SigNoz Support at <a href="mailto:support@signoz.io" target="_blank" rel="noopener noreferrer nofollow">support@signoz.io</a>
+
+</Admonition>
+
+## Next steps
+
+- Create an alert rule and route it to this channel: [Manage Alerts](https://signoz.io/docs/userguide/alerts-management/)
+- Set up more notification channels: [Notification Channels](https://signoz.io/docs/setup-alerts-notification/)

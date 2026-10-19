@@ -170,7 +170,86 @@ const cleanMarkdownNode = (node: HastContent): HastContent[] => {
   return [node]
 }
 
+/**
+ * Shiki (rehype-pretty-code) renders each line as a [data-line] span without a
+ * trailing newline when grid mode is on. Re-insert newlines so fences round-trip.
+ */
+const joinPrettyCodeLines = (node: HastElement) => {
+  if (!Array.isArray(node.children) || node.children.length === 0) return
+
+  const nextChildren: HastContent[] = []
+  let previousWasLine = false
+
+  for (const child of node.children) {
+    if (isHastElement(child)) {
+      joinPrettyCodeLines(child)
+      const isLine = child.properties?.['data-line'] != null
+      if (isLine && previousWasLine) {
+        nextChildren.push({ type: 'text', value: '\n' })
+      }
+      previousWasLine = isLine
+      nextChildren.push(child)
+      continue
+    }
+
+    previousWasLine = false
+    nextChildren.push(child)
+  }
+
+  node.children = nextChildren as HastElement['children']
+}
+
+/** Replace CodeBlock chrome wrappers with their inner <pre> for cleaner fences. */
+const unwrapCodeBlockChrome = (node: HastParentNode) => {
+  if (!Array.isArray(node.children)) return
+
+  const next: HastContent[] = []
+  for (const child of node.children) {
+    if (!isHastElement(child)) {
+      next.push(child)
+      continue
+    }
+
+    unwrapCodeBlockChrome(child)
+
+    const isCodeBlock =
+      child.properties?.['data-sz-codeblock'] != null || child.properties?.dataSzCodeblock != null
+    const isCodeTabs =
+      child.properties?.['data-sz-codeblock-tabs'] != null ||
+      child.properties?.dataSzCodeblockTabs != null
+
+    if (isCodeBlock && !isCodeTabs) {
+      const pre = findDescendantPre(child)
+      if (pre) {
+        next.push(pre)
+        continue
+      }
+    }
+
+    next.push(child)
+  }
+
+  node.children = next
+}
+
+const findDescendantPre = (node: HastElement): HastElement | null => {
+  if (node.tagName === 'pre') return node
+  for (const child of node.children || []) {
+    if (!isHastElement(child)) continue
+    const found = findDescendantPre(child)
+    if (found) return found
+  }
+  return null
+}
+
 export function cleanHastForMarkdown<T extends HastParentNode>(tree: T): T {
+  unwrapCodeBlockChrome(tree)
+  if (tree.children) {
+    for (const child of tree.children) {
+      if (isHastElement(child)) joinPrettyCodeLines(child)
+    }
+  }
+
   tree.children = ((tree.children || []) as HastContent[]).flatMap((child) =>
     cleanMarkdownNode(child)
   )

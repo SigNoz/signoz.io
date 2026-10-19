@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-25
 title: Correlate Logs and Traces in SigNoz
 meta_title: Correlate Logs and Traces
 description: Learn how to correlate logs and traces in SigNoz to debug requests faster and connect application events to traces.
@@ -134,7 +134,7 @@ Each log entry gets `trace_id`, `span_id`, and `trace_flags` injected when a spa
 </TabItem>
 <TabItem value="go" label="Go">
 
-Go has no automatic context propagation for logs. Set up a logger bridge and pass `context.Context` on every log call. The bridge extracts `trace_id` and `span_id` from the active span in that context.
+Go has no automatic <Tooltip text="context propagation" content="The mechanism that carries trace context across process and service boundaries, so spans emitted by different services join into one trace." link="https://signoz.io/docs/glossary/#context-propagation" /> for logs. Set up a logger bridge and pass `context.Context` on every log call. The bridge extracts `trace_id` and `span_id` from the active span in that context.
 
 Initialize your `LoggerProvider` and register it globally before calling `NewLogger`. Skip this and nothing exports. `go.opentelemetry.io/otel/log/global` is experimental; its import path may change when the Go log API stabilizes.
 

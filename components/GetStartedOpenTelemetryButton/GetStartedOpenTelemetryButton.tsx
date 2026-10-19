@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import Button from '../Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
 
 interface GetStartedOpenTelemetryButtonProps {
@@ -9,18 +9,19 @@ interface GetStartedOpenTelemetryButtonProps {
   children?: React.ReactNode
 }
 
-const GetStartedOpenTelemetryButton: React.FC<GetStartedOpenTelemetryButtonProps> = ({ 
+const GetStartedOpenTelemetryButton: React.FC<GetStartedOpenTelemetryButtonProps> = ({
   href = '/teams/',
   className = '',
-  children = 'Get Started with OpenTelemetry'
+  children = 'Get Started with OpenTelemetry',
 }) => {
   return (
-    <Link href={href} className="no-underline hover:no-underline">
-      <Button type={Button.TYPES.PRIMARY} className={`flex items-center gap-2 ${className}`}>
-        {children} <ArrowRight size={14} />
-      </Button>
-    </Link>
+    <Button asChild variant="default" className={className}>
+      <Link href={href}>
+        {children}
+        <ArrowRight size={14} />
+      </Link>
+    </Button>
   )
 }
-  
-export default GetStartedOpenTelemetryButton 
+
+export default GetStartedOpenTelemetryButton
