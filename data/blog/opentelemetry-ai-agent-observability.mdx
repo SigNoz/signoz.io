@@ -1,10 +1,10 @@
 ---
 title: AI Agent Observability with OpenTelemetry
-description: Learn how to set up observability for your AI agents using OpenTelemetry GenAI instrumentation libraries, and how tracing helps capture agent execution context in detail.
-date: 2026-10-16
+description: AI agent observability tracks model calls, tools, and conversation context to help debug failures, monitor latency, and understand token usage.
+date: 2026-10-19
 tags: [OpenTelemetry, AI]
 authors: [dhruv_ahuja]
-image: /img/blog/2026/10/ai_agent_observability.webp
+image: /img/blog/common/ai-observability-trace-detail.webp
 keywords: [opentelemetry,python,opentelemetry llm,ai observability,agentic observability,llm observability,opentelemetry genai,opentelemetry agentic,observability for ai]
 related_articles:
   - '/blog/what-is-opentelemetry'
@@ -146,9 +146,9 @@ The FastAPI server starts on port 8085. Calling `/` returns a quick health check
 {"message":"OpenTelemetry NBA agent demo is running"}
 ```
 
-Before we move ahead, let’s look at how the OpenTelemetry community is standardizing telemetry standards, capture, and export processes for agentic applications.
+The demo is now running. Before exploring the agent code, let’s look at the OpenTelemetry conventions and instrumentation packages used to capture AI agent workflows.
 
-### Evolving GenAI standards
+### Understanding OpenTelemetry’s evolving GenAI conventions
 
 While early instrumentation discussions focused solely on "LLM tracing", OpenTelemetry standardizes AI telemetry under the broader umbrella of `Generative AI` (GenAI), using <a href="https://github.com/open-telemetry/semantic-conventions-genai/blob/4f85037ef86e92c510d2ef881a58f1076f6fc0e4/docs/gen-ai/README.md" rel="noopener noreferrer nofollow" target="_blank">semantic conventions prefixed with `gen_ai.*`</a>.
 
@@ -177,18 +177,11 @@ We recommend that you pin your instrumentation packages explicitly and check the
 </KeyPointCallout>
 
 
-### Dissecting the agent implementation
+### How the NBA agent uses tools, guardrails, and sessions
 
-Now let's go over the key implementation details to understand how the AI agent workflow has been wired up. [Skip to the next section](#visualizing-ai-agent-workflows-with-opentelemetry) if you want to jump directly to the interactive trace analysis.
+Now that we've seen how OpenTelemetry separates agent orchestration from model calls, let's look at the code behind the NBA agent's workflow. [Skip to the next section](#visualizing-ai-agent-workflows-with-opentelemetry) if you want to jump directly to generating and inspecting traces.
 
-#### Dependency choices
-
-Besides the core OpenTelemetry dependencies we installed earlier, the application relies on:
-
-- **FastAPI**: Serves as the web framework, providing request-response validation, automatic OpenAPI schema generation, and async support.
-- **OpenAI Agents SDK**: Orchestrates the agent loop, handling tool selection, input guardrails, and multi-turn session persistence.
-OpenAI has published <a href="https://openai.github.io/openai-agents-python/" rel="noopener noreferrer nofollow" target="_blank">extensive documentation</a>, and the project has garnered 30,000+ GitHub stars at the time of writing this blog.
-- **OpenAI Python API library**: Serves as the core LLM execution layer. All LLM calls go through the OpenAI Python API library.
+FastAPI serves our HTTP endpoints, the <a href="https://openai.github.io/openai-agents-python/" rel="noopener noreferrer nofollow" target="_blank">OpenAI Agents SDK</a> manages the agent loop, and the OpenAI Python API library handles the underlying model calls. This separation is why we instrument both the Agents SDK and the API library: one captures the workflow, while the other captures each model call.
 
 #### The core agentic setup
 
@@ -224,7 +217,7 @@ def calculate_win_percentage(wins: int, losses: int) -> str:
 
 To prevent misuse or off-topic queries, we define an input guardrail. When a user prompt does not match relevant basketball keywords, the function returns a `GuardrailFunctionOutput` with `tripwire_triggered=True`:
 
-```python
+```python:app/guardrails.py minimap defaultCollapsed
 @input_guardrail()
 def nba_content_guardrail(
     context: RunContextWrapper[None],
@@ -289,7 +282,7 @@ The `run_agent_turn` function completes our implementation. The agent uses the `
 
 If no `session_id` was passed, the session object triggers the creation of a new conversation session. In a follow-up request, the user can attach this ID to ensure the agent has context of the conversation thus far.
 
-```python
+```python:app/agent_service.py defaultCollapsed
 def run_agent_turn(
     topic: str,
     user_message: str | None,
@@ -316,6 +309,8 @@ def run_agent_turn(
 ```
 
 ## Visualizing AI agent workflows with OpenTelemetry
+
+Let’s send the agent a few requests to generate traces, then inspect how tool calls, conversation history, and guardrail failures appear in SigNoz Cloud.
 
 ### Interacting with the agent
 
