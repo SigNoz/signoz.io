@@ -1,5 +1,5 @@
 ---
-date: 2026-10-07
+date: 2026-10-19
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -32,7 +32,7 @@ The V2 schema is strictly validated. Update API and dashboard-as-code (Terraform
 </Admonition>
 
 <Admonition type="warning">
-The time series `chartAppearance.spanGaps` field is validated. When `fillOnlyBelow` is `true`, `fillLessThan` is required and must be a positive duration. `fillLessThan` accepts second (`s`), minute (`m`), hour (`h`), day (`d`), and week (`w`) units, including compound values (for example `5m`, `1d`, `1w`, `1h30m`). Any dashboard payload with `fillOnlyBelow: true` and a missing, empty, or non-positive `fillLessThan` fails validation on save or load. Update those panels or API/Terraform payloads with a valid duration. In the UI these two fields are the **Disconnect values** control and its **Threshold value** input; see [Disconnect values](https://signoz.io/docs/dashboards/panel-types/timeseries/#disconnect-values).
+The time series `chartAppearance.spanGaps` field is validated. When `fillOnlyBelow` is `true`, `fillLessThan` is required and must be a positive duration. `fillLessThan` accepts second (`s`), minute (`m`), hour (`h`), day (`d`), and week (`w`) units, including compound values (for example `5m`, `1d`, `1w`, `1h30m`). Any dashboard payload with `fillOnlyBelow: true` and a missing, empty, or non-positive `fillLessThan` fails validation on save or load. Update those panels or API/Terraform payloads with a valid duration. In the UI, these two fields are the **Break long gaps** option under **When data is missing** and its **Break when a gap is longer than** input. See [When data is missing](https://signoz.io/docs/dashboards/panel-types/timeseries/#when-data-is-missing).
 </Admonition>
 
 <Admonition type="info" title="Zero-valued and nullable fields in GET responses">
@@ -292,7 +292,7 @@ curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
 
 Adding a new panel involves one request object to add the panel, and another to add it to the layout:
 
-```bash
+```bash minimap defaultCollapsed
 curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
 --header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
 --data '[
@@ -413,7 +413,7 @@ curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
 
 Adding a variable is similar to adding a tag. Here's an example of adding a dynamic variable named `httproute` that takes values from the `http.route` attribute:
 
-```bash
+```bash defaultCollapsed
 curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
 --header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
 --data '[

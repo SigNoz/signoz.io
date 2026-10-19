@@ -41,12 +41,7 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
         Track multi-step workflows like "calls dialed" to "leads qualified" for voice agents, or
         visualize drop-off rates across your AI agent pipelines to identify where users abandon
         flows.
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="flex w-fit items-center gap-2"
-          asChild
-        >
+        <Button variant="secondary" className="flex w-fit items-center gap-2" asChild>
           <TrackingLink
             href="/docs/trace-funnels/overview/"
             clickType="Observability for AI Native Companies Card CTA"
@@ -69,12 +64,7 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
         Enable AI agents to query your telemetry via Model Context Protocol. Agents can debug
         themselves, create dashboards, or perform root-cause analysis by importing telemetry data
         directly.
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="flex w-fit items-center gap-2"
-          asChild
-        >
+        <Button variant="secondary" className="flex w-fit items-center gap-2" asChild>
           <TrackingLink
             href="/docs/ai/signoz-mcp-server/"
             clickType="Observability for AI Native Companies Card CTA"
@@ -140,7 +130,7 @@ export const CAPABILITIES_CARDS2: IconTitleDescriptionCardData[] = [
 ]
 
 export const VENDORS: { key: VendorKey; label: string }[] = [
-  { key: 'signoz', label: 'SigNoz' },
+  { key: 'signoz', label: 'SigNoz Cloud' },
   { key: 'langfuse', label: 'Langfuse' },
   { key: 'langsmith', label: 'LangSmith' },
   { key: 'braintrust', label: 'Braintrust' },
@@ -325,7 +315,7 @@ export const PILLARS_DATA = [
     iconText: 'COST PREDICTABILITY',
     title: 'Pay for Data Volume Ingested, Not Host Count',
     description:
-      'Companies running large GPU clusters make host-based pricing financially unsustainable. Legacy vendors charge per host and double-charge for ingestion and indexing, leading to surprise bills. We charge based on data volume ingested, not the number of nodes or containers. Set daily rate limits and ingestion quotas to prevent cost overruns.',
+      'Companies running large GPU clusters make host-based pricing financially unsustainable. Legacy vendors charge per host and double-charge for ingestion and indexing, leading to surprise bills. SigNoz Cloud charges based on data volume ingested, not the number of nodes or containers. Set daily rate limits and ingestion quotas to prevent cost overruns.',
   },
   {
     icon: <TextSearch size={14} className="text-signoz_vanilla-400" />,

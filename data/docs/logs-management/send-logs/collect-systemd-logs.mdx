@@ -1,5 +1,5 @@
 ---
-date: 2026-04-06
+date: 2026-08-27
 title: Collecting systemd logs (journald)
 description: Configure OpenTelemetry Collector to collect systemd journal logs and send them to SigNoz. Learn about filtering by units, priority levels, and combining multiple criteria.
 
@@ -78,7 +78,7 @@ Replace the placeholders:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -241,7 +241,7 @@ A common requirement is to collect logs at different priority levels for differe
 
 Since the journald receiver applies a single `priority` filter to all units, you can achieve this by using **multiple receiver instances**:
 
-```yaml:config.yaml
+```yaml:config.yaml defaultCollapsed minimap
 receivers:
   # Receiver for application logs - collect all logs including info and debug
   journald/app:
@@ -297,7 +297,10 @@ The receiver instance name after the `/` (e.g., `journald/app`, `journald/system
 <details>
 <ToggleHeading>
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Permission Issues
 

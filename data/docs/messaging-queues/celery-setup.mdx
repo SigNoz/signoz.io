@@ -37,7 +37,7 @@ Celery using `opentelemetry-instrument`.
 ### Step 1: Installing opentelemetry-instrumentation
 
 You need to install the OpenTelemetry instrumentation dependency using `pip` as:
-```
+```bash
 pip install opentelemetry-instrumentation
 ```
 
@@ -46,7 +46,7 @@ pip install opentelemetry-instrumentation
 You need to ensure all the environment variables are setup on the celery components in order to send all the telemetry 
 to your locally running otel collector agent. Here are the environment variables that need to be set:
 
-```
+```yaml
 env:
   - name: CELERY_BROKER_URL
     value: amqp://guest:guest@rabbitmq:5672//
@@ -73,7 +73,7 @@ Here are the contents of the `config.yaml` file:
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-```yaml:config.yaml
+```yaml:config.yaml defaultCollapsed minimap
 receivers:
   otlp:
     protocols:
@@ -120,7 +120,7 @@ service:
 </TabItem>
 <TabItem value='self-host' label='Self-Host'>
 
-```yaml:config.yaml
+```yaml:config.yaml defaultCollapsed minimap
 receivers:
   otlp:
     protocols:
@@ -173,7 +173,7 @@ You can now use `opentelemetry-instrument` command to auto-instrument Celery.
 
 For example, if you have your task generators named as `generator1.py` you can run the following command to enable 
 auto instrumentation for generators.
-```
+```bash
 opentelemetry-instrument python generator1.py 
 ```
 
@@ -199,7 +199,7 @@ pip install celery \
 
 The following code instruments the OpenTelemetry metrics for Celery.
 
-```python:instrumentation.py
+```python:instrumentation.py defaultCollapsed minimap
 from opentelemetry import metrics, trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
     OTLPSpanExporter,
@@ -248,7 +248,7 @@ Here are the contents of the `config.yaml` file:
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-```yaml:config.yaml
+```yaml:config.yaml defaultCollapsed minimap
 receivers:
   otlp:
     protocols:
@@ -295,7 +295,7 @@ service:
 </TabItem>
 <TabItem value='self-host' label='Self-Host'>
 
-```yaml:config.yaml
+```yaml:config.yaml defaultCollapsed minimap
 receivers:
   otlp:
     protocols:
@@ -414,53 +414,29 @@ prometheus:
 Open the SigNoz Dashboard, and navigate to **Messaging Queues** from the left navigation menu. Select **Celery** from the top of the page. 
 Once the metrics start flowing in, you should see the dashboard getting populated with metrics as shown below.
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/messaging-queues/celery/metrics-dashboard-1.webp"
-        alt="Celery Dashboard"
-    />
-<figcaption>
-<i>
-Celery Dashboard
-</i>
-</figcaption>
-</figure>
+<Figure
+  src="/img/docs/messaging-queues/celery/metrics-dashboard-1.webp"
+  alt="Celery Dashboard"
+  caption="Celery Dashboard"
+/>
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/messaging-queues/celery/metrics-dashboard-2.webp"
-        alt="Celery Dashboard (continued)"
-    />
-<figcaption>
-<i>
-Celery Dashboard (continued)
-</i>
-</figcaption>
-</figure>
+<Figure
+  src="/img/docs/messaging-queues/celery/metrics-dashboard-2.webp"
+  alt="Celery Dashboard (continued)"
+  caption="Celery Dashboard (continued)"
+/>
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/messaging-queues/celery/celery-traces-panel.webp"
-        alt="Celery Dashboard (continued)"
-    />
-<figcaption>
-<i>
-Celery Traces Panel
-</i>
-</figcaption>
-</figure>
+<Figure
+  src="/img/docs/messaging-queues/celery/celery-traces-panel.webp"
+  alt="Celery Dashboard (continued)"
+  caption="Celery Traces Panel"
+/>
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/messaging-queues/celery/celery-traces-detailed.webp"
-        alt="Celery Dashboard (continued)"
-    />
-<figcaption>
-<i>
-Detailed Celery Traces
-</i>
-</figcaption>
-</figure>
+<Figure
+  src="/img/docs/messaging-queues/celery/celery-traces-detailed.webp"
+  alt="Celery Dashboard (continued)"
+  caption="Detailed Celery Traces"
+/>
 
 ## Troubleshooting
 

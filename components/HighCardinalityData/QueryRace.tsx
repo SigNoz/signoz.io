@@ -44,34 +44,38 @@ export default function QueryRace() {
         {/* Scenario 1: Index Lookup */}
         <div className="relative">
           <div className="mb-2 flex items-end justify-between">
-            <h4 className="font-semibold text-zinc-100">
+            <h4 className="font-semibold text-[var(--l1-foreground)]">
               Low Cardinality Query
-              <span className="ml-2 text-sm font-normal text-zinc-400">(Indexed Lookup)</span>
+              <span className="ml-2 text-sm font-normal text-[var(--l3-foreground)]">
+                (Indexed Lookup)
+              </span>
             </h4>
             <span
-              className={`text-sm font-bold transition-all ${lowCardDone ? 'scale-110 text-green-500' : 'text-zinc-500'}`}
+              className={`text-sm font-bold transition-all ${lowCardDone ? 'scale-110 text-green-500' : 'text-[var(--l3-foreground)]'}`}
             >
               {lowCardDone ? '0.05ms' : 'Waiting...'}
             </span>
           </div>
 
-          <div className="relative flex h-12 items-center overflow-hidden rounded-lg bg-zinc-800 px-4">
+          <div className="relative flex h-12 items-center overflow-hidden rounded-lg bg-[var(--l3-background)] px-4">
             {/* Index Visual: Just a few sorted blocks */}
             <div className="flex w-full gap-1 opacity-50">
               {Array.from({ length: 20 }).map((_, i) => (
-                <div key={i} className="h-6 flex-1 rounded-sm bg-zinc-600" />
+                <div key={i} className="h-6 flex-1 rounded-sm bg-[var(--l3-border)]" />
               ))}
             </div>
 
             {/* The "JUMP" cursor */}
             <div
-              className={`absolute bottom-0 top-0 flex w-8 items-center justify-center border-l-2 border-r-2 border-green-500 bg-green-900/40 transition-all duration-200
+              className={`absolute bottom-0 top-0 flex w-8 items-center justify-center border-l-2 border-r-2 border-green-500 bg-[var(--callout-success-background)] transition-all duration-200
                  ${lowCardDone ? 'left-[40%]' : 'left-0'}`}
             >
-              {lowCardDone && <span className="text-xs font-bold text-green-400">FOUND</span>}
+              {lowCardDone && (
+                <span className="text-xs font-bold text-[var(--callout-success-title)]">FOUND</span>
+              )}
             </div>
           </div>
-          <p className="mt-2 text-xs text-zinc-400">
+          <p className="mt-2 text-xs text-[var(--l3-foreground)]">
             The database jumps directly to the bucket. It doesn't scan everything.
           </p>
         </div>
@@ -79,12 +83,14 @@ export default function QueryRace() {
         {/* Scenario 2: Full Scan */}
         <div className="relative">
           <div className="mb-2 flex items-end justify-between">
-            <h4 className="font-semibold text-zinc-100">
+            <h4 className="font-semibold text-[var(--l1-foreground)]">
               High Cardinality Query
-              <span className="ml-2 text-sm font-normal text-zinc-400">(Full Scan)</span>
+              <span className="ml-2 text-sm font-normal text-[var(--l3-foreground)]">
+                (Full Scan)
+              </span>
             </h4>
             <span
-              className={`text-sm font-bold transition-all ${highCardProgress === 100 ? 'text-red-500' : 'text-zinc-500'}`}
+              className={`text-sm font-bold transition-all ${highCardProgress === 100 ? 'text-red-500' : 'text-[var(--l3-foreground)]'}`}
             >
               {racing
                 ? `${(highCardProgress * 15).toFixed(0)}ms`
@@ -94,27 +100,27 @@ export default function QueryRace() {
             </span>
           </div>
 
-          <div className="relative flex h-12 items-center overflow-hidden rounded-lg bg-zinc-800">
+          <div className="relative flex h-12 items-center overflow-hidden rounded-lg bg-[var(--l3-background)]">
             {/* Scan Visual: Millions of tiny lines */}
             <div
               className="flex h-full w-full"
               style={{
                 backgroundImage:
-                  'repeating-linear-gradient(90deg, transparent, transparent 2px, #3f3f46 2px, #3f3f46 4px)',
+                  'repeating-linear-gradient(90deg, transparent, transparent 2px, var(--l3-border) 2px, var(--l3-border) 4px)',
               }}
             ></div>
 
             {/* The "SCAN" cursor */}
             <div
-              className="absolute bottom-0 top-0 border-r-2 border-red-500 bg-red-900/30"
+              className="absolute bottom-0 top-0 border-r-2 border-red-500 bg-[var(--callout-error-background)]"
               style={{ width: `${highCardProgress}%` }}
             >
-              <div className="absolute right-0 top-1/2 flex h-4 w-4 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-red-500 text-[8px] text-white">
+              <div className="absolute right-0 top-1/2 flex h-4 w-4 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-red-500 text-[8px] text-[var(--base-white)]">
                 🔍
               </div>
             </div>
           </div>
-          <p className="mt-2 text-xs text-zinc-400">
+          <p className="mt-2 text-xs text-[var(--l3-foreground)]">
             The database must check every single index entry because there are too many unique
             values to group effectively.
           </p>
@@ -127,8 +133,8 @@ export default function QueryRace() {
           disabled={racing}
           className={`rounded-full px-8 py-3 text-sm font-bold shadow-sm transition-all ${
             racing
-              ? 'cursor-not-allowed bg-zinc-800 text-zinc-500'
-              : 'bg-zinc-100 text-zinc-900 hover:scale-105 active:scale-95'
+              ? 'cursor-not-allowed bg-[var(--l3-background)] text-[var(--l3-foreground)]'
+              : 'bg-[var(--l1-foreground)] text-[var(--l1-background)] hover:scale-105 active:scale-95'
           }`}
         >
           {racing ? 'Scanning...' : 'Start Race'}

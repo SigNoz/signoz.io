@@ -1,9 +1,11 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import { cacheLife, cacheTag } from 'next/cache'
-import type { NavItem } from '@/components/DocsSidebar/types'
+import type { NavItem, Doc } from '@/components/DocsSidebar/types'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { cmsFetch } from '@/utils/cmsFetch'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
+import { fetchAllDocsIndex } from '@/utils/cachedData'
 
 const LOCAL_JSON_PATH = path.join(process.cwd(), 'data/docs-side-nav/main.json')
 
@@ -18,7 +20,7 @@ async function fetchCmsSideNav(): Promise<NavItem[]> {
     throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
   }
 
-  const res = await fetch(`${CMS_API_URL}/api/docs-side-nav`, {
+  const res = await cmsFetch(`/api/docs-side-nav`, {
     cache: 'force-cache',
     next: {
       tags: ['docs-side-nav'],
@@ -64,16 +66,53 @@ async function getCachedSideNav(): Promise<NavItem[]> {
   return cachedResolveSideNav()
 }
 
+function enrichNavWithDates(items: NavItem[], dateMap: Map<string, string>): NavItem[] {
+  return items.map((item) => {
+    if (item.type === 'doc') {
+      const normalizedRoute = item.route.endsWith('/') ? item.route.slice(0, -1) : item.route
+      const date = dateMap.get(normalizedRoute)
+      if (date) {
+        return { ...item, published_date: date } as Doc
+      }
+      return item
+    }
+    if (item.type === 'category' && 'items' in item && item.items) {
+      return { ...item, items: enrichNavWithDates(item.items, dateMap) }
+    }
+    return item
+  })
+}
+
 export async function getDocsSideNav(): Promise<NavItem[]> {
+  let nav: NavItem[]
   try {
-    return await getCachedSideNav()
+    nav = await getCachedSideNav()
   } catch (cacheError) {
     console.warn('Cached sidenav fetch failed, retrying without cache:', cacheError)
     try {
-      return await resolveSideNav()
+      nav = await resolveSideNav()
     } catch (directError) {
       console.error('Direct sidenav fetch also failed:', directError)
       return []
     }
   }
+
+  try {
+    const allDocs = await fetchAllDocsIndex()
+    const dateMap = new Map<string, string>()
+    for (const doc of allDocs) {
+      if (doc.published_date && doc.path) {
+        const route = doc.path.startsWith('/') ? doc.path : `/${doc.path}`
+        const normalized = route.endsWith('/') ? route.slice(0, -1) : route
+        dateMap.set(normalized, doc.published_date)
+      }
+    }
+    if (dateMap.size > 0) {
+      nav = enrichNavWithDates(nav, dateMap)
+    }
+  } catch (enrichError) {
+    console.warn('Sidenav date enrichment failed, returning unenriched nav:', enrichError)
+  }
+
+  return nav
 }

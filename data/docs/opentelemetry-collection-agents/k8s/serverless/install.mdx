@@ -1,8 +1,8 @@
 ---
-date: 2026-05-11
-
-title: K8s Serverless (EKS Fargate) - Install
-description: Set up the OpenTelemetry Collector sidecar for EKS Fargate to collect telemetry for SigNoz.
+date: 2026-10-13
+title: EKS Fargate Collection Agent - Install the Sidecar Collector
+description: Run the OpenTelemetry Collector as a sidecar container in your EKS Fargate pods to collect application traces, metrics, and logs and send them to SigNoz.
+doc_type: howto
 ---
 
 Follow this guide to set up an OpenTelemetry Collector sidecar alongside your applications on EKS Fargate. The sidecar collects OTLP telemetry from your app and sends it to SigNoz. It runs inside your pod, so no node-level access is required.
@@ -30,7 +30,7 @@ Create a ConfigMap containing the collector configuration and an in-cluster kube
 
 Add the following ConfigMap to provide a minimal in-cluster kubeconfig for the sidecar collector, used by `kubeletstats` in API-proxy mode.
 
-```yaml
+```yaml defaultCollapsed
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -60,7 +60,7 @@ data:
 
 Add the following to your application pod spec to inject the OpenTelemetry Collector as a sidecar.
 
-```yaml
+```yaml minimap defaultCollapsed
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -204,7 +204,7 @@ This configuration reads exporter endpoints and credentials from environment var
 
 Create a ServiceAccount and minimal RBAC so the sidecar can call the API-server proxy path:
 
-```yaml
+```yaml defaultCollapsed minimap
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -247,7 +247,7 @@ subjects:
 
 Add the following sidecar container to your Deployments/Apps. Replace placeholders like `<OTLP_EXPORTER_OTLP_ENDPOINT>` and `<YOUR_K8S_CLUSTER_NAME>`.
 
-```yaml
+```yaml minimap defaultCollapsed
 # Example Deployment fragment
 spec:
   template:
@@ -272,7 +272,7 @@ spec:
         - name: opentelemetry-collector-contrib
           imageOverride:
             repository: otel/opentelemetry-collector-contrib
-            tag: v0.139.0
+            tag: 0.139.0
           command:
             - /otelcol-contrib --config=/conf/otel-agent-config.yaml
           env:
@@ -387,5 +387,5 @@ kubectl apply -f app-deployment.yaml
 ## Next Steps
 
 - [Configure Fargate log routing and Collector receivers](/docs/opentelemetry-collection-agents/k8s/serverless/configure/)
-- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

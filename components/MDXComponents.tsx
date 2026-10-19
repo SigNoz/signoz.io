@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import type { MDXComponents } from 'mdx/types'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
@@ -23,6 +24,8 @@ import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetSt
 import InterlinkCard from './InterlinkCard/InterlinkCard'
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
 import Listicle from './Listicle/Listicle'
+import ListicleDirectory from './ListicleDirectory/ListicleDirectory'
+import DocsCtaCard from './DocsCtaCard/DocsCtaCard'
 import MDXButton from './MDXButton/MDXButton'
 import HostingDecision from './shared/HostingDecision'
 import CommonPrerequisites from './shared/CommonPrerequisites'
@@ -64,6 +67,9 @@ import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
 import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
 import IncidentCostGraphic from './Blog/IncidentCostGraphic.lazy'
+import TroubleshootingWizard from './TroubleshootingWizard/TroubleshootingWizard'
+
+const MDXTabs = (props: ComponentProps<typeof Tabs>) => <Tabs segmented {...props} />
 
 // MDXComponents type from @types/mdx@2.0.13 expects React-18-shape components
 // (props: any) => Element | null, while @types/react@19 widens FC return to
@@ -85,7 +91,7 @@ export const components = {
   SignUps,
   LogsPerf,
   VersionPin,
-  Tabs,
+  Tabs: MDXTabs,
   TabItem,
   CodeTabs,
   CodeTab,
@@ -112,6 +118,8 @@ export const components = {
   InterlinkCard,
   GetStartedInfrastructureMonitoring,
   Listicle,
+  ListicleDirectory,
+  DocsCtaCard,
   MDXButton,
   HostingDecision,
   ArticleSeriesBottom,
@@ -143,4 +151,5 @@ export const components = {
   TraefikMetrics,
   MetricsDefinition,
   CHClientWithOutput,
+  TroubleshootingWizard,
 } as unknown as MDXComponents

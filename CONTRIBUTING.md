@@ -27,7 +27,7 @@ Use the canonical verification matrix in [contributing/repo-workflow.md](contrib
 
 ## Shared PR Workflow
 
-1. Fork and clone the repo.
+1. Clone the repo and branch. Internal contributors (write access) must branch on this repo directly — never from a fork, because fork PRs are excluded from CMS staging sync. External contributors fork; see [Contributing From a Fork](README.md#contributing-from-a-fork-external-contributors) for what local preview covers and how content is published after merge.
 2. Create a focused branch.
 3. Make task-scoped changes.
 4. Run the checks that match your files using the matrix in [contributing/repo-workflow.md](contributing/repo-workflow.md#verification-matrix).

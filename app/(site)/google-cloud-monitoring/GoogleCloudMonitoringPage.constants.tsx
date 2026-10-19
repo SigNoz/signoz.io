@@ -1,6 +1,5 @@
 import { MonitorCog, Telescope, Microscope } from 'lucide-react'
 import BanknoteCheckIcon from '@/public/img/icons/banknote-check.svg'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import section1Url from '@/public/img/google-cloud-monitoring/section-1.svg?url'
 import section2Url from '@/public/img/google-cloud-monitoring/section-2.svg?url'
 import section3Url from '@/public/img/google-cloud-monitoring/section-3.svg?url'
@@ -12,7 +11,6 @@ export const GCP_MONITORING_HEADER_BUTTONS = [
     text: 'Get Started Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -24,7 +22,6 @@ export const GCP_MONITORING_HEADER_BUTTONS = [
     text: 'Read the Docs',
     href: '/docs/gcp-monitoring/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Docs Link',
@@ -39,13 +36,13 @@ export const UNIFY_GCP_PANEL = {
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       When Cloud Run latency spikes, jump from the GCP infrastructure metric to the application
-      trace to the log line that explains it; without switching to the multiple consoles. SigNoz
+      trace to the log line that explains it; without switching to multiple consoles. SigNoz Cloud
       stores all three signal types in a single ClickHouse backend, so correlation is native, not
       manual.
     </p>
   ),
   image: section1Url,
-  imageAlt: 'Unified Google Cloud monitoring in SigNoz',
+  imageAlt: 'Unified Google Cloud monitoring in SigNoz Cloud',
   button: {
     text: 'Explore More',
     href: '/docs/gcp-monitoring/',
@@ -187,7 +184,7 @@ export const GCP_ICON_GRID_CARDS: IconTitleDescriptionCardData[] = [
     icon: <BanknoteCheckIcon className="h-5 w-5" aria-hidden="true" />,
     title: 'Predictable Pricing for Google Cloud Observability',
     description:
-      "GCP already charges you for Cloud Monitoring metrics queries, log ingestion, and log storage. Your observability tool shouldn't add another unpredictable bill on top. SigNoz charges $0.30/GB for logs and traces. $0.10 per million metric samples. No per-host fees. No per-metric charges. No surprise at month-end.",
+      "GCP already charges you for Cloud Monitoring metrics queries, log ingestion, and log storage. Your observability tool shouldn't add another unpredictable bill on top. SigNoz Cloud charges $0.30/GB for logs and traces and $0.10 per million metric samples. No per-host fees. No per-metric charges. No surprise at month-end.",
     button: {
       text: 'View Pricing',
       href: '/pricing/',
@@ -206,7 +203,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Get Started Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -218,7 +214,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Read Doc',
     href: '/docs/gcp-monitoring/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Docs Link',

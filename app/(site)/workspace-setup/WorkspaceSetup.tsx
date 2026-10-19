@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import './workspace-setup.styles.css'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
-function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
+function WorkspaceSetup({ isEmailVerified, isWorkspaceSetupDelayed, email, workspaceData }) {
   const logEvent = useLogEvent()
   const pathname = usePathname()
 
@@ -78,17 +80,27 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
 
       <div className="text-md mt-[28px] w-full rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
         <div className="flex items-center gap-4 text-sm">
-          <CheckCircleIcon size={24} /> Email verified! Looking good.
+          {isEmailVerified ? (
+            <>
+              <CheckCircleIcon size={24} /> Email verified! Looking good.
+            </>
+          ) : (
+            <>
+              <Loader2 size={24} className="animate-spin" /> Verifying your email ...
+            </>
+          )}
         </div>
 
-        <div
-          className={`mt-[28px] flex items-center gap-4 text-sm ${
-            isWorkspaceSetupDelayed ? 'text-signoz_amber-500' : ''
-          }`}
-        >
-          <Loader2 size={24} className="animate-spin" /> Preparing your cloud workspace, This may
-          take a few minutes ...
-        </div>
+        {isEmailVerified && (
+          <div
+            className={`mt-[28px] flex items-center gap-4 text-sm ${
+              isWorkspaceSetupDelayed ? 'text-signoz_amber-500' : ''
+            }`}
+          >
+            <Loader2 size={24} className="animate-spin" /> Preparing your cloud workspace. This may
+            take a few minutes ...
+          </div>
+        )}
       </div>
 
       {isWorkspaceSetupDelayed && (
@@ -116,7 +128,7 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
       <div className="mt-[28px] flex w-full max-w-[480px] flex-col items-center justify-center gap-4 py-[8px] text-sm font-medium">
         <a
           type="submit"
-          className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
+          className={cn(buttonVariants({ variant: 'default' }), 'mt-[28px] w-full')}
           href="mailto:cloud-support@signoz.io"
           onClick={() => handleContactSupport('button')}
         >
@@ -125,7 +137,7 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
         </a>
 
         <Link href="/docs/introduction/" className="w-full" onClick={handleReadDocs}>
-          <button className="flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
+          <button className={cn(buttonVariants({ variant: 'secondary' }), 'w-full')}>
             <span className="flex text-xs leading-5">Read the docs </span>
             <ArrowRight size={14} />
           </button>

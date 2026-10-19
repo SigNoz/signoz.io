@@ -1,0 +1,166 @@
+---
+date: 2026-08-03
+title: "Kubernetes Namespaces Monitoring: Aggregated Resource Usage"
+description: Monitor Kubernetes namespace resource usage in SigNoz, covering aggregated CPU and memory, top pods, network activity, and workload health.
+doc_type: explanation
+---
+
+The **Namespaces** view shows aggregated resource usage per namespace, useful for cost allocation, ResourceQuota monitoring, and identifying resource-heavy namespaces.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-namespaces-list.webp"
+  alt="Kubernetes Namespaces list view showing namespace names with CPU and memory columns"
+  caption="Namespaces List View"
+  className="box-shadowed-image"
+/>
+
+## Namespaces List Page Columns
+
+### Namespace Name
+
+- This column is derived from the resource attribute `k8s.namespace.name`.
+- Identifier of the Kubernetes namespace.
+- Click the name to open the namespace detail page and drill into per-namespace CPU, memory, top-pod charts, network activity, and workload-controller status (StatefulSets, ReplicaSets, DaemonSets, Deployments).
+
+### Cluster Name
+
+- This column is derived from the resource attribute `k8s.cluster.name`.
+- Cluster the namespace belongs to.
+- In multi-cluster setups, use this to scope namespace-level cost allocation and ResourceQuota compliance to a single cluster (the same namespace name can exist across clusters with completely different workloads).
+
+### CPU Usage (cores)
+
+- This column relies on the OTel metric `k8s.pod.cpu.usage` from the kubeletstats receiver, summed across all pods in the namespace.
+- Total CPU consumed by every pod in the namespace, expressed in CPU-core units, averaged over the sample window and then summed across pods.
+- Use this to track a namespace against a `ResourceQuota` `requests.cpu` / `limits.cpu` cap and to identify which tenant (when one namespace = one tenant) is driving cluster-wide CPU consumption.
+
+### Mem Usage (WSS)
+
+- This column relies on the OTel metric `k8s.pod.memory.working_set` from the kubeletstats receiver, summed across all pods in the namespace.
+- Working Set Size across every pod in the namespace: anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for eviction).
+- Use this to track a namespace against its `ResourceQuota` memory cap and identify which tenant is closest to its allocation; sustained high WSS with no `LimitRange` defined typically means individual pods aren't being capped and one runaway pod can starve the namespace.
+
+### Pod Counts by Phase
+
+- This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
+- Counts of pods in this namespace grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
+- A persistent `Pending` count usually means the namespace is hitting a `ResourceQuota` cap or its pods can't fit on any node (insufficient CPU/memory); `Failed` / `Unknown` spikes warrant drilling into those pods from the detail page.
+
+### Pod Counts by Status
+
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- Counts of the pods in this namespace grouped by their kubectl-style display status within the selected window. The status is derived exactly as on the Pods view. See [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
+- A `CrashLoopBackOff` / `ImagePullBackOff` spike confined to one namespace usually points to a bad deploy or a missing image-pull secret for that tenant, while climbing `Evicted` counts signal the namespace is bumping against its resource limits; drill into the affected workloads from this namespace.
+
+## Namespace Detail Page
+
+Click a namespace name to open the detail page. The header shows **Namespace Name** and **Cluster Name**. The detail page includes five tabs: **Metrics**, **Logs**, **Traces**, **Events**, and **Pod Metrics**.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-namespaces-detail.webp"
+  alt="Namespace detail page showing CPU, memory, and workload charts"
+  caption="Namespace Detail: Metrics Tab"
+  className="box-shadowed-image"
+/>
+
+### Namespaces Metrics - Charts and Panels
+
+#### CPU Usage (cores)
+
+- This chart relies on the OTel metrics `k8s.pod.cpu.usage` and `k8s.container.cpu_request` from the kubeletstats receiver, summed across all pods (and their containers) in the namespace.
+- Plots four series: `k8s.pod.cpu.usage` aggregated three ways within each step interval (**Avg**, **Max**, **Min**) and the sum of container CPU **Requests** scheduled in the namespace as a reference line.
+- When Usage consistently exceeds Requests, the namespace is bursting above its reserved capacity (allowed, but throttling risk under cluster contention); when Usage is well below Requests, the namespace is reserving more CPU than it actually needs and can be right-sized to free quota headroom.
+
+#### Memory Usage (bytes)
+
+- This chart relies on the OTel metrics `k8s.pod.memory.usage`, `k8s.pod.memory.working_set`, `k8s.pod.memory.rss`, and `k8s.container.memory_request` from the kubeletstats receiver, summed across all pods (and their containers) in the namespace.
+- Plots six series: usage **Avg / Max / Min**, **Working Set**, **RSS**, and total container **Requests**. `working_set` (anonymous + active file pages, excluding reclaimable inactive file pages) is the value the kubelet uses for eviction; `usage` includes reclaimable page cache and so reads higher.
+- Working Set climbing toward Requests means the namespace's pods are nearing the level at which the kubelet starts evicting under node-level MemoryPressure; sustained RSS growth without correlated Working Set growth points to memory leaks in long-running workloads.
+
+#### Pods CPU (top 10)
+
+- This chart relies on the OTel metric `k8s.pod.cpu.usage` from the kubeletstats receiver, grouped by `k8s.pod.name` and limited to 10 lines.
+- One line per pod in the namespace, showing CPU consumption in CPU-core units.
+- Use this to spot which pods drive the namespace's CPU cost: candidates for tighter `limits.cpu`, right-sized `requests.cpu`, or relocation to a different namespace/node pool.
+
+#### Pods Memory (top 10)
+
+- This chart relies on the OTel metric `k8s.pod.memory.usage` from the kubeletstats receiver, grouped by `k8s.pod.name` and limited to 10 lines.
+- One line per pod in the namespace, showing memory consumption in bytes.
+- The pod most consistently above its `requests.memory` is the most likely candidate for eviction under MemoryPressure (within its QoS class); use this view to right-size requests or set explicit `limits.memory`.
+
+#### Network Rate
+
+- This chart relies on the OTel metric `k8s.pod.network.io` from the kubeletstats receiver, a cumulative Sum in bytes with attributes `direction` and `interface`, shown as a per-second rate and aggregated across all pods in the namespace.
+- One line per `direction :: interface` combination, showing transmit/receive throughput across the namespace's pods.
+- Use this to detect a chatty workload saturating shared cluster bandwidth: common when one pod's traffic dominates the namespace; apply `NetworkPolicy` to restrict cross-namespace traffic or move the heavy workload to a dedicated namespace/node.
+
+#### Network Errors
+
+- This chart relies on the OTel metric `k8s.pod.network.errors` from the kubeletstats receiver, a cumulative Sum with attributes `direction` and `interface`, shown as a per-second increase and aggregated across all pods in the namespace.
+- One line per `direction :: interface` combination, sourced from the kubelet's per-pod-interface error counters.
+- Sustained non-zero values warrant attention: common causes are misconfigured CNI plugins, MTU mismatches, or a noisy neighbor in another namespace saturating shared host links; follow up via the CNI plugin's troubleshooting docs.
+
+#### StatefulSets
+
+- This chart relies on the OTel metrics `k8s.statefulset.desired_pods`, `k8s.statefulset.current_pods`, and `k8s.statefulset.updated_pods` from the k8s_cluster receiver, rendered as a table with one row per StatefulSet in the namespace.
+- Columns show **Desired** (`.spec.replicas`), **Current** (pods at the StatefulSet's current revision), and **Updated** (pods at the latest revision), the K8s `StatefulSetStatus` fields. A stalled rolling update typically shows Updated < Current for an extended period.
+- Use this to detect a stalled or partially-rolled StatefulSet: when Current < Desired, the controller is still creating pods (or one is stuck Pending); when Updated < Desired during a rollout, the update is paused or wedged: inspect events with `kubectl describe statefulset`.
+
+#### ReplicaSets
+
+- This chart relies on the OTel metrics `k8s.replicaset.desired` and `k8s.replicaset.available` from the k8s_cluster receiver, rendered as a table with one row per ReplicaSet in the namespace (empty ReplicaSets are filtered out via `HAVING max(desired) > 0`).
+- Columns show **Desired** (`.spec.replicas`) and **Available** (pods ready for at least `minReadySeconds`, the `.status.availableReplicas` field).
+- Available < Desired for an extended period means the ReplicaSet can't bring pods up: typically because of an image-pull failure, a missing ConfigMap/Secret, or insufficient cluster capacity; drill into the underlying pods' events. (Most ReplicaSets are managed by Deployments; see the Deployments chart for the rollout-level view.)
+
+#### DaemonSets
+
+- This chart relies on the OTel metrics `k8s.daemonset.desired_scheduled_nodes`, `k8s.daemonset.current_scheduled_nodes`, `k8s.daemonset.ready_nodes`, and `k8s.daemonset.misscheduled_nodes` from the k8s_cluster receiver, rendered as a table with one row per DaemonSet in the namespace.
+- Columns show **Desired** (nodes that should run the pod), **Current** (nodes running at least one pod and supposed to), **Ready** (nodes whose pod is running and Ready), and **Misscheduled** (nodes running the pod but not supposed to, violating node affinity or taints).
+- Non-zero Misscheduled means the DaemonSet's `nodeSelector` / `affinity` / `tolerations` changed but pods on the now-excluded nodes haven't been cleaned up yet; Ready < Desired means new node onboarding (or a CrashLoop on existing nodes) is keeping the DaemonSet from full coverage.
+
+#### Deployments
+
+- This chart relies on the OTel metrics `k8s.deployment.desired` and `k8s.deployment.available` from the k8s_cluster receiver, rendered as a table with one row per Deployment in the namespace; an extra column shows the `available/desired` utilization as a percentage.
+- **Desired** is `.spec.replicas`; **Available** is pods ready for at least `minReadySeconds` (`.status.availableReplicas`).
+- Available % consistently below 100% means a rollout is stuck or pods are crashing: `kubectl rollout status deployment/<name>` and pod events surface the root cause (image-pull failure, readiness-probe failure, insufficient capacity).
+
+### Pod Metrics
+
+The **Pod Metrics** tab breaks resource utilization down **per pod** across every pod in the namespace, spanning all of its workloads. All charts are scoped to this namespace (filtered by `k8s.cluster.name` and `k8s.namespace.name`), grouped by `k8s.pod.name` (one line per pod), averaged within each step interval, and expressed as a percentage.
+
+#### CPU Limit Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver, a pod's CPU usage as a fraction of the sum of its containers' CPU limits, emitted directly as a ratio.
+- Plots one line per pod in the namespace, each showing that pod's CPU usage against its CPU limit; values near 100% mean the kernel is actively throttling that pod's CPU.
+- Use it to spot which pod in the namespace is being throttled across all its workloads: a single hot line isolates one pod, while broadly high utilization suggests limits are set too low across the namespace's workloads.
+
+#### CPU Request Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.cpu_request_utilization` from the kubeletstats receiver, a pod's CPU usage as a fraction of the sum of its containers' CPU requests.
+- Plots one line per pod in the namespace, each showing usage against its CPU request; values above 100% mean the pod is using more CPU than it reserved (allowed, but a sign the request is low).
+- Use it to find over- and under-provisioned pods across the namespace: pods far below 100% waste reserved capacity, while pods above it are under-requested and may crowd their node.
+
+#### Memory Limit Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.memory_limit_utilization` from the kubeletstats receiver, a pod's memory usage as a fraction of the sum of its containers' memory limits.
+- Plots one line per pod in the namespace, each showing that pod's memory usage against its memory limit; a line at or near 100% is a pod on the verge of an OOMKill.
+- Use it to catch the pod at OOMKill risk anywhere in the namespace: a steady per-pod climb is a memory-leak signature; raise that workload's `limits.memory` or fix the leak.
+
+#### Memory Request Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.memory_request_utilization` from the kubeletstats receiver, a pod's memory usage as a fraction of the sum of its containers' memory requests.
+- Plots one line per pod in the namespace, each showing usage against its memory request; values above 100% mean the pod exceeds its reservation.
+- Use it to right-size memory requests across the namespace's workloads: pods well below 100% reserve memory they never use, while pods above it risk eviction first under node memory pressure.
+
+#### FileSystem Usage Percentage By Pod Name
+
+- This chart is derived from two kubeletstats metrics: `k8s.pod.filesystem.usage` (bytes used) divided by `k8s.pod.filesystem.capacity` (total bytes); only the computed ratio is plotted, not the raw metrics.
+- Plots one line per pod in the namespace, each showing that pod's local/ephemeral filesystem fill level as a percentage of its capacity.
+- Watch any pod trending toward 100%: its ephemeral storage is filling (unrotated logs, cached artifacts, temp files) and writes will start failing or the pod may be evicted; the line isolates the culprit pod.
+
+## Next steps
+
+- [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/): back to the Kubernetes Monitoring overview.
+- [Setup Kubernetes Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/): configure the receivers this page's metrics depend on.
+- [Pods](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/) and [Deployments](https://signoz.io/docs/infrastructure-monitoring/kubernetes/deployments/): drill into the workloads running in this namespace.

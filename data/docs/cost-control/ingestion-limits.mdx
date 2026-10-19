@@ -1,0 +1,41 @@
+---
+date: 2026-08-14
+title: Set Ingestion Limits in SigNoz Cloud
+description: Set hard, per-signal ingestion caps on a SigNoz Cloud ingestion key to stop a misconfigured Dev or Staging environment from generating an unexpected bill.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+Ingestion Limits let you place hard caps on telemetry data ingested per ingestion key, independent of what the applications are sending. This is a SigNoz Cloud-only feature.
+
+The primary use case is **non-production environment governance**: prevent a misconfigured dev or staging service from generating an unexpectedly large bill by capping ingestion before it reaches your paid quota.
+
+## How to Set a Limit
+
+Limits are configured per-signal on an ingestion key. The full step-by-step procedure is in the ingestion keys documentation:
+
+**[Add Limits to an Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/#add-limits-to-a-key)**
+
+In summary:
+
+1. Navigate to **Settings > Ingestion Settings** in SigNoz Cloud.
+2. Click the target ingestion key to open its dropdown.
+3. Select the signal to limit (Logs, Traces, or Metrics).
+4. Click **+ Limits**, enter a limit value, and click **Save**.
+
+Limits reset daily. Once the limit is hit within the day, SigNoz drops further data for that signal until midnight UTC.
+
+<Admonition type="warning">
+  Data dropped due to ingestion limits is permanently lost. It does not buffer or retry. Apply
+  limits only on environments where data loss is acceptable (Dev, Staging).
+</Admonition>
+
+## Next Steps
+
+- Return to **[Cost Control Overview](https://signoz.io/docs/cost-control/overview/)** for the full optimization flow.
+- Set up **[Cost Meter Alerts](https://signoz.io/docs/cost-meter/alerts/)** to be notified when ingestion volume is approaching your limit.
+- See **[Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/)** for full key management, including modifying and removing limits.
+
+## Get Help
+
+<GetHelp />

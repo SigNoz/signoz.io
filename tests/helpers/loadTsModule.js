@@ -30,6 +30,7 @@ const transpileSource = (sourcePath, source) => {
       allowSyntheticDefaultImports: true,
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2020,
+      jsx: ts.JsxEmit.ReactJSX,
     },
   })
 
@@ -38,6 +39,11 @@ const transpileSource = (sourcePath, source) => {
       /require\((['"])@\/([^'"]+)\1\)/g,
       (_match, _quote, subPath) =>
         `require(${JSON.stringify(resolveModulePath(path.join(repoRoot, subPath)))})`
+    )
+    .replace(
+      /require\((['"])app\/([^'"]+)\1\)/g,
+      (_match, _quote, subPath) =>
+        `require(${JSON.stringify(resolveModulePath(path.join(repoRoot, 'app', subPath)))})`
     )
     .replace(
       /require\((['"])(\.\.?\/[^'"]+)\1\)/g,

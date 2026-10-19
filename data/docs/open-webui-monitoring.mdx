@@ -1,5 +1,5 @@
 ---
-date: 2026-07-23
+date: 2026-08-03
 title: Open WebUI Observability & Monitoring with OpenTelemetry
 description: Set up Open WebUI monitoring with OpenTelemetry and SigNoz. Track API and LLM traces, database queries, token usage, cost, and model latency.
 doc_type: howto
@@ -11,9 +11,11 @@ Open WebUI monitoring gives you real-time visibility into your self-hosted <a hr
 
 With full Open WebUI observability in SigNoz, you can trace API requests end to end, monitor database and endpoint latency, track LLM token usage and cost per model, set alerts on errors and latency, and keep your deployment reliable.
 
+<YouTube id="20XYiC0ER00" mute="false" />
+
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self-Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - Docker and Docker Compose installed and running on your system
 - A running Open WebUI deployment (a recent version with OpenTelemetry support). Follow the <a href="https://docs.openwebui.com/" target="_blank" rel="noopener noreferrer nofollow">Open WebUI docs</a> if you don't have it yet
 - Only for the optional LLM telemetry add-on: an OpenAI API key (or another OpenAI-compatible provider)
@@ -26,7 +28,7 @@ Open WebUI's OpenTelemetry stack is bundled inside its backend and turned on wit
 
 Create `otel-collector-config.yaml`. The Collector receives OTLP from Open WebUI and OpenLIT and exports it to SigNoz with your ingestion key.
 
-```yaml:otel-collector-config.yaml
+```yaml:otel-collector-config.yaml defaultCollapsed minimap
 receivers:
   otlp:
     protocols:
@@ -69,14 +71,14 @@ service:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="info" title="Why is a Collector required?" defaultCollapsed="true">
-SigNoz Cloud authenticates ingestion with the `signoz-ingestion-key` header. Open WebUI initializes its OTLP exporter without custom headers, so it cannot attach that key itself. The Collector adds it on Open WebUI's behalf. If you run self-hosted SigNoz, you can point Open WebUI's exporter straight at your SigNoz OTLP endpoint and skip this hop.
+SigNoz Cloud authenticates ingestion with the `signoz-ingestion-key` header. Open WebUI initializes its OTLP exporter without custom headers, so it cannot attach that key itself. The Collector adds it on Open WebUI's behalf. If you run Self-Hosted SigNoz, you can point Open WebUI's exporter straight at your SigNoz OTLP endpoint and skip this hop.
 </Admonition>
 
 ### Step 2: Start the stack with Docker Compose
 
 Create `docker-compose.yaml`. It runs Open WebUI and the Collector on one network, with Open WebUI exporting its native OTLP to the Collector.
 
-```yaml
+```yaml defaultCollapsed
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -125,7 +127,7 @@ The Open WebUI environment variables above control the native export:
 | `OTEL_OTLP_SPAN_EXPORTER` | No | `http` (default `grpc`) | Selects the OTLP/HTTP exporter for traces. |
 | `OTEL_EXPORTER_OTLP_INSECURE` | Yes | `true` | Plaintext OTLP to the Collector on the local network. |
 
-<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the Collector's exporter endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
@@ -151,7 +153,7 @@ Open WebUI's Pipelines framework supports two plugin kinds: a `pipe` (which is i
 
 Create `pipelines/openai_openlit_pipeline.py`:
 
-```python
+```python minimap defaultCollapsed
 """
 title: OpenAI GenAI (OpenLIT)
 requirements: openlit, openai
@@ -330,8 +332,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-## Additional resources
+## Related integrations
 
-- [Set up alerts on traces and metrics](https://signoz.io/docs/alerts-management/trace-based-alerts/)
-- [Query and filter traces](https://signoz.io/docs/userguide/query-builder-v5/)
-- [Correlate logs with traces](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/)
+Instrument the rest of your self-hosted inference stack:
+
+- [Monitor Ollama with OpenTelemetry](https://signoz.io/docs/ollama-monitoring/) - track local model inference latency, tokens, and resource usage
+- [Hugging Face observability with OpenTelemetry](https://signoz.io/docs/huggingface-observability/) - trace inference API calls and local pipeline runs
+- [Monitor Baseten with OpenTelemetry](https://signoz.io/docs/baseten-monitoring/) - trace model deployments and inference calls running on Baseten
+- [LangChain and LangGraph observability with OpenTelemetry](https://signoz.io/docs/langchain-observability/) - trace chains, agents, graph nodes, and tool calls
+- [LiteLLM observability with OpenTelemetry](https://signoz.io/docs/litellm-observability/) - trace calls across 100+ models through either the SDK or the proxy
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

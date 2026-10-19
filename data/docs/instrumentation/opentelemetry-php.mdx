@@ -1,5 +1,5 @@
 ---
-date: 2026-06-17
+date: 2026-08-27
 title: PHP OpenTelemetry Instrumentation Guide
 description: Instrument your PHP application with OpenTelemetry and send traces to SigNoz. Works with Laravel, WordPress, Symfony, and Slim using auto-instrumentation.
 doc_type: howto
@@ -7,7 +7,7 @@ doc_type: howto
 
 This guide shows you how to instrument your PHP application with OpenTelemetry and send traces to SigNoz. The auto-instrumentation approach works with Laravel, WordPress, Symfony, Slim, and other PHP frameworks.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -16,7 +16,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 - <a href="https://packagist.org/packages/open-telemetry/exporter-otlp" target="_blank" rel="noopener noreferrer nofollow">PHP 8.1+</a>
 - [PECL](https://pecl.php.net/) package manager
 - [Composer](https://getcomposer.org/) dependency manager
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- A SigNoz Cloud account or Self-Hosted SigNoz instance
 
 ## Send traces to SigNoz
 
@@ -93,7 +93,7 @@ Add `extension=opentelemetry.so` to your main `php.ini` file. Run `php --ini` to
 
 Add these environment variables to your deployment manifest:
 
-```yaml:deployment.yaml
+```yaml:deployment.yaml defaultCollapsed
 env:
 - name: OTEL_PHP_AUTOLOAD_ENABLED
   value: "true"
@@ -511,7 +511,7 @@ curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
 OTEL_TRACES_EXPORTER=console OTEL_PHP_AUTOLOAD_ENABLED=true php -S localhost:8080 app.php
 ```
 
-If you see span output in your terminal but traces don't appear in SigNoz, the issue is with export configuration (endpoint, auth, or network). If no output appears, the instrumentation isn't capturing your requests.
+If you see span output in your terminal but traces don't appear in SigNoz, the issue is with export configuration (endpoint, auth, or network). If no output appears, the instrumentation isn't capturing your requests. See [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) for a full walkthrough of these checks, also covering logs and metrics.
 
 ### PECL installation fails
 

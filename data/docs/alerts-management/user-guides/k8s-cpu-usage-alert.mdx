@@ -1,54 +1,188 @@
 ---
-date: 2026-05-12
-title: How to Create a CPU Usage Alert for Kubernetes Containers
-description: Learn how to set up alerts to monitor CPU usage in your Kubernetes containers and get notified when usage exceeds specified thresholds.
+date: 2026-08-14
+title: Kubernetes CPU Alerts - Monitor Node and Container Usage
+description: "Set up SigNoz alerts for Kubernetes CPU: node usage against allocatable capacity, and container usage against its configured CPU limit."
 doc_type: howto
-tags: ["SigNoz Cloud", "Self-Hosted"]
 ---
 
-You can create alerts to monitor CPU usage in your Kubernetes setup and get notified when containers exceed specified thresholds. This guide shows you how to set up an alert that triggers when CPU usage goes above 80%.
+Kubernetes CPU pressure shows up at two levels. A node running near its allocatable CPU throttles the workloads on it and leaves little room to absorb a reschedule. A container running near its own CPU limit gets throttled even when the node has spare capacity. This guide sets up one alert for each.
 
 ## Prerequisites
 
-- Using [SigNoz Cloud](https://signoz.io/docs/cloud/) or [Self-Hosted SigNoz](https://signoz.io/docs/install/)
-- Kubernetes cluster with [kubeletstats receiver configured](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/)
-- The `k8s.container.cpu_limit_utilization` metric enabled (enabled by default in k8s-infra Helm chart v0.11.10+)
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- Kubernetes metrics reaching SigNoz through the [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) or a [manually configured collector](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/)
+- A [notification channel](https://signoz.io/docs/setup-alerts-notification/) to receive the alert
 
-## Setting up the CPU usage alert
+The k8s-infra chart collects every metric used below with its default values. If you run your own collector, check the receiver notes in each section.
 
-Follow these steps to create an alert for container CPU usage exceeding 80% of its limit:
+## Alert on node CPU utilization
 
-### Step 1: Create the metric query
+Kubernetes reports node CPU in cores. Divide usage by the node's allocatable capacity to get a percentage.
 
-Navigate to **Alerts** in the SigNoz UI and create a new alert with the following configuration:
+| Metric | Receiver | What it reports |
+|---|---|---|
+| `k8s.node.cpu.usage` | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver" target="_blank" rel="noopener noreferrer nofollow">`kubeletstats`</a> | CPU cores in use on the node, averaged over the scrape window |
+| `k8s.node.allocatable_cpu` | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver" target="_blank" rel="noopener noreferrer nofollow">`k8s_cluster`</a> | CPU cores the node can allocate to pods |
 
-- **Metric:** `k8s.container.cpu_limit_utilization`
-- **[Time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation):** `avg`
-- **[Space aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation):** `max` by (`k8s.cluster.name`, `k8s.namespace.name`, `k8s.pod.name`, `k8s.container.name`)
+<Admonition type="info">
+Older tutorials use `k8s.node.cpu.utilization`. The kubeletstats receiver replaced that metric with `k8s.node.cpu.usage`, so the old name returns no data. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md" target="_blank" rel="noopener noreferrer nofollow">kubeletstats metric reference</a>.
+</Admonition>
 
-This configuration:
-- Uses `avg` [time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation) to smooth out short CPU spikes over the evaluation window
-- Uses `max` [space aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation) to alert when any container in a pod exceeds the threshold
-- Groups by cluster, namespace, pod, and container names for granular monitoring
+`k8s.node.allocatable_cpu` comes from the `k8s_cluster` receiver, which is disabled by default upstream. The k8s-infra chart enables it (`presets.clusterMetrics.allocatableTypesToReport` includes `cpu`). On a manually configured collector, add the opt-in to your existing `k8s_cluster` receiver block:
 
-### Step 2: Set alert condition
+```yaml:otel-collector-config.yaml
+receivers:
+  k8s_cluster:
+    allocatable_types_to_report: [cpu, memory]
+```
 
-Configure the alert evaluation:
+Restart the collector after the change, then confirm the metric appears in [**Metrics**](https://signoz.io/docs/metrics-management/metrics-explorer/) before you build the alert.
 
-- **Evaluate:** Query A
-- **Condition:** Above
-- **Threshold:** `0.8` (represents 80%)
-- **Match type:** all the times
+### Step 1: Build the utilization query
 
-The threshold of 0.8 corresponds to 80% because `k8s.container.cpu_limit_utilization` is a ratio metric (0.0 to 1.0).
+1. Go to **Alerts** in the left navigation and click **New Alert**, then select [**Metric based Alert**](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+2. Under **Define the Query**, configure query **A**:
+   - **Metrics**: `k8s.node.cpu.usage`
+   - **[Aggregate within time series](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation)**: `Avg`
+   - **Aggregate across time series**: `Max` by `k8s.node.name`. On a multi-cluster setup, add `k8s.cluster.name` as a second key. The k8s-infra chart attaches it from the `clusterName` value; a manually configured collector does not emit it unless you add it yourself.
+3. Add query **B** and configure it the same way, with `k8s.node.allocatable_cpu` as the metric.
+4. Click **Add Formula** and set the expression to `(A / B) * 100`.
+5. Set the unit dropdown above the chart to **Percent (0 - 100)** so the threshold and the alert message read as percentages.
 
-## Expected result
+<Figure
+  src="/img/docs/alerts/k8s-node-cpu-alert-query.webp"
+  width="3200"
+  height="1710"
+  alt="Query builder with query A on k8s.node.cpu.usage, query B on k8s.node.allocatable_cpu, and formula F1 set to (A / B) * 100"
+  caption="Query A divided by query B gives per-node CPU utilization as a percentage"
+/>
 
-This configuration will monitor all containers across your Kubernetes clusters and trigger an alert whenever any container's CPU usage exceeds 80% of its configured limit. The alert will include the cluster name, namespace, pod, and container name in the notification, making it easy to identify which container needs attention.
+<Admonition type="warning">
+Group query A and query B by the same keys. A formula matches series by their group-by labels, so a mismatch leaves nothing to divide and the chart stays empty.
+</Admonition>
+
+Click the eye icon on queries A and B to hide them from the chart. Both still feed the formula, and the preview drops to one line per node.
+
+A node can read above 100%. `k8s.node.cpu.usage` covers everything on the node, kubelet and system processes included, while <a href="https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable" target="_blank" rel="noopener noreferrer nofollow">allocatable CPU</a> excludes the capacity reserved for them. Where kube-reserved or system-reserved takes a large share, a busy node crosses 100% of allocatable. That reading is correct.
+
+<Figure
+  src="/img/docs/alerts/k8s-node-cpu-alert-chart.webp"
+  width="3200"
+  height="1470"
+  alt="Alert chart preview showing four Kubernetes nodes between 10 and 40 percent CPU utilization against a dashed 60 percent threshold line"
+  caption="Each line is one node, plotted against the 60% threshold"
+/>
+
+### Step 2: Set the alert condition
+
+Under **Set Alert Conditions**, read the row as a sentence: send a notification when `F1` is `ABOVE` the threshold `ALL THE TIME` during the `Last 5 Minutes`, evaluated as a `Rolling` window. Then set the threshold row to `warning` on value `>` `60`, and pick a channel under **send to** on that same row.
+
+<Admonition type="info">
+Every threshold row needs its own channel. Saving fails with "Please select at least one channel for each threshold or enable routing policies" until you either pick one or turn on **Use Routing Policies for dynamic routing** and let your [routing policies](https://signoz.io/docs/alerts-management/routing-policy/) decide.
+</Admonition>
+
+<Figure
+  src="/img/docs/alerts/k8s-node-cpu-alert-condition.webp"
+  width="3200"
+  height="780"
+  alt="Alert condition set to fire when formula F1 stays above 60 for the last 5 minutes"
+  caption="Alert condition for node CPU utilization above 60%"
+/>
+
+`ALL THE TIME` means every data point in the window must exceed 60% before the alert fires, which filters out short spikes from a batch job or an image pull.
+
+Treat 60% as a starting point. The headroom you need depends on cluster size, the CPU requests your pods declare, and your scheduling constraints. A three-node cluster at 60% cannot absorb a node loss; a thirty-node cluster can. Raise the threshold toward 80% to alert closer to saturation, or lower it for more warning.
+
+The k8s-infra chart scrapes kubelet and cluster metrics every 30 seconds, so a 5 minute window holds roughly 10 data points per node. If you shorten the window, keep it well above the scrape interval. Evaluation frequency sits under **Advanced Options** and defaults to 1 minute.
+
+### Step 3: Name the alert and group the notifications
+
+1. Under **Notification Settings**, set **Group alerts by** to `k8s.node.name` so each node gets its own notification instead of one combined message.
+2. At the top of the form, name the alert and add a `severity` label next to it. The threshold name you set in Step 2 (`warning`) is what routing policies match on; the `severity` label is separate and drives your own filtering.
+3. Click **Test Notification** to confirm the channel works, then **Save Alert Rule**.
+
+<Figure
+  src="/img/docs/alerts/k8s-node-cpu-alert-notification.webp"
+  width="3200"
+  height="1020"
+  alt="Notification settings with a custom message template and alerts grouped by k8s.node.name"
+  caption="Grouping by node keeps one notification per node"
+/>
+
+## Alert on container CPU against its limit
+
+Node-level alerts miss a container that is throttled while the node sits idle. For that, alert on how much of its own <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/" target="_blank" rel="noopener noreferrer nofollow">CPU limit</a> a container uses.
+
+`k8s.container.cpu_limit_utilization` comes from the kubeletstats receiver and reports a ratio from 0 to 1. The receiver emits it only for containers that define a CPU limit.
+
+The metric is disabled by default upstream. The k8s-infra chart turns it on; on a manually configured collector, enable it on your existing `kubeletstats` receiver:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  # On Collector v0.152.0 and newer, use "kubelet_stats" to avoid a deprecation warning.
+  kubeletstats:
+    metrics:
+      k8s.container.cpu_limit_utilization:
+        enabled: true
+```
+
+Utilization metrics also need wider RBAC. Give the collector's service account `get` on `nodes/pods` alongside the `nodes/stats` permission it already has, or the receiver collects nothing. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md#role-based-access-control" target="_blank" rel="noopener noreferrer nofollow">kubeletstats RBAC reference</a>. Restart the collector, then check **Metrics** for the metric before building the alert.
+
+### Step 1: Build the query
+
+1. Create a new **Metric based Alert**.
+2. Configure query **A**:
+   - **Metrics**: `k8s.container.cpu_limit_utilization`
+   - **Aggregate within time series**: `Avg`
+   - **Aggregate across time series**: `Max` by `k8s.cluster.name`, `k8s.namespace.name`, `k8s.pod.name`, and `k8s.container.name`
+3. Set the query unit to **Percent (0.0-1.0)**.
+
+`Avg` smooths spikes inside the evaluation window. `Max` reports the busiest container in each group, so quiet neighbors cannot mask a throttled one.
+
+### Step 2: Set the alert condition
+
+Send a notification when `A` is `ABOVE` the threshold `ALL THE TIME` during the `Last 5 Minutes`, with the threshold row set to `warning` on value `>` `0.8`. Pick a channel under **send to** on the threshold row, the same as the node alert, or turn on routing policies.
+
+The metric is a ratio, so `0.8` means 80% of the container's limit. Group notifications by `k8s.namespace.name` and `k8s.pod.name` to keep each firing pod separate.
+
+## Validate
+
+- The chart preview in the alert form plots one series per node or container, with the threshold drawn across it. Node values above 100% are legitimate on nodes with a large reserved share; values near zero across every series usually mean a query problem.
+- After saving, open **Alerts** and confirm the rule is enabled. A rule that has never evaluated shows no state.
+- Check **Alerts** > **Triggered Alerts** once a threshold is crossed, and use [alert history](https://signoz.io/docs/alerts-management/alerts-history/) to see past firings and how long each lasted.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The formula chart is empty
+
+- Confirm `k8s.node.allocatable_cpu` returns data in **Metrics**. If it is missing, the `k8s_cluster` receiver is not running or `allocatable_types_to_report` does not include `cpu`.
+- Compare the group-by keys on query A and query B. They must match exactly.
+- Confirm both queries cover the same time range and neither has a filter the other lacks.
+
+### Node utilization looks wrong
+
+Check the space aggregation on query B. Summing allocatable CPU across nodes gives the cluster total instead of a per-node value, which pushes every result far below the real percentage.
+
+### The container alert never fires
+
+- Confirm the metric is enabled. It is off by default upstream, so a manually configured collector needs both the receiver setting and `get` on `nodes/pods`.
+- Check the pod spec for a CPU limit. The receiver skips containers that declare none, so those pods never produce a data point.
+- On GKE Autopilot, kubelet does not expose request and limit metrics. See [Kubelet metrics on GKE Autopilot](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-autogke/).
+
+### The alert flaps between firing and resolved
+
+Raise **Minimum Data Points in Result Group** under **Advanced Options** to a value below your expected point count, for example `3` for a 5 minute window at a 30 second scrape interval.
+</details>
 
 ## Next steps
 
-- Learn more about [Kubernetes metrics](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/)
-- Explore [time aggregation best practices](https://signoz.io/docs/alerts-management/user-guides/time-aggregation-best-practices/) for alerts
-- Set up [notification channels](https://signoz.io/docs/setup-alerts-notification/) to receive alerts via Slack, PagerDuty, or other channels
-- Create similar alerts for [memory usage](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/) using `k8s.container.memory_limit_utilization`
+- Apply the same pattern to memory with `k8s.node.memory.usage` over `k8s.node.allocatable_memory`, or `k8s.container.memory_limit_utilization` for containers
+- Read [time aggregation best practices](https://signoz.io/docs/alerts-management/user-guides/time-aggregation-best-practices/) before tuning windows and thresholds
+- Watch nodes and pods in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes/nodes/)
+
+## Get Help
+
+<GetHelp />

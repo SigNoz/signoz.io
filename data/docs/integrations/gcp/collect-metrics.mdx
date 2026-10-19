@@ -1,0 +1,111 @@
+---
+date: 2026-08-03
+title: Collect GCP Cloud Monitoring Metrics with OpenTelemetry
+description: Configure the googlecloudmonitoring receiver to scrape Cloud Monitoring metrics from one or more GCP projects and view them in SigNoz dashboards.
+doc_type: howto
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+---
+
+GCP stores service metrics in **Cloud Monitoring** and exposes them through the Monitoring API. The Collector's `googlecloudmonitoring` receiver pulls the metrics you list on an interval and exports them to SigNoz. This is step 4 of the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/).
+
+## Prerequisites
+
+- The [Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/) (on Cloud Run or the compute of your choice).
+- The `signoz-integration` service account has `roles/monitoring.viewer` on every project you list here. If not, revisit [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
+- The Cloud Monitoring API is enabled in each monitored project.
+
+## How the receiver works
+
+The `googlecloudmonitoring` receiver reads time series through the Monitoring API using the Collector's service account (via Application Default Credentials, no key file needed). You declare exactly which metrics to pull in a `metrics_list`; the receiver polls each one every `collection_interval`.
+
+## Step 1: Choose which metrics to collect
+
+For each service, SigNoz's pre-built dashboard expects a specific set of metrics. Find them in the SigNoz UI:
+
+1. In **Integrations** > **Google Cloud Platform**, select the service (for example, **GCP Cloud SQL for PostgreSQL**).
+2. Open the **Data Collected** tab. It lists the metrics that service's dashboard uses.
+
+<Admonition type="warning">
+The metrics under **Data Collected** are **suggested** values for your Collector configuration. The metrics that actually appear in SigNoz depend on what you put in your Collector config. If you omit a metric here, its dashboard panel stays empty. Add the listed metrics to the `metrics_list` for the project the service runs in.
+</Admonition>
+
+You can also browse the full catalog of metric names in the <a href="https://docs.cloud.google.com/monitoring/api/metrics_gcp" target="_blank" rel="noopener noreferrer nofollow">GCP metrics list</a>. Metric names look like `compute.googleapis.com/instance/cpu/utilization`.
+
+## Step 2: Configure the receiver for a single project
+
+If all your monitored resources are in one project, use one `googlecloudmonitoring` block. In your `otel-collector-config.yaml` (from [step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/)), the receiver already exists from the starter config, so **replace only its `project_id` and `metrics_list`** and leave the rest of the file (the `service` pipelines, extensions, processors, and exporters) untouched:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  googlecloudmonitoring:
+    project_id: "<monitored-project-id>"
+    collection_interval: 300s   # 5 minutes; minimum is 60s
+    metrics_list:
+      - metric_name: "compute.googleapis.com/instance/cpu/utilization"
+      - metric_name: "compute.googleapis.com/instance/disk/write_bytes_count"
+      - metric_name: "cloudsql.googleapis.com/database/cpu/utilization"
+      # ...add the metrics from each service's Data Collected tab
+```
+
+`<monitored-project-id>` is one of the values from your [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields) list.
+
+## Step 3: Configure multiple projects
+
+The `googlecloudmonitoring` receiver scopes to a **single project per block**. There is no multi-project option in one receiver. To monitor several projects, replace the single `googlecloudmonitoring` receiver with one **named** instance per project (`googlecloudmonitoring/<name>`), and update the metrics pipeline's `receivers` list to reference all of them, as shown below. The rest of the file is unaffected:
+
+```yaml:otel-collector-config.yaml defaultCollapsed
+receivers:
+  googlecloudmonitoring/project-a:
+    project_id: "project-a"
+    collection_interval: 300s
+    metrics_list:
+      - metric_name: "compute.googleapis.com/instance/cpu/utilization"
+      - metric_name: "compute.googleapis.com/instance/disk/write_bytes_count"
+
+  googlecloudmonitoring/project-b:
+    project_id: "project-b"
+    collection_interval: 300s
+    metrics_list:
+      - metric_name: "compute.googleapis.com/instance/cpu/utilization"
+      - metric_name: "compute.googleapis.com/instance/disk/write_bytes_count"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [googlecloudmonitoring/project-a, googlecloudmonitoring/project-b]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp]
+```
+
+Add one block for every project in **Projects to Monitor** whose metrics you want, and list each block in the pipeline's `receivers`.
+
+## Step 4: Apply the configuration
+
+The Collector reads its config from the `signoz-collector-config` secret, so apply changes by adding a new secret version and redeploying:
+
+1. Update `otel-collector-config.yaml`.
+2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
+3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
+
+## Step 5: Verify metrics in SigNoz
+
+1. In the SigNoz UI, open **Integrations** > **Google Cloud Platform**, select a service, and toggle **Metric Collection** on. This enables the pre-built dashboard.
+2. Wait for one or two collection intervals (up to ~5 minutes with the default `300s`).
+3. Go to **Dashboards** and open the service's dashboard, or query a metric name directly in **Metrics Explorer**.
+
+If a metric is missing, confirm it is present in the correct project's `metrics_list` and that the service account has `roles/monitoring.viewer` on that project.
+
+## Cost and tuning
+
+The Monitoring API bills **$0.01 per 1,000 read calls** after the first 1 million free calls per billing account each month. The number of read calls scales with **how many metrics you list** and **how often you poll**:
+
+- Keep `metrics_list` to the metrics your dashboards and alerts actually use.
+- The default `collection_interval` is `300s` (5 minutes); the minimum is `60s`. Most GCP metrics update on a 60-second-or-slower cadence, so polling faster than the metric's own sampling rate wastes API calls without adding resolution. Raise the interval for metrics you don't need at high resolution.
+
+## Next steps
+
+- Configure a supported service for the exact metric list it needs: [Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) or [Memorystore for Redis](https://signoz.io/docs/integrations/gcp/memorystore-redis/).
+
+## Get Help
+
+<GetHelp />

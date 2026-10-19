@@ -36,7 +36,15 @@ const hasMatchingLeadingH1 = (markdown: string, title: string): boolean => {
   return false
 }
 
-const wrapDocument = (doc: DocMarkdownSource, bodyMarkdown: string): string =>
+type RenderMarkdownOptions = {
+  footerLines?: string[]
+}
+
+const wrapDocument = (
+  doc: DocMarkdownSource,
+  bodyMarkdown: string,
+  options: RenderMarkdownOptions = {}
+): string =>
   normalizeWhitespace(
     buildMarkdownDocument({
       title: doc.title,
@@ -44,7 +52,7 @@ const wrapDocument = (doc: DocMarkdownSource, bodyMarkdown: string): string =>
       description: doc.description,
       tags: getDocTags(doc),
       bodyMarkdown,
-      footerLines: [MORE_DOCS_POINTER],
+      footerLines: options.footerLines ?? [MORE_DOCS_POINTER],
     })
   )
 
@@ -69,13 +77,16 @@ const compileMdxToMarkdown = async (doc: DocMarkdownSource): Promise<string> => 
   return htmlToMarkdown(renderToStaticMarkup(content), { cleanForDocsUi: true })
 }
 
-export async function renderDocMarkdownForAgents(doc: DocMarkdownSource): Promise<string> {
+export async function renderDocMarkdownForAgents(
+  doc: DocMarkdownSource,
+  options: RenderMarkdownOptions = {}
+): Promise<string> {
   try {
     const bodyMarkdown = await compileMdxToMarkdown(doc)
     if (!bodyMarkdown) throw new Error('Empty markdown from MDX compilation')
-    return wrapDocument(doc, bodyMarkdown)
+    return wrapDocument(doc, bodyMarkdown, options)
   } catch (error) {
     console.error(`Agent markdown render failed for "${doc.slug}":`, error)
-    return wrapDocument(doc, doc.body.raw)
+    return wrapDocument(doc, doc.body.raw, options)
   }
 }

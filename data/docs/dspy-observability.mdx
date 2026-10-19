@@ -1,5 +1,5 @@
 ---
-date: 2026-07-21
+date: 2026-08-03
 title: DSPy Observability & Monitoring with OpenTelemetry
 description: Set up DSPy observability with OpenTelemetry and SigNoz. Trace module, chain, and tool calls, model requests, latency, and errors from your DSPy programs.
 doc_type: howto
@@ -11,9 +11,11 @@ DSPy observability gives you real-time visibility into your DSPy programs by col
 
 With full DSPy monitoring in SigNoz, you can trace every program run end to end, break down module and tool activity, compare model usage and latency, set alerts on latency and errors, and continuously improve the reliability of your DSPy applications.
 
+<YouTube id="pPnIX6p5xT8" mute="false" />
+
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self-Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - Python 3.9 or later
 - A DSPy program and a configured language model provider (for example, an Anthropic or OpenAI API key)
 
@@ -76,7 +78,7 @@ opentelemetry-instrument <your_run_command>
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<your_run_command>`: The command you use to run your application, for example `python main.py`.
 
-<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
@@ -100,7 +102,7 @@ pip install \
 
 Create a `telemetry.py` module that sets up the tracer provider, wires the OTLP/HTTP exporter to SigNoz, and turns on the DSPy instrumentation:
 
-```python
+```python defaultCollapsed
 from openinference.instrumentation.dspy import DSPyInstrumentor
 from opentelemetry import trace as trace_api
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -130,7 +132,7 @@ def setup_tracing() -> None:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
@@ -239,7 +241,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
+
+Trace the rest of your LLM application and retrieval stack:
+
+- [Vercel AI SDK observability with OpenTelemetry](https://signoz.io/docs/vercel-ai-sdk-observability/) - trace generateText, streamText, and tool calls inside Next.js
+- [LangChain and LangGraph observability with OpenTelemetry](https://signoz.io/docs/langchain-observability/) - trace chains, agents, graph nodes, and tool calls
+- [LlamaIndex observability with OpenTelemetry](https://signoz.io/docs/llamaindex-observability/) - trace RAG queries, retrievers, and index operations
+- [Langflow observability with OpenTelemetry](https://signoz.io/docs/langflow-observability/) - trace Langflow flows, components, and model calls
+- [Monitor Inkeep with OpenTelemetry](https://signoz.io/docs/inkeep-monitoring/) - trace Inkeep assistant queries and the retrieval behind them
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

@@ -1,6 +1,8 @@
 ---
-date: 2026-06-09
+published_date: 2026-08-03
+updated_date: 2026-09-07
 title: Vercel AI SDK Observability & Monitoring with OpenTelemetry
+meta_title: "Vercel AI SDK Observability: Trace AI Calls"
 description: Set up Vercel AI SDK observability with OpenTelemetry and SigNoz. Monitor AI function calls, trace requests end-to-end in your Next.js app.
 doc_type: howto
 ---
@@ -13,6 +15,10 @@ With full Vercel AI SDK observability in SigNoz, you can trace AI interactions e
 
 Explore the <a href="https://github.com/SigNoz/vercel-ai-sdk-opentelemetry-example" target="_blank" rel="noopener noreferrer nofollow">SigNoz Vercel AI SDK example chatbot</a>, which includes observability and monitoring via OpenTelemetry.
 
+<Admonition type="tip">
+  **Also on Vercel?** Forward deployment logs and traces with the [SigNoz integration for Vercel](https://signoz.io/docs/integrations/vercel/). If your agent runs generated code in a sandbox, see [Vercel Sandbox Observability](https://signoz.io/docs/vercel-sandbox-observability/).
+</Admonition>
+
 <YouTube id="AMeLYQe59j8" mute="false" />
 
 ## Prerequisites
@@ -21,7 +27,7 @@ Explore the <a href="https://github.com/SigNoz/vercel-ai-sdk-opentelemetry-examp
 - Vercel AI SDK integrated into the app
 - SigNoz setup (choose one):
   - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
-  - Self-hosted SigNoz instance
+  - Self-Hosted SigNoz instance
 - Network access from your app to the chosen SigNoz endpoint
 
 ## Instrument your Next.js App with OpenTelemetry
@@ -76,7 +82,7 @@ export function register() {
 > The instrumentation file should be in the root of your project and not inside the app or pages directory. If you're using the src folder, then place the file inside src alongside pages and app.
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
   remove the ingestion key header as shown in [Cloud →
   Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
@@ -174,38 +180,42 @@ Once configured, your Vercel AI SDK commands automatically emit traces, spans, a
 
 Vercel AI SDK traces are available in SigNoz under the Traces tab:
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/llm/vercel/vercel-traces-view.webp" alt="Traces View" />
-  <figcaption>
-    <i>Traces of your Vercel AI Application</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/llm/vercel/vercel-traces-view.webp"
+  alt="Traces View"
+  caption="Traces of your Vercel AI Application"
+/>
 
 If you click on any span, you can see the detailed trace of which it is a part of.
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/llm/vercel/vercel-traces-detailed-view.webp" alt="Detailed Traces View" />
-  <figcaption>
-    <i>Detailed Trace view of your Vercel AI Application</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/llm/vercel/vercel-traces-detailed-view.webp"
+  alt="Detailed Traces View"
+  caption="Detailed Trace view of your Vercel AI Application"
+/>
 
 ## Vercel AI SDK Observability Dashboard
 
 The [Vercel AI SDK Observability Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard/) provides specialized visualizations for monitoring your AI applications. The dashboard includes pre-built charts and metrics specifically tailored for Vercel AI SDK telemetry data, along with import instructions to get started quickly.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard.webp"
-    alt="Vercel AI SDK Dashboard"
-  />
-  <figcaption>
-    <i>Vercel AI SDK Dashboard</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard.webp"
+  alt="Vercel AI SDK Dashboard"
+  caption="Vercel AI SDK Dashboard"
+/>
 
-## Additional Resources
+## Related integrations
+
+Trace the rest of your LLM application and retrieval stack:
+
+- [LangChain and LangGraph observability with OpenTelemetry](https://signoz.io/docs/langchain-observability/) - trace chains, agents, graph nodes, and tool calls
+- [LlamaIndex observability with OpenTelemetry](https://signoz.io/docs/llamaindex-observability/) - trace RAG queries, retrievers, and index operations
+- [Monitor Haystack pipelines with OpenTelemetry](https://signoz.io/docs/haystack-monitoring/) - trace RAG pipelines, retrievers, and generator nodes
+- [Instrument LLM apps with Langtrace](https://signoz.io/docs/langtrace/) - an OpenTelemetry-native SDK that exports LLM spans straight to SigNoz
+- [Langflow observability with OpenTelemetry](https://signoz.io/docs/langflow-observability/) - trace Langflow flows, components, and model calls
+
+Further reading:
 
 - Read [Observing Vercel AI SDK with OpenTelemetry + SigNoz](https://signoz.io/blog/opentelemetry-vercel-ai-sdk/)
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

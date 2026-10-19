@@ -1,5 +1,5 @@
 ---
-date: 2026-05-20
+date: 2026-08-25
 title: Creating Alerts based on Apdex Score
 description: Create alerts based on Apdex scores in SigNoz to monitor application performance using satisfaction thresholds and PromQL queries.
 doc_type: howto
@@ -39,9 +39,13 @@ For example, if a request takes 250ms to complete, it will be counted in:
 
 This cumulative structure means each `le` value contains all requests less than or equal to that time.
 
+<Admonition type="warning">
+This PromQL-based approach only works with histogram metrics that use **cumulative temporality** (such as `http.server.duration.bucket` exported with cumulative aggregation). SigNoz's auto-generated span metrics (`signoz_latency.bucket`, `signoz_latency.count`) use **delta temporality** by default, and PromQL does not read delta series. If you use `signoz_latency` metrics in these queries, you will get no data.
+</Admonition>
+
 ### Creating an Alert for Apdex Score
 
-We can create an alert for evaluating Apdex score using a PromQL Query.
+We can create an alert for evaluating Apdex score using a <Tooltip text="PromQL" content="The Prometheus query language, supported in SigNoz for metrics." link="https://signoz.io/docs/glossary/#promql" /> Query.
 
 Let’s assume our threshold to be 2000 ms.
 

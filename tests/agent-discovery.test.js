@@ -2,7 +2,7 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
-const { getLlmStarterLinks } = loadTsModule('utils/docs/agentDiscovery.ts')
+const { getLlmStarterLinks, INTRO_DESCRIPTION } = loadTsModule('utils/docs/agentDiscovery.ts')
 
 test('getLlmStarterLinks includes LLM, AWS, and GCP landing routes', async () => {
   const starters = await getLlmStarterLinks()
@@ -53,11 +53,38 @@ test('getLlmStarterLinks orders setup before LLM/AWS/GCP and migration routes', 
   assert.equal(gcpIndex < migrationIndex, true)
 })
 
+test('getLlmStarterLinks attaches metadata descriptions to every starter', async () => {
+  const starters = await getLlmStarterLinks()
+
+  assert.equal(starters.length > 0, true)
+  starters.forEach((item) => {
+    assert.equal(typeof item.label === 'string' && item.label.length > 0, true)
+    assert.match(item.route, /^\/docs\//)
+    assert.equal(
+      typeof item.description === 'string' && item.description.trim().length > 0,
+      true,
+      `starter ${item.route} is missing a description`
+    )
+    assert.equal(/\r|\n/.test(item.description), false)
+  })
+})
+
+test('getLlmStarterLinks uses the introduction meta description for the docs root', async () => {
+  const starters = await getLlmStarterLinks()
+  const intro = starters.find((item) => item.route === '/docs/introduction')
+
+  assert.notEqual(intro, undefined)
+  assert.equal(intro.description, INTRO_DESCRIPTION)
+  assert.match(INTRO_DESCRIPTION, /^Learn about SigNoz, an open-source observability platform/)
+})
+
 test('getLlmStarterLinks is unique and respects default max size', async () => {
   const starters = await getLlmStarterLinks()
   const routes = starters.map((item) => item.route)
   const uniqueRoutes = new Set(routes)
 
   assert.equal(uniqueRoutes.size, routes.length)
-  assert.equal(starters.length <= 24, true)
+  // Raised from 24 when the access-control matchers were added, so the new
+  // entries cannot evict existing starter docs from the cap.
+  assert.equal(starters.length <= 30, true)
 })

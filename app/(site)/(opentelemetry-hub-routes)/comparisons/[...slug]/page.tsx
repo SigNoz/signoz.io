@@ -16,7 +16,8 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
-import { resolvePublishedDate, resolveLatestDate } from '@/utils/dateUtils'
+import { resolveLatestDate } from '@/utils/dateUtils'
+import { buildMetadataImages } from '@/utils/metadataImages'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -47,18 +48,10 @@ export async function generateMetadata(props: {
     return a || { name: author }
   })
 
-  const publishedAt = new Date(resolvePublishedDate(post) || Date.now()).toISOString()
+  const publishedAt = new Date(resolveLatestDate(post) || Date.now()).toISOString()
   const modifiedAt = new Date(resolveLatestDate(post) || Date.now()).toISOString()
   const authors = authorDetails.map((author) => author.name)
-  let imageList = [siteMetadata.socialBanner]
-  if (post?.image) {
-    imageList = typeof post?.image === 'string' ? [post.image] : post.image
-  }
-  const ogImages = imageList.map((img) => {
-    return {
-      url: img.includes('http') ? img : siteMetadata.siteUrl + img,
-    }
-  })
+  const { imageList, ogImages } = buildMetadataImages(post?.image)
 
   const seoTitle = post.meta_title || post.title
 

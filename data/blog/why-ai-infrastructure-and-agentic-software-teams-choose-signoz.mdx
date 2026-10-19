@@ -1,0 +1,174 @@
+---
+title: "Why AI Infrastructure and Agentic Software Teams Choose SigNoz for Observability"
+date: 2026-10-01
+tags: [AI, Observability]
+authors: [avishek_kataria]
+description: "Learn why AI infrastructure and agentic software teams choose SigNoz for observability across logs, metrics, traces, and agent-driven workflows."
+image: /img/blog/2026/10/ai-infra-signoz.webp
+keywords: [ai infrastructure observability, agentic software observability, ai agent observability, signoz]
+related_articles:
+  - '/blog/observability-for-the-ai-era/'
+  - '/blog/introducing-agent-native-observability/'
+  - '/blog/why-engineering-first-teams-choose-signoz/'
+---
+
+<h2 className="!mb-2">TL;DR</h2>
+
+AI infrastructure, agent platform, and AI model teams are among the fastest-growing groups of SigNoz Cloud customers. Here's why,
+
+- Unified telemetry across LLMs, agents, APM, infrastructure, logs, and traces.
+- Query high-cardinality data without defining every metric upfront.
+- Fully programmable through APIs, Terraform, or the SigNoz Operator.
+- Build it into your product for your customers with APIs and fine-grained access.
+- Open standards give agents more context and make instrumentation easier to scale.
+
+**For AI infrastructure, agent platforms, and model builders, the failure surface is much larger.**
+
+A single request can span application services, multiple hosts, model inference, GPUs, external APIs, and other dependencies. There are far more dimensions you need to track, such as token consumption, cost per request, inference latency, GPU type, and more.
+
+A templated, one-size-fits-all observability platform will always come up short here, leaving gaps in your observability workflows.
+
+You need a platform that provides the depth and control to adapt to your observability workflows. One that gives you flexibility to query any dimension, correlate signals across layers, and follow a request across the entire stack. And one that's fully programmable, so you can build observability into your workflows.
+
+<Figure
+  src="/img/blog/2026/10/ai-infra-signoz.webp"
+  alt="SigNoz observability for AI infrastructure and agentic software teams"
+  caption="Observability for AI infrastructure and agentic software teams with SigNoz."
+/>
+
+This is the same philosophy SigNoz is built on - depth, control, and flexibility.
+
+When we started, we were one of the few teams to bet early on OpenTelemetry and build an open-source platform. Plus, every feature we build is designed for depth. For example, we have one of the most comprehensive trace detail views, supporting traces with unlimited spans.
+
+So, it's not a surprise that more and more AI infrastructure, agent platform and model teams are choosing SigNoz Cloud. Today, these companies are our largest customer cohort. They include Kernel, Black Forest Labs, Sarvam, and more.
+
+> *It's nice to have open source software because agents do really well with it. If we're trying to create a dashboard and there's a limitation we don't understand, we can let agents go into the open-source codebase, understand the limitation, and ask for feature requests.*
+>
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+## What makes SigNoz Cloud the best observability platform for AI infrastructure, agentic software, and AI model teams?
+
+### Unified observability with end-to-end trace visibility
+
+Your product might be an LLM or agent call. It might be used primarily by agents. Or AI-powered features might be at its core. In each case, LLM and agent observability is non-negotiable.
+
+> *If I select a model, it should show me the APM metrics, the infrastructure of that particular part. So from one individual model perspective, I should get from all the infra layer to the APM metrics.*
+>
+
+-Sarvam
+
+But siloed LLM data is not enough. An LLM call is just one part of a much larger system or workflow. You need a single platform that,
+
+- Brings LLM and agent telemetry together with APM, logs, infrastructure, and dependencies.
+- Connects agent behaviour to what's happening in your services and hosts.
+- Provides end-to-end trace visibility across agents, services, and tools.
+- Helps you with faster root-cause analysis, even in dynamic agentic workflows
+
+SigNoz Cloud offers LLM and agent observability on top of APM and infrastructure monitoring. Send telemetry from your agents and LLM calls to SigNoz, then analyze it on its own or alongside the rest of your telemetry.
+
+<Figure
+  src="/img/blog/2026/10/signoz-one-trace-every-layer.gif"
+  alt="Animation showing a trace across every layer of an application in SigNoz"
+  caption="Follow a single trace across every layer of an application."
+/>
+
+The SigNoz Cloud [trace detail view](https://signoz.io/blog/new-trace-detail-view/) shows the complete trace, end-to-end. It shows API, HTTP, tool, and LLM calls with no limits on spans. It offers flexible search and quick filters to easily highlight required spans in dense agentic workflows.
+
+### Query high-cardinality data without predefined metrics
+
+AI and agent workloads create far more dimensions than a typical application.
+
+A single AI request can include model name, model version, GPU type, `run_id`, `task_id`, `worker_id`, and more. Some of these, like `run_id`, `task_id`, and `worker_id`, are high-cardinality attributes common in agentic workflows. Every new dimension also adds more layers to slice your data during an investigation.
+
+Say a customer reports slow inference calls. You might start by looking at inference latency for that customer. Then you break it down by model version, GPU type, region, and deployment. You can't predict all these questions upfront and set them up as metrics.
+
+Most observability setups start with a known set of metrics. However, the data often exists as attributes on spans or logs. The problem is that nobody created a metric for that exact question.
+
+<Figure
+  src="/img/blog/2026/10/signoz-query-any-attribute.gif"
+  alt="Animation showing how to query telemetry using any attribute in SigNoz"
+  caption="Query and analyze telemetry using any available attribute in SigNoz."
+/>
+
+The SigNoz Cloud Query Builder supports aggregations like sum, average, min, max, percentiles, and rates over any span or log attribute. So, you can query the spans directly, without storing them as metrics.
+
+During an investigation, you can calculate p95 token usage and group it by `customer_id` or `session_id` to find which customers or sessions are driving the highest token usage.
+
+### Programmable observability
+
+Most AI infra teams we talk to already run everything as code. Clusters, deployments, and pipelines all live in Git. They expect the same from observability.
+
+With SigNoz Cloud, you can work with observability programmatically through APIs, Terraform, or the SigNoz Operator.
+
+For APIs, SigNoz publishes an OpenAPI reference and APIs to query metrics, logs, and traces programmatically. The Metrics API, for example, supports range queries, aggregations, filters, grouping, and formulas.
+
+With Terraform, you can define dashboards and alert rules in code, review changes in pull requests, and roll them back like any other infrastructure change.
+
+If your team lives in Kubernetes, you can define SigNoz dashboards, alert rules, users, roles, and more as Kubernetes resources. Write them as YAML, keep them in Git, and manage them through your existing GitOps workflows.
+
+One of our customers, [Inkeep](https://signoz.io/customers/inkeep-ai-agent-monitoring/), uses Trace API to programmatically query traces and build custom dashboards, while ClickHouse ensures they query at scale without timeouts.
+
+> *For debugging complex AI agent workflows, you need both programmatic access and query speed - SigNoz delivers both.*
+>
+
+–Shagun Singh, Software Engineer, Inkeep.
+
+This enables teams to pull production telemetry into internal tools, automate investigations, and build product-specific workflows around their telemetry.
+
+### Build observability into your product
+
+For some AI infra products and model companies, observability is not just an internal workflow. It becomes part of the product their customers use.
+
+Such teams need observability on two sides,
+
+1. **Internal observability -** monitoring their own product workflows, health, and performance.
+2. **Customer observability -** giving customers visibility into their own workloads as part of the product.
+
+Internal observability already has its own challenges. When something fails, you need to know whether the issue is on your side or the customer's. Customer observability adds another layer. Your customers need that same visibility inside your product, and you need to ensure that each customer can access only the telemetry for their own workloads.
+
+Here’s how SigNoz Cloud makes it possible to build observability into your product.
+
+- **APIs for every signal:** Metrics, logs, and traces are all available through APIs, so you can pull telemetry into your product and build customer-facing views on top of it.
+- **Fine-grained access control:** SigNoz has one of the most flexible access control models that gives you granular control over individual resources, such as a specific dashboard or alert.
+
+> *We utilize the API and we create dashboards and we white-label them using our branding and show them on our platform.*
+>
+
+-RapidCanvas
+
+RapidCanvas wanted to build observability directly into its platform using the SigNoz API. They wanted to show customers how their APIs were performing, including latency and p99, directly inside the product.
+
+### Open standards give agents more context and flexibility
+
+As an AI infra team, you ship fast. New services go live frequently across multiple environments. Your engineering workflows are also increasingly AI-native, with agents becoming heavy users of observability data.
+
+Open source gives agents more context. They can inspect the SigNoz source code when they need to understand how something works or work around a limitation. SigNoz docs are also easy for agents to consume, with an `llms.txt` index and Markdown versions of each page. This helps agents produce more reliable outputs.
+
+OpenTelemetry gives your agents another advantage. Since it is a standard, well-documented framework, your agents can better understand the data and schema with less guesswork, helping reduce inference costs.
+
+OpenTelemetry also makes instrumenting new services fast and consistent. You can add a new service with just a few lines of OTel configuration.
+
+> *We add a lot of services on bare metal because our VMs are on bare metal. Onboarding that new service to SigNoz is so easy because of OTel. It's like a couple of lines of OTel configuration and that's it.*
+>
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+And, open source also gives you control over where SigNoz runs. You can use SigNoz Cloud, BYOC, or self-host it. The same SigNoz setup can run locally, across multiple clouds, or on-prem.
+
+## Kernel, a browser infrastructure platform for AI agents, uses SigNoz
+
+[**Kernel**](https://signoz.io/customers/kernel/) runs browser infrastructure for agents. It runs across control-plane APIs, microVMs, proxy providers, bare-metal services, and browser sessions. A failure can originate at any of these layers or in the external website being accessed.
+
+> *Our customers care a lot about reliability and latency, so we care about reliability and latency, too.*
+>
+
+-Hiro Tamada, Founding Engineer, Kernel
+
+Kernel uses SigNoz Cloud for customer triage, incident response, post-launch monitoring, dashboards, alerts, and latency optimization.
+
+<YouTube id="XnPd_0gEwoM" mute="false" />
+
+In one investigation, the team inspected traces for browser acquisition requests and found Temporal workflow I/O in the hot path. After adding Redis caching and removing Temporal from that path, Kernel reduced browser acquisition latency from 140 ms to 30 ms within a few weeks.
+
+If you're building AI infrastructure, agent platforms, or models, try SigNoz for your observability use case. Start with a [free trial on SigNoz Cloud](https://signoz.io/teams/) or [run SigNoz yourself](https://signoz.io/docs/install/).

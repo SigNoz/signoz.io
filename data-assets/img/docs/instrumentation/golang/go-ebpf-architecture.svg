@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 360" width="1000" height="360" font-family="'Inter', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <marker id="arrGray" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#636e72"/>
+    </marker>
+    <marker id="arrPurple" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#a29bfe"/>
+    </marker>
+    <marker id="arrGreen" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#00b894"/>
+    </marker>
+    <linearGradient id="signoz-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="glow-o" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#F97316" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes pulse-signoz {
+        0%,100% { filter: url(#glow-o); }
+        50%      { filter: none; }
+      }
+      .signoz-box { animation: pulse-signoz 3s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="360" fill="url(#bgGrad)" rx="14"/>
+
+  <text x="500" y="38" text-anchor="middle" fill="#f5f6fa" font-size="19" font-weight="700">The agent runs beside your binary and never changes it</text>
+
+  <!-- shared process namespace group: x=55 y=70 w=640 h=226, right=695, bottom=296 -->
+  <rect x="55" y="70" width="640" height="226" rx="10" fill="#16182099" stroke="#636e72" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="67" y="88" fill="#9aa3b2" font-size="11">Shared process namespace (pid: host, or shareProcessNamespace: true)</text>
+
+  <!-- application container: x=75 y=105 w=270 h=64, right=345 -->
+  <rect x="75" y="105" width="270" height="64" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="210" y="130" text-anchor="middle" fill="#dfe6e9" font-size="13">Your Go binary, unmodified</text>
+  <text x="210" y="150" text-anchor="middle" fill="#9aa3b2" font-size="11">/usr/local/bin/myapp</text>
+
+  <!-- agent container: x=405 y=105 w=270 h=64, right=675 -->
+  <rect x="405" y="105" width="270" height="64" rx="8" fill="#20222e" stroke="#a29bfe" stroke-width="1.5"/>
+  <text x="540" y="130" text-anchor="middle" fill="#a29bfe" font-size="13" font-weight="600">autoinstrumentation-go</text>
+  <text x="540" y="150" text-anchor="middle" fill="#9aa3b2" font-size="11">privileged, runAsUser: 0</text>
+
+  <!-- agent attaches probes to the binary (leftward) -->
+  <path d="M400,137 L 356,137" fill="none" stroke="#a29bfe" stroke-width="1.5" marker-end="url(#arrPurple)"/>
+  <text x="375" y="125" text-anchor="middle" fill="#9aa3b2" font-size="10">uprobes</text>
+
+  <!-- kernel band: x=75 y=215 w=600 h=56, right=675, bottom=271 -->
+  <rect x="75" y="215" width="600" height="56" rx="8" fill="#191b26" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="375" y="248" text-anchor="middle" fill="#9aa3b2" font-size="12">Linux kernel: eBPF programs and the perf ring buffer</text>
+
+  <!-- traced calls: app down to kernel -->
+  <path d="M210,174 L 210,204" fill="none" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrGray)"/>
+  <text x="224" y="195" fill="#9aa3b2" font-size="10">traced calls</text>
+
+  <!-- span events: kernel up to agent -->
+  <path d="M540,210 L 540,180" fill="none" stroke="#a29bfe" stroke-width="1.5" marker-end="url(#arrPurple)"/>
+  <text x="554" y="195" fill="#9aa3b2" font-size="10">span events</text>
+
+  <!-- SigNoz: x=805 y=105 w=140 h=64, right=945 -->
+  <rect x="805" y="105" width="140" height="64" rx="8" fill="url(#signoz-grad)" class="signoz-box"/>
+  <text x="875" y="142" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">SigNoz</text>
+
+  <path d="M680,137 L 794,137" fill="none" stroke="#00b894" stroke-width="1.5" marker-end="url(#arrGreen)"/>
+  <text x="740" y="125" text-anchor="middle" fill="#9aa3b2" font-size="10">OTLP</text>
+
+  <text x="500" y="330" text-anchor="middle" fill="#9aa3b2" font-size="12">The agent finds the process through OTEL_GO_AUTO_TARGET_EXE and reads it from /proc.</text>
+
+  <!-- flowing events: app to kernel, kernel to agent, agent to SigNoz -->
+  <circle r="3.5" fill="#636e72" opacity="0.9">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="0s" path="M210,174 L 210,202"/>
+  </circle>
+  <circle r="3.5" fill="#a29bfe" opacity="0.9">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="1.2s" path="M540,210 L 540,182"/>
+  </circle>
+  <circle r="3.5" fill="#00b894" opacity="0.9">
+    <animateMotion dur="1.8s" repeatCount="indefinite" begin="2.4s" path="M680,137 L 792,137"/>
+  </circle>
+</svg>

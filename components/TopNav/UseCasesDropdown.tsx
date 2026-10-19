@@ -2,21 +2,19 @@
 
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import { Button } from '@/components/ui/Button'
 import { useCasesDropdownItemsSorted } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
+import { NAV_PILL_CLASS } from './NavPill'
 
 export default function UseCasesDropdown() {
   const { isOpen, open, close, triggerRef } = useNavDropdown('usecases')
 
   return (
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
-      <Button
-        isButton
-        unstyled
+      <button
         type="button"
         ref={triggerRef}
-        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
+        className={NAV_PILL_CLASS}
         onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">
@@ -26,7 +24,7 @@ export default function UseCasesDropdown() {
             className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
           />
         </div>
-      </Button>
+      </button>
     </div>
   )
 }
@@ -53,7 +51,7 @@ export function UseCasesDropdownContent({ onClose }: { onClose: () => void }) {
                 <span className="text-sm">{item.name}</span>{' '}
                 <ArrowRight size={14} className="shrink-0 opacity-0 group-hover:opacity-100" />
               </div>
-              <div className="line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400 group-hover:text-[#FFF]">
+              <div className="line-clamp-2 max-w-[274px] text-xs text-[var(--l2-foreground)] group-hover:text-[var(--l1-foreground-hover)]">
                 {item.description}
               </div>
             </div>

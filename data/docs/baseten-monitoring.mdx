@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-03
 title: Baseten Monitoring & Observability with OpenTelemetry
 description: Setup Baseten monitoring with OpenTelemetry and SigNoz. Track traces, logs, and metrics for your Baseten LLM applications and model usage.
 doc_type: howto
@@ -11,9 +11,11 @@ This guide walks you through setting up monitoring and observability for Baseten
 
 Monitoring Baseten in your AI applications with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
 
+<YouTube id="MmnHJwScu9o" mute="false" />
+
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self-Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - For Python: `pip` installed for managing Python packages
 - A <a href="https://login.baseten.co/sign-up" target="_blank" rel="noopener noreferrer nofollow">Baseten account</a> and API key. You can get the API key from <a href="https://app.baseten.co/settings/account/api_keys" target="_blank" rel="noopener noreferrer nofollow">Baseten API Keys page</a>
 
@@ -62,7 +64,7 @@ This sets the minimum log level for the root logger to DEBUG, which ensures that
 
 ### Step 4: Create an example Baseten application
 
-```python:main.py
+```python:main.py defaultCollapsed
 from openai import OpenAI
 import os
 import logging
@@ -118,7 +120,7 @@ opentelemetry-instrument <your_run_command>
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -171,13 +173,13 @@ OpenAIInstrumentor().instrument()
 - **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/traces`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ### Step 3: Set up Metrics
 
-```python
+```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
@@ -207,7 +209,7 @@ HTTPXClientInstrumentor().instrument()
 - **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -218,7 +220,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ### Step 4: Set up Logs
 
-```python
+```python defaultCollapsed
 import logging
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider
@@ -254,7 +256,7 @@ httpx_logger.addHandler(handler)
 - **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/logs`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -265,7 +267,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
    Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
 </Admonition>
 
-```python:main.py
+```python:main.py defaultCollapsed
 from openai import OpenAI
 import os
 import logging
@@ -410,9 +412,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
 
+Instrument the rest of your self-hosted inference stack:
 
+- [Monitor Open WebUI with OpenTelemetry](https://signoz.io/docs/open-webui-monitoring/) - trace chat requests, database queries, and model token usage
+- [Monitor Ollama with OpenTelemetry](https://signoz.io/docs/ollama-monitoring/) - track local model inference latency, tokens, and resource usage
+- [Hugging Face observability with OpenTelemetry](https://signoz.io/docs/huggingface-observability/) - trace inference API calls and local pipeline runs
+- [Monitor Haystack pipelines with OpenTelemetry](https://signoz.io/docs/haystack-monitoring/) - trace RAG pipelines, retrievers, and generator nodes
+- [LangChain and LangGraph observability with OpenTelemetry](https://signoz.io/docs/langchain-observability/) - trace chains, agents, graph nodes, and tool calls
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

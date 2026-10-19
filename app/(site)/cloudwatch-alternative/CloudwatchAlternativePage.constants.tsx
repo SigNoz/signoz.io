@@ -88,7 +88,7 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
       signoz: {
         text: (
           <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
-            <span className="text-lg">Usage-based (GB ingested), </span>{' '}
+            <span className="text-lg">SigNoz Cloud usage-based pricing, </span>{' '}
             <span className="text-sm">predictable scaling using cost meter</span>
           </div>
         ),
@@ -193,7 +193,7 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
       signoz: {
         text: (
           <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
-            <span className="text-lg">SigNoz Cloud or Self-hosted</span>
+            <span className="text-lg">SigNoz Cloud or Self-Hosted SigNoz</span>
           </div>
         ),
       },
@@ -211,7 +211,7 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
 export const VENDORS = [
   {
     key: 'signoz',
-    label: <span className="text-xl text-signoz_forest-50">SigNoz</span>,
+    label: <span className="text-xl text-signoz_forest-50">SigNoz Cloud</span>,
     className: 'text-center',
   },
   {
@@ -307,8 +307,8 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
   },
   {
     icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
-    iconText: 'Self-Managed Enterprise',
-    title: 'Enterprise Self-Hosted',
+    iconText: 'Self-Hosted SigNoz',
+    title: 'Self-Hosted SigNoz Enterprise',
     description: (
       <>
         <p>
@@ -323,7 +323,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
   {
     icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
     iconText: 'Open Source Core',
-    title: 'Community Edition',
+    title: 'Self-Hosted SigNoz Community Edition',
     description: (
       <>
         <p>

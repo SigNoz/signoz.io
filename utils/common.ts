@@ -6,7 +6,12 @@ function flattenRoutes(navItems) {
   let routes: RoutesProps[] = []
 
   navItems.forEach((item) => {
-    if (item.route) {
+    // Skip category route if it duplicates its first child's route
+    const normalize = (r?: string) => (r?.endsWith('/') ? r.slice(0, -1) : r)
+    const isDuplicateOfFirstChild =
+      !!item.route && normalize(item.items?.[0]?.route) === normalize(item.route)
+
+    if (item.route && !isDuplicateOfFirstChild) {
       routes.push({ route: item.route, label: item.label })
     }
     if (item.items) {

@@ -1,11 +1,11 @@
 ---
-date: 2026-06-11
+date: 2026-09-14
 title: Send logs from Python to SigNoz using OpenTelemetry
 doc_type: howto
 description: Learn how to send logs from Python to SigNoz using the OpenTelemetry SDK for OTLP log export.
 ---
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -21,7 +21,7 @@ Tested with <a href="https://docs.python.org/3.11/" target="_blank" rel="noopene
 <Tabs entityName="instrumentation">
 <TabItem value="automatic" label="No Code Auto-Instrumentation (recommended)" default>
 
-Auto-instrumentation automatically captures logs from your Python application with trace correlation.
+<Tooltip text="Auto-instrumentation" content="An agent or startup hook instruments the libraries you already use, so you write no instrumentation code." link="https://signoz.io/docs/glossary/#auto-instrumentation" /> automatically captures logs from your Python application with trace correlation.
 
 ### Step 1: Install dependencies
 
@@ -109,7 +109,7 @@ If using the `k8s-infra` chart (which auto-collects container logs), disable log
 
 Create a `Dockerfile` in your project root:
 
-```dockerfile:Dockerfile
+```dockerfile:Dockerfile defaultCollapsed
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -263,7 +263,7 @@ Replace the placeholders:
 
 Create a `Dockerfile` in your project root:
 
-```dockerfile:Dockerfile
+```dockerfile:Dockerfile defaultCollapsed
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -323,7 +323,7 @@ Replace the placeholders:
 
 Create a file to configure the OpenTelemetry logger with trace correlation:
 
-```python:otel_logger.py
+```python:otel_logger.py defaultCollapsed minimap
 import logging
 from opentelemetry import trace
 from opentelemetry._logs import set_logger_provider
@@ -435,6 +435,8 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 ## Troubleshooting
 
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 #### Why do I see "404 Not Found" errors?
 

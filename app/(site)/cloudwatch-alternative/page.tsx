@@ -11,15 +11,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'AWS CloudWatch Alternative | SigNoz',
     description:
-      "Open-source observability with transparent pricing. Get logs, metrics, and traces in one place without CloudWatch's fragmented consoles and 12+ billing components.",
+      "Compare AWS CloudWatch with SigNoz Cloud for managed logs, metrics, and traces in one place without CloudWatch's fragmented consoles and 12+ billing components.",
     images: '/img/platform/CloudwatchAlternativeMeta.webp',
   },
   description:
-    "Open-source observability with transparent pricing. Get logs, metrics, and traces in one place without CloudWatch's fragmented consoles and 12+ billing components.",
+    "Compare AWS CloudWatch with SigNoz Cloud for managed logs, metrics, and traces in one place without CloudWatch's fragmented consoles and 12+ billing components.",
   twitter: {
     title: 'AWS CloudWatch Alternative | SigNoz',
     description:
-      "Open-source observability with transparent pricing. Get logs, metrics, and traces in one place without CloudWatch's fragmented consoles and 12+ billing components.",
+      "Compare AWS CloudWatch with SigNoz Cloud for managed logs, metrics, and traces in one place without CloudWatch's fragmented consoles and 12+ billing components.",
     images: '/img/platform/CloudwatchAlternativeMeta.webp',
   },
 }
