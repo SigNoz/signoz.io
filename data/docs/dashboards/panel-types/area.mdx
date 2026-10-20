@@ -1,5 +1,5 @@
 ---
-date: 2026-10-13
+date: 2026-10-17
 title: Area Chart Panel Type - Stacked Area Visualizations
 description: Learn how to use the Area Chart panel type in SigNoz dashboards, including fill opacity, fill style, and the Overlap, Stacked, and 100% series layouts.
 doc_type: reference
@@ -88,6 +88,17 @@ When you create a new panel, **Unit** is pre-filled with the unit of the selecte
   alt="Chart appearance section showing Line, How points connect, Area under the line with Solid and Gradient and the Opacity slider at 44%, Show points, and When data is missing"
   caption="Chart appearance controls for an Area Chart panel."
 />
+
+#### Partial bucket indicator
+
+The rightmost time bucket on a panel is often still collecting data when the panel loads, so its value can look like a sudden drop. SigNoz marks that in-progress bucket so you do not read it as a real metric change:
+
+- The partial point shows a filled dot wrapped in a dotted ring, which sets it apart from the settled points to its left. The line and fill are unchanged.
+- Hovering the partial bucket adds `(partial)` in italics next to the timestamp in the tooltip header (for example, `15:42:00 (partial)`), for every series in that bucket.
+
+The marker appears automatically whenever the query result flags a bucket as still filling. No dashboard setting or query change is needed, and it works on dashboards built with either the older or newer panel engine.
+
+Traces and logs panels show the marker most often. Metrics queries round the query end time down to the last completed minute, so their final bucket is rarely partial and the marker seldom appears.
 
 #### Thresholds
 
