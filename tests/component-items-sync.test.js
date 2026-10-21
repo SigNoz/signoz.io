@@ -251,11 +251,14 @@ test('integrations AI section matches the llm-monitoring listicle', () => {
 
   const byHref = (items) =>
     Object.fromEntries(
-      items.map(({ name, href, description, icon }) => [href, { name, description, icon }])
+      items.map(({ name, href, description, icon, clickName }) => [
+        href,
+        { name, description, icon, clickName },
+      ])
     )
   assert.deepEqual(
     byHref(collectRenderedSectionItems(aiSection)),
     byHref(collectItems(configs['llm-monitoring'])),
-    'integrations.json ai items should match llm-monitoring.json (name, href, description, icon)'
+    'integrations.json ai items should match llm-monitoring.json (name, href, description, icon, clickName)'
   )
 })
