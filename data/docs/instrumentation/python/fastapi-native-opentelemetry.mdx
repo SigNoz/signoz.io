@@ -7,7 +7,7 @@ doc_type: howto
 
 ## Overview
 
-FastAPI 0.142.0 and newer include OpenTelemetry support. FastAPI records request traces, HTTP request metrics, and logs for validation failures and unhandled exceptions without extra instrumentation packages. This guide shows you how to send that telemetry to SigNoz with a few environment variables.
+FastAPI 0.142.0 and newer have built-in OpenTelemetry support that records request traces, HTTP metrics, and validation and error logs with no extra packages. This guide sends that telemetry to SigNoz through environment variables, which needs FastAPI 0.143.0 or newer.
 
 <Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -155,7 +155,7 @@ FastAPI returns HTTP 422 and logs a `Request validation failed` warning. Remove 
 ## Validate
 
 1. In **Services**, find the name that you set in `OTEL_SERVICE_NAME`.
-2. In **Traces**, open a request span, for example `GET /items/{item_id}`, and check for child spans such as `fastapi.endpoint`.
+2. In **Traces**, open a `GET /otel-check/{number}` span and check for child spans such as `fastapi.dependencies`.
 3. In **Metrics** > **Summary**, filter by `service.name = '<service-name>'` and look for `http.server.request.duration.bucket` and `http.server.active_requests`. Metrics export every 60 seconds.
 4. In **Logs**, filter by the same service and look for `Request validation failed`.
 
