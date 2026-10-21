@@ -1,6 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 const { transformListicleToStrapi, extractIconPaths } = require('../listicle-transformer')
+const { resolveListicleIncludes } = require('../../../constants/listicles/includes')
+const { readListicle, withDependentListicles } = require('../listicle-dependents')
 
 async function runPhase4({ config, cmsAdapter, assetAdapter }) {
   console.log('\n' + '='.repeat(80))
@@ -9,14 +11,16 @@ async function runPhase4({ config, cmsAdapter, assetAdapter }) {
 
   const listicleResults = { created: [], updated: [], deleted: [], errors: [] }
 
-  for (const listicleFile of config.changedListicles) {
+  for (const listicleFile of withDependentListicles(config.changedListicles, config.listiclesDir)) {
     const key = path.basename(listicleFile, '.json')
     console.log(`\n📄 Processing listicle: ${key}`)
 
     try {
       const fullPath = path.resolve(config.listiclesDir, path.basename(listicleFile))
       const raw = fs.readFileSync(fullPath, 'utf8')
-      const jsonData = JSON.parse(raw)
+      const jsonData = resolveListicleIncludes(JSON.parse(raw), (name) =>
+        readListicle(config.listiclesDir, name)
+      )
 
       const iconPaths = extractIconPaths(jsonData)
       console.log(`  🖼️ Found ${iconPaths.length} icon(s) to check`)

@@ -69,6 +69,30 @@ Agent stubs auto-discover items from the JSON, including `defaultSection` behavi
 - **Change icons**: update the `icon` path on the item. To add a new icon, place the SVG at `data-assets/img/icons/listicle/<name>.svg` and set `icon` to its `/img/icons/listicle/<name>.svg` URL path. After changing an `icon` path, confirm the SVG exists at `data-assets/img/icons/listicle/<name>.svg`.
 - **Add/remove sections**: edit the `sections` array in the JSON config. Move items between sections as needed.
 
+### Reusing cards from another listicle
+
+A section of a sectioned listicle can show cards from other listicles with `include`, so the same card does not live in two files:
+
+```jsonc
+{
+  "id": "ai",
+  "label": "AI & Agents",
+  "title": "AI and Agent Integrations",
+  "sectionName": "AI and Agent Integrations",
+  "include": ["llm-monitoring", "metrics-quick-start#databases"], // whole listicle, or one section
+  "items": [] // optional cards of its own
+}
+```
+
+Other options:
+
+- `"<listicle>#<sectionId>@/docs/azure-monitoring"`: keep only the included cards under that path.
+- `{ "from": "aws-monitoring", "nameSuffix": " (Manual)" }`: add a suffix to the names of the included cards, to tell them apart from cards with the same name.
+- `"exclude": ["/docs/frontend-monitoring", "/docs/aws-monitoring/ec2/*"]` on the section: drop one href, or every card under a path (`/*`).
+- `"uniqueAcrossSections": true` on the listicle: each card stays only in the first section that claims it. Sections claim in `claimOrder` (default: their order), so a specific tab such as AWS can claim its cards before a broad tab such as Logs. The Integrations catalog uses this.
+
+`constants/listicles/includes.js` expands `include` into `items`: it merges the section's own cards with the included ones, drops repeated hrefs, and sorts the cards by name. The registry, the local content overlay, and the CMS sync (`scripts/cms-sync/engine/phase4-listicles.js`) all expand it, so the CMS stores plain items. When an included listicle changes, the CMS sync also re-syncs every listicle that includes it. An included listicle cannot have includes of its own, and `node --test tests/component-items-sync.test.js` fails when an include names an unknown listicle or section.
+
 ### JSON config reference
 
 **Flat listicle:**
