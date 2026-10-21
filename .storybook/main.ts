@@ -38,15 +38,25 @@ const config: StorybookConfig = {
   },
   viteFinal: async (viteConfig) => {
     viteConfig.plugins = viteConfig.plugins ?? []
-    // Must stay CJS for next.config.js; Vite serves project sources as ESM.
+    // These files must stay CJS for Node scripts (next.config.js, the CMS sync);
+    // Vite serves project sources as ESM.
+    const cjsConstants: Record<string, string[]> = {
+      'constants/allowedImageDomains.js': [
+        'DEFAULT_ALLOWED_DOMAINS',
+        'getAllowedImageDomains',
+        'isSrcAllowedForNextImage',
+      ],
+      'constants/listicles/includes.js': ['resolveListicleIncludes', 'includedListicleNames'],
+    }
     viteConfig.plugins.push({
       name: 'signoz-cjs-constants-shim',
       transform(code: string, id: string) {
-        if (!id.endsWith('constants/allowedImageDomains.js')) return undefined
+        const file = Object.keys(cjsConstants).find((candidate) => id.endsWith(candidate))
+        if (!file) return undefined
         return (
           'const module = { exports: {} };\n' +
           code +
-          '\nexport { DEFAULT_ALLOWED_DOMAINS, getAllowedImageDomains, isSrcAllowedForNextImage };\n'
+          `\nexport { ${cjsConstants[file].join(', ')} };\n`
         )
       },
     })

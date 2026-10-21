@@ -1,4 +1,5 @@
 import type { ListicleConfig } from '@/components/Listicle/types'
+import { resolveListicleIncludes } from './includes'
 
 import apmQuickStart from './apm-quick-start.json'
 import apmInstrumentation from './apm-instrumentation.json'
@@ -28,7 +29,7 @@ import migrateToSignoz from './migrate-to-signoz.json'
 import selfHostInstallation from './self-host-installation.json'
 import webVitals from './web-vitals.json'
 
-export const listicleConfigs: Record<string, ListicleConfig> = {
+const rawListicleConfigs: Record<string, ListicleConfig> = {
   'apm-quick-start': apmQuickStart as unknown as ListicleConfig,
   'apm-instrumentation': apmInstrumentation as unknown as ListicleConfig,
   'aurora-dashboards': auroraDashboards as unknown as ListicleConfig,
@@ -57,3 +58,10 @@ export const listicleConfigs: Record<string, ListicleConfig> = {
   'self-host-installation': selfHostInstallation as unknown as ListicleConfig,
   'web-vitals': webVitals as unknown as ListicleConfig,
 }
+
+export const listicleConfigs: Record<string, ListicleConfig> = Object.fromEntries(
+  Object.entries(rawListicleConfigs).map(([name, config]) => [
+    name,
+    resolveListicleIncludes(config, (included: string) => rawListicleConfigs[included] ?? null),
+  ])
+)

@@ -5,6 +5,7 @@ const { readdirSync, readFileSync } = require('fs')
 const { join } = require('path')
 
 const { getListicleSectionItems } = loadTsModule('constants/listicles/utils.ts')
+const { resolveListicleIncludes } = require('../constants/listicles/includes')
 
 const isValidHref = (href) =>
   typeof href === 'string' && (href.startsWith('/') || href.startsWith('https://'))
@@ -29,11 +30,21 @@ const assertNoDuplicateHrefs = (items, name) => {
 
 const LISTICLES_DIR = join(__dirname, '..', 'constants', 'listicles')
 
-function loadAllListicleConfigs() {
+function loadRawListicleConfigs() {
   const files = readdirSync(LISTICLES_DIR).filter((f) => f.endsWith('.json'))
   return files.map((f) => ({
     name: f.replace('.json', ''),
     config: JSON.parse(readFileSync(join(LISTICLES_DIR, f), 'utf8')),
+  }))
+}
+
+// The configs as the app and the CMS see them, with `include` sections expanded.
+function loadAllListicleConfigs() {
+  const raw = loadRawListicleConfigs()
+  const byName = Object.fromEntries(raw.map(({ name, config }) => [name, config]))
+  return raw.map(({ name, config }) => ({
+    name,
+    config: resolveListicleIncludes(config, (included) => byName[included] ?? null),
   }))
 }
 
@@ -242,23 +253,122 @@ test('no duplicate hrefs within each listicle section', () => {
   }
 })
 
-test('integrations AI section matches the llm-monitoring listicle', () => {
-  const configs = Object.fromEntries(
-    loadAllListicleConfigs().map(({ name, config }) => [name, config])
-  )
-  const aiSection = configs.integrations.sections.find((section) => section.id === 'ai')
-  assert.ok(aiSection, 'integrations.json should have an ai section')
-
-  const byHref = (items) =>
-    Object.fromEntries(
-      items.map(({ name, href, description, icon, clickName }) => [
-        href,
-        { name, description, icon, clickName },
-      ])
+test('listicle includes resolve to known listicles and sections', () => {
+  const raw = loadRawListicleConfigs()
+  const byName = Object.fromEntries(raw.map(({ name, config }) => [name, config]))
+  for (const { name, config } of raw) {
+    assert.doesNotThrow(
+      () => resolveListicleIncludes(config, (included) => byName[included] ?? null),
+      `${name}.json includes should resolve`
     )
+  }
+})
+
+test('resolveListicleIncludes merges included cards without duplicates, sorted by name', () => {
+  const configs = {
+    source: {
+      pattern: 'sectioned',
+      sections: [
+        { id: 'one', items: [{ name: 'Beta', href: '/docs/beta/' }] },
+        { id: 'two', items: [{ name: 'Gamma', href: '/docs/gamma' }] },
+      ],
+    },
+  }
+  const getConfig = (name) => configs[name] ?? null
+  const config = {
+    pattern: 'sectioned',
+    sections: [
+      {
+        id: 'all',
+        include: ['source'],
+        items: [
+          { name: 'Alpha', href: '/docs/alpha' },
+          { name: 'Beta', href: '/docs/beta' },
+        ],
+      },
+      { id: 'part', include: ['source#two'] },
+      { id: 'plain', items: [{ name: 'Delta', href: '/docs/delta' }] },
+    ],
+  }
+
+  const resolved = resolveListicleIncludes(config, getConfig)
   assert.deepEqual(
-    byHref(collectRenderedSectionItems(aiSection)),
-    byHref(collectItems(configs['llm-monitoring'])),
-    'integrations.json ai items should match llm-monitoring.json (name, href, description, icon, clickName)'
+    resolved.sections[0].items.map((item) => item.name),
+    ['Alpha', 'Beta', 'Gamma']
   )
+  assert.deepEqual(
+    resolved.sections[1].items.map((item) => item.name),
+    ['Gamma']
+  )
+  assert.equal(resolved.sections[2], config.sections[2])
+  assert.ok(resolved.sections.every((section) => !('include' in section)))
+
+  assert.throws(
+    () => resolveListicleIncludes({ sections: [{ id: 'x', include: ['missing'] }] }, getConfig),
+    /no listicle named "missing"/
+  )
+  assert.throws(
+    () => resolveListicleIncludes({ sections: [{ id: 'x', include: ['source#nope'] }] }, getConfig),
+    /has no section "nope"/
+  )
+})
+
+test('resolveListicleIncludes applies href filters, exclude, nameSuffix, and claim order', () => {
+  const configs = {
+    source: {
+      pattern: 'sectioned',
+      sections: [
+        {
+          id: 'all',
+          items: [
+            { name: 'Hub', href: '/docs/cloud/hub' },
+            { name: 'Child', href: '/docs/cloud/hub/child' },
+            { name: 'Other', href: '/docs/other' },
+          ],
+        },
+      ],
+    },
+  }
+  const getConfig = (name) => configs[name] ?? null
+  const config = {
+    pattern: 'sectioned',
+    uniqueAcrossSections: true,
+    sections: [
+      { id: 'broad', include: ['source'] },
+      {
+        id: 'cloud',
+        claimOrder: -1,
+        include: [{ from: 'source@/docs/cloud', nameSuffix: ' (Manual)' }],
+        exclude: ['/docs/cloud/hub/*'],
+      },
+    ],
+  }
+
+  const resolved = resolveListicleIncludes(config, getConfig)
+  assert.deepEqual(
+    resolved.sections.map((section) => section.items.map((item) => item.name)),
+    [['Child', 'Other'], ['Hub (Manual)']]
+  )
+  assert.ok(!('uniqueAcrossSections' in resolved))
+  assert.ok(
+    resolved.sections.every((section) => !('claimOrder' in section) && !('exclude' in section))
+  )
+})
+
+test('integrations catalog keeps each card in one tab and each name once per tab', () => {
+  const integrations = loadAllListicleConfigs().find(({ name }) => name === 'integrations').config
+  const seenHrefs = new Map()
+  for (const section of integrations.sections) {
+    const names = section.items.map((item) => item.name)
+    assert.equal(
+      new Set(names).size,
+      names.length,
+      `integrations.sections[${section.id}] repeats a card name`
+    )
+    for (const item of section.items) {
+      const href = item.href.replace(/\/+$/, '')
+      assert.ok(!seenHrefs.has(href), `${href} is in both ${seenHrefs.get(href)} and ${section.id}`)
+      seenHrefs.set(href, section.id)
+    }
+  }
 })
