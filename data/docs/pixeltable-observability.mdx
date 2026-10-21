@@ -20,7 +20,7 @@ pixeltable.insert
    └─ pixeltable.sa.insert_rows
 ```
 
-UDF spans carry `pxt.udf_path`, `pxt.resource_pool`, and `pxt.retries`. Column operations carry `pxt.column`. The model name, prompt, completion, and token counts are attributes of the LLM child span. SigNoz [AI Observability](https://signoz.io/docs/ai-observability/) reads the `gen_ai.*` attributes on that child span.
+UDF spans carry `pxt.udf_path`, `pxt.column`, `pxt.resource_pool`, and `pxt.retries`. `pixeltable.store.write_column` spans carry `pxt.column`. The model name, prompt, completion, and token counts are attributes of the LLM child span. SigNoz [AI Observability](https://signoz.io/docs/ai-observability/) reads the `gen_ai.*` attributes on that child span.
 
 This guide was tested with `pixeltable` 0.7.19, `opentelemetry-instrumentation-pixeltable` 0.1.0, and `openinference-instrumentation-openai` 0.1.65.
 
@@ -41,13 +41,13 @@ Most steps are identical. Set the endpoint to `http://localhost:4318` and omit t
 <Tabs entityName="instrumentation">
 <TabItem value="Environment variables" label="Environment variables" default>
 
-**Step 1:** Install Pixeltable with the OpenTelemetry extra, and install the OpenAI instrumentor.
+**Step 1:** Install Pixeltable with the OpenTelemetry extra, the `openai` client, and the OpenAI instrumentor.
 
 ```bash
-pip install 'pixeltable[otel]' openinference-instrumentation-openai
+pip install 'pixeltable[otel]' openai openinference-instrumentation-openai
 ```
 
-`pixeltable[otel]` installs `opentelemetry-instrumentation-pixeltable` together with the OpenTelemetry SDK and the OTLP exporters.
+`pixeltable[otel]` installs `opentelemetry-instrumentation-pixeltable` together with the OpenTelemetry SDK and the OTLP exporters. Neither Pixeltable nor the instrumentor installs `openai`, which `chat_completions()` calls.
 
 **Step 2:** Point the exporter at SigNoz. `init()` reads these variables when you omit the matching arguments. `OTEL_SPAN_LEVEL=debug` keeps per-row and per-UDF spans. The default `info` keeps the operation span and the catalog, store, and SQL spans that belong to it.
 
@@ -79,7 +79,7 @@ OpenAIInstrumentor().instrument()
 import pixeltable as pxt
 from pixeltable.functions import openai
 
-table = pxt.create_table('articles', {'id': pxt.Int, 'body': pxt.String})
+table = pxt.create_table('articles', {'id': pxt.Int, 'body': pxt.String}, if_exists='replace')
 table.add_computed_column(
     summary=openai.chat_completions(
         messages=[{'role': 'user', 'content': 'Summarize in one sentence: ' + table.body}],
@@ -105,7 +105,7 @@ metrics.get_meter_provider().force_flush()
 **Step 1:** Install the same packages.
 
 ```bash
-pip install 'pixeltable[otel]' openinference-instrumentation-openai
+pip install 'pixeltable[otel]' openai openinference-instrumentation-openai
 ```
 
 **Step 2:** Pass the SigNoz endpoint to `init()`. Leave `metrics` at its default so token counters are exported to `/v1/metrics`.
@@ -126,7 +126,7 @@ OpenAIInstrumentor().instrument()
 import pixeltable as pxt
 from pixeltable.functions import openai
 
-table = pxt.create_table('articles', {'id': pxt.Int, 'body': pxt.String})
+table = pxt.create_table('articles', {'id': pxt.Int, 'body': pxt.String}, if_exists='replace')
 table.add_computed_column(
     summary=openai.chat_completions(
         messages=[{'role': 'user', 'content': 'Summarize in one sentence: ' + table.body}],
@@ -149,9 +149,9 @@ Set `OPENAI_API_KEY` before running the insert. `headers` uses the `OTEL_EXPORTE
 </TabItem>
 </Tabs>
 
-`init()` reuses a tracer provider that your application already registered. If you start the process with `opentelemetry-instrument`, the Pixeltable entry point attaches on its own, at span level `info`. Call `PixeltableInstrumentor().instrument(span_level='debug')` when you want row and UDF spans on that existing provider.
+`init()` reuses a tracer provider that your application already registered. With `opentelemetry-instrument`, the Pixeltable entry point instruments at span level `info`, and later `instrument()` or `init()` calls do not change it. For row and UDF spans, set `OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=pixeltable` and call `pxt_otel.init(span_level='debug')`. `init()` reuses the provider that `opentelemetry-instrument` registered.
 
-On the tested OpenInference release, the `ChatCompletion` span sets `gen_ai.request.model`, `gen_ai.provider.name`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, and `openinference.span.kind=LLM`. It also sets `llm.model_name` and `llm.token_count.*`. Those `gen_ai.*` fields are the ones listed in [AI Observability telemetry requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/). If the instrumentor only sets `llm.model_name`, the default `gen_ai.llm` group in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/) copies it to `gen_ai.request.model`.
+OpenInference sets `llm.model_name`, `llm.provider`, and `llm.token_count.*` on the `ChatCompletion` span. The default `gen_ai.llm` group in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/) copies them to the `gen_ai.*` attributes that [AI Observability](https://signoz.io/docs/ai-observability-telemetry-requirements/) reads. To emit `gen_ai.*` from the process, set `OPENINFERENCE_ENABLE_GENAI_SEMCONV=true`.
 
 ## View Pixeltable Traces in SigNoz
 
@@ -175,7 +175,7 @@ Open the trace. The waterfall shows `pixeltable.udf.chat_completions` under `pix
   caption="pixeltable.insert with the UDF span and the nested LLM span"
 />
 
-[AI Observability](https://signoz.io/docs/ai-observability/) counts that child span as an LLM call. In the test, one insert produced 1 LLM call, model `gpt-4o-mini`, and 27 tokens (18 input, 9 output). Latency on the overview matched the `ChatCompletion` span. Cost showed as $0, and the cost-over-time and cost-breakdown panels had no series. Add a [model pricing](https://signoz.io/docs/ai-observability-model-pricing/) rule for the model name if you want dollar cost. Time to first token showed 0s on this non-streaming call.
+[AI Observability](https://signoz.io/docs/ai-observability/) counts that child span as an LLM call. After one insert, it shows 1 LLM call for `gpt-4o-mini` with its input and output tokens. Cost reads $0 until you add a [model pricing](https://signoz.io/docs/ai-observability-model-pricing/) rule for the model name. Time to first token reads 0s for a non-streaming call.
 
 <Figure
   src="/img/docs/llm/pixeltable/pixeltable-ai-overview.webp"
@@ -196,12 +196,8 @@ The metric scope name is `pixeltable`. The same insert recorded input and output
 ## Caveats
 
 - **Every operation is a trace.** `create_table`, `drop_table`, `add_computed_column`, and `collect` each start their own trace. `span_level='debug'` adds per-row spans, per-UDF spans, and finer catalog and store spans such as `pixeltable.catalog.*`. At `info`, those per-row and per-UDF spans are dropped, and the LLM span stays in the insert trace without a `pixeltable.udf.chat_completions` parent.
-- **Short scripts must flush.** Call `trace.get_tracer_provider().force_flush()` before the process exits. Metrics export on a periodic reader, about once a minute. Call `metrics.get_meter_provider().force_flush()` when the script exits sooner.
-- **Call order.** `pxt_otel.init()` and `OpenAIInstrumentor().instrument()` run before the first Pixeltable operation.
-- **Custom UDFs and scripts.** Pixeltable refuses a `@pxt.udf` defined in `__main__` when you run a file as a script. Put the function in a module and import it.
 - **Do not double-instrument.** The Anthropic Python SDK 2.x emits its own OpenTelemetry spans. Do not also enable `openinference-instrumentation-anthropic`, or each call is recorded twice.
 - **Prompts leave the process.** `ChatCompletion` carries the prompt and the completion. Pixeltable log export stays off unless you pass `logs=True`. Leave it off. Log records can contain credentials.
-- **`init()` ignores `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`.** The endpoint comes from the `endpoint` argument, then the connected database's `db_exporter_otlp_endpoint`, then `OTEL_EXPORTER_OTLP_ENDPOINT`, then the `[otel]` section of `~/.pixeltable/config.toml`. With none of those set, and no tracer provider already registered by the application, nothing is exported.
 
 <details>
 <ToggleHeading>
@@ -221,16 +217,10 @@ The insert returned a row, and the Traces Explorer is empty for `service.name = 
 
 `pixeltable.insert` is visible, and `ChatCompletion` is not.
 
-- `OpenAIInstrumentor().instrument()` did not run, or it ran after the client was already created. Instrument before the insert.
+- `OpenAIInstrumentor().instrument()` did not run, or it logged a dependency conflict because `openai` is not installed. Install `openai` and restart the process.
 - `span_level` is `info`, so there is no UDF span. The LLM span should still be in the insert trace. Search the trace for `ChatCompletion` before assuming the call was dropped.
 - `collect()` does not re-run computed columns. Insert or update a row to produce a new model call.
 - The OpenAI client returned an error. The UDF span is then marked as an error, and there may be no `ChatCompletion` child.
-
-### Verify the instrumentor
-
-`PixeltableInstrumentor` subscribes to Pixeltable's own hooks. A second `init()` in the same process does not attach a second exporter. If spans are missing after you change the endpoint, start a new process.
-
-LLM details come from the OpenAI instrumentor, not from the Pixeltable scope. In the span, the Pixeltable scope name is `pixeltable`. The `ChatCompletion` span comes from OpenInference.
 
 ### Auth errors (401 / 403)
 
@@ -238,9 +228,9 @@ The `signoz-ingestion-key` header must be the key from SigNoz Ingestion Settings
 
 ### Endpoint issues
 
-Use `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud and `http://localhost:4318` for a local collector. `init()` appends `/v1/traces` unless the URL already ends with that path. Do not send OTLP/HTTP to the gRPC port `4317`.
+Use `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud and `http://localhost:4318` for a local collector. `init()` appends `/v1/traces` and `/v1/metrics` to the endpoint. Pass the base URL. An endpoint ending in `/v1/traces` still exports traces, but metrics fail. Do not send OTLP/HTTP to the gRPC port `4317`.
 
-Setting only `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` does not start an exporter. Set `OTEL_EXPORTER_OTLP_ENDPOINT` or pass `endpoint` to `init()`.
+Setting only `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` does not start an exporter. Set `OTEL_EXPORTER_OTLP_ENDPOINT` or pass `endpoint` to `init()`. If the connected database's entry sets `db_exporter_otlp_endpoint`, that value wins over `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
 ### Too many spans
 
