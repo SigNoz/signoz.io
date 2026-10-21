@@ -1,0 +1,279 @@
+---
+date: 2026-10-21
+title: Pixeltable Observability & Monitoring with OpenTelemetry
+description: Trace Pixeltable operations, UDF calls, and LLM requests in SigNoz with OpenTelemetry, including tokens and models in AI Observability.
+doc_type: howto
+---
+
+## What is Pixeltable Observability?
+
+Pixeltable is declarative data infrastructure for multimodal AI apps. Images, video, audio, documents, and model calls live in tables, and a computed column runs its transform on insert and update. Pixeltable observability records that work with <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and sends it to SigNoz.
+
+The <a href="https://github.com/pixeltable/pixeltable/tree/v0.7.19/packages/opentelemetry-instrumentation-pixeltable" target="_blank" rel="noopener noreferrer nofollow">Pixeltable OpenTelemetry bridge</a> emits one trace per table operation. With `span_level='debug'` the trace contains the rows, each UDF call, and, when you add an LLM instrumentor, a child span for the model request:
+
+```text noLineNumbers
+pixeltable.insert
+└─ pixeltable.store.insert_rows
+   ├─ pixeltable.row
+   ├─ pixeltable.udf.chat_completions
+   │  └─ ChatCompletion
+   └─ pixeltable.sa.insert_rows
+```
+
+UDF spans carry `pxt.udf_path`, `pxt.resource_pool`, and `pxt.retries`. Column operations carry `pxt.column`. The model name, prompt, completion, and token counts are attributes of the LLM child span. SigNoz [AI Observability](https://signoz.io/docs/ai-observability/) reads the `gen_ai.*` attributes on that child span.
+
+This guide was tested with `pixeltable` 0.7.19, `opentelemetry-instrumentation-pixeltable` 0.1.0, and `openinference-instrumentation-openai` 0.1.65.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key, or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/) instance
+- Python 3.11 or later
+- An OpenAI API key if you run the example below (`OPENAI_API_KEY`)
+
+## Monitoring Pixeltable with OpenTelemetry
+
+Call `pxt_otel.init()` once per process, before the first Pixeltable operation. It builds an OTLP/HTTP exporter and instruments Pixeltable. Add `OpenAIInstrumentor` so each `openai.chat_completions` cell gets a child span. For the Pixeltable API, see the <a href="https://docs.pixeltable.com" target="_blank" rel="noopener noreferrer nofollow">Pixeltable documentation</a>.
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Set the endpoint to `http://localhost:4318` and omit the `signoz-ingestion-key` header, as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+<Tabs entityName="instrumentation">
+<TabItem value="Environment variables" label="Environment variables" default>
+
+**Step 1:** Install Pixeltable with the OpenTelemetry extra, and install the OpenAI instrumentor.
+
+```bash
+pip install 'pixeltable[otel]' openinference-instrumentation-openai
+```
+
+`pixeltable[otel]` installs `opentelemetry-instrumentation-pixeltable` together with the OpenTelemetry SDK and the OTLP exporters.
+
+**Step 2:** Point the exporter at SigNoz. `init()` reads these variables when you omit the matching arguments. `OTEL_SPAN_LEVEL=debug` keeps per-row and per-UDF spans. The default `info` keeps the operation span and the catalog, store, and SQL spans that belong to it.
+
+```bash
+export OTEL_SERVICE_NAME=pixeltable-app
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_SPAN_LEVEL=debug
+export OPENAI_API_KEY=<your-openai-api-key>
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-openai-api-key>`: The API key for the provider your computed columns call.
+
+**Step 3:** Initialize the bridge, instrument OpenAI, and insert a row. `init()` appends `/v1/traces` to the endpoint (and `/v1/metrics` for metrics). Pass the base URL, without `/v1/traces`.
+
+```python
+import opentelemetry.instrumentation.pixeltable as pxt_otel
+from openinference.instrumentation.openai import OpenAIInstrumentor
+from opentelemetry import trace
+
+pxt_otel.init()
+OpenAIInstrumentor().instrument()
+
+import pixeltable as pxt
+from pixeltable.functions import openai
+
+table = pxt.create_table('articles', {'id': pxt.Int, 'body': pxt.String})
+table.add_computed_column(
+    summary=openai.chat_completions(
+        messages=[{'role': 'user', 'content': 'Summarize in one sentence: ' + table.body}],
+        model='gpt-4o-mini',
+    ).choices[0].message.content
+)
+table.insert([{'id': 1, 'body': 'Pixeltable is declarative data infrastructure for multimodal AI apps.'}])
+trace.get_tracer_provider().force_flush()
+```
+
+`force_flush()` matters for a short script. The exporter batches spans, and the process can exit before the batch is sent. Metrics go out on a periodic reader, about once a minute. To send them before exit, flush the meter provider as well:
+
+```python
+from opentelemetry import metrics
+
+metrics.get_meter_provider().force_flush()
+```
+
+</TabItem>
+
+<TabItem value="Code" label="Code">
+
+**Step 1:** Install the same packages.
+
+```bash
+pip install 'pixeltable[otel]' openinference-instrumentation-openai
+```
+
+**Step 2:** Pass the SigNoz endpoint to `init()`. Leave `metrics` at its default so token counters are exported to `/v1/metrics`.
+
+```python defaultCollapsed
+import opentelemetry.instrumentation.pixeltable as pxt_otel
+from openinference.instrumentation.openai import OpenAIInstrumentor
+from opentelemetry import trace
+
+pxt_otel.init(
+    endpoint='https://ingest.<region>.signoz.cloud:443',
+    headers='signoz-ingestion-key=<your-ingestion-key>',
+    service_name='pixeltable-app',
+    span_level='debug',
+)
+OpenAIInstrumentor().instrument()
+
+import pixeltable as pxt
+from pixeltable.functions import openai
+
+table = pxt.create_table('articles', {'id': pxt.Int, 'body': pxt.String})
+table.add_computed_column(
+    summary=openai.chat_completions(
+        messages=[{'role': 'user', 'content': 'Summarize in one sentence: ' + table.body}],
+        model='gpt-4o-mini',
+    ).choices[0].message.content
+)
+table.insert([{'id': 1, 'body': 'Pixeltable is declarative data infrastructure for multimodal AI apps.'}])
+trace.get_tracer_provider().force_flush()
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+For a self-hosted collector, call `pxt_otel.init(endpoint='http://localhost:4318', service_name='pixeltable-app', span_level='debug')` and omit `headers`.
+
+Set `OPENAI_API_KEY` before running the insert. `headers` uses the `OTEL_EXPORTER_OTLP_HEADERS` form: comma-separated `key=value` pairs. The example flushes the tracer before exit. Metrics export about once a minute, so also call `metrics.get_meter_provider().force_flush()` when the script exits sooner.
+
+</TabItem>
+</Tabs>
+
+`init()` reuses a tracer provider that your application already registered. If you start the process with `opentelemetry-instrument`, the Pixeltable entry point attaches on its own, at span level `info`. Call `PixeltableInstrumentor().instrument(span_level='debug')` when you want row and UDF spans on that existing provider.
+
+On the tested OpenInference release, the `ChatCompletion` span sets `gen_ai.request.model`, `gen_ai.provider.name`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, and `openinference.span.kind=LLM`. It also sets `llm.model_name` and `llm.token_count.*`. Those `gen_ai.*` fields are the ones listed in [AI Observability telemetry requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/). If the instrumentor only sets `llm.model_name`, the default `gen_ai.llm` group in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/) copies it to `gen_ai.request.model`.
+
+## View Pixeltable Traces in SigNoz
+
+Open the [Traces Explorer](https://signoz.io/docs/userguide/traces/) and filter on the service name and the operation:
+
+```text noLineNumbers
+service.name = 'pixeltable-app' AND name = 'pixeltable.insert'
+```
+
+<Figure
+  src="/img/docs/llm/pixeltable/pixeltable-traces.webp"
+  alt="Traces Explorer filtered to service pixeltable-app and span name pixeltable.insert"
+  caption="A pixeltable.insert span in the Traces Explorer"
+/>
+
+Open the trace. The waterfall shows `pixeltable.udf.chat_completions` under `pixeltable.store.insert_rows`, and `ChatCompletion` under the UDF span. The prompt and completion are attributes on `ChatCompletion`.
+
+<Figure
+  src="/img/docs/llm/pixeltable/pixeltable-detailed-traces.webp"
+  alt="Trace detail for pixeltable.insert with a nested ChatCompletion span"
+  caption="pixeltable.insert with the UDF span and the nested LLM span"
+/>
+
+[AI Observability](https://signoz.io/docs/ai-observability/) counts that child span as an LLM call. In the test, one insert produced 1 LLM call, model `gpt-4o-mini`, and 27 tokens (18 input, 9 output). Latency on the overview matched the `ChatCompletion` span. Cost showed as $0, and the cost-over-time and cost-breakdown panels had no series. Add a [model pricing](https://signoz.io/docs/ai-observability-model-pricing/) rule for the model name if you want dollar cost. Time to first token showed 0s on this non-streaming call.
+
+<Figure
+  src="/img/docs/llm/pixeltable/pixeltable-ai-overview.webp"
+  alt="AI Observability overview with 1 LLM call, 27 tokens, and model gpt-4o-mini"
+  caption="AI Observability after one Pixeltable insert"
+/>
+
+Pixeltable also exports metrics when an endpoint is set. In the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/), query:
+
+- `pixeltable.udf.input_tokens` and `pixeltable.udf.output_tokens`, with attribute `pxt.model` (and `pxt.udf_path`)
+- `pixeltable.udf.calls` and `pixeltable.udf.latency`
+- `pixeltable.rows.written`, with attribute `pxt.table`
+
+The metric scope name is `pixeltable`. The same insert recorded input and output tokens on `pxt.model=gpt-4o-mini`.
+
+`collect()` writes a `pixeltable.collect` trace and does not call the model again. Computed values are stored. New LLM spans appear on `insert`, on `update`, and when `add_computed_column` backfills rows that already exist.
+
+## Caveats
+
+- **Every operation is a trace.** `create_table`, `drop_table`, `add_computed_column`, and `collect` each start their own trace. `span_level='debug'` adds per-row spans, per-UDF spans, and finer catalog and store spans such as `pixeltable.catalog.*`. At `info`, those per-row and per-UDF spans are dropped, and the LLM span stays in the insert trace without a `pixeltable.udf.chat_completions` parent.
+- **Short scripts must flush.** Call `trace.get_tracer_provider().force_flush()` before the process exits. Metrics export on a periodic reader, about once a minute. Call `metrics.get_meter_provider().force_flush()` when the script exits sooner.
+- **Call order.** `pxt_otel.init()` and `OpenAIInstrumentor().instrument()` run before the first Pixeltable operation.
+- **Custom UDFs and scripts.** Pixeltable refuses a `@pxt.udf` defined in `__main__` when you run a file as a script. Put the function in a module and import it.
+- **Do not double-instrument.** The Anthropic Python SDK 2.x emits its own OpenTelemetry spans. Do not also enable `openinference-instrumentation-anthropic`, or each call is recorded twice.
+- **Prompts leave the process.** `ChatCompletion` carries the prompt and the completion. Pixeltable log export stays off unless you pass `logs=True`. Leave it off. Log records can contain credentials.
+- **`init()` ignores `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`.** The endpoint comes from the `endpoint` argument, then the connected database's `db_exporter_otlp_endpoint`, then `OTEL_EXPORTER_OTLP_ENDPOINT`, then the `[otel]` section of `~/.pixeltable/config.toml`. With none of those set, and no tracer provider already registered by the application, nothing is exported.
+
+<details>
+<ToggleHeading>
+## Troubleshooting Pixeltable Observability
+</ToggleHeading>
+
+### No traces in SigNoz
+
+The insert returned a row, and the Traces Explorer is empty for `service.name = 'pixeltable-app'`.
+
+- `pxt_otel.init()` ran after the first Pixeltable call, or it ran with no endpoint and stayed inert. Restart the process and call `init()` with the endpoint first. A second `init()` in the same process raises an error that instrumentation is already initialized.
+- The script exited without `force_flush()`, so the batch was dropped.
+- The `<region>` in the endpoint does not match the SigNoz Cloud account that owns the ingestion key.
+- Wait 10-30 seconds. The exporter and SigNoz both batch.
+
+### The operation span is there, and the LLM span is missing
+
+`pixeltable.insert` is visible, and `ChatCompletion` is not.
+
+- `OpenAIInstrumentor().instrument()` did not run, or it ran after the client was already created. Instrument before the insert.
+- `span_level` is `info`, so there is no UDF span. The LLM span should still be in the insert trace. Search the trace for `ChatCompletion` before assuming the call was dropped.
+- `collect()` does not re-run computed columns. Insert or update a row to produce a new model call.
+- The OpenAI client returned an error. The UDF span is then marked as an error, and there may be no `ChatCompletion` child.
+
+### Verify the instrumentor
+
+`PixeltableInstrumentor` subscribes to Pixeltable's own hooks. A second `init()` in the same process does not attach a second exporter. If spans are missing after you change the endpoint, start a new process.
+
+LLM details come from the OpenAI instrumentor, not from the Pixeltable scope. In the span, the Pixeltable scope name is `pixeltable`. The `ChatCompletion` span comes from OpenInference.
+
+### Auth errors (401 / 403)
+
+The `signoz-ingestion-key` header must be the key from SigNoz Ingestion Settings, with no extra spaces or quotes. `headers` is a single string, `signoz-ingestion-key=<your-ingestion-key>`, not a Python dict.
+
+### Endpoint issues
+
+Use `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud and `http://localhost:4318` for a local collector. `init()` appends `/v1/traces` unless the URL already ends with that path. Do not send OTLP/HTTP to the gRPC port `4317`.
+
+Setting only `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` does not start an exporter. Set `OTEL_EXPORTER_OTLP_ENDPOINT` or pass `endpoint` to `init()`.
+
+### Too many spans
+
+`span_level='debug'` records per-row, per-UDF, and finer catalog and store spans as well as the insert. Set `OTEL_SPAN_LEVEL=info` or `span_level='info'` to drop those finer spans. Filter the Explorer with `name = 'pixeltable.insert'` while you are on `debug`.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The OpenTelemetry Collector sits between your app and SigNoz. The application sends OTLP to the Collector, and the Collector forwards it to SigNoz.
+
+### Why use it?
+
+- **Cleaning up data.** Drop noisy catalog spans, or remove prompt attributes before they leave your network.
+- **Keeping your app lightweight.** The Collector handles batching, retries, and compression.
+- **Adding context.** The Collector can add the Kubernetes pod or cloud region.
+- **More than one backend.** You can fan out later without changing the Pixeltable process.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for the steps. For more detail, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Related integrations
+
+- [DSPy observability with OpenTelemetry](https://signoz.io/docs/dspy-observability/) for module, chain, and tool spans from DSPy programs
+- [OpenAI monitoring](https://signoz.io/docs/openai-monitoring/) for OpenAI API calls outside Pixeltable
+- [LangChain and LangGraph observability](https://signoz.io/docs/langchain-observability/) for chains, agents, and tool calls
+- [LlamaIndex observability](https://signoz.io/docs/llamaindex-observability/) for RAG queries and retrievers
+- [AI Observability telemetry requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/) for the `gen_ai.*` attributes the dashboards read
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of the stack.
