@@ -1,0 +1,74 @@
+---
+date: 2026-10-16
+title: AI Conversation Thread - Inspect LLM Spans in Traces
+description: Read the AI conversation thread in SigNoz Trace Details. See the system prompt, user and assistant turns, tool calls, and normalized finish reasons.
+doc_type: howto
+---
+
+When you open an LLM or agent span in [Trace Details](https://signoz.io/docs/userguide/span-details/), SigNoz formats its request and response messages into a **conversation thread**. The thread turns the raw GenAI message attributes into a readable sequence of system, user, assistant, and tool turns, so you can see the prompt, the model's reply, and any tool calls without reading raw JSON.
+
+The thread reads the OpenTelemetry GenAI message attributes, so it works across instrumentation libraries that follow the convention, including LangChain and OpenLLMetry, Pydantic-AI, AWS Strands agents, litellm, and the Vercel AI SDK.
+
+## What the thread shows
+
+For a span that carries GenAI message attributes, the thread renders each turn in order:
+
+- **System**: the model's instructions, when the span carries them.
+- **User**: the input messages sent to the model.
+- **Assistant**: the model's output, including any tool calls it requested.
+- **Tool**: the result returned to the model for a tool call.
+
+Each assistant turn shows its finish reason, which tells you why the model stopped.
+
+<Admonition type="info">
+Message content is opt-in. SigNoz can only render a turn when the span carries the matching GenAI attribute, and `gen_ai.input.messages`, `gen_ai.output.messages`, and `gen_ai.system_instructions` are **Opt-In** in the OpenTelemetry specification. Enable content capture in your instrumentation to populate the thread. See [Prompt and response content](https://signoz.io/docs/llm-observability/#prompt-and-response-content).
+</Admonition>
+
+## System prompt as the leading message
+
+When a span carries a system instructions attribute (`gen_ai.system_instructions`), SigNoz surfaces it as a leading **system** message above all user and assistant turns. This gives you the instructions the model ran under at the top of the thread, before the conversation that followed.
+
+Instrumentation for LangChain and OpenLLMetry, Pydantic-AI, and AWS Strands agents sets this attribute, so the system prompt appears automatically.
+
+<Admonition type="info">
+AWS Strands agents set `gen_ai.system_instructions` and also insert the same text as the first message in the payload. SigNoz deduplicates the two, so the system prompt appears once in the thread rather than twice.
+</Admonition>
+
+## Finish reasons
+
+Each output message shows a finish reason, such as `stop`, `length`, or `tool_call`.
+
+**Response-level finish reasons take precedence.** When the span carries a response finish reasons attribute (`gen_ai.response.finish_reasons`), those reasons replace any per-message finish reason values in the thread. This gives a single authoritative source for why the model stopped, instead of reasons that can differ per message in the payload.
+
+**Labels are normalized across SDKs.** Instrumentation libraries spell the same reason differently: litellm, OpenAI, and the Vercel AI SDK may emit `tool_calls`, `tool-calls`, or `tool_call` for the same outcome. SigNoz maps these to the canonical label `tool_call` throughout the thread, so the finish reason reads consistently regardless of which SDK produced the span.
+
+## Pydantic-AI compatibility
+
+SigNoz normalizes two Pydantic-AI conventions so its spans render like other instrumentation in the thread:
+
+- **Structured tool call arguments.** Tool call arguments that Pydantic-AI stores as a raw JSON string are decoded and shown as formatted, readable JSON.
+- **Consistent response field.** A tool call response that Pydantic-AI stores under the key `result` is shown as `response`, matching the OpenTelemetry GenAI semantic convention and aligning with other instrumentation libraries.
+
+To instrument a Pydantic-AI application, see [Pydantic AI Observability](https://signoz.io/docs/pydantic-ai-observability/).
+
+## Attributes SigNoz reads
+
+The thread reads these <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI</a> span attributes. If your instrumentation uses other names, map them in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/).
+
+| Attribute | Used for |
+| --- | --- |
+| `gen_ai.system_instructions` | The leading system message. |
+| `gen_ai.input.messages` | The user and prior turns sent to the model. |
+| `gen_ai.output.messages` | The assistant turns and tool calls returned by the model. |
+| `gen_ai.response.finish_reasons` | The finish reason shown on every output message, overriding per-message values. |
+
+## Next steps
+
+- [Trace Details](https://signoz.io/docs/userguide/span-details/): inspect the spans of one trace.
+- [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/): find an AI trace to open.
+- [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/): check the attributes that each panel and view needs.
+- [LLM Observability](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, Pydantic-AI, and other frameworks.
+
+## Get Help
+
+<GetHelp />
