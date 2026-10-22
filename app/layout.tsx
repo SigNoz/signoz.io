@@ -1,5 +1,6 @@
 import 'css/tailwind.css'
 import 'css/global.css'
+import 'css/cookieyes.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
 import Script from 'next/script'

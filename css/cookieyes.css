@@ -1,0 +1,274 @@
+/*
+ * CookieYes banner and preference centre, themed with the site's tokens.
+ * CookieYes writes colours from its dashboard as inline styles, so every rule here needs
+ * !important, and the `html :is(...)` prefix outranks the dashboard's own custom CSS.
+ * Buttons mirror components/ui/Button.tsx; links mirror .content-link in css/tailwind.css.
+ */
+
+html :is(.cky-consent-container, .cky-modal) {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif !important;
+}
+
+html .cky-consent-container {
+  z-index: 2147483000 !important;
+}
+
+html :is(.cky-consent-container, .cky-modal) :is(.cky-consent-bar, .cky-preference-center) {
+  background-color: var(--popover) !important;
+  border: 1px solid var(--l2-border) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--bg-base-black) 45%, transparent) !important;
+}
+
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(.cky-title, .cky-preference-title, .cky-accordion-btn, .cky-opt-out-checkbox-label) {
+  color: var(--l1-foreground) !important;
+}
+
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(
+    .cky-notice-des,
+    .cky-preference-content-wrapper,
+    .cky-dma-content-wrapper,
+    .cky-accordion-header-des,
+    .cky-cookie-des-table,
+    .cky-empty-cookies-text
+  ) {
+  color: var(--l2-foreground) !important;
+}
+
+html :is(.cky-consent-container, .cky-modal) :is(.cky-notice-des, .cky-accordion-header-des) {
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+html :is(.cky-consent-container, .cky-modal) :is(.cky-horizontal-separator, .cky-accordion) {
+  border-color: var(--l2-border) !important;
+}
+
+html .cky-modal :is(.cky-footer-wrapper, .cky-prefrence-btn-wrapper, .cky-preference-header) {
+  background-color: var(--popover) !important;
+  border-color: var(--l2-border) !important;
+}
+
+html .cky-modal .cky-footer-shadow {
+  background: linear-gradient(180deg, transparent 0%, var(--popover) 100%) !important;
+}
+
+html .cky-modal .cky-audit-table {
+  background-color: var(--l2-background) !important;
+  border-color: var(--l2-border) !important;
+  color: var(--l2-foreground) !important;
+}
+
+html .cky-modal .cky-always-active {
+  color: var(--bg-forest-400) !important;
+}
+
+html :is(.cky-consent-container, .cky-modal) :is(.cky-btn-close, .cky-banner-btn-close) img {
+  filter: invert(1) !important;
+}
+
+/* Tactile buttons: same shell, press travel and noise as components/ui/Button.tsx. */
+html :is(.cky-consent-container, .cky-modal) .cky-btn {
+  --bh: 40px;
+  --bpd: 1.25px;
+  --bbi-rest: -1.75px;
+  --bbi: var(--bbi-rest);
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: var(--bh) !important;
+  min-height: var(--bh) !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 16px !important;
+  border: none !important;
+  border-radius: 3px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.005em !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+  transition:
+    background-color 100ms ease,
+    box-shadow 100ms ease,
+    transform 100ms ease !important;
+}
+
+html :is(.cky-consent-container, .cky-modal) .cky-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100' height='100' filter='url(%23n)'/></svg>");
+  background-size: 100px 100px;
+  mix-blend-mode: overlay;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+html :is(.cky-consent-container, .cky-modal) .cky-btn:active {
+  --bbi: -0.5px;
+  transform: translateY(var(--bpd));
+}
+
+html :is(.cky-consent-container, .cky-modal) .cky-btn:focus-visible {
+  outline: 2px solid var(--primary-background) !important;
+  outline-offset: 2px !important;
+}
+
+/* Reject and accept share the primary fill so refusing is as prominent as accepting. */
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(.cky-btn-accept, .cky-btn-reject, .cky-btn-confirm) {
+  background-color: var(--primary-background) !important;
+  color: var(--primary-foreground, var(--bg-base-white)) !important;
+  box-shadow:
+    inset 0 var(--bbi) 0 color-mix(in srgb, var(--bg-base-black) 20%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--bg-base-white) 14%, transparent),
+    0 1px 3px color-mix(in srgb, var(--primary-background) 28%, transparent),
+    0 0 0 0.5px color-mix(in srgb, var(--primary-background) 45%, transparent) !important;
+}
+
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(.cky-btn-accept, .cky-btn-reject, .cky-btn-confirm):hover {
+  background-color: var(--bg-robin-600) !important;
+}
+
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(.cky-btn-customize, .cky-btn-preferences, .cky-btn-cancel, .cky-btn-do-not-sell) {
+  background-color: var(--l3-background) !important;
+  color: var(--l1-foreground) !important;
+  box-shadow:
+    inset 0 var(--bbi) 0 color-mix(in srgb, var(--bg-base-black) 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--bg-base-white) 10%, transparent),
+    0 1px 2px color-mix(in srgb, var(--bg-base-black) 7%, transparent),
+    0 0 0 0.5px color-mix(in srgb, var(--bg-base-black) 7%, transparent) !important;
+}
+
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(.cky-btn-customize, .cky-btn-preferences, .cky-btn-cancel, .cky-btn-do-not-sell):hover {
+  background-color: var(--bg-neutral-dark-700) !important;
+}
+
+/* The US notice has a single long action; let it wrap rather than overflow the box. */
+html .cky-consent-container .cky-btn-do-not-sell {
+  height: auto !important;
+  padding: 11px 16px !important;
+  line-height: 1.3 !important;
+  white-space: normal !important;
+}
+
+/* Links: the docs prose link (robin underline, fill rises on hover). */
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(
+    .cky-policy,
+    .cky-show-desc-btn,
+    .cky-notice-des a,
+    .cky-preference-content-wrapper a,
+    .cky-dma-content-wrapper a,
+    .cky-accordion-header-des a
+  ) {
+  margin: 0 -3px !important;
+  padding: 0 3px !important;
+  border: none !important;
+  border-radius: 2px !important;
+  color: var(--bg-robin-400) !important;
+  font-size: inherit !important;
+  font-weight: 500 !important;
+  text-decoration: underline !important;
+  text-decoration-color: color-mix(in srgb, var(--bg-robin-400) 60%, transparent) !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 3px !important;
+  background-color: transparent !important;
+  background-image: linear-gradient(var(--bg-robin-400), var(--bg-robin-400)) !important;
+  background-repeat: no-repeat !important;
+  background-position: 0 100% !important;
+  background-size: 100% 0 !important;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    color 80ms cubic-bezier(0.2, 0.6, 0.2, 1),
+    background-size 80ms cubic-bezier(0.2, 0.6, 0.2, 1),
+    text-decoration-color 80ms cubic-bezier(0.2, 0.6, 0.2, 1) !important;
+}
+
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(
+    .cky-policy,
+    .cky-show-desc-btn,
+    .cky-notice-des a,
+    .cky-preference-content-wrapper a,
+    .cky-dma-content-wrapper a,
+    .cky-accordion-header-des a
+  ):is(:hover, :focus-visible) {
+  color: var(--l1-background) !important;
+  background-size: 100% 100% !important;
+  text-decoration-color: transparent !important;
+  outline: none !important;
+}
+
+html .cky-modal .cky-switch input[type='checkbox'] {
+  background: var(--l3-background) !important;
+  box-shadow: inset 0 0 0 1px var(--l2-border) !important;
+}
+
+html .cky-modal .cky-switch input[type='checkbox']:checked {
+  background: var(--primary-background) !important;
+  box-shadow: none !important;
+}
+
+html .cky-modal .cky-switch input[type='checkbox']::before {
+  background-color: var(--l1-foreground) !important;
+}
+
+html .cky-modal input[type='checkbox'].cky-opt-out-checkbox {
+  background-color: var(--l3-background) !important;
+  border: 1px solid var(--l2-border) !important;
+}
+
+html .cky-modal input[type='checkbox'].cky-opt-out-checkbox:checked {
+  background-color: var(--primary-background) !important;
+  border: none !important;
+}
+
+html
+  :is(.cky-consent-container, .cky-modal)
+  :is(
+    .cky-switch input,
+    .cky-accordion-btn,
+    .cky-btn-close,
+    .cky-banner-btn-close,
+    .cky-opt-out-checkbox
+  ):focus-visible {
+  outline: 2px solid var(--primary-background) !important;
+  outline-offset: 2px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html :is(.cky-consent-container, .cky-modal) :is(.cky-btn, .cky-policy, .cky-show-desc-btn, a) {
+    transition: none !important;
+  }
+
+  html :is(.cky-consent-container, .cky-modal) .cky-btn:active {
+    transform: none;
+  }
+}
+
+/* Hide categories that have no cookies and no switch (Performance today); they offer no choice. */
+html .cky-modal .cky-accordion:not(:has(.cky-switch)):has(.cky-empty-cookies-text) {
+  display: none !important;
+}
