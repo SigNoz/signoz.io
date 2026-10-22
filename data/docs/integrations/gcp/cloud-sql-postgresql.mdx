@@ -7,7 +7,7 @@ doc_type: howto
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
-The **Cloud SQL for PostgreSQL** integration brings instance metrics into SigNoz, with a pre-built dashboard for the service. It also brings in your PostgreSQL logs.
+The **Cloud SQL for PostgreSQL** integration brings instance metrics and logs into SigNoz, with a pre-built dashboard for the service.
 
 Cloud SQL publishes its metrics to **Cloud Monitoring** and its logs to **Cloud Logging**. SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
 
@@ -44,7 +44,7 @@ Before configuring this service, complete the shared GCP integration setup:
 
 1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
 2. Select **GCP Cloud SQL for PostgreSQL** from the service list.
-3. Toggle **Metric Collection** on to activate the pre-built dashboard. Toggle **Log Collection** on if you also send logs.
+3. Toggle **Metric Collection** on to activate the pre-built dashboard. Toggle **Log Collection** if you also want to [send logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
 4. Open the **Data Collected** tab and note the metrics listed there. These are the metrics the dashboard's panels query.
 
 <Admonition type="warning">
@@ -92,7 +92,7 @@ If your instances span several projects, add one **named** receiver per project 
 </Admonition>
 
 <Admonition type="info">
-**Also monitoring Cloud SQL for MySQL in the same project?** Add its metrics from the [MySQL page](https://signoz.io/docs/integrations/gcp/cloud-sql-mysql/) to the same `googlecloudmonitoring` receiver. Three metrics are in both lists: `database/up`, `database/cpu/utilization`, and `database/memory/utilization`. Listing them twice is harmless, but you only need them once. Don't add a second receiver for the same project instead: the shared metrics would then be collected twice.
+**Also monitoring Cloud SQL for MySQL in the same project?** Add its metrics from the [MySQL section](https://signoz.io/docs/integrations/gcp/cloud-sql-mysql/) to the same `googlecloudmonitoring` receiver. Three metrics are in both lists: `database/up`, `database/cpu/utilization`, and `database/memory/utilization`. Listing them twice is harmless, but you only need them once. Don't add a second receiver for the same project instead: the shared metrics would then be collected twice.
 </Admonition>
 
 The three `insights/` metrics need <a href="https://cloud.google.com/sql/docs/postgres/using-query-insights" target="_blank" rel="noopener noreferrer nofollow">Query Insights</a> enabled on the instance (off by default, no extra charge) or their panels stay empty; drop them from the list if you don't need query timing.
