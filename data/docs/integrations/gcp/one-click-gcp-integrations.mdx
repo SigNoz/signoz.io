@@ -115,12 +115,14 @@ curl -fsSL https://signoz.io/foundry.sh | bash -s -- cloudintegration gcp terraf
   --signoz-api-url <signoz-api-url> \
   --signoz-api-key <signoz-api-key> \
   --ingestion-url <ingestion-url> \
-  --ingestion-key <ingestion-key>
+  --ingestion-key <ingestion-key> \
+  --agent-version <agent-version>
 ```
 
 **Verify these values:**
 
 - `<deployment-project-id>` and `<deployment-region>` match what you entered in Step 1.
+- `<agent-version>` is the SigNoz agent release that SigNoz picks for you, for example `v0.0.16`.
 - The other values come from SigNoz. You don't need to change them.
 
 **You should see:** the script prints its progress for each step and ends with `Deployed projects/<deployment-project-id>/locations/<deployment-region>/deployments/signoz-integration-bootstrap`. The whole run takes a few minutes.
@@ -278,22 +280,18 @@ Created by the setup command before the deployment runs:
 
 </ToggleHeading>
 
-### SigNoz shows "We couldn't establish a connection to your GCP account"
-
-SigNoz waits up to 10 minutes for the agent to check in.
+**SigNoz shows "We couldn't establish a connection to your GCP account".** SigNoz waits up to 10 minutes for the agent to check in.
 
 - Confirm the setup command finished and the deployment is **Active** in **Infrastructure Manager** > **Deployments**.
 - In **Cloud Run**, open `signoz-integration-agent` and check its **Logs** tab for errors.
 - Once the agent is running, click **Check Again** in SigNoz.
 
-### SigNoz shows "Failed to generate GCP setup commands"
+**SigNoz shows "Failed to generate GCP setup commands".**
 
 - Check that **Deployment Project ID** is the project ID, not the display name, and has no extra spaces.
 - On SigNoz Enterprise (Self-Hosted), check that every field under **Deployment details & ingestion secrets** is filled in and the URLs start with `https://`.
 
-### The setup command fails
-
-The script stops at the first step that fails and prints the error. Common causes:
+**The setup command fails.** The script stops at the first step that fails and prints the error. Common causes:
 
 - **"gcloud is not signed in" or "Cannot access project"**: run `gcloud auth login`, or check that the account gcloud uses can open the deployment project.
 - **"Secret ... exists but is not labeled managed-by=signoz"**: a secret with the same name already exists and SigNoz didn't create it. The script won't overwrite it. Delete or rename that secret, then rerun the command.
@@ -301,19 +299,13 @@ The script stops at the first step that fails and prints the error. Common cause
 
 The script reuses everything it already created, so rerunning it is safe. Don't delete the deployment to retry.
 
-### The agent logs "already connected to cloud integration"
+**The agent logs "already connected to cloud integration".** Another SigNoz GCP integration already uses this project. Disconnect the other account in SigNoz, or use a different project.
 
-Another SigNoz GCP integration already uses this project. Disconnect the other account in SigNoz, or use a different project.
+**The agent logs "signoz deployment region ... does not match agent region".** The region in SigNoz is different from the region in the deployment. Disconnect the account, then connect again and run the new setup command SigNoz generates.
 
-### The agent logs "signoz deployment region ... does not match agent region"
+**Deleting the deployment fails with "service account ... was not found".** The `signoz-integration-bootstrap` service account was deleted before the deployment. Infrastructure Manager needs that account to remove the resources. Rerun the setup command from SigNoz to recreate the service account and its roles, wait a few minutes, then delete the deployment again. After the delete succeeds, remove the service account and the secrets.
 
-The region in SigNoz is different from the region in the deployment. Disconnect the account, then connect again and run the new setup command SigNoz generates.
-
-### Deleting the deployment fails with "service account ... was not found"
-
-The `signoz-integration-bootstrap` service account was deleted before the deployment. Infrastructure Manager needs that account to remove the resources. Rerun the setup command from SigNoz to recreate the service account and its roles, wait a few minutes, then delete the deployment again. After the delete succeeds, remove the service account and the secrets.
-
-### Metrics or logs don't show up after turning on a service
+**Metrics or logs don't show up after turning on a service.**
 
 - Wait at least 10 minutes. The first metrics take a while to arrive after you turn on a service.
 - Confirm **Metric Collection** or **Log Collection** is on for the service, and that you clicked **Save**.
