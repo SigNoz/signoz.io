@@ -2,6 +2,7 @@ import 'css/tailwind.css'
 import 'css/global.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
+import Script from 'next/script'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -9,6 +10,8 @@ import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import RB2BLoader from '@/components/Analytics/RB2BLoader'
 import { AnonymousIdSetter } from './anonymous-id-setter'
+
+const COOKIEYES_ID = process.env.NEXT_PUBLIC_COOKIEYES_ID
 
 const inter = Inter({
   subsets: ['latin'],
@@ -69,6 +72,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
+      {COOKIEYES_ID ? (
+        <Script
+          id="cookieyes"
+          src={`https://cdn-cookieyes.com/client_data/${COOKIEYES_ID}/script.js`}
+          strategy="beforeInteractive"
+        />
+      ) : null}
       <GoogleTagManager gtmId="GTM-N9B6D4H" />
       <link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png" />
