@@ -3333,16 +3333,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/integrations/gcp/collect-logs/',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
-          source: '/docs/integrations/gcp/collect-logs',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
           source: '/blog/llm-observability/',
           destination: '/docs/llm-observability/',
           permanent: true,
