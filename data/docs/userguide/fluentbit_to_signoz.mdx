@@ -1,148 +1,327 @@
 ---
-date: 2026-03-21
-title: FluentBit to SigNoz
-description: Send Fluent Bit logs to SigNoz using the OpenTelemetry Collector.
-hide_table_of_contents: true
+date: 2026-10-23
+title: Send Fluent Bit Logs to SigNoz from VMs and Kubernetes
+description: Forward Fluent Bit logs from VMs or Kubernetes to SigNoz through the OpenTelemetry Collector, and map Kubernetes metadata to attributes.
+doc_type: howto
 ---
 
-If you use FluentBit to collect logs in your stack, this tutorial will guide you on how to send logs from FluentBit to SigNoz.
+## Overview
 
-At SigNoz, we use the OpenTelemetry Collector to receive logs, which supports the FluentForward protocol. You can forward logs from your FluentBit agent to the OpenTelemetry Collector using this protocol.
+This guide sends the logs that Fluent Bit collects to SigNoz. Fluent Bit sends the logs with its `forward` output to the OpenTelemetry Collector. The Collector receives them with the `fluentforward` receiver and exports them to SigNoz. On Kubernetes, the Collector also turns the pod metadata that Fluent Bit adds into separate `k8s.*` attributes.
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+The steps are the same. Point the Collector at your SigNoz instance and remove the ingestion key header, as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
 
-### Collect Logs Using FluentBit in SigNoz Cloud
+## Prerequisites
 
-1. **Add OpenTelemetry Collector binary to your VM**
-Follow this [guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+- Fluent Bit. This guide uses Fluent Bit v5.1.5.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+- The OpenTelemetry Collector on a [VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/), or the `k8s-infra` chart on [Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
 
-2. **Add FluentForward receiver to your `config.yaml`:**
+## Send Fluent Bit logs to SigNoz
 
-    ```yaml
-    receivers:
-      fluentforward:
-        endpoint: 0.0.0.0:24224
-    ```
-    Here, port 24224 is used for listening to the FluentForward protocol. You can change it to a port of your choice. Learn more about the FluentForward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+<Tabs entityName="environment">
+<TabItem value="vm" label="Linux VM" default>
 
-3. **Modify your `config.yaml` to include the receiver:**
+### Step 1. Add the fluentforward receiver to the Collector
 
-    ```yaml
-    service:
-      ...
-      pipelines:
-        logs:
-          receivers: [otlp, fluentforward]
-          processors: [batch]
-          exporters: [otlp]
-    ```
+Add the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver" target="_blank" rel="noopener noreferrer nofollow">`fluentforward` receiver</a> to the `receivers` section of the Collector configuration (`/etc/otelcol-contrib/config.yaml`). Then add it to the `logs` pipeline:
 
-4. **Update FluentBit configuration to forward logs to the OpenTelemetry Collector:**
+```yaml:config.yaml {8-10,14}
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  # On Collector v0.151.0 and newer, use "fluent_forward" to avoid a deprecation warning.
+  fluentforward:
+    endpoint: 0.0.0.0:24224
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, fluentforward]
+      processors: [batch, resourcedetection]
+      exporters: [otlphttp]
+```
 
-    ```ini
-    [OUTPUT]
-      Name          forward
-      Match         *
-      Host          localhost
-      Port          24224
-    ```
-    - This configuration forwards logs to the OpenTelemetry Collector listening on port 24224.
-    - If FluentBit is not running on the same host, replace `localhost` with the appropriate host value.
+The receiver listens on port 24224 for the Fluent Forward protocol. Keep the other sections of the file from the install guide.
 
-5. **Restart FluentBit and OpenTelemetry Collector.**
+Restart the Collector:
 
-6. **Use processors to transform logs:**
+```bash
+sudo systemctl restart otelcol-contrib
+```
 
-    To properly transform your existing log model into the OpenTelemetry [log model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md), use OpenTelemetry processors:
+The path and the command apply to the DEB and RPM packages. For macOS and Windows, use the configuration path and the restart steps in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
 
-    ```yaml
-    processors:
-      logstransform:
-        operators:
-          - type: trace_parser
-            trace_id:
-              parse_from: attributes.trace_id
-            span_id:
-              parse_from: attributes.span_id
-          - type: remove
-            field: attributes.trace_id
-          - type: remove
-            field: attributes.span_id
-    ```
+### Step 2. Add a forward output to Fluent Bit
+
+Add a `forward` output to the Fluent Bit configuration (`fluent-bit.yaml`):
+
+```yaml:fluent-bit.yaml
+pipeline:
+  outputs:
+    - name: forward
+      match: '*'
+      host: <collector-host>
+      port: 24224
+      retain_metadata_in_forward_mode: false
+```
+
+**Verify these values:**
+
+- `<collector-host>`: The host where the Collector runs. Use `127.0.0.1` when Fluent Bit runs on the same host.
+
+Set `retain_metadata_in_forward_mode` to `false`. Fluent Bit v5.0.4 and newer set it to `true` by default, and the `fluentforward` receiver cannot read that format. The receiver then drops every log, and Fluent Bit still reports a successful flush.
+
+Restart Fluent Bit so that it loads the new output.
 
 </TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
 
-<TabItem value='self-host' label='Self-Host'>
+The Fluent Bit Helm chart runs Fluent Bit as a DaemonSet. Fluent Bit reads the container log files on each node, and its `kubernetes` filter adds the pod metadata to each log as one nested `kubernetes` map. This step sends the logs to the `k8s-infra` OpenTelemetry Collector agent, which splits that map into `k8s.*` resource attributes.
 
-### Collect Logs Using FluentBit in Self-Hosted SigNoz
+### Step 1. Add the receiver and the mapping to k8s-infra
 
-1. **Add FluentForward receiver to `otel-collector-config.yaml`:**
+Add these values to the `override-values.yaml` file of your `k8s-infra` release:
 
-    ```yaml
+```yaml:override-values.yaml minimap defaultCollapsed
+presets:
+  logsCollection:
+    enabled: false
+otelAgent:
+  ports:
+    fluentforward:
+      enabled: true
+      containerPort: 24224
+      servicePort: 24224
+      protocol: TCP
+  config:
     receivers:
       fluentforward:
         endpoint: 0.0.0.0:24224
-    ```
-    Port 24224 is used for the FluentForward protocol. You can change it to a preferred port. Learn more about the FluentForward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
-
-2. **Update the logs pipeline in `otel-collector-config.yaml`:**
-
-    ```yaml
+    processors:
+      transform/fluentbit_k8s:
+        error_mode: ignore
+        log_statements:
+          - set(log.attributes["k8s.pod.name"], log.attributes["kubernetes"]["pod_name"]) where log.attributes["kubernetes"] != nil
+          - set(log.attributes["k8s.namespace.name"], log.attributes["kubernetes"]["namespace_name"]) where log.attributes["kubernetes"] != nil
+          - set(log.attributes["k8s.pod.uid"], log.attributes["kubernetes"]["pod_id"]) where log.attributes["kubernetes"] != nil
+          - set(log.attributes["k8s.container.name"], log.attributes["kubernetes"]["container_name"]) where log.attributes["kubernetes"] != nil
+          - set(log.attributes["k8s.node.name"], log.attributes["kubernetes"]["host"]) where log.attributes["kubernetes"] != nil
+          - delete_key(log.attributes, "kubernetes")
+      groupbyattrs/fluentbit_k8s:
+        keys: [k8s.pod.name, k8s.namespace.name, k8s.pod.uid, k8s.container.name, k8s.node.name]
     service:
-      ...
       pipelines:
         logs:
           receivers: [otlp, fluentforward]
-          processors: [batch]
-          exporters: [clickhouselogsexporter]
-    ```
+          processors: [transform/fluentbit_k8s, groupbyattrs/fluentbit_k8s, batch]
+```
 
-3. **Expose the port in `docker-compose.yaml`:**
+These values do the following:
 
-    ```yaml
-    otel-collector:
-      ...
-      ports:
-        - "24224:24224"
-    ```
+- `presets.logsCollection.enabled: false` stops the `k8s-infra` agent from reading the container log files. Fluent Bit reads them, so without this line each log arrives twice.
+- `otelAgent.ports.fluentforward` opens port 24224 on the agent pods and on the agent Service.
+- The `transform/fluentbit_k8s` processor copies the fields of the `kubernetes` map to `k8s.*` attributes, then deletes the map.
+- The `groupbyattrs/fluentbit_k8s` processor moves those attributes to the resource. SigNoz then shows the logs under the correct pod, namespace, and container.
 
-4. **Update FluentBit configuration:**
+The chart adds its own processors before these, so you only list the new ones.
 
-    ```ini
+Apply the values:
+
+```bash
+helm upgrade <release-name> signoz/k8s-infra -n <namespace> -f override-values.yaml
+```
+
+**Verify these values:**
+
+- `<release-name>`: The name of your `k8s-infra` release.
+- `<namespace>`: The namespace of your `k8s-infra` release.
+
+### Step 2. Install Fluent Bit with a forward output
+
+Save these values as `fluent-bit-values.yaml`:
+
+```yaml:fluent-bit-values.yaml
+config:
+  inputs: |
     [INPUT]
-      Name   dummy
-      Tag    dummy.log
-      Dummy {"message": "mylog", "trace_id": "0000000000000000f4dbb3edd765f620", "span_id": "43222c2d51a7abe3"}
+        Name tail
+        Path /var/log/containers/*.log
+        Exclude_Path /var/log/containers/*-otel-agent-*_<namespace>_*.log
+        multiline.parser docker, cri
+        Tag kube.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
 
+  outputs: |
     [OUTPUT]
-      Name          forward
-      Match         *
-      Host          <otel-collector-host>
-      Port          24224
-    ```
-    Replace `<otel-collector-host>` with the host where the OpenTelemetry Collector is running. For more info, check the [troubleshooting guide](https://signoz.io/docs/ingestion/self-hosted/overview/#endpoints).
+        Name forward
+        Match kube.*
+        Host <release-name>-k8s-infra-otel-agent.<namespace>.svc.cluster.local
+        Port 24224
+        Retain_Metadata_In_Forward_Mode false
+```
 
-5. **Restart FluentBit and SigNoz.**
+**Verify these values:**
 
-6. **Use processors to transform logs:**
+- `<release-name>`: The name of your `k8s-infra` release. If the release name already contains `k8s-infra`, the Service is `<release-name>-otel-agent`. Run `kubectl get svc -n <namespace>` to see the name.
+- `<namespace>`: The namespace of your `k8s-infra` release. The `Exclude_Path` line stops Fluent Bit from reading the logs of the agent pods. Other pods in that namespace still send their logs.
 
-    To transform your existing log model into the OpenTelemetry [log model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md), use processors:
+The chart keeps its default `kubernetes` filter, which adds the pod metadata. Set `Retain_Metadata_In_Forward_Mode` to `false`. Fluent Bit v5.0.4 and newer set it to `true` by default, and the `fluentforward` receiver drops logs in that format.
 
-    ```yaml
-    processors:
-      logstransform:
-        operators:
-          - type: trace_parser
-            trace_id:
-              parse_from: attributes.trace_id
-            span_id:
-              parse_from: attributes.span_id
-          - type: remove
-            field: attributes.trace_id
-          - type: remove
-            field: attributes.span_id
-    ```
+Install the chart:
+
+```bash
+helm repo add fluent https://fluent.github.io/helm-charts
+helm repo update
+helm install fluent-bit fluent/fluent-bit -n logging --create-namespace -f fluent-bit-values.yaml
+```
+
+If you already run the Fluent Bit chart, add the `forward` output and the `Exclude_Path` line to your values file instead, then upgrade that release:
+
+```bash
+helm upgrade <fluent-bit-release> fluent/fluent-bit -n <fluent-bit-namespace> -f <your-values-file>
+```
 
 </TabItem>
 </Tabs>
+
+<details>
+<ToggleHeading>
+
+## Link logs to traces (Optional)
+
+</ToggleHeading>
+
+If your logs carry `trace_id` and `span_id` fields, the Collector stores them as plain attributes. Move them to the trace context of the log, so that SigNoz links each log to its trace.
+
+Add a `transform` processor to the `processors` section of the Collector configuration:
+
+```yaml:config.yaml
+processors:
+  transform/trace_context:
+    error_mode: ignore
+    log_statements:
+      - set(log.trace_id.string, log.attributes["trace_id"]) where log.attributes["trace_id"] != nil
+      - set(log.span_id.string, log.attributes["span_id"]) where log.attributes["span_id"] != nil
+      - delete_key(log.attributes, "trace_id")
+      - delete_key(log.attributes, "span_id")
+```
+
+Add the processor to the start of the `logs` pipeline:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, fluentforward]
+      processors: [transform/trace_context, batch, resourcedetection]
+      exporters: [otlphttp]
+```
+
+On Kubernetes, add the same processor under `otelAgent.config.processors` and to the `logs` pipeline in `override-values.yaml`.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Send logs without a Collector (Optional)
+
+</ToggleHeading>
+
+Fluent Bit can send logs to SigNoz Cloud over OTLP with its `opentelemetry` output. Use this path when you do not run a Collector. The Kubernetes mapping above needs the Collector, so this path fits a VM or Docker host.
+
+```yaml:fluent-bit.yaml defaultCollapsed
+pipeline:
+  inputs:
+    - name: tail
+      path: <log-file-path>
+      processors:
+        logs:
+          - name: opentelemetry_envelope
+          - name: content_modifier
+            context: otel_resource_attributes
+            action: upsert
+            key: service.name
+            value: <service-name>
+  outputs:
+    - name: opentelemetry
+      match: '*'
+      host: ingest.<region>.signoz.cloud
+      port: 443
+      tls: on
+      tls.verify: on
+      logs_uri: /v1/logs
+      header: signoz-ingestion-key <your-ingestion-key>
+```
+
+**Verify these values:**
+
+- `<log-file-path>`: The log file that Fluent Bit reads, for example `/var/log/app/*.log`.
+- `<service-name>`: The name that SigNoz shows for these logs. The `opentelemetry_envelope` and `content_modifier` processors set it as the `service.name` resource attribute.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</details>
+
+## Validate
+
+1. In SigNoz, open **Logs** > **Logs Explorer**.
+2. Filter by `fluent.tag EXISTS`. The `fluentforward` receiver adds the Fluent Bit tag of each log as the `fluent.tag` attribute. If you send logs without a Collector, filter by `service.name` instead.
+3. On Kubernetes, open a log and make sure that it has the `k8s.pod.name`, `k8s.namespace.name`, and `k8s.container.name` resource attributes, and no `kubernetes` attribute.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/fluentbit-kubernetes-logs-explorer.webp"
+  alt="Logs Explorer filtered by fluent.tag EXISTS, with namespace and pod name columns for Fluent Bit logs from Kubernetes"
+  caption="Fluent Bit logs from Kubernetes, with the namespace and pod name as separate attributes"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Fluent Bit reports a successful flush, but no logs arrive
+
+Fluent Bit v5.0.4 and newer send metadata in forward mode by default. The `fluentforward` receiver cannot read it and drops the logs. It logs the error only at the `debug` level:
+
+```text noLineNumbers
+failed to parse forward mode e: unknown type of value: [... map[]] at Time at Entries/0
+```
+
+Set `retain_metadata_in_forward_mode: false` in the `forward` output, then restart Fluent Bit.
+
+### Fluent Bit cannot connect to the Collector
+
+Fluent Bit logs `no upstream connections available`.
+
+1. Make sure that the Collector runs and that the `logs` pipeline lists the `fluentforward` receiver.
+2. Make sure that the `host` and `port` of the `forward` output match the Collector. On Kubernetes, run `kubectl get svc -n <namespace>` and make sure that the agent Service lists port 24224.
+
+### Kubernetes metadata stays in one attribute
+
+Logs show a single `kubernetes` attribute when the `transform/fluentbit_k8s` processor does not run. Make sure that the `logs` pipeline in `override-values.yaml` lists `transform/fluentbit_k8s` and `groupbyattrs/fluentbit_k8s`, then run `helm upgrade` again.
+
+### Each Kubernetes log appears twice
+
+The `k8s-infra` agent and Fluent Bit both read the container log files. Set `presets.logsCollection.enabled` to `false` in `override-values.yaml`, then run `helm upgrade` again.
+
+</details>
+
+## Next steps
+
+- [Create log pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse fields or change severity after ingestion.
+- [Correlate traces and logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to jump from a log to its trace.
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on error logs.
+
+## Get Help
+
+<GetHelp />
