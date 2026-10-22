@@ -870,7 +870,12 @@ If you run the agent on Linux as the `otelcol-contrib` package, or as an `otelco
 
    - `<your-environment>`: Your deployment environment, for example `staging` or `production`.
 
-   Foundry merges them over its own config: maps merge and lists replace, so restate whole lists, with Foundry's names `otlp/http` and `otlp/grpc` for your `otlp` receiver and `otlphttp/signoz` for your `otlphttp` exporter, and keep `journald` in the `logs` pipeline. Your exporter's endpoint and key go in `SIGNOZ_INGESTION_ENDPOINT` and `SIGNOZ_INGESTION_KEY`, as in the install guide.
+   Foundry merges the `collector/agent/agent.yaml` block over its own config. When you move your settings over:
+
+   - Restate a whole list to change it, such as a pipeline's `receivers` or an exclude list. A list you set replaces Foundry's.
+   - Use Foundry's names: `otlp/grpc` and `otlp/http` for your `otlp` receiver's gRPC and HTTP protocols, and `otlphttp/signoz` for your `otlphttp` exporter.
+   - Keep `journald` in the `logs` pipeline's `receivers`.
+   - Set your exporter's endpoint and key as `SIGNOZ_INGESTION_ENDPOINT` and `SIGNOZ_INGESTION_KEY` under `spec.collector.spec.env`, not as values in `agent.yaml`. The install guide's `agent.yaml` block reads the key from there.
 
 3. To free the host ports the Foundry agent binds, remove the old collector. For the package on Debian and Ubuntu, run this on the host:
 

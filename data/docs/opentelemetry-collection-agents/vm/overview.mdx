@@ -19,7 +19,7 @@ The VM Collection Agent primarily performs the following:
 
 ### Agent (systemd service)
 
-On Linux, the agent runs as the `signoz-collector-agent.service` systemd unit, under the `signoz-collector-agent` user, and collects:
+On Linux, the agent runs as a systemd service on each host and collects:
 
 - **Host metrics:** CPU, memory, disk I/O, filesystem usage, network, load, paging, per-process usage, process counts, and uptime, via `hostmetrics`.
 - **Host logs:** Journal entries at priority warning and above, via `journald`. Each record's `service.name` resource attribute is its systemd unit without `.service`, or its program name when it has no unit. The agent leaves out its own entries.
@@ -28,7 +28,7 @@ On Linux, the agent runs as the `signoz-collector-agent.service` systemd unit, u
 
 ### Agent (process or Windows service)
 
-On macOS and Windows, the agent runs as a collector process under the user who starts it, or with the Windows MSI as the `otelcol-contrib` service under LocalSystem, and collects:
+On macOS and Windows, the agent runs as a process on each host, or as a Windows service when you install it with the MSI, and collects:
 
 - **Host metrics:** CPU, memory, disk I/O, filesystem usage, network, load, paging, per-process CPU and memory, and uptime, via `hostmetrics`, plus process counts on macOS.
 - **OTLP:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318).
