@@ -225,7 +225,7 @@ service:
       exporters: [otlphttp/caddy]
 ```
 
-Set `CADDY_METRICS_TARGET` to the address of the metrics site, for example `localhost:9180` on a VM or `caddy:9180` in Docker. Set the other two variables as in [Step 3 of the logs section](#step-3-start-the-collector).
+Set `CADDY_METRICS_TARGET` to the address of the metrics site, for example `localhost:9180` on a VM or `caddy:9180` in Docker. Set `OTLP_DESTINATION_ENDPOINT` to `https://ingest.<region>.signoz.cloud:443`, where `<region>` is your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint), and `SIGNOZ_INGESTION_KEY` to your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 </details>
 
@@ -363,7 +363,7 @@ Caddy creates the log file with mode `600` by default, and the Collector contain
 
 ### Step 2. Copy the Collector configuration file
 
-Create the file `caddy-logs-collection-config.yaml` from [Step 2 of the VM tab](#step-2-create-the-collector-configuration-file).
+Create `caddy-logs-collection-config.yaml` with the same content as in Step 2 of the VM tab.
 
 ### Step 3. Add the Collector to Docker Compose
 
@@ -406,19 +406,21 @@ docker compose up -d
 
 ### Step 1. Write access logs to stdout
 
-Add a `log` directive to each site in the Caddyfile:
+Add a `log` block to each site in the Caddyfile:
 
-```text:Caddyfile {5}
+```text:Caddyfile {5-7}
 example.com {
 	tracing {
 		span caddy_request
 	}
-	log
+	log {
+		format json
+	}
 	reverse_proxy localhost:8080
 }
 ```
 
-Without an `output`, Caddy writes JSON access logs to stderr. Kubernetes stores them with the other container logs.
+Without an `output`, Caddy writes access logs to stderr. `format json` keeps them in JSON, which the parser in Step 2 expects. Kubernetes stores them with the other container logs.
 
 ### Step 2. Parse the logs in k8s-infra
 
