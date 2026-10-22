@@ -7,6 +7,7 @@ import {
   routeLabel,
   routeUrl,
 } from '@/utils/sitemapRoutes'
+import { getLegalRoutes } from '@/utils/legal'
 import { getLlmStarterLinks, type LlmStarterLink } from './agentDiscovery'
 
 const link = (label: string, url: string, description?: string): string =>
@@ -58,7 +59,7 @@ export async function buildLlmsFullMarkdown(): Promise<string> {
 
   const company = [
     link('Company pages sitemap (markdown)', `${siteMetadata.siteUrl}/corporate/sitemap.md`),
-    routeLinks(CORPORATE_SITEMAP_ROUTES),
+    routeLinks([...CORPORATE_SITEMAP_ROUTES, ...getLegalRoutes()]),
   ].join('\n')
 
   return [
