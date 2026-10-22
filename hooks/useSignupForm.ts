@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLogEvent } from './useLogEvent'
+import { setUserId } from '@/utils/userClient'
 import {
   createSubmissionRelayId,
   sendSubmissionRelayInBackground,
@@ -138,7 +139,7 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
           setSubmitSuccess(true)
           handleGTMCustomEventTrigger(payload)
 
-          localStorage.setItem('app_user_id', payload.email)
+          setUserId(payload.email)
 
           logEvent({
             eventType: 'identify',
@@ -261,7 +262,7 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
           setSubmitSuccess(true)
           handleGTMCustomEventTrigger({ ...responseData?.data, region: data_region })
 
-          localStorage.setItem('app_user_id', responseData.data.email)
+          setUserId(responseData.data.email)
 
           logEvent({
             eventType: 'identify',

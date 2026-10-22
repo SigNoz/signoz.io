@@ -6,6 +6,7 @@ import { useLogEvent } from '../../hooks/useLogEvent'
 import { getPageType } from '../../utils/getPageType'
 import { detectBotClientSide } from '../../utils/logEvent'
 import { getOrCreateAnalyticsSessionId } from '../../utils/userClient'
+import { hasConsent } from '../../utils/consent/client'
 
 const FLAGGED_TIMEZONES = (process.env.NEXT_PUBLIC_PAGEVIEW_FLAGGED_TIMEZONES || '')
   .split(',')
@@ -171,7 +172,7 @@ export default function PageViewTracker() {
     const pageType = getPageType(pathname || '') // Ensure pathname is defined
     const botDetection = detectBotClientSide()
     const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : ''
-    const sessionId = getOrCreateAnalyticsSessionId()
+    const sessionId = hasConsent('analytics') ? getOrCreateAnalyticsSessionId() : undefined
     const pageUrl =
       typeof window !== 'undefined' ? `${window.location.origin}${currentUrl}` : currentUrl
     const pageTitle = typeof document !== 'undefined' ? document.title : undefined

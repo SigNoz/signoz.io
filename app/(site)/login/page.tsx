@@ -6,6 +6,7 @@ import React, { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, ArrowUpRight, Dot, Loader2, Pencil } from 'lucide-react'
 import { useLogEvent } from '@/hooks/useLogEvent'
+import { setUserId } from '@/utils/userClient'
 import Button from '@/components/ui/Button'
 import Pagination from '@signozhq/pagination'
 
@@ -159,7 +160,7 @@ export default function Login() {
 
       if (data.status === 'success') {
         setSubmitSuccess(true)
-        localStorage.setItem('app_user_id', workEmail || '')
+        setUserId(workEmail || '')
 
         const tenants: Tenant[] = data?.data ?? []
         const paginationInfo: PaginationInfo | null = data?._pagination ?? null
