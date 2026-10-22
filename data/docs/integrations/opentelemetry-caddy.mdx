@@ -1,0 +1,557 @@
+---
+date: 2026-10-22
+title: Monitor Caddy with OpenTelemetry - Traces, Metrics, and Logs
+description: Send Caddy traces, metrics, and JSON access logs to SigNoz with OpenTelemetry. Link each access log line to its trace and track request rates and latency.
+doc_type: howto
+---
+
+## Overview
+
+Caddy has built-in OpenTelemetry support. It exports a trace span for each request and pushes its HTTP metrics over OTLP, straight to SigNoz Cloud. For access logs, Caddy writes JSON lines that an OpenTelemetry Collector reads, parses, and links to the trace of the same request.
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Caddy v2.11.3 or newer. Older versions send traces only, see [Scrape metrics with Prometheus](#scrape-metrics-with-prometheus).
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) for access logs on a VM or in Docker. On Kubernetes, the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) collects them.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send traces and metrics
+
+### Step 1. Enable tracing and metrics in the Caddyfile
+
+Add the `metrics` global option and a `tracing` block to each site that you want to trace:
+
+```text:Caddyfile
+{
+	metrics {
+		otlp
+	}
+}
+
+example.com {
+	tracing {
+		span caddy_request
+	}
+	reverse_proxy localhost:8080
+}
+```
+
+- `otlp` pushes Caddy metrics over OTLP. Caddy keeps its Prometheus endpoint at `localhost:2019/metrics` too.
+- `span` sets the span name. Without it, every span has the name `handler`.
+
+The global options block must be the first block in the Caddyfile. If your Caddyfile already has one, add `metrics` to it.
+
+### Step 2. Set the OpenTelemetry environment variables
+
+Caddy reads its export settings from the standard OpenTelemetry environment variables. Caddy v2.11.0 and newer send OTLP over HTTP. Older versions send gRPC. SigNoz Cloud accepts both on the same endpoint.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Open a systemd drop-in file for the Caddy service:
+
+```bash
+sudo systemctl edit caddy
+```
+
+Add these lines and save the file:
+
+```ini:/etc/systemd/system/caddy.service.d/override.conf
+[Service]
+# Stop Caddy from printing its environment, which includes the ingestion key, to the journal.
+ExecStart=
+ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile
+Environment="OTEL_SERVICE_NAME=caddy"
+Environment="OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+Environment="OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+The Caddy package starts Caddy with `--environ`, which writes every environment variable to the journal. The two `ExecStart` lines replace that command with one that does not.
+
+Restart Caddy:
+
+```bash
+sudo systemctl restart caddy
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Set the variables on the Caddy service in your `docker-compose.yml`:
+
+```yaml:docker-compose.yml
+services:
+  caddy:
+    image: caddy:2.11.7
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    environment:
+      OTEL_SERVICE_NAME: caddy
+      OTEL_EXPORTER_OTLP_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+      OTEL_EXPORTER_OTLP_HEADERS: signoz-ingestion-key=<your-ingestion-key>
+```
+
+Recreate the container:
+
+```bash
+docker compose up -d caddy
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+Store the ingestion key in a Secret in the namespace of Caddy:
+
+```bash
+kubectl -n <namespace> create secret generic signoz-ingestion --from-literal=key="<your-ingestion-key>"
+```
+
+Add the variables to the Caddy container in your Deployment. Kubernetes expands `$(SIGNOZ_INGESTION_KEY)` because the variable comes earlier in the list:
+
+```yaml:caddy-deployment.yaml
+spec:
+  template:
+    spec:
+      containers:
+        - name: caddy
+          image: caddy:2.11.7
+          env:
+            - name: SIGNOZ_INGESTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-ingestion
+                  key: key
+            - name: OTEL_SERVICE_NAME
+              value: caddy
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: https://ingest.<region>.signoz.cloud:443
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              value: signoz-ingestion-key=$(SIGNOZ_INGESTION_KEY)
+```
+
+Apply the Deployment:
+
+```bash
+kubectl apply -f caddy-deployment.yaml
+```
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<namespace>`: The Kubernetes namespace where Caddy runs
+
+<details>
+<ToggleHeading>
+## Send traces and metrics through a Collector
+</ToggleHeading>
+
+If you already run an OpenTelemetry Collector with an `otlp` receiver, point Caddy at it instead of SigNoz Cloud. The Collector adds the ingestion key, so Caddy does not need it.
+
+Set only these two variables in Step 2:
+
+```bash
+OTEL_SERVICE_NAME=caddy
+OTEL_EXPORTER_OTLP_ENDPOINT=http://<collector-host>:4318
+```
+
+`<collector-host>` is the host name or IP address of the Collector, as Caddy reaches it. The Collector needs `traces` and `metrics` pipelines that start at its `otlp` receiver.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Scrape metrics with Prometheus
+</ToggleHeading>
+
+Caddy v2.11.2 and older cannot push metrics over OTLP. With these versions, turn on metrics and let the Collector scrape the Prometheus endpoint of Caddy.
+
+The admin API of Caddy serves metrics at `localhost:2019/metrics`, which other containers cannot reach. Add a site that serves only metrics:
+
+```text:Caddyfile
+{
+	metrics
+}
+
+:9180 {
+	metrics /metrics
+}
+```
+
+Do not expose port `9180` to the internet.
+
+Add a `prometheus` receiver to the Collector configuration:
+
+```yaml:caddy-metrics-collection-config.yaml defaultCollapsed
+receivers:
+  prometheus/caddy:
+    config:
+      scrape_configs:
+        - job_name: caddy
+          scrape_interval: 30s
+          static_configs:
+            - targets: ["${env:CADDY_METRICS_TARGET}"]
+
+processors:
+  resource/caddy:
+    attributes:
+      - key: service.name
+        value: caddy
+        action: upsert
+  batch:
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/caddy:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/caddy:
+      receivers: [prometheus/caddy]
+      processors: [resource/caddy, batch]
+      exporters: [otlphttp/caddy]
+```
+
+Set `CADDY_METRICS_TARGET` to the address of the metrics site, for example `localhost:9180` on a VM or `caddy:9180` in Docker. Set the other two variables as in [Step 3 of the logs section](#step-3-start-the-collector).
+
+</details>
+
+## Collect access logs
+
+Caddy writes access logs as JSON. When tracing is on, each line has the `traceID` and `spanID` of its request. The Collector parses each line and copies these IDs to the log record, so SigNoz links the log to its trace.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+### Step 1. Write access logs to a file
+
+Add a `log` block to each site in the Caddyfile:
+
+```text:Caddyfile {5-10}
+example.com {
+	tracing {
+		span caddy_request
+	}
+	log {
+		output file /var/log/caddy/access.log {
+			mode 640
+		}
+		format json
+	}
+	reverse_proxy localhost:8080
+}
+```
+
+Caddy creates the log file with mode `600` by default, and the Collector cannot read it. `mode 640` lets the `caddy` group read the file. Add the user that runs the Collector to that group, then start a new login session for that user so that the change applies:
+
+```bash
+sudo usermod -aG caddy <collector-user>
+```
+
+- `<collector-user>`: The user that runs `otelcol-contrib` in Step 3.
+
+Restart Caddy. A reload does not change the mode of a file that already exists.
+
+```bash
+sudo systemctl restart caddy
+```
+
+### Step 2. Create the Collector configuration file
+
+Create a file named `caddy-logs-collection-config.yaml`:
+
+```yaml:caddy-logs-collection-config.yaml minimap defaultCollapsed
+receivers:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/caddy:
+    include:
+      - ${env:CADDY_ACCESS_LOG_FILE}
+    start_at: end
+    resource:
+      service.name: caddy
+    operators:
+      - type: json_parser
+        parse_from: body
+        timestamp:
+          parse_from: attributes.ts
+          layout_type: epoch
+          layout: s.ns
+        severity:
+          parse_from: attributes.level
+      - type: trace_parser
+        if: attributes.traceID != nil
+        trace_id:
+          parse_from: attributes.traceID
+        span_id:
+          parse_from: attributes.spanID
+
+processors:
+  batch:
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/caddy:
+    endpoint: ${env:OTLP_DESTINATION_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+
+service:
+  pipelines:
+    logs/caddy:
+      receivers: [filelog/caddy]
+      processors: [batch]
+      exporters: [otlphttp/caddy]
+```
+
+### Step 3. Start the Collector
+
+Set the environment variables that the configuration reads:
+
+```bash
+# path of the Caddy access log, must be readable by the otel collector
+export CADDY_ACCESS_LOG_FILE="/var/log/caddy/access.log"
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Start the Collector with the configuration file:
+
+```bash
+otelcol-contrib --config caddy-logs-collection-config.yaml
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+### Step 1. Write access logs to a shared volume
+
+Add a `log` block to each site in the Caddyfile:
+
+```text:Caddyfile {5-10}
+example.com {
+	tracing {
+		span caddy_request
+	}
+	log {
+		output file /var/log/caddy/access.log {
+			mode 644
+		}
+		format json
+	}
+	reverse_proxy localhost:8080
+}
+```
+
+Caddy creates the log file with mode `600` by default, and the Collector container runs as a different user, so it cannot read the file. `mode 644` makes the file readable inside the `caddy-logs` volume, which only these two containers mount.
+
+### Step 2. Copy the Collector configuration file
+
+Create the file `caddy-logs-collection-config.yaml` from [Step 2 of the VM tab](#step-2-create-the-collector-configuration-file).
+
+### Step 3. Add the Collector to Docker Compose
+
+Mount the same named volume in both containers:
+
+```yaml:docker-compose.yml {9,11-20,22-23} defaultCollapsed
+services:
+  caddy:
+    image: caddy:2.11.7
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-logs:/var/log/caddy
+    # environment from "Send traces and metrics"
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.163.2
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./caddy-logs-collection-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - caddy-logs:/var/log/caddy:ro
+    environment:
+      CADDY_ACCESS_LOG_FILE: /var/log/caddy/access.log
+      OTLP_DESTINATION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+      SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+
+volumes:
+  caddy-logs:
+```
+
+Start both containers:
+
+```bash
+docker compose up -d
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+### Step 1. Write access logs to stdout
+
+Add a `log` directive to each site in the Caddyfile:
+
+```text:Caddyfile {5}
+example.com {
+	tracing {
+		span caddy_request
+	}
+	log
+	reverse_proxy localhost:8080
+}
+```
+
+Without an `output`, Caddy writes JSON access logs to stderr. Kubernetes stores them with the other container logs.
+
+### Step 2. Parse the logs in k8s-infra
+
+The [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) collects container logs from each node. Add these log operators to your `override-values.yaml`. The `if` conditions apply the parsers only to the container named `caddy`:
+
+```yaml:override-values.yaml defaultCollapsed
+presets:
+  logsCollection:
+    operators:
+      - id: container-parser
+        type: container
+      - id: caddy-json
+        type: json_parser
+        if: 'resource["k8s.container.name"] == "caddy" and body matches "^\\{"'
+        parse_from: body
+        timestamp:
+          parse_from: attributes.ts
+          layout_type: epoch
+          layout: s.ns
+        severity:
+          parse_from: attributes.level
+      - id: caddy-trace
+        type: trace_parser
+        if: attributes.traceID != nil
+        trace_id:
+          parse_from: attributes.traceID
+        span_id:
+          parse_from: attributes.spanID
+```
+
+The list replaces the default operators of the chart, so keep `container-parser` first. If the name of your Caddy container is not `caddy`, change it in the `if` condition.
+
+Upgrade your k8s-infra release with the file:
+
+```bash
+helm upgrade <release-name> signoz/k8s-infra -n <namespace> -f override-values.yaml
+```
+
+- `<release-name>`: The name of your k8s-infra release. Run `helm list -A` to find it.
+- `<namespace>`: The namespace of that release.
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+## Validate
+
+Send a few requests through Caddy, then check each signal in SigNoz:
+
+1. **Traces:** Open **Traces** and filter by `service.name = 'caddy'`. Each request is one `caddy_request` span.
+2. **Metrics:** Open **Metrics** and filter by `service.name = 'caddy'`. The list shows the `caddy_http_*` metrics.
+3. **Logs:** Open **Logs** and filter by `service.name = 'caddy'`, or by `k8s.container.name = 'caddy'` on Kubernetes. Open a log line and select its **Trace ID** to see the span of the same request.
+
+<Figure
+  src="/img/docs/integrations/caddy/caddy-traces.webp"
+  alt="Caddy request spans in the SigNoz Traces explorer, filtered by service.name = caddy, with method and status code columns"
+  caption="Caddy request spans in the Traces explorer"
+/>
+
+<Figure
+  src="/img/docs/integrations/caddy/caddy-logs.webp"
+  alt="A Caddy JSON access log in the SigNoz Logs explorer, with its parsed body fields and a link to its trace ID"
+  caption="A parsed Caddy access log, linked to its trace"
+/>
+
+<Figure
+  src="/img/docs/integrations/caddy/caddy-metrics.webp"
+  alt="Caddy HTTP metrics in the SigNoz Metrics Explorer, filtered by service.name = caddy"
+  caption="Caddy metrics in the Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Caddy does not start with `unrecognized servers option 'otlp'`
+
+- **Cause:** Your Caddy version is older than v2.11.3, which added the `otlp` option.
+- **Fix:** Upgrade Caddy, or remove `otlp` and [scrape metrics with Prometheus](#scrape-metrics-with-prometheus).
+- **Verify:** `caddy validate --config /etc/caddy/Caddyfile` prints `Valid configuration`.
+
+### No logs arrive on a VM
+
+- **Cause:** `ls -l /var/log/caddy/access.log` shows `-rw-------`. Caddy creates the file with mode `600`, so the Collector cannot read it.
+- **Fix:** Add `mode 640` to the `output file` block, add the Collector user to the `caddy` group, and restart Caddy. A reload does not change the mode of a file that already exists.
+- **Verify:** `ls -l` shows `-rw-r-----`, and `id <collector-user>` lists the `caddy` group. The Collector reads from the end of the file, so send new requests through Caddy, then check the **Logs** explorer.
+
+### The ingestion key shows in the journal
+
+- **Cause:** The Caddy package starts Caddy with `--environ`, which prints the environment at startup.
+- **Fix:** Add the two `ExecStart` lines from [Step 2](#step-2-set-the-opentelemetry-environment-variables) to the drop-in file, restart Caddy, and rotate the [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- **Verify:** `sudo journalctl -u caddy --since "-1min" | grep OTEL_` prints nothing.
+
+### Logs are not linked to traces
+
+- **Cause:** Caddy adds `traceID` and `spanID` to access log lines only for sites that have a `tracing` block.
+- **Fix:** Add `tracing` to the site, then reload Caddy.
+- **Verify:** New log lines in the **Logs** explorer show a **Trace ID**.
+
+### No data at all
+
+- **Cause:** The endpoint has the wrong region, or the ingestion key is wrong. A wrong region drops data with no error.
+- **Fix:** Make sure that `<region>` matches your [SigNoz region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint), and copy the key again from [SigNoz settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/). Restart Caddy and the Collector.
+- **Verify:** Send a few requests through Caddy, then follow [Validate](#validate).
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- Caddy records request metrics once for each route that a request matches, and labels them with the first handler of the route. A request that passes through `tracing`, `basic_auth`, and `reverse_proxy` counts three times. To count each request once, filter on the first route, which sees every request: `handler = 'tracing'` with the setup in this guide.
+- `caddy_http_requests_total` has only the `server` and `handler` labels. For counts by status code or method, use `caddy_http_request_duration_seconds.count`, which has `code` and `method` labels.
+- `caddy_reverse_proxy_upstreams_healthy` reports `0` only when `reverse_proxy` has active or passive health checks. Without health checks, every upstream reports `1`.
+- Metrics have no host label unless you add `per_host` to the `metrics` option.
+- OTLP export also sends the Go runtime metrics of Caddy, such as `go_goroutines`.
+- Caddy creates one server span for each request, with no `http.route` attribute. Filter spans by `url.path` instead.
+
+</details>
+
+## Next Steps
+
+- [Import the Caddy dashboard](https://signoz.io/docs/dashboards/dashboard-templates/caddy-dashboard/) to see request rate, latency, errors, and upstream health in one place.
+- [Create log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for spikes in `5xx` responses.
+- [Query logs](https://signoz.io/docs/userguide/logs_query_builder/) by fields in the JSON body, for example `body.request.uri`.
+- [Parse and transform logs](https://signoz.io/docs/logs-pipelines/introduction/) further with Logs Pipelines.
+
+## Get Help
+
+<GetHelp />
