@@ -11,8 +11,9 @@ import type {
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { cmsFetch } from '@/utils/cmsFetch'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
+import { includedListicleNames, resolveListicleIncludes } from '@/constants/listicles/includes'
 
-async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
+async function readRawLocalListicle(name: string): Promise<ListicleConfig | null> {
   const filePath = path.join(process.cwd(), 'constants/listicles', `${name}.json`)
   try {
     const raw = await fs.readFile(filePath, 'utf8')
@@ -20,6 +21,20 @@ async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
   } catch {
     return null
   }
+}
+
+async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
+  const config = await readRawLocalListicle(name)
+  if (!config) return null
+
+  const included = new Map<string, ListicleConfig | null>()
+  for (const includedName of includedListicleNames(config)) {
+    included.set(includedName, await readRawLocalListicle(includedName))
+  }
+  return resolveListicleIncludes(
+    config,
+    (includedName: string) => included.get(includedName) ?? null
+  )
 }
 
 function transformIcon(raw: Record<string, unknown>): IconSpec | undefined {

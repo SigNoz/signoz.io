@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const { withDependentListicles } = require('./cms-sync/listicle-dependents')
 const { parseArgs: nodeParseArgs } = require('node:util')
 
 const BULK_THRESHOLD = Number(process.env.REVALIDATE_BULK_THRESHOLD || '25')
@@ -162,7 +163,7 @@ function listicleFileToKey(filePath) {
 function findDocsPathsForListicle(listicleKey) {
   const results = []
   const escaped = listicleKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const pattern = new RegExp(`<Listicle\\s[^>]*name=["']${escaped}["']`)
+  const pattern = new RegExp(`<Listicle(?:Directory)?\\s[^>]*name=["']${escaped}["']`)
 
   function walk(dir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
@@ -213,7 +214,8 @@ function buildPayload({
   // Collect listicle-related paths and tags
   const listiclePaths = []
   const listicleTags = []
-  const allListicleChanges = [...changedListicles, ...deletedListicles]
+  // A listicle that includes a changed listicle has new cards too.
+  const allListicleChanges = [...withDependentListicles(changedListicles), ...deletedListicles]
   if (listiclesChanged && allListicleChanges.length > 0) {
     for (const file of allListicleChanges) {
       const key = listicleFileToKey(file)
