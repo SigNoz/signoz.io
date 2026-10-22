@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useReducer, useMemo } from 'react'
 import Cookies from 'js-cookie'
+import { hasConsent } from '@/utils/consent/client'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import {
   createSubmissionRelayId,
@@ -381,7 +382,8 @@ export function useHubspotCustomForm({
           value: serializeFieldValue(state.values[f.name] ?? ''),
         }))
 
-      const hutk = Cookies.get('hubspotutk')
+      // Linking a submission to the HubSpot tracking cookie is marketing use, so it needs consent.
+      const hutk = hasConsent('advertisement') ? Cookies.get('hubspotutk') : undefined
 
       const payload: HubspotSubmissionPayload = {
         submittedAt: Date.now(),
