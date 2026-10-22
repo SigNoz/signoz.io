@@ -1,28 +1,32 @@
 ---
-date: 2026-02-27
-title: Docker Swarm Collection Agent - Overview
-description: Monitor Docker Swarm nodes and containers using the OpenTelemetry Collector to send metrics, logs, and traces to SigNoz.
+date: 2026-10-19
+title: Docker Swarm OpenTelemetry Collection Agent - Overview
+description: Learn how the OpenTelemetry Collector runs on each Docker Swarm node as the Docker Swarm Collection Agent to send metrics, logs, and traces to SigNoz.
 doc_type: explanation
 ---
 
-The Docker Swarm Collection Agent collects telemetry from Docker Swarm nodes and containers. The agent runs as a Swarm service with one replica per node.
+The Docker Swarm Collection Agent runs one OpenTelemetry Collector container on each node of a Docker Swarm, as a global Swarm service. It collects metrics and logs from each node and its containers, receives telemetry from your instrumented applications, and sends everything to SigNoz.
 
-## How It Works
+The Docker Swarm Collection Agent primarily performs the following:
 
-The agent runs as a Swarm service with one replica on each node. It collects host and container metrics from the local OS and Docker Engine, tails container log files on that node, and listens for OTLP telemetry from applications, then forwards everything to SigNoz.
+- Collects host metrics such as CPU, memory, disk, and filesystem usage from each Swarm node.
+- Collects resource usage metrics for each container from the Docker Engine of its node.
+- Tails and parses the logs of the containers on each node and sends them to SigNoz.
+- Acts as a gateway to send traces, metrics, and logs from your applications to SigNoz.
 
-1. **Scrapes the host**: Reads CPU, memory, disk, and network data from the mounted host filesystem on each node
-2. **Polls the Docker API**: Fetches per-container resource stats via the Docker socket on each node
-3. **Tails container logs**: Reads stdout/stderr from Docker's JSON log files in the container directory
-4. **Forwards OTLP**: Receives telemetry from instrumented apps on ports 4317/4318 and batches it to SigNoz
+## How it works
 
-## What You Can Collect
+### Agent (global service)
 
-- **Node health**: CPU, memory, disk, filesystem, network, and load averages from each Swarm node
-- **Container resource usage**: Per-container CPU, memory, and network I/O on each node
-- **Container logs**: stdout/stderr logs from all running containers across the cluster
-- **Application traces**: Distributed traces from OpenTelemetry-instrumented applications
-- **Application metrics and logs**: Any OTLP telemetry sent directly from your applications
+The agent reads each node through read-only mounts of the node's root filesystem and Docker's container log directory, and the node's Docker Engine API through the Docker socket. It runs as a global service, so Swarm runs one agent task on every node, including nodes that join later. Each task collects node-level and container-level data:
+
+- **Host metrics:** CPU usage, memory consumption, disk I/O, filesystem usage, and load averages from the node. Network statistics describe the agent's own container, since the agent runs on its stack's network rather than the node's.
+- **Container metrics:** CPU, memory, network, and block I/O usage of each container on the node, from the Docker Engine API. Metrics of Swarm tasks carry their stack, service, task, and node as `docker.stack.name`, `docker.service.name`, `docker.task.name`, and `docker.node.id`.
+- **Container logs:** Tailing and parsing the logs of the containers on the node. Each log record carries the `container.id` resource attribute.
+- **OTLP:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318), published on every node.
+- **Resource attributes:** `host.name` on every signal, and on AWS, GCP, and Azure virtual machines the cloud provider, region, and instance.
+
+Each task takes its node's hostname, so `host.name` names the Swarm node the data comes from.
 
 ## Next Steps
 
