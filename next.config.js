@@ -881,6 +881,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/terms-of-service/',
+          destination: '/legal/terms-of-service/',
+          permanent: true,
+        },
+        {
+          source: '/privacy/',
+          destination: '/legal/privacy/',
+          permanent: true,
+        },
+        {
+          source: '/terms-of-reference/',
+          destination: '/legal/terms-of-reference/',
+          permanent: true,
+        },
+        {
           source: '/docs/alerts-management/notification-channel/',
           destination: '/docs/setup-alerts-notification/',
           permanent: true,
