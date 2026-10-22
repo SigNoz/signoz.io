@@ -19,7 +19,7 @@ The VM Collection Agent primarily performs the following:
 
 ### Agent (systemd service)
 
-On Linux, the agent runs as the `signoz-collector-agent.service` systemd unit under the `signoz-collector-agent` user. The unit lets it read the journal and any file on the host outside `/tmp` and `/var/tmp`, and gives it no write access to the host's files. It collects:
+On Linux, the agent runs as the `signoz-collector-agent.service` systemd unit, under the `signoz-collector-agent` user, and collects:
 
 - **Host metrics:** CPU, memory, disk I/O, filesystem usage, network, load, paging, per-process usage, process counts, and uptime, via `hostmetrics`.
 - **Host logs:** Journal entries at priority warning and above, via `journald`. Each record's `service.name` resource attribute is its systemd unit without `.service`, or its program name when it has no unit. The agent leaves out its own entries.
@@ -28,9 +28,9 @@ On Linux, the agent runs as the `signoz-collector-agent.service` systemd unit un
 
 ### Agent (process or Windows service)
 
-On macOS, the agent is the collector process you start from the release tarball. On Windows, it runs as the `otelcol-contrib` Windows service that the OpenTelemetry Collector MSI installs, or as a process you start from the tarball. Both use the Linux agent's collector config without the journal:
+On macOS and Windows, the agent runs as a collector process under the user who starts it, or with the Windows MSI as the `otelcol-contrib` service under LocalSystem, and collects:
 
-- **Host metrics:** The same metrics as on Linux, via `hostmetrics`, apart from a few that only Linux reports, such as two disk metrics. macOS also reports no per-process disk I/O, and Windows no process counts.
+- **Host metrics:** CPU, memory, disk I/O, filesystem usage, network, load, paging, per-process CPU and memory, and uptime, via `hostmetrics`, plus process counts on macOS.
 - **OTLP:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318).
 - **Resource attributes:** The same as on Linux.
 
