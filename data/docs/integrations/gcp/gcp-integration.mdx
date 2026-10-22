@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-03
-updated_date: 2026-10-19
+updated_date: 2026-10-23
 title: GCP Integration - Monitor Google Cloud Metrics & Logs
 description: Learn how the SigNoz GCP integration works. Choose One-Click setup, where SigNoz manages the Collector for you, or Manual setup, where you run it yourself.
 doc_type: explanation
@@ -11,11 +11,11 @@ The **SigNoz GCP Integration** brings metrics and logs from your Google Cloud se
 
 You can connect GCP in two ways:
 
-- **One-Click Integration (recommended):** you run a few setup commands that SigNoz gives you. SigNoz then sets up and manages the rest, for both metrics and logs.
-- **Manual Setup:** you create and run the GCP resources yourself. You get full control, but it collects metrics only.
+- **One-Click Integration (recommended):** you run one setup command that SigNoz gives you. SigNoz then sets up and manages the rest, for both metrics and logs.
+- **Manual Setup:** you create and run the GCP resources yourself (a service account, an OpenTelemetry Collector, and, for logs, a Pub/Sub topic and log sinks). You get full control, and you can collect from many projects with one Collector.
 
 <Admonition type="info">
-The GCP integration is available on **SigNoz Cloud** and **SigNoz Enterprise (Self-Hosted)**. Logs are collected with **One-Click Integration** only. Traces are **not** part of this integration. Send traces by [instrumenting your applications](https://signoz.io/docs/instrumentation/) directly.
+The GCP integration is available on **SigNoz Cloud** and **SigNoz Enterprise (Self-Hosted)**. Traces are **not** part of this integration. Send traces by [instrumenting your applications](https://signoz.io/docs/instrumentation/) directly.
 </Admonition>
 
 ## How it works
@@ -23,26 +23,25 @@ The GCP integration is available on **SigNoz Cloud** and **SigNoz Enterprise (Se
 GCP does not send your data to outside tools on its own. So SigNoz uses an **OpenTelemetry Collector**, a small program that runs **inside your GCP project**, to gather the data and send it to SigNoz over OTLP.
 
 - **Metrics** live in **Cloud Monitoring**. Every few minutes, the Collector reads them with the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/googlecloudmonitoringreceiver" target="_blank" rel="noopener noreferrer nofollow">`googlecloudmonitoring`</a> receiver.
-- **Logs** live in **Cloud Logging**. A **log sink** (a rule that picks which logs to forward) sends matching logs to a **Pub/Sub topic** (a message queue). Pub/Sub then pushes them to the Collector. This part is set up by One-Click Integration only.
+- **Logs** live in **Cloud Logging**. A **log sink** (a rule that picks which logs to forward) sends matching logs to a **Pub/Sub topic** (a message queue). Pub/Sub then pushes them to the Collector.
 
 The integration runs the Collector inside your GCP project. There, it signs in to Google Cloud with a service account in your project, so you never share GCP credentials with SigNoz. It also keeps your data inside GCP until it leaves for SigNoz.
 
 <Admonition type="info">
-With Manual Setup, the Collector doesn't have to run on Cloud Run or even inside GCP. The `googlecloudmonitoring` receiver works anywhere it can find Google Cloud credentials through <a href="https://cloud.google.com/docs/authentication/application-default-credentials" target="_blank" rel="noopener noreferrer nofollow">Application Default Credentials</a>, such as a Compute Engine VM, GKE, or an existing Kubernetes cluster. One-Click Integration always deploys it on Cloud Run in your project.
+With Manual Setup, the Collector doesn't have to run on Cloud Run. The `googlecloudmonitoring` receiver works anywhere it can find Google Cloud credentials through <a href="https://cloud.google.com/docs/authentication/application-default-credentials" target="_blank" rel="noopener noreferrer nofollow">Application Default Credentials</a>, such as a Compute Engine VM, GKE, or an existing Kubernetes cluster. For logs, Pub/Sub must also be able to reach the Collector over HTTPS. One-Click Integration always deploys the Collector on Cloud Run in your project.
 </Admonition>
 
-The two setup methods differ in who runs and updates the Collector:
+The two setup methods differ in who creates and updates these resources:
 
 - **One-Click Integration:** SigNoz also deploys a **SigNoz agent** next to the Collector. The agent checks in with SigNoz every 30 seconds. When you turn a service on or off in SigNoz, the agent updates the Collector and the log sink for you.
-- **Manual Setup:** you deploy the Collector yourself, and you edit its config each time you add a service.
+- **Manual Setup:** you deploy the Collector, the Pub/Sub topic, and the log sinks yourself. Each time you add a service, you add its metrics to the Collector config and its filter to your log sink.
 
 <Figure
   src="/img/docs/integrations/gcp/gcp-integration-architecture.webp"
   width={1200}
-  height={600}
-  alt="Architecture diagram: an OpenTelemetry Collector on Cloud Run pulls metrics from Cloud Monitoring and receives logs from a log pipeline (Cloud Logging, log sink, Pub/Sub topic, push subscription), then exports both to SigNoz over OTLP. A SigNoz agent checks in with SigNoz and applies the Collector config and the log sink filter."
-  caption="GCP integration architecture: the Collector pulls metrics and receives logs through Pub/Sub, then sends both to SigNoz. With One-Click Integration, the SigNoz agent keeps the Collector and log sink in sync with your settings in SigNoz."
-  className="box-shadowed-image"
+  height={520}
+  alt="Architecture diagram: the googlecloudmonitoring receiver in an OpenTelemetry Collector on Cloud Run pulls metrics from Cloud Monitoring in each monitored project. A log sink in each monitored project publishes logs to a Pub/Sub topic in the deployment project, and a push subscription sends them to the googlecloudpubsubpush receiver on port 8080. The otlphttp exporter sends metrics and logs to SigNoz over OTLP."
+  caption="GCP integration architecture: the Collector pulls metrics from Cloud Monitoring and receives logs through Pub/Sub, then sends both to SigNoz. With One-Click Integration, the monitored project and the deployment project are the same project, and the SigNoz agent keeps the Collector and log sink in sync with your settings."
 />
 
 ## Choose a setup method
@@ -51,9 +50,9 @@ Start with **One-Click Integration** unless you need one of the things only Manu
 
 |  | One-Click Integration | Manual Setup |
 | --- | --- | --- |
-| **Who sets up the Collector** | SigNoz, through setup commands you run | You |
-| **Adding a service** | Turn on a toggle in SigNoz | Turn on a toggle in SigNoz, then add the service's metrics to your Collector config |
-| **Data collected** | Metrics and logs | Metrics only |
+| **Who sets up the Collector and log pipeline** | SigNoz, through one setup command you run | You |
+| **Adding a service** | Turn on a toggle in SigNoz | Turn on a toggle in SigNoz, then add the service's metrics to your Collector config and its filter to your log sink |
+| **Data collected** | Metrics and logs | Metrics and logs |
 | **Projects per connected account** | One (the project the agent runs in) | One or more |
 | **Where the Collector runs** | Cloud Run, set up for you | Cloud Run or any compute you choose |
 | **Best for** | Getting started fast and hands-off upkeep | Many projects from one Collector, or custom setups |
@@ -62,13 +61,13 @@ Start with **One-Click Integration** unless you need one of the things only Manu
 
 <DocCard
     title="One-Click Integration (Recommended)"
-    description="Run the setup commands from SigNoz. SigNoz deploys an agent and a Collector in your project and keeps them configured for metrics and logs."
+    description="Run one setup command from SigNoz. SigNoz deploys an agent and a Collector in your project and keeps them configured for metrics and logs."
     href="https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/"
 />
 
 <DocCard
     title="Manual Setup"
-    description="Create and run the GCP resources yourself: a service account and an OpenTelemetry Collector. Collects metrics only."
+    description="Create and run the GCP resources yourself: a service account, an OpenTelemetry Collector, and, for logs, a Pub/Sub topic and log sinks."
     href="https://signoz.io/docs/integrations/gcp/manual-setup/"
 />
 
@@ -81,7 +80,7 @@ After you connect GCP, turn on the services you want to monitor. Each service pa
 <Listicle name="gcp-services" />
 
 <Admonition type="info">
-More services are on the way. With One-Click Integration, a new service only needs a toggle. With Manual Setup, you also add its metric names to the `googlecloudmonitoring` receiver.
+More services are on the way. With One-Click Integration, a new service only needs a toggle. With Manual Setup, you also add its metric names to the `googlecloudmonitoring` receiver and, for logs, its filter to your log sink.
 </Admonition>
 
 ## Costs to expect
@@ -90,11 +89,11 @@ Both methods run resources in your GCP project, so GCP bills you for them, not S
 
 - **Cloud Run, Collector (both methods):** roughly **~$110/month** for a Collector sized at 2 vCPU and 4 GiB running all the time. One-Click Integration starts the Collector at this size. With Manual Setup you pick the size, so for low volumes you can choose something smaller (for example, 1 vCPU and 1 to 2 GiB). See <a href="https://cloud.google.com/run#pricing" target="_blank" rel="noopener noreferrer nofollow">Cloud Run pricing</a>.
 - **Cloud Run, SigNoz agent (One-Click only):** roughly **~$50/month** for the agent, which runs all the time at 1 vCPU and 512 MiB.
-- **Pub/Sub, logs (One-Click only):** roughly **$80 per TiB** of logs. Pub/Sub charges $40 per TiB each time data passes through it, and every log passes through twice: once on the way in and once on the way out to the Collector. The first 10 GiB each month are free. See <a href="https://cloud.google.com/pubsub/pricing" target="_blank" rel="noopener noreferrer nofollow">Pub/Sub pricing</a>.
+- **Pub/Sub, logs (both methods):** roughly **$80 per TiB** of logs. Pub/Sub charges $40 per TiB each time data passes through it, and every log passes through twice: once on the way in and once on the way out to the Collector. The first 10 GiB each month are free. See <a href="https://cloud.google.com/pubsub/pricing" target="_blank" rel="noopener noreferrer nofollow">Pub/Sub pricing</a>.
 - **Monitoring API, metrics (both methods):** **$0.01 per 1,000 read calls**, with the first 1 million read calls free per billing account each month. Write calls are free. See <a href="https://cloud.google.com/stackdriver/pricing" target="_blank" rel="noopener noreferrer nofollow">Cloud Monitoring pricing</a>.
 
 <Admonition type="info">
-One-Click Integration sends a **copy** of your logs to SigNoz. Your logs still land in GCP's built-in `_Default` log bucket, which Cloud Logging bills as before. If you don't need to keep those logs in GCP too, you can add an exclusion filter to the `_Default` sink. See <a href="https://cloud.google.com/logging/docs/routing/overview" target="_blank" rel="noopener noreferrer nofollow">Cloud Logging routing</a>.
+The log sink sends a **copy** of your logs to SigNoz. Your logs still land in GCP's built-in `_Default` log bucket, which Cloud Logging bills as before. If you don't need to keep those logs in GCP too, you can add an exclusion filter to the `_Default` sink. See [Avoid paying twice for logs](https://signoz.io/docs/integrations/gcp/collect-logs/#step-8-avoid-paying-twice-for-logs).
 </Admonition>
 
 ## Get Help

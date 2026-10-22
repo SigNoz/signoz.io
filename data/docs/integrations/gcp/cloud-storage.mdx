@@ -1,13 +1,13 @@
 ---
 published_date: 2026-08-18
-updated_date: 2026-10-19
+updated_date: 2026-10-23
 title: Monitor GCP Cloud Storage Bucket Metrics and Audit Logs
-description: Collect GCP Cloud Storage metrics and logs in SigNoz with One-Click Integration, or metrics with Manual Setup, and view them on a pre-built dashboard.
+description: Collect GCP Cloud Storage metrics and logs in SigNoz with One-Click Integration or Manual Setup, then view them on a pre-built dashboard.
 doc_type: howto
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
-The **Cloud Storage** integration brings bucket metrics into SigNoz, with a pre-built dashboard for the service. With One-Click Integration, it also brings in your Cloud Storage audit logs.
+The **Cloud Storage** integration brings bucket metrics and logs into SigNoz, with a pre-built dashboard for the service.
 
 Cloud Storage publishes its metrics to **Cloud Monitoring** and its audit logs to **Cloud Logging**. SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
 
@@ -69,7 +69,7 @@ For buckets that contain objects, give the bucket size and object count panels u
 
 ## Manual Setup
 
-You run the OpenTelemetry Collector in your own GCP project and add Cloud Storage metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics only**.
+You run the OpenTelemetry Collector in your own GCP project and add Cloud Storage metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics**, and **logs** if you set up the [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/).
 
 Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps below for each project that hosts the buckets you want to monitor.
 
@@ -79,14 +79,15 @@ Before configuring this service, complete the shared GCP integration setup:
 
 - Your [GCP account is connected in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/), and the project that owns your buckets is in [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields).
 - The [OpenTelemetry Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/).
-- The `signoz-integration` service account has `roles/monitoring.viewer` on the project that owns the buckets. See [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
+- The `signoz-integration-collector` service account has `roles/monitoring.viewer` on the project that owns the buckets. See [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
 - The **Cloud Monitoring API** is enabled in that project.
+- For logs only: the **Cloud Logging API** is enabled in that project, and you have finished steps 1 to 5 of [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
 
 ### Step 1: Enable the service in SigNoz
 
 1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
 2. Select **GCP Cloud Storage** from the service list.
-3. Toggle **Metric Collection** on to activate the pre-built dashboard.
+3. Toggle **Metric Collection** on to activate the pre-built dashboard. Toggle **Log Collection** if you also want to [send logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
 4. Open the **Data Collected** tab and note the metrics listed there. These are the metrics the dashboard's panels query.
 
 <Admonition type="warning">
@@ -131,17 +132,32 @@ Cloud Storage measures `storage/v2/total_bytes` and `storage/v2/total_count` onc
 
 ### Step 3: Apply the configuration
 
-The Collector loads its config from the `signoz-collector-config` secret, so a config change needs a new secret version and a redeploy:
+The Collector loads its config from the `signoz-integration-collector-config` secret, so a config change needs a new secret version and a redeploy:
 
 1. Save your updated `otel-collector-config.yaml`.
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
 3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
+
+### Step 4: Send logs (optional)
+
+To also send Cloud Storage audit logs to SigNoz, follow [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/) to set up the Pub/Sub topic, the push subscription, and the logs receiver. In [step 6, Create a log sink](https://signoz.io/docs/integrations/gcp/collect-logs/#step-6-create-a-log-sink-in-each-monitored-project), use this filter:
+
+```text
+resource.type="gcs_bucket"
+```
+
+See **Logs** under [What's collected](#whats-collected) for what this filter picks up and which logs need a setting in GCP first.
+
+<Admonition type="warning">
+Add the same filter as an **exclusion filter** on the project's `_Default` sink, or you pay to store these logs in both Cloud Logging and SigNoz. See [Avoid paying twice for logs](https://signoz.io/docs/integrations/gcp/collect-logs/#step-8-avoid-paying-twice-for-logs).
+</Admonition>
 
 ### Validate
 
 1. Wait one or two collection intervals (up to about 10 minutes with the default `300s`).
 2. In SigNoz, go to **Dashboards** and open the Cloud Storage dashboard. The API, authentication, and network panels should start filling in first.
 3. To check a single metric, open **Metrics Explorer** and query `storage.googleapis.com/api/request_count`.
+4. For logs, open **Logs** and filter on `gcp.resource_type = 'gcs_bucket'`.
 
 <Admonition type="info">
 For buckets that contain objects, give the bucket size and object count panels up to 24 hours before treating them as empty. Cloud Storage measures these values daily and does not track empty buckets.
@@ -170,7 +186,7 @@ See the **Data Collected** tab in the SigNoz integration for the definitive list
 </details>
 
 <details>
-<summary>Logs (One-Click Integration only)</summary>
+<summary>Logs</summary>
 
 With **Log Collection** turned on, SigNoz collects the <a href="https://cloud.google.com/storage/docs/audit-logging" target="_blank" rel="noopener noreferrer nofollow">Cloud Storage audit logs</a> for buckets in your project:
 
@@ -181,7 +197,7 @@ With **Log Collection** turned on, SigNoz collects the <a href="https://cloud.go
 
 Audit logs don't record access to public objects, or changes made by Object Lifecycle Management or Autoclass.
 
-SigNoz uses this log sink filter:
+With One-Click Integration, SigNoz applies this log sink filter for you. With Manual Setup, use it when you create your log sink:
 
 ```text
 resource.type="gcs_bucket"
@@ -194,15 +210,17 @@ resource.type="gcs_bucket"
 ## Troubleshooting
 </ToggleHeading>
 
-**No logs after turning on Log Collection (One-Click).** Admin Activity logs only appear when a bucket or its settings change, so a quiet project may show nothing at first. Open **Logs Explorer** in the GCP Console and filter on `resource.type="gcs_bucket"` to see what GCP has written. For object reads and writes, confirm Data Access audit logs are on for Cloud Storage.
+**No logs after turning on Log Collection.** Admin Activity logs only appear when a bucket or its settings change, so a quiet project may show nothing at first. Open **Logs Explorer** in the GCP Console and filter on `resource.type="gcs_bucket"` to see what GCP has written. For object reads and writes, confirm Data Access audit logs are on for Cloud Storage.
 
 **No metrics at all (One-Click).** Confirm the buckets belong to the project the agent is deployed in, and that **Metric Collection** is on and saved. See the [One-Click troubleshooting](https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/#troubleshooting) for agent and Collector checks.
+
+**Logs don't arrive (Manual).** If Logs Explorer in GCP shows the logs but SigNoz doesn't, work back through the log pipeline: the push subscription must reach the Collector, and the sink's writer identity needs `roles/pubsub.publisher` on the topic. See [Collect logs troubleshooting](https://signoz.io/docs/integrations/gcp/collect-logs/#troubleshooting).
 
 **A dashboard panel is empty (Manual).** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
 
 **Bucket size and object count stay empty while other panels work.** These come from `storage/v2/total_bytes` and `storage/v2/total_count`, which Cloud Storage measures once per day. Confirm that the selected buckets contain objects, then wait up to 24 hours for the next measurement before investigating further.
 
-**No Cloud Storage metrics at all (Manual).** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
+**No Cloud Storage metrics at all (Manual).** Confirm the `signoz-integration-collector` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
 
 **The bucket_name variable lists far more buckets than expected.** It lists every bucket reporting metrics in the selected project. On projects with many buckets, keep the selection narrow instead of using **All**, so panels stay responsive.
 

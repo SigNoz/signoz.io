@@ -1307,12 +1307,14 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/celery/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework-type=background-workers&framework=celery#framework-instrumentation',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/django/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=django#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1337,7 +1339,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/falcon/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=falcon#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1347,7 +1350,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/flask/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=flask#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1357,7 +1361,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/hypercorn-unicorn-support/',
-          destination: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=hypercorn-unicorn#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1462,7 +1467,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=hypercorn-unicorn#framework-instrumentation',
           permanent: true,
         },
         // Python framework-specific redirects to consolidated page
@@ -3327,16 +3333,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/integrations/gcp/collect-logs/',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
-          source: '/docs/integrations/gcp/collect-logs',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
           source: '/blog/llm-observability/',
           destination: '/docs/llm-observability/',
           permanent: true,
@@ -3454,6 +3450,11 @@ module.exports = () => {
         {
           source: '/guides/prometheus-monitoring-101/',
           destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-llm/',
+          destination: '/blog/opentelemetry-ai-agent-observability/',
           permanent: true,
         },
       ])

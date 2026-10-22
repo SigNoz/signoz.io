@@ -1,5 +1,5 @@
 ---
-date: 2026-10-13
+date: 2026-10-19
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -83,6 +83,36 @@ The full schema can be seen in the payload of the <a href="https://signoz.io/api
     }
 }
 ```
+
+### Required spec fields
+
+Starting in SigNoz v0.136.0, every dashboard `spec` must contain `variables`, `panels`, and `layouts`. None of them can be `null`. If a dashboard has none of an item, send the empty collection:
+
+- `variables`: an array. Use `[]` for a dashboard with no variables.
+- `panels`: an object. Use `{}` for a dashboard with no panels.
+- `layouts`: an array. Use `[]` for a dashboard with no layouts.
+
+The smallest valid spec is:
+
+```json
+{
+    "variables": [],
+    "panels": {},
+    "layouts": []
+}
+```
+
+The rule applies to create (`POST`) and update (`PUT`) bodies, and to the dashboard that results from a `PATCH`. A patch that removes one of these fields or sets it to `null` is rejected. A request that breaks the rule fails with `400 Bad Request` and the error code `dashboard_invalid_input`. SigNoz checks the fields in order and reports the first missing one:
+
+```
+spec.variables: is required and must not be null; use [] for a dashboard with no variables
+spec.panels: is required and must not be null; use {} for a dashboard with no panels
+spec.layouts: is required and must not be null; use [] for a dashboard with no layouts
+```
+
+Existing dashboards need no edits. When you upgrade to SigNoz v0.136.0 or later, a one-time database migration replaces a missing or `null` `spec.variables`, `spec.panels`, or `spec.layouts` with an empty collection.
+
+Each panel needs `spec.queries`, and it cannot be `null`. A Text panel must use `[]`, available in SigNoz v0.142.0 and later. Every other panel kind needs exactly one query.
 
 ### Dashboard APIs
 
