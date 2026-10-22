@@ -2,26 +2,24 @@
 date: 2026-10-22
 title: Install the OpenTelemetry Collector on a Virtual Machine
 meta_title: Install OpenTelemetry Collector on a VM
-description: Install the OpenTelemetry Collector as the VM Collection Agent, with Foundry on Linux or as a service on macOS and Windows, to send host data to SigNoz.
+description: Install the OpenTelemetry Collector as the VM Collection Agent, with Foundry on Linux or release packages on macOS and Windows, to send host data to SigNoz.
 doc_type: howto
 ---
 
-This guide explains how to install the VM Collection Agent on a virtual machine or server: with Foundry on Linux, and as a service you create on macOS and Windows.
+This guide explains how to install the VM Collection Agent on a virtual machine or server: with Foundry on Linux, and from the OpenTelemetry Collector's release packages on macOS and Windows.
 
-<Admonition type="warning" title="Migrating from a collector you set up yourself?" defaultCollapsed="true">
+<Admonition type="warning" title="Migrating from a collector you set up yourself on Linux?" defaultCollapsed="true">
 Foundry, documented below, is now the supported way to install and manage the VM Collection Agent on Linux.
 
-If you already run the agent as the `otelcol-contrib` service from the OpenTelemetry Collector package, or from the tarball, with your own `config.yaml`, follow [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#migrate-to-foundry) to move it over.
-
-On macOS and Windows, first stop the collector you run today: on macOS, the process you started from the tarball, for example with `kill "$(cat otel-pid)"`; on Windows, uninstall the **OpenTelemetry Collector** app that the MSI installed, or stop the `otelcol-contrib.exe` process you started. Then follow the tab for your system, and carry your `config.yaml` customizations into the agent's `custom.yaml` with the component names and environment variables that step 2 of [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#migrate-to-foundry) describes.
+If you already run the agent on Linux as the `otelcol-contrib` service from the OpenTelemetry Collector package, or from the tarball, with your own `config.yaml`, follow [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#migrate-to-foundry) to move it over.
 </Admonition>
 
 ## Prerequisites
 
 - One of these hosts:
-  - A Linux host with <a href="https://systemd.io/" target="_blank" rel="noopener noreferrer nofollow">systemd</a> 232 or newer, and `sudo` on it.
-  - A Mac (Apple silicon or Intel) with macOS 12 or newer, and administrator access.
-  - A Windows 10 version 1803, Windows Server 2019, or newer host (x64), with administrator access.
+  - A Linux host with <a href="https://systemd.io/" target="_blank" rel="noopener noreferrer nofollow">systemd</a> 232 or newer, with `sudo`, `curl`, and `tar` on it.
+  - A Mac (Apple silicon or Intel) with macOS 12 or newer.
+  - A Windows 10 version 1803, Windows Server 2019, or newer host (x64), with administrator access for the MSI.
 - Ports `4317`, `4318`, `8888`, and `13133` free on the host. To run the agent on the host that runs self-hosted SigNoz, see [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#run-on-the-same-host-as-self-hosted-signoz).
 - A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
@@ -94,8 +92,8 @@ spec:
 
 For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/systemd/binary" target="_blank" rel="noopener noreferrer nofollow">systemd binary example</a>.
 
-<Admonition type="info" title="Change the collector binary's path" defaultCollapsed="true">
-If the binary from Step 2 is somewhere other than `/opt/signoz-collector-agent/bin/otelcol-contrib`, point Foundry at it with an annotation under `metadata`:
+<Admonition type="info" title="Collector binary in another location?" defaultCollapsed="true">
+Foundry runs the collector from `/opt/signoz-collector-agent/bin/otelcol-contrib`. If you placed it elsewhere, set its path under `metadata`:
 
 ```yaml
 metadata:
@@ -115,11 +113,11 @@ sudo foundryctl cast -f casting.yaml
 
 This command:
 
-- writes the collector config `agent.yaml`, the environment file `signoz-collector-agent.conf`, the systemd unit `signoz-collector-agent.service`, and the service-user file `signoz-collector-agent.sysusers.conf` to `pours/collectionagent/collector/agent/`;
-- checks that the collector binary exists, then installs `agent.yaml` and the environment file to `/etc/signoz-collector-agent/`, the unit to `/etc/systemd/system/`, and the service-user file to `/etc/sysusers.d/signoz-collector-agent.conf`;
-- creates the `signoz-collector-agent` user, then enables and restarts the `signoz-collector-agent` service.
+- writes the collector config, the environment file and the systemd unit to `pours/collectionagent/collector/agent/`;
+- installs them under `/etc` and creates the `signoz-collector-agent` user;
+- enables and restarts the `signoz-collector-agent` service.
 
-It needs `sudo` because it writes to `/etc` and manages systemd. The file, directory and unit names follow `metadata.name`; the user is `signoz-collector-agent` for every name. Run the same command again after editing `casting.yaml`: it reinstalls the files and restarts the agent.
+Run the same command again after editing `casting.yaml`.
 
 ### Step 5: Verify the Collection Agent
 
@@ -215,7 +213,7 @@ In Step 4, `sudo foundryctl cast -f casting.yaml` stops with `otelcol-contrib bi
 
 **Cause:** the collector binary is not at that path.
 
-**Fix:** run Step 2 again, or point Foundry at the binary's path as **Change the collector binary's path** in Step 3 shows, then run Step 4 again.
+**Fix:** run Step 2 again, or set the binary's path as **Collector binary in another location?** in Step 3 shows, then run Step 4 again.
 
 After the fix, Step 5 shows `Everything is ready`.
 
@@ -281,26 +279,36 @@ After the fix, Step 5 shows `Everything is ready`.
 
 ## Install on macOS
 
-On macOS, the agent runs as the launchd daemon `io.signoz.signoz-collector-agent`, which you create in the steps below. Run every command in Terminal on the Mac.
+On macOS, you run the OpenTelemetry Collector from its release tarball. Run every command in Terminal, in the directory where you keep the collector.
 
-### Step 1: Download the OpenTelemetry Collector
+### Step 1: Download the tarball
 
-Run this to download the OpenTelemetry Collector Contrib binary, version 0.139.0, to `/opt/signoz-collector-agent/bin/otelcol-contrib`:
+Run this to download version 0.139.0 for your Mac:
 
 ```bash
 ARCH=$(uname -m | sed 's/x86_64/amd64/')
-curl -fsSL "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz" | tar -xz otelcol-contrib
-sudo install -d /opt/signoz-collector-agent/bin
-sudo install -m 755 otelcol-contrib /opt/signoz-collector-agent/bin/otelcol-contrib
+curl -fsSL -O "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz"
 ```
 
-### Step 2: Create the collector config
+### Step 2: Extract the tarball
 
-The agent reads two config files in `/etc/signoz-collector-agent/`. `agent.yaml` holds its defaults, the same config Foundry generates on Linux with macOS filters for host metrics and no host logs. Keep it as it is: your changes go in `custom.yaml`. Run this to create `agent.yaml`:
+Run this in the same shell as Step 1:
 
-```bash minimap defaultCollapsed
-sudo mkdir -p /etc/signoz-collector-agent
-sudo tee /etc/signoz-collector-agent/agent.yaml > /dev/null <<'EOF'
+```bash
+tar -xzf otelcol-contrib_0.139.0_darwin_${ARCH}.tar.gz
+```
+
+This writes the collector binary `otelcol-contrib` to the current directory.
+
+### Step 3: Create the collector config
+
+Create `config.yaml` in the same directory, with this content:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, remove the `headers` block from `config.yaml`, then in Step 4 set `SIGNOZ_INGESTION_ENDPOINT` to `http://<signoz-host>:4318`, where `<signoz-host>` is your self-hosted SigNoz's address, and leave out `SIGNOZ_INGESTION_KEY`. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collector#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:config.yaml minimap defaultCollapsed
 receivers:
   otlp/grpc:
     protocols:
@@ -326,18 +334,25 @@ receivers:
           match_type: regexp
           mount_points:
             - /dev/*
+            - ^/System/Volumes/(Preboot|VM|Update|xarts|iSCPreboot|Hardware)$
       network:
         exclude:
           match_type: regexp
           interfaces:
             - ^lo0$
+            - ^utun\d+$
+            - ^awdl\d+$
+            - ^llw\d+$
+            - ^bridge\d+$
+            - ^vmenet\d+$
+            - ^anpi\d+$
+            - ^ap\d+$
+            - ^gif\d+$
+            - ^stf\d+$
       load: {}
       paging: {}
       process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-        mute_process_user_error: true
+        mute_process_all_errors: true
       processes: {}
       system: {}
 
@@ -363,6 +378,8 @@ processors:
 exporters:
   otlphttp/signoz:
     endpoint: ${env:SIGNOZ_INGESTION_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
 
 extensions:
   health_check:
@@ -384,35 +401,17 @@ service:
       receivers: [otlp/http, otlp/grpc]
       processors: [memory_limiter, resourcedetection, batch]
       exporters: [otlphttp/signoz]
-EOF
 ```
 
-<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, create `custom.yaml` empty, then in Step 3 set `SIGNOZ_INGESTION_ENDPOINT` in the environment file to `http://<signoz-host>:4318`, where `<signoz-host>` is your self-hosted SigNoz's address, and remove the `SIGNOZ_INGESTION_KEY` line.
-</Admonition>
+### Step 4: Run the collector
 
-Then create `custom.yaml`. The collector merges it over `agent.yaml`, and it starts with the header that sends your ingestion key:
+Run this to set the collector's environment and start it in the background:
 
 ```bash
-sudo tee /etc/signoz-collector-agent/custom.yaml > /dev/null <<'EOF'
-exporters:
-  otlphttp/signoz:
-    headers:
-      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-EOF
-```
-
-### Step 3: Create the launchd daemon
-
-Run this to write the agent's environment file, `signoz-collector-agent.conf`, readable by root only:
-
-```bash
-sudo install -m 600 /dev/null /etc/signoz-collector-agent/signoz-collector-agent.conf
-sudo tee /etc/signoz-collector-agent/signoz-collector-agent.conf > /dev/null <<'EOF'
-SIGNOZ_INGESTION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
-OTEL_RESOURCE_ATTRIBUTES="deployment.environment=<your-environment>"
-EOF
+export SIGNOZ_INGESTION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=<your-environment>"
+nohup ./otelcol-contrib --config ./config.yaml > otelcol-output.log 2>&1 & echo "$!" > otel-pid
 ```
 
 **Verify these values:**
@@ -421,56 +420,17 @@ EOF
 - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<your-environment>`: Your deployment environment, for example `staging` or `production`.
 
-Then run this to create the log directory and the daemon's definition, `/Library/LaunchDaemons/io.signoz.signoz-collector-agent.plist`:
-
-```bash defaultCollapsed
-sudo mkdir -p /Library/Logs/signoz-collector-agent
-sudo tee /Library/LaunchDaemons/io.signoz.signoz-collector-agent.plist > /dev/null <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>io.signoz.signoz-collector-agent</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/bin/sh</string>
-    <string>-c</string>
-    <string>set -a; . /etc/signoz-collector-agent/signoz-collector-agent.conf; exec /opt/signoz-collector-agent/bin/otelcol-contrib --config=/etc/signoz-collector-agent/agent.yaml --config=/etc/signoz-collector-agent/custom.yaml</string>
-  </array>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-  <key>StandardErrorPath</key>
-  <string>/Library/Logs/signoz-collector-agent/collector.log</string>
-</dict>
-</plist>
-EOF
-```
-
-The daemon loads the environment file, runs the collector as root with both config files, restarts it whenever it exits, and writes the collector's own logs to `/Library/Logs/signoz-collector-agent/collector.log`. The ingestion key stays in the environment file, which only root can read.
-
-### Step 4: Start the agent
-
-Run this to load the daemon:
-
-```bash
-sudo launchctl bootstrap system /Library/LaunchDaemons/io.signoz.signoz-collector-agent.plist
-```
-
-launchd starts the agent now and at every boot.
+The collector runs until you stop it, log out, or restart the Mac. It writes its logs to `otelcol-output.log` and its process ID to `otel-pid`.
 
 ### Step 5: Verify the Collection Agent
 
-Run this to check that the agent started:
+Run this to check that the collector started:
 
 ```bash
-sudo launchctl print system/io.signoz.signoz-collector-agent | grep 'state ='
-sudo tail -n 20 /Library/Logs/signoz-collector-agent/collector.log
+tail -n 20 otelcol-output.log
 ```
 
-The first command prints `state = running`, and the log should include a line similar to the following:
+The logs should include a line similar to the following:
 
 ```output
 ... Everything is ready. Begin running and processing data.
@@ -480,25 +440,13 @@ In SigNoz, open **[Infrastructure Monitoring](https://signoz.io/docs/infrastruct
 
 ## Customize the Collection Agent
 
-Every change follows the same loop: edit `custom.yaml` or the environment file `signoz-collector-agent.conf` in `/etc/signoz-collector-agent/`, then restart the agent:
+Every change follows the same loop: edit `config.yaml`, then stop the collector and run Step 4 again:
 
 ```bash
-sudo launchctl kickstart -k system/io.signoz.signoz-collector-agent
+kill "$(cat otel-pid)"
 ```
 
-- **Collector config** (receivers, processors, pipelines): add it to `custom.yaml`, which the collector merges over `agent.yaml`. Each section of the configure guide shows the YAML to add, under a `collector/agent/agent.yaml: |` line, as [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes) explains. For example, to collect host metrics every 30s, `custom.yaml` becomes:
-
-  ```yaml:custom.yaml
-  exporters:
-    otlphttp/signoz:
-      headers:
-        signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-  receivers:
-    hostmetrics:
-      collection_interval: 30s
-  ```
-
-- **Environment variables:** set them in `signoz-collector-agent.conf`, one `NAME="value"` per line. The daemon loads the file each time the agent starts.
+The [configure guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos) shows what to add to `config.yaml` for each change.
 
 <details>
 
@@ -506,25 +454,21 @@ sudo launchctl kickstart -k system/io.signoz.signoz-collector-agent
 ## Troubleshooting
 </ToggleHeading>
 
-### The agent logs `at least one endpoint must be specified`
+### The collector logs `at least one endpoint must be specified`
 
-In Step 5, `collector.log` shows `exporters::otlphttp/signoz: at least one endpoint must be specified`, and launchd keeps restarting the agent.
+In Step 5, `otelcol-output.log` shows `exporters::otlphttp/signoz: at least one endpoint must be specified`, and the collector exits.
 
-**Cause:** the environment file `signoz-collector-agent.conf` sets no `SIGNOZ_INGESTION_ENDPOINT`.
+**Cause:** `SIGNOZ_INGESTION_ENDPOINT` is not set in the shell that started the collector.
 
-**Fix:** add it as in Step 3, then restart the agent:
-
-```bash
-sudo launchctl kickstart -k system/io.signoz.signoz-collector-agent
-```
+**Fix:** run Step 4 again, with its `export` lines, in the same shell.
 
 After the fix, Step 5 shows `Everything is ready`.
 
-### The agent logs `bind: address already in use`
+### The collector logs `bind: address already in use`
 
-In Step 5, `collector.log` shows `listen tcp 127.0.0.1:8888: bind: address already in use`, or the same error for `0.0.0.0:13133`, `0.0.0.0:4317`, or `0.0.0.0:4318`, and launchd keeps restarting the agent.
+In Step 5, `otelcol-output.log` shows `listen tcp 127.0.0.1:8888: bind: address already in use`, or the same error for `0.0.0.0:13133`, `0.0.0.0:4317`, or `0.0.0.0:4318`, and the collector exits.
 
-**Cause:** another process on the Mac holds the port, such as a collector you started yourself or a self-hosted SigNoz on the same Mac.
+**Cause:** another process on the Mac holds the port, such as a collector you started earlier or a self-hosted SigNoz on the same Mac.
 
 **Fix:** find the process that holds the port, for example `4317`:
 
@@ -532,7 +476,7 @@ In Step 5, `collector.log` shows `listen tcp 127.0.0.1:8888: bind: address alrea
 sudo lsof -nP -iTCP:4317 -sTCP:LISTEN
 ```
 
-Stop it, or move the agent's ports as [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#run-on-the-same-host-as-self-hosted-signoz) shows, then restart the agent with `sudo launchctl kickstart -k system/io.signoz.signoz-collector-agent`.
+Stop it, or move the collector's ports as [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#run-on-the-same-host-as-self-hosted-signoz) shows, then run Step 4 again.
 
 After the fix, Step 5 shows `Everything is ready`.
 
@@ -541,27 +485,34 @@ After the fix, Step 5 shows `Everything is ready`.
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-## Install on Windows
+<Tabs entityName="windows-method">
+<TabItem value="msi" label="MSI" default>
 
-On Windows, the agent runs as the Windows service `signoz-collector-agent`, which you create in the steps below. Run every command in Windows PowerShell as Administrator.
+## Install on Windows with the MSI
 
-### Step 1: Download the OpenTelemetry Collector
+The OpenTelemetry Collector MSI installs the collector as the `otelcol-contrib` Windows service, which runs as LocalSystem and starts at boot. Run every command in PowerShell as Administrator.
 
-Run this to download the OpenTelemetry Collector Contrib binary, version 0.139.0, to `C:\Program Files\signoz-collector-agent\bin\otelcol-contrib.exe`:
+### Step 1: Install the MSI
+
+Run this to download version 0.139.0 and install it:
 
 ```powershell
-New-Item -ItemType Directory -Force -Path 'C:\Program Files\signoz-collector-agent\bin' | Out-Null
-curl.exe -fsSL -o "$env:TEMP\otelcol-contrib.tar.gz" "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.tar.gz"
-tar.exe -xzf "$env:TEMP\otelcol-contrib.tar.gz" -C 'C:\Program Files\signoz-collector-agent\bin' otelcol-contrib.exe
+curl.exe -fsSL -o "$env:TEMP\otelcol-contrib.msi" "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_x64.msi"
+(Start-Process msiexec.exe -Wait -PassThru -ArgumentList "/i `"$env:TEMP\otelcol-contrib.msi`" /qn /norestart").ExitCode
 ```
+
+The second command prints `0` when the install succeeds. The MSI installs `otelcol-contrib.exe` and a default `config.yaml` in `C:\Program Files\OpenTelemetry Collector\`, and starts the service. The service reads that `config.yaml`, the file the MSI's `COLLECTOR_SVC_ARGS` property points to by default.
 
 ### Step 2: Create the collector config
 
-The agent reads two config files in `C:\ProgramData\signoz-collector-agent\`. `agent.yaml` holds its defaults, the same config Foundry generates on Linux with Windows settings for host metrics and no host logs. Keep it as it is: your changes go in `custom.yaml`. Run this to create `agent.yaml`:
+Run this to replace the service's `config.yaml`:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, remove the `headers` block from `config.yaml`, then in Step 3 set `SIGNOZ_INGESTION_ENDPOINT` to `http://<signoz-host>:4318`, where `<signoz-host>` is your self-hosted SigNoz's address, and leave out `SIGNOZ_INGESTION_KEY`. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collector#cloud-to-self-hosted).
+</Admonition>
 
 ```powershell minimap defaultCollapsed
-New-Item -ItemType Directory -Force -Path 'C:\ProgramData\signoz-collector-agent' | Out-Null
-Set-Content -Encoding ascii -Path 'C:\ProgramData\signoz-collector-agent\agent.yaml' -Value @'
+Set-Content -Encoding ascii -Path 'C:\Program Files\OpenTelemetry Collector\config.yaml' -Value @'
 receivers:
   otlp/grpc:
     protocols:
@@ -611,6 +562,8 @@ processors:
 exporters:
   otlphttp/signoz:
     endpoint: ${env:SIGNOZ_INGESTION_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
 
 extensions:
   health_check:
@@ -635,43 +588,17 @@ service:
 '@
 ```
 
-<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, create `custom.yaml` empty, then in Step 3 set `SIGNOZ_INGESTION_ENDPOINT` to `http://<signoz-host>:4318`, where `<signoz-host>` is your self-hosted SigNoz's address, and remove the `SIGNOZ_INGESTION_KEY` line.
-</Admonition>
+### Step 3: Set the environment and restart
 
-Then create `custom.yaml`. The collector merges it over `agent.yaml`, and it starts with the header that sends your ingestion key:
+Run this to set the service's environment and restart it:
 
 ```powershell
-Set-Content -Encoding ascii -Path 'C:\ProgramData\signoz-collector-agent\custom.yaml' -Value @'
-exporters:
-  otlphttp/signoz:
-    headers:
-      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-'@
-```
-
-### Step 3: Create the service
-
-Run this to create the service, set its environment, and register its Event Log source:
-
-```powershell
-$service = @{
-  Name           = 'signoz-collector-agent'
-  DisplayName    = 'SigNoz OpenTelemetry Collector'
-  StartupType    = 'Automatic'
-  BinaryPathName = '"C:\Program Files\signoz-collector-agent\bin\otelcol-contrib.exe" --config="C:\ProgramData\signoz-collector-agent\agent.yaml" --config="C:\ProgramData\signoz-collector-agent\custom.yaml"'
-}
-New-Service @service | Out-Null
-
-New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\signoz-collector-agent' -Name Environment -PropertyType MultiString -Force -Value @(
+New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\otelcol-contrib' -Name Environment -PropertyType MultiString -Force -Value @(
   'SIGNOZ_INGESTION_ENDPOINT=https://ingest.<region>.signoz.cloud:443'
   'SIGNOZ_INGESTION_KEY=<your-ingestion-key>'
   'OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>'
 ) | Out-Null
-
-$source = 'HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Application\signoz-collector-agent'
-New-Item -Path $source -Force | Out-Null
-New-ItemProperty -Path $source -Name EventMessageFile -PropertyType ExpandString -Value '%SystemRoot%\System32\EventCreate.exe' -Force | Out-Null
+Restart-Service otelcol-contrib
 ```
 
 **Verify these values:**
@@ -680,23 +607,15 @@ New-ItemProperty -Path $source -Name EventMessageFile -PropertyType ExpandString
 - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<your-environment>`: Your deployment environment, for example `staging` or `production`.
 
-The service runs the collector as LocalSystem with both config files and starts at boot. Its environment lives in the service's `Environment` registry value, one `NAME=value` per line, which Windows passes to the service when it starts (see the <a href="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.17.0/docs/windows-service-instrumentation.md#configuration" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET guide to Windows service environment variables</a>). The collector writes its own logs to the Application event log under the `signoz-collector-agent` source.
+The service's environment lives in its `Environment` registry value, one `NAME=value` per line, which Windows passes to the service when it starts (see the <a href="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.17.0/docs/windows-service-instrumentation.md#configuration" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET guide to Windows service environment variables</a>).
 
-### Step 4: Start the agent
+### Step 4: Verify the Collection Agent
 
-Run this to start the service:
-
-```powershell
-Start-Service signoz-collector-agent
-```
-
-### Step 5: Verify the Collection Agent
-
-Run this to check that the agent started:
+Run this to check that the service started:
 
 ```powershell
-(Get-Service signoz-collector-agent).Status
-Get-WinEvent -FilterHashtable @{ LogName = 'Application'; ProviderName = 'signoz-collector-agent' } -MaxEvents 20 | Select-Object -ExpandProperty Message
+(Get-Service otelcol-contrib).Status
+Get-WinEvent -ProviderName otelcol-contrib -MaxEvents 20 | Select-Object -ExpandProperty Message
 ```
 
 The first command prints `Running`, and the events should include a message similar to the following:
@@ -709,25 +628,13 @@ In SigNoz, open **[Infrastructure Monitoring](https://signoz.io/docs/infrastruct
 
 ## Customize the Collection Agent
 
-Every change follows the same loop: edit `C:\ProgramData\signoz-collector-agent\custom.yaml`, then restart the agent:
+Every change follows the same loop: edit `C:\Program Files\OpenTelemetry Collector\config.yaml`, then restart the service:
 
 ```powershell
-Restart-Service signoz-collector-agent
+Restart-Service otelcol-contrib
 ```
 
-- **Collector config** (receivers, processors, pipelines): add it to `custom.yaml`, which the collector merges over `agent.yaml`. Each section of the configure guide shows the YAML to add, under a `collector/agent/agent.yaml: |` line, as [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes) explains. For example, to collect host metrics every 30s, `custom.yaml` becomes:
-
-  ```yaml:custom.yaml
-  exporters:
-    otlphttp/signoz:
-      headers:
-        signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-  receivers:
-    hostmetrics:
-      collection_interval: 30s
-  ```
-
-- **Environment variables:** run the `New-ItemProperty ... -Name Environment` command from Step 3 again with every variable the agent needs, then restart the agent.
+The [configure guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows) shows what to add to `config.yaml` for each change. To change an environment variable, run Step 3 again with every variable the collector needs.
 
 <details>
 
@@ -735,19 +642,217 @@ Restart-Service signoz-collector-agent
 ## Troubleshooting
 </ToggleHeading>
 
-### The agent logs `at least one endpoint must be specified`
+### The MSI install prints a code other than `0`
 
-In Step 4, `Start-Service signoz-collector-agent` fails, and the events from Step 5 show `exporters::otlphttp/signoz: at least one endpoint must be specified`.
+In Step 1, the install command prints a code other than `0`, such as `1603`, and `C:\Program Files\OpenTelemetry Collector\` has no `config.yaml`.
+
+**Cause:** the MSI starts the service with its default config, which needs ports `4317`, `4318`, `8888`, `13133` and several others, and another process on the host holds one of them, such as a self-hosted SigNoz or a collector you started yourself. When the service cannot start, the install is rolled back.
+
+**Fix:** stop the other process and run Step 1 again, or [install the collector manually](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows&windows-method=manual#install-on-windows-manually).
+
+After the fix, Step 1 prints `0`.
+
+### The collector logs `at least one endpoint must be specified`
+
+In Step 3, `Restart-Service otelcol-contrib` fails, and the events from Step 4 show `exporters::otlphttp/signoz: at least one endpoint must be specified`.
 
 **Cause:** the service's `Environment` value sets no `SIGNOZ_INGESTION_ENDPOINT`.
 
-**Fix:** run the `New-ItemProperty ... -Name Environment` command from Step 3 again with every variable the agent needs, including `SIGNOZ_INGESTION_ENDPOINT`, then run Step 4 again.
+**Fix:** run Step 3 again with every variable the collector needs, including `SIGNOZ_INGESTION_ENDPOINT`.
 
-After the fix, Step 5 shows `Running` and `Everything is ready`.
+After the fix, Step 4 shows `Running` and `Everything is ready`.
 
-### The agent logs `Only one usage of each socket address`
+### The collector logs `Only one usage of each socket address`
 
-In Step 4, `Start-Service signoz-collector-agent` fails, and the events from Step 5 show `listen tcp 127.0.0.1:8888: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.`, or the same error for `0.0.0.0:13133`, `0.0.0.0:4317`, or `0.0.0.0:4318`.
+In Step 3, `Restart-Service otelcol-contrib` fails, and the events from Step 4 show `listen tcp 127.0.0.1:8888: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.`, or the same error for `0.0.0.0:13133`, `0.0.0.0:4317`, or `0.0.0.0:4318`.
+
+**Cause:** another process on the host holds the port, such as a collector you started yourself or a self-hosted SigNoz on the same host.
+
+**Fix:** find the process that holds the port, for example `4317`:
+
+```powershell
+Get-Process -Id (Get-NetTCPConnection -LocalPort 4317 -State Listen).OwningProcess
+```
+
+Stop it, or move the collector's ports as [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#run-on-the-same-host-as-self-hosted-signoz) shows, then run `Restart-Service otelcol-contrib`.
+
+After the fix, Step 4 shows `Running` and `Everything is ready`.
+
+</details>
+
+</TabItem>
+<TabItem value="manual" label="Manual">
+
+## Install on Windows manually
+
+You run the OpenTelemetry Collector from its release tarball. Run every command in PowerShell, in the folder where you keep the collector.
+
+### Step 1: Download the tarball
+
+Run this to download version 0.139.0:
+
+```powershell
+curl.exe -fsSL -o otelcol-contrib_0.139.0_windows_amd64.tar.gz "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_windows_amd64.tar.gz"
+```
+
+### Step 2: Extract the tarball
+
+```powershell
+tar.exe -xzf otelcol-contrib_0.139.0_windows_amd64.tar.gz
+```
+
+This writes the collector binary `otelcol-contrib.exe` to the current folder.
+
+### Step 3: Create the collector config
+
+Run this to create `config.yaml` in the same folder:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, remove the `headers` block from `config.yaml`, then in Step 4 set `SIGNOZ_INGESTION_ENDPOINT` to `http://<signoz-host>:4318`, where `<signoz-host>` is your self-hosted SigNoz's address, and leave out `SIGNOZ_INGESTION_KEY`. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collector#cloud-to-self-hosted).
+</Admonition>
+
+```powershell minimap defaultCollapsed
+Set-Content -Encoding ascii -Path .\config.yaml -Value @'
+receivers:
+  otlp/grpc:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size_mib: 16
+  otlp/http:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+      network: {}
+      load: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+        mute_process_user_error: true
+      system: {}
+
+processors:
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 4000
+    spike_limit_mib: 800
+  resourcedetection:
+    detectors: [env, ec2, gcp, azure, system]
+    timeout: 2s
+    override: false
+    system:
+      hostname_sources: [os]
+      resource_attributes:
+        host.id:
+          enabled: true
+  batch:
+    send_batch_size: 1000
+    send_batch_max_size: 2048
+    timeout: 10s
+
+exporters:
+  otlphttp/signoz:
+    endpoint: ${env:SIGNOZ_INGESTION_ENDPOINT}
+    headers:
+      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: /healthz
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp/http, otlp/grpc]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlphttp/signoz]
+    metrics:
+      receivers: [otlp/http, otlp/grpc, hostmetrics]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlphttp/signoz]
+    logs:
+      receivers: [otlp/http, otlp/grpc]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlphttp/signoz]
+'@
+```
+
+### Step 4: Run the collector
+
+Run this to set the collector's environment and start it in the background:
+
+```powershell
+$env:SIGNOZ_INGESTION_ENDPOINT = 'https://ingest.<region>.signoz.cloud:443'
+$env:SIGNOZ_INGESTION_KEY = '<your-ingestion-key>'
+$env:OTEL_RESOURCE_ATTRIBUTES = 'deployment.environment=<your-environment>'
+$collector = Start-Process -FilePath .\otelcol-contrib.exe -ArgumentList '--config', '.\config.yaml' -RedirectStandardError otelcol-output.log -WindowStyle Hidden -PassThru
+$collector.Id | Set-Content otel-pid
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+The collector runs until you stop it, sign out, or restart the host. It writes its logs to `otelcol-output.log` and its process ID to `otel-pid`.
+
+### Step 5: Verify the Collection Agent
+
+Run this to check that the collector started:
+
+```powershell
+Get-Content otelcol-output.log -Tail 20
+```
+
+The logs should include a line similar to the following:
+
+```output
+... Everything is ready. Begin running and processing data.
+```
+
+In SigNoz, open **[Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)** > **Hosts**: your host appears under its host name as data arrives.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `config.yaml`, then stop the collector and run Step 4 again:
+
+```powershell
+Stop-Process -Id (Get-Content otel-pid)
+```
+
+The [configure guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows) shows what to add to `config.yaml` for each change.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The collector logs `at least one endpoint must be specified`
+
+In Step 5, `otelcol-output.log` shows `exporters::otlphttp/signoz: at least one endpoint must be specified`, and the collector exits.
+
+**Cause:** `SIGNOZ_INGESTION_ENDPOINT` is not set in the PowerShell session that started the collector.
+
+**Fix:** run Step 4 again, with its `$env:` lines, in the same session.
+
+After the fix, Step 5 shows `Everything is ready`.
+
+### The collector logs `Only one usage of each socket address`
+
+In Step 5, `otelcol-output.log` shows `listen tcp 127.0.0.1:8888: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.`, or the same error for `0.0.0.0:13133`, `0.0.0.0:4317`, or `0.0.0.0:4318`, and the collector exits.
 
 **Cause:** another process on the host holds the port, such as the `otelcol-contrib` service from the OpenTelemetry Collector MSI or a self-hosted SigNoz on the same host.
 
@@ -757,11 +862,14 @@ In Step 4, `Start-Service signoz-collector-agent` fails, and the events from Ste
 Get-Process -Id (Get-NetTCPConnection -LocalPort 4317 -State Listen).OwningProcess
 ```
 
-Stop it, or uninstall the **OpenTelemetry Collector** app if the MSI installed it, or move the agent's ports as [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#run-on-the-same-host-as-self-hosted-signoz) shows, then run Step 4 again.
+Stop it, or move the collector's ports as [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#run-on-the-same-host-as-self-hosted-signoz) shows, then run Step 4 again.
 
-After the fix, Step 5 shows `Running` and `Everything is ready`.
+After the fix, Step 5 shows `Everything is ready`.
 
 </details>
+
+</TabItem>
+</Tabs>
 
 </TabItem>
 </Tabs>
