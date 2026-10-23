@@ -1,0 +1,47 @@
+---
+title: How do I investigate an incident across application and cloud logs?
+meta_title: Investigate incidents across application and cloud logs
+description: Bring application and cloud logs into SigNoz Cloud, compare the records for a failed request, and check gaps in IDs and timestamps.
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+Collect both sources in [SigNoz Cloud](https://signoz.io/log-management/), then search them within the incident's account, environment and time range. A provider request ID recorded by your application lets you compare its failed call with the cloud record for that request.
+
+## Follow one failed upload
+
+For example, take a checkout service that saves an order receipt in Amazon S3 before returning success. If S3 rejects the upload, the checkout can return a server error even though the payment succeeded. We wrote sample application and AWS CloudTrail-format logs for this situation.
+
+CloudTrail records AWS API activity when the relevant collection is enabled. AWS does not enable <a href="https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html" target="_blank" rel="noopener noreferrer nofollow">S3 data event collection</a> by default.
+
+In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), find the checkout error around the reported failure time. Open the record and note the account, region, bucket, object and available IDs. The checkout ID identifies the application's request, while the AWS request ID identifies its call to S3.
+
+Our sample stores those IDs in the log attributes `request.id` and `aws.request_id`. With the account, environment and time range still in scope, remove service and severity filters that could exclude the cloud record. Then search both IDs.
+
+```text
+attribute.request.id = 'checkout-4821' OR attribute.aws.request_id = 'S3DENY4821EXAMPLE'
+```
+
+Order the records by timestamp, from oldest to newest. The query returned four records showing an accepted payment, a CloudTrail-format denial, the application's upload error and its HTTP 500 response.
+
+<Figure
+  src="/img/faqs/investigate-incidents-across-application-and-cloud-logs/incident-timeline.webp"
+  alt="SigNoz Cloud shows payment accepted, a CloudTrail-format AccessDenied record, the application error and HTTP 500."
+  caption="Four collected example records, from accepted payment to HTTP 500. Times shown are UTC+05:30."
+  width={1215}
+  height={170}
+  themeInvert={false}
+/>
+
+In the CloudTrail-format record, `PutObject` names the upload operation and `AccessDenied` describes its failure. Compare the bucket and object with the application error before treating the records as related.
+
+That combination narrows the investigation to the rejected upload. The error alone does not identify which permission or policy caused the denial.
+
+## When an ID or record is missing
+
+Without a provider request ID, narrow the search by account, region, bucket, object and time. Treat the results as candidates and compare their operations and errors. Two failures close together can involve different objects, so time proximity alone does not establish a connection or cause.
+
+Check the stored timestamps too. CloudTrail's <a href="https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-record-contents.html" target="_blank" rel="noopener noreferrer nofollow">`eventTime`</a> describes when AWS completed the request; arrival time can be later. Preserve event timestamps during collection, and widen the search if clocks or timestamp parsing differ.
+
+The investigation covers matching logs that SigNoz Cloud received and still retains. A missing source, collection filter or expired retention can leave a gap. The [collection methods guide](https://signoz.io/docs/logs-management/send-logs/collection-methods/) covers application logs. For AWS, <a href="https://docs.aws.amazon.com/awscloudtrail/latest/userguide/send-cloudtrail-events-to-cloudwatch-logs.html" target="_blank" rel="noopener noreferrer nofollow">send the required CloudTrail events to CloudWatch Logs</a>, then follow the [CloudWatch collection guide](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/). These guides cover collection from your actual sources; our sample records illustrate the investigation.
