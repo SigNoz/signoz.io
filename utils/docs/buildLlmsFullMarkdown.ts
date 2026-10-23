@@ -2,12 +2,11 @@ import siteMetadata from '@/data/siteMetadata'
 import {
   ALTERNATIVES_SITEMAP_ROUTES,
   CMS_SITEMAP_SECTIONS,
-  CORPORATE_SITEMAP_ROUTES,
+  getCorporateSitemapRoutes,
   PRODUCT_SITEMAP_ROUTES,
   routeLabel,
   routeUrl,
 } from '@/utils/sitemapRoutes'
-import { getLegalRoutes } from '@/utils/legal'
 import { getLlmStarterLinks, type LlmStarterLink } from './agentDiscovery'
 
 const link = (label: string, url: string, description?: string): string =>
@@ -59,7 +58,7 @@ export async function buildLlmsFullMarkdown(): Promise<string> {
 
   const company = [
     link('Company pages sitemap (markdown)', `${siteMetadata.siteUrl}/corporate/sitemap.md`),
-    routeLinks([...CORPORATE_SITEMAP_ROUTES, ...getLegalRoutes()]),
+    routeLinks(getCorporateSitemapRoutes()),
   ].join('\n')
 
   return [

@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import OpenInAI from '@/components/OpenInAI'
+import { LEGAL_PAGE_CLASSES } from '@/components/legal/legalPageClasses'
 import { BASE_URL } from '@/utils/breadcrumbTypes'
 import { formatLegalDate, type LegalDoc } from '@/utils/legal'
 import { LEGAL_REMARK_PLUGINS } from '@/utils/legalMarkdown'
@@ -14,7 +15,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
   ]
 
   return (
-    <div className="mx-auto w-full max-w-[880px] px-4 py-10 md:px-8 lg:py-16">
+    <div className={LEGAL_PAGE_CLASSES}>
       <Breadcrumb crumbs={breadcrumbs} />
       <div className="mt-2 flex items-start justify-between gap-4">
         <div>
@@ -36,7 +37,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
         />
       </div>
 
-      <article className="prose prose-slate max-w-none break-words py-6 dark:prose-invert prose-h2:text-xl">
+      <article className="prose prose-slate max-w-none break-words py-6 dark:prose-invert prose-h2:text-xl md:text-justify">
         <ReactMarkdown remarkPlugins={LEGAL_REMARK_PLUGINS} components={{ h1: 'h2' }}>
           {doc.content}
         </ReactMarkdown>

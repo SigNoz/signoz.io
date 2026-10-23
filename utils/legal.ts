@@ -19,9 +19,17 @@ function toIsoDate(value: unknown): string | undefined {
   return undefined
 }
 
+function resolveLegalFile(fileName: string): string {
+  const filePath = fs.realpathSync(path.resolve(LEGAL_DIR, fileName))
+  if (path.dirname(filePath) !== fs.realpathSync(LEGAL_DIR)) {
+    throw new Error(`data/legal/${fileName}: resolves outside data/legal`)
+  }
+  return filePath
+}
+
 function readLegalDoc(fileName: string): LegalDoc {
   const slug = fileName.replace(/\.md$/, '')
-  const { data, content } = matter(fs.readFileSync(path.join(LEGAL_DIR, fileName), 'utf8'))
+  const { data, content } = matter(fs.readFileSync(resolveLegalFile(fileName), 'utf8'))
 
   if (typeof data.title !== 'string' || typeof data.description !== 'string') {
     throw new Error(`data/legal/${fileName}: frontmatter requires "title" and "description"`)
@@ -42,9 +50,9 @@ function readLegalDoc(fileName: string): LegalDoc {
 
 export function getLegalDocs(): LegalDoc[] {
   return fs
-    .readdirSync(LEGAL_DIR)
-    .filter((fileName) => fileName.endsWith('.md'))
-    .map(readLegalDoc)
+    .readdirSync(LEGAL_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+    .map((entry) => readLegalDoc(entry.name))
     .sort((a, b) => a.order - b.order)
 }
 

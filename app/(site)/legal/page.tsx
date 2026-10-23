@@ -2,6 +2,9 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import siteMetadata from '@/data/siteMetadata'
+import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
+import { LEGAL_PAGE_CLASSES } from '@/components/legal/legalPageClasses'
+import { BASE_URL } from '@/utils/breadcrumbTypes'
 import { EXTERNAL_LEGAL_LINKS } from '@/data/legal/external'
 import { formatLegalDate, getLegalDocs } from '@/utils/legal'
 
@@ -65,9 +68,15 @@ export default function LegalPage() {
   const docs = getLegalDocs()
 
   return (
-    <div className="mx-auto w-full max-w-[880px] px-4 py-16 md:px-8 lg:py-24">
-      <header>
-        <h1 className="text-4xl font-semibold tracking-tight text-[var(--l1-foreground)] md:text-5xl">
+    <div className={LEGAL_PAGE_CLASSES}>
+      <Breadcrumb
+        crumbs={[
+          { name: 'Home', url: `${BASE_URL}/` },
+          { name: 'Legal', url: `${BASE_URL}/legal/` },
+        ]}
+      />
+      <header className="mt-2">
+        <h1 className="m-0 text-4xl font-semibold tracking-tight text-[var(--l1-foreground)] md:text-5xl">
           Legal
         </h1>
         <p className="mt-4 max-w-[56ch] text-lg text-[var(--l2-foreground)]">
