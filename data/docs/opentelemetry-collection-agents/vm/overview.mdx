@@ -1,37 +1,41 @@
 ---
-date: 2026-02-27
+date: 2026-10-22
 title: VM Collection Agent - Overview
-description: Monitor virtual machines and applications running on them using OpenTelemetry Collector binary to send metrics, logs, and traces to SigNoz.
+description: Learn how the OpenTelemetry Collector runs as the VM Collection Agent on Linux, macOS, and Windows hosts to send host metrics, logs, and traces to SigNoz.
 doc_type: explanation
 ---
 
-The VM Collection Agent uses the OpenTelemetry Collector binary to collect telemetry data from applications and infrastructure running on virtual machines. The collector binary runs as an agent on the VM, receiving telemetry from instrumented applications and collecting host metrics from the VM itself.
+The VM Collection Agent runs one OpenTelemetry Collector on each virtual machine or server: as a systemd service on Linux, as a process on macOS, and as a Windows service or a process on Windows. It collects the host's metrics, receives telemetry from your instrumented applications, and sends everything to SigNoz. On Linux, it also collects the warnings and errors in the systemd journal.
 
-## How it Works
+The VM Collection Agent primarily performs the following:
 
-OpenTelemetry-instrumented applications in a VM can send data to the `otel-binary` agent running in the same VM. The OTel agent then forwards this data to SigNoz.
+- Collects host metrics such as CPU, memory, disk, filesystem, network, and load from the host.
+- Collects the warnings and errors that services write to the systemd journal on Linux hosts.
+- Acts as a gateway to send traces, metrics, and logs from your applications to SigNoz.
 
-<Figure src="/img/docs/saas-docs/vm-setup-2x.webp" alt="Collecting data from applications deployed in VM" caption="OpenTelemetry-instrumented applications in a VM send data to the OTel Collector binary, which forwards it to SigNoz." />
+## How it works
 
-## What You Can Collect
+<Figure src="/img/docs/saas-docs/vm-setup-2x.webp" alt="Collecting data from applications deployed in VM" caption="Instrumented applications on a VM send telemetry to the agent on the same VM, which forwards it to SigNoz." />
 
-- **Application Traces:** Distributed traces from OpenTelemetry-instrumented applications
-- **Application Metrics:** Custom metrics from your applications
-- **Application Logs:** Log data from your applications
-- **Host Metrics:** CPU usage, memory consumption, disk I/O, and network statistics from the Host
-- **Collector Metrics:** Internal metrics from the OpenTelemetry Collector itself
-- **Host Logs:** Tailing and parsing logs generated in the Host
+### Agent (systemd service)
 
-## Installation Methods
+On Linux, the agent runs as a systemd service on each host and collects:
 
-The VM Collection Agent supports the following installation methods:
+- **Host metrics:** CPU, memory, disk I/O, filesystem usage, network, load, paging, per-process usage, process counts, and uptime, via `hostmetrics`.
+- **Host logs:** Journal entries at priority warning and above, via `journald`. Each record's `service.name` resource attribute is its systemd unit without `.service`, or its program name when it has no unit. The agent leaves out its own entries.
+- **OTLP:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318).
+- **Resource attributes:** `host.name`, `host.id`, and `os.type` on every signal, and on AWS, GCP, and Azure virtual machines the cloud provider, region, and instance.
 
-- **Linux:** **DEB** (systemd on Debian/Ubuntu), **RPM** (systemd on Red Hat, CentOS, Fedora), or **Manual** (plain binary from a tarball)
-- **macOS:** **Manual** (plain binary from a tarball)
-- **Windows:** **MSI** (Windows service) or **Manual** (plain binary)
+### Agent (process or Windows service)
+
+On macOS and Windows, the agent runs as a process on each host, or as a Windows service when you install it with the MSI, and collects:
+
+- **Host metrics:** CPU, memory, disk I/O, filesystem usage, network, load, paging, per-process CPU and memory, and uptime, via `hostmetrics`, plus process counts on macOS.
+- **OTLP:** Traces, metrics, and logs from instrumented applications, over OTLP/gRPC (4317) and OTLP/HTTP (4318).
+- **Resource attributes:** The same as on Linux.
 
 ## Next Steps
 
 - [Install the VM Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
-- [Configure the Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/)
+- [Configure the VM Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
