@@ -1,13 +1,10 @@
-import MarkdownRenderer from '@/components/ReactMarkdown'
-import React from 'react'
+---
+title: Privacy Policy
+description: How SigNoz collects, processes, and protects personal data.
+order: 2
+lastUpdated: 2024-12-20
+---
 
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Privacy Policy',
-}
-
-const markdownContent = `
 
 
 **SigNoz INC.**
@@ -168,7 +165,7 @@ When we no longer require the Personal Data we have collected about you, we will
 
 2) Related-Party Claims. Any claims made against SigNoz or its Affiliates arising out of or related to this Privacy Policy may only be brought by the Customer that has accepted the Terms and Conditions available at [https://signoz.io/terms-of-service/](https://signoz.io/terms-of-service/) 
 
-### **15\.      YOUR DATA PROTECTION RIGHTS UNDER GENERAL DATA PROTECTION REGULATION (GDPR)**
+### **15.      YOUR DATA PROTECTION RIGHTS UNDER GENERAL DATA PROTECTION REGULATION (GDPR)**
 
 If you are a resident of the European Union (EU) and European Economic Area (EEA), you have certain data protection rights, covered by GDPR. – See more at https://eur-lex.europa.eu/eli/reg/2016/679/oj
 
@@ -194,7 +191,7 @@ Please note that we may ask you to verify your identity before responding to suc
 
 You have the right to complain to a Data Protection Authority about our collection and use of your Personal Data. For more information, please contact your local data protection authority in the European Economic Area (EEA).
 
-**16\.  YOUR DATA PROTECTION RIGHTS UNDER THE CALIFORNIA PRIVACY PROTECTION ACT (CALOPPA)**
+**16.  YOUR DATA PROTECTION RIGHTS UNDER THE CALIFORNIA PRIVACY PROTECTION ACT (CALOPPA)**
 
 CalOPPA is the first state law in the nation to require commercial websites and online services to post a privacy policy. The law’s reach stretches well beyond California to require a person or company in the United States (and conceivable the world) that operates websites collecting personally identifiable information from California consumers to post a conspicuous privacy policy on its website stating exactly the information being collected and those individuals with whom it is being shared, and to comply with this policy. – See more at: https://consumercal.org/about-cfc/cfc-education-foundation/california-online-privacy-protection-act-caloppa-3/
 
@@ -214,7 +211,7 @@ We honor Do Not Track signals and do not track, plant cookies, or use advertisin
 
 You can enable or disable Do Not Track by visiting the Preferences or Settings page of your web browser.
 
-**17\.  YOUR DATA PROTECTION RIGHTS UNDER THE CALIFORNIA CONSUMER PRIVACY ACT (CCPA)**
+**17.  YOUR DATA PROTECTION RIGHTS UNDER THE CALIFORNIA CONSUMER PRIVACY ACT (CCPA)**
 
 If you are a California resident, you are entitled to learn what data we collect about you, ask to delete your data and not to sell (share) it. To exercise your data protection rights, you can make certain requests and ask us:
 
@@ -248,17 +245,17 @@ By email: support@signoz.io
 
 Your data protection rights, described above, are covered by the CCPA, short for the California Consumer Privacy Act. To find out more, visit the official California Legislative Information website. The CCPA took effect on 01/01/2020.
 
-**18\. MODIFICATIONS TO OUR PRIVACY POLICY**
+**18. MODIFICATIONS TO OUR PRIVACY POLICY**
 
 We will post any changes to this Privacy Policy in a notice of the change at the bottom of our web page with a hyperlink thereto. We will also send you an email describing such changes. Please regularly review this Privacy Policy. Notwithstanding if you continue to use our services, you are bound by any changes that we make to this Privacy Policy.
 
-**19\. LIST OF THIRD-PARTY SERVICE PROVIDERS**
+**19. LIST OF THIRD-PARTY SERVICE PROVIDERS**
 
 SigNoz uses the following third-party service providers for the provision of services as detailed under the Terms of Service as applicable. You can find a list of our third party service providers at [https://trust.signoz.io/subprocessors](https://trust.signoz.io/subprocessors) 
 
 Additionally, if you have any questions or concerns about our third-party service providers, please email us at [support@signoz.io](mailto:support@signoz.io) . 
 
-**20\. CONTACT US**
+**20. CONTACT US**
 
 To ask questions or comment about this Privacy Policy and our privacy practices, contact us at:
 
@@ -266,14 +263,6 @@ To ask questions or comment about this Privacy Policy and our privacy practices,
 
 2) Email: [ankit@signoz.io](mailto:ankit@signoz.io) 
 
-3) Address: 2261 Market Street \#4496, San Francisco, CA, 94114   
+3) Address: 2261 Market Street #4496, San Francisco, CA, 94114   
 
-4) PLEASE NOTE: IF YOU USE OUR WEBSITE OR SAAS PLATFORM, YOU HAVE AGREED TO AND ACCEPTED THE PRACTICES DESCRIBED IN THIS PRIVACY POLICY AND THE TERMS AND CONDITIONS SET FORTH IN OUR TERMS OF SERVICE AS APPLICABLE.  IF YOU DO NOT AGREE WITH THE TERMS OF THIS PRIVACY POLICY, PLEASE DO NOT USE OUR WEBSITE OR SAAS PLATFORM.`
-
-export default function page() {
-  return (
-    <div className="privacy container mx-auto my-16">
-      <MarkdownRenderer markdownContent={markdownContent} />
-    </div>
-  )
-}
+4) PLEASE NOTE: IF YOU USE OUR WEBSITE OR SAAS PLATFORM, YOU HAVE AGREED TO AND ACCEPTED THE PRACTICES DESCRIBED IN THIS PRIVACY POLICY AND THE TERMS AND CONDITIONS SET FORTH IN OUR TERMS OF SERVICE AS APPLICABLE.  IF YOU DO NOT AGREE WITH THE TERMS OF THIS PRIVACY POLICY, PLEASE DO NOT USE OUR WEBSITE OR SAAS PLATFORM.

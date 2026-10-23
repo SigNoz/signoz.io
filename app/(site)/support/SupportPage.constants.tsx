@@ -382,8 +382,8 @@ export const COMPLIANCE_LINKS = [
     label: 'Security Documentation',
   },
   {
-    text: 'signoz.io/privacy',
-    href: 'https://signoz.io/privacy',
+    text: 'signoz.io/legal/privacy',
+    href: 'https://signoz.io/legal/privacy/',
     label: 'Privacy Policy',
   },
 ]

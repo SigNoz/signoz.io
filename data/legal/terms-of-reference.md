@@ -1,37 +1,9 @@
-import MarkdownRenderer from '@/components/ReactMarkdown'
-import React from 'react'
-
-import { Metadata } from 'next'
-import siteMetadata from '@/data/siteMetadata'
-
-export const metadata: Metadata = {
-  title: 'Terms of Reference',
-  description: 'Terms of Reference | SigNoz',
-  openGraph: {
-    title: 'Terms of Reference | SigNoz',
-    description: 'Terms of Reference | SigNoz',
-    url: `${siteMetadata.siteUrl}/terms-of-reference`,
-    siteName: siteMetadata.title,
-    locale: 'en_US',
-    type: 'website',
-    images: [siteMetadata.socialBanner],
-  },
-  twitter: {
-    title: 'Terms of Reference | SigNoz',
-    description: 'Terms of Reference | SigNoz',
-    images: [siteMetadata.socialBanner],
-    site: siteMetadata.twitter,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: `${siteMetadata.siteUrl}/terms-of-reference`,
-  },
-}
-
-const markdownContent = `**TERMS OF REFERENCE**
+---
+title: Terms of Reference
+description: Definitions of the capitalized terms used in our Terms of Service and Privacy Policy.
+order: 3
+---
+**TERMS OF REFERENCE**
 
 These Terms of Reference provide the definition of words used in capitalized manner in the Terms and Conditions available at [https://signoz.io/terms-of-service/](https://signoz.io/terms-of-service/) and Privacy Policy [https://signoz.io/privacy/](https://signoz.io/privacy/) .
 
@@ -63,7 +35,7 @@ These Terms of Reference provide the definition of words used in capitalized man
       
 14) “Intellectual Property Rights” means any and all intellectual property rights existing from time to time under any law, including patent law, copyright law, semiconductor chip protection law, moral rights law, trade secret law, trademark law (together with all of the goodwill associated therewith), unfair competition law, publicity rights law, or privacy rights law, and any and all other proprietary rights, and any and all applications, renewals, extensions and restorations of any of the foregoing, now or hereafter in force and effect worldwide. For purposes of this definition, rights under patent law shall include rights under any and all patent applications and patents (including letters patent and inventor’s certificates) anywhere in the world, including any provisionals, substitutions, extensions, supplementary patent certificates, reissues, renewals, divisions, continuations in part (or in whole), continued prosecution applications, requests for continued examination, and other similar filings or stages thereof provided for under the laws of the United States of America;  
       
-15) “Service(s)” shall have the same meaning as ascribed in Clause 1 (a) of the Terms and Conditions available at [https://signoz.io/terms-of-service/](https://signoz.io/terms-of-service/) and Clause 1 of the Privacy Policy \[Insert link of the updated version of Privacy Policy\]:
+15) “Service(s)” shall have the same meaning as ascribed in Clause 1 (a) of the Terms and Conditions available at [https://signoz.io/terms-of-service/](https://signoz.io/terms-of-service/) and Clause 1 of the Privacy Policy [Insert link of the updated version of Privacy Policy]:
 
 16) “Term” shall have the same meaning as ascribed in Clause 9 (a) of the Terms and Conditions available at [https://signoz.io/terms-of-service/](https://signoz.io/terms-of-service/) and Clause 14 (a) of the Privacy Policy [https://signoz.io/privacy](https://signoz.io/privacy) :  
       
@@ -73,12 +45,4 @@ These Terms of Reference provide the definition of words used in capitalized man
       
 19) “Beta Product” means an early or prerelease feature or version of the SaaS Platform that is identified as beta or similar, or a version of the SaaS Platform that is not generally available.  
       
-20) “Usage Data” means data and information about the provision, use, and performance of the SaaS Platform and related offerings based on Customer’s or User’s use of the SaaS Platform.   `
-
-export default function termsReferencePage() {
-  return (
-    <div className="terms-of-reference container mx-auto my-16">
-      <MarkdownRenderer markdownContent={markdownContent} />
-    </div>
-  )
-}
+20) “Usage Data” means data and information about the provision, use, and performance of the SaaS Platform and related offerings based on Customer’s or User’s use of the SaaS Platform.   

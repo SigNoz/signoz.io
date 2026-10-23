@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@signozhq/ui/dropdown-menu'
 import { ChevronDown, Copy, Check, ArrowUpRight } from 'lucide-react'
@@ -12,7 +13,13 @@ import { ChevronDown, Copy, Check, ArrowUpRight } from 'lucide-react'
 import { cn } from '../../app/lib/utils'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
-import { AI_OPTIONS, COPY_AS_MARKDOWN_LABEL, COPY_FEEDBACK_DURATION_MS } from './OpenInAI.constants'
+import {
+  AI_OPTIONS,
+  COPY_AS_MARKDOWN_LABEL,
+  COPY_FEEDBACK_DURATION_MS,
+  EXPLAIN_AI_OPTIONS,
+  EXPLAIN_AI_SECTION,
+} from './OpenInAI.constants'
 import type { AIOption, OpenInAIProps } from './OpenInAI.types'
 import { getAbsoluteUrl } from './OpenInAI.utils'
 
@@ -49,7 +56,10 @@ function OpenInAI({
   docSlug,
   className,
   copyLabel = 'Copy markdown',
+  aiVariant = 'open',
 }: OpenInAIProps) {
+  const aiOptions = aiVariant === 'explain' ? EXPLAIN_AI_OPTIONS : AI_OPTIONS
+  const aiSection = aiVariant === 'explain' ? EXPLAIN_AI_SECTION : undefined
   const [copied, setCopied] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [open, setOpen] = useState(false)
@@ -176,7 +186,21 @@ function OpenInAI({
               {copied ? 'Copied' : COPY_AS_MARKDOWN_LABEL}
             </DropdownMenuItem>
 
-            {AI_OPTIONS.map((option) => (
+            {aiSection && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-3 pb-1 pt-2">
+                  <p className="m-0 text-[13px] font-medium text-[var(--l1-foreground)]">
+                    {aiSection.title}
+                  </p>
+                  <p className="m-0 mt-1 text-xs leading-snug text-[var(--l3-foreground)]">
+                    {aiSection.description}
+                  </p>
+                </div>
+              </>
+            )}
+
+            {aiOptions.map((option) => (
               <DropdownMenuItem
                 key={option.id}
                 clickable

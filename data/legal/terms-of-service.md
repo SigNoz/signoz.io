@@ -1,38 +1,11 @@
-import MarkdownRenderer from '@/components/ReactMarkdown'
-import React from 'react'
+---
+title: Terms of Service
+description: The agreement between you and SigNoz for using our website and SaaS platform.
+order: 1
+---
+# TERMS AND CONDITIONS
 
-import { Metadata } from 'next'
-import siteMetadata from '@/data/siteMetadata'
-
-export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'Terms of Service | SigNoz',
-  openGraph: {
-    title: 'Terms of Service | SigNoz',
-    description: 'Terms of Service | SigNoz',
-    url: `${siteMetadata.siteUrl}/terms-of-service`,
-    siteName: siteMetadata.title,
-    locale: 'en_US',
-    type: 'website',
-    images: [siteMetadata.socialBanner],
-  },
-  twitter: {
-    title: 'Terms of Service | SigNoz',
-    description: 'Terms of Service | SigNoz',
-    images: [siteMetadata.socialBanner],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: `${siteMetadata.siteUrl}/terms-of-service`,
-  },
-}
-
-const markdownContent = `# TERMS AND CONDITIONS
-
-These Terms and Conditions (the **“Agreement”** or **“Terms”**) are a legally binding agreement between you (“**Customer**”**,** “**You**” **or** “**Your**”) and Signoz, Inc. (“**Signoz**”, “**Company**”, “**We**”, “**Us**”), a company duly incorporated under the laws of State of Delaware, with its office 2261 Market Street \#4496, San Francisco, CA, 94114 or its subsidiaries and affiliates. You acknowledge and agree that your use of the Signoz platform through the Signoz website at [https://signoz.io/](https://signoz.io/)  (“**Website**”) will be governed by the terms of this Agreement, our \[Privacy Policy\], other related terms updated from time to time. Any updates to these Terms or our Privacy Policy shall be updated to you via email and/or text message. 
+These Terms and Conditions (the **“Agreement”** or **“Terms”**) are a legally binding agreement between you (“**Customer**”**,** “**You**” **or** “**Your**”) and Signoz, Inc. (“**Signoz**”, “**Company**”, “**We**”, “**Us**”), a company duly incorporated under the laws of State of Delaware, with its office 2261 Market Street #4496, San Francisco, CA, 94114 or its subsidiaries and affiliates. You acknowledge and agree that your use of the Signoz platform through the Signoz website at [https://signoz.io/](https://signoz.io/)  (“**Website**”) will be governed by the terms of this Agreement, our [Privacy Policy], other related terms updated from time to time. Any updates to these Terms or our Privacy Policy shall be updated to you via email and/or text message. 
 
 PLEASE READ THE TERMS OF THIS AGREEMENT CAREFULLY TO ENSURE THAT YOU UNDERSTAND EACH PROVISION. PLEASE NOTE THAT THESE TERMS CONTAIN A BINDING AND MANDATORY ARBITRATION PROVISION THAT REQUIRES THE USE OF ARBITRATION ON AN INDIVIDUAL BASIS TO RESOLVE DISPUTES, AND LIMITS REMEDIES AVAILABLE TO YOU IN THE EVENT OF CERTAIN DISPUTES.
 
@@ -180,7 +153,7 @@ Name: Pranay Prateek
 
 Title: Chief Executive Officer
 
-Address: 2261 Market Street \#4496, San Francisco, CA, 94114 
+Address: 2261 Market Street #4496, San Francisco, CA, 94114 
 
 Email: [support@signoz.io](mailto:support@signoz.io) 
 
@@ -216,12 +189,4 @@ The headings/captions appearing in this Agreement have been inserted for the pur
 
 24. **OTHER AGREEMENTS** 
 
-The Company and Customer agree that these Terms shall constitute the entire agreement between the Company and the Customer with respect to the subject matter hereof and shall supersede all other agreements with respect to such subject matter, now or in the future, including any shrink-wrap, browse-wrap, click-wrap, or “click to approve” agreement or other terms or conditions that may appear when accessing or using the Services or otherwise.`
-
-export default function termsPage() {
-  return (
-    <div className="terms-of-service container mx-auto my-16 [&_h1]:mb-6 [&_h1]:text-2xl [&_h1]:font-bold">
-      <MarkdownRenderer markdownContent={markdownContent} />
-    </div>
-  )
-}
+The Company and Customer agree that these Terms shall constitute the entire agreement between the Company and the Customer with respect to the subject matter hereof and shall supersede all other agreements with respect to such subject matter, now or in the future, including any shrink-wrap, browse-wrap, click-wrap, or “click to approve” agreement or other terms or conditions that may appear when accessing or using the Services or otherwise.
