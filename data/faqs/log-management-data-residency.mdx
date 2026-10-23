@@ -1,0 +1,44 @@
+---
+title: Can production logs stay in my data center or required region?
+meta_title: Keep production logs in your data center or region
+description: Choose a SigNoz deployment for your data-location requirement and check collection, storage, access, exports, and sensitive-data handling.
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+For logs that must stay in your data center, use self-hosted SigNoz and keep the full data path inside that boundary. If the requirement is regional, consider [SigNoz Cloud](https://signoz.io/log-management/) in an available region or Bring Your Own Cloud (BYOC) in your cloud account. Check where logs travel during collection, queries, and exports, and where SigNoz stores them.
+
+## Choose a deployment for your boundary
+
+Start with what your policy permits. A requirement to keep logs in Europe differs from a requirement to keep them in your own infrastructure.
+
+| Your requirement | Deployment to consider |
+| --- | --- |
+| Logs must stay in your data center | [Self-hosted SigNoz](https://signoz.io/docs/install/self-host/), with collection, storage, and access configured inside that boundary. |
+| Logs can go to a provider in an approved region | SigNoz Cloud offers regions in the United States, Europe, and India. Match the region and data-handling terms to your requirement. |
+| Logs must stay in your cloud account | BYOC lets SigNoz run the platform in your cloud. Confirm the region, management connections, and support access for your deployment. |
+
+The [deployment options](https://signoz.io/enterprise/) describe SigNoz Cloud, enterprise self-hosting, and BYOC. Self-hosting lets your team choose the infrastructure; it also leaves your team responsible for configuring its data paths.
+
+## Follow one log through the boundary
+
+For example, take a checkout service that records successful payments and payment failures. Its company requires those logs to stay in its data center. A suitable design sends logs to a local OpenTelemetry Collector, which receives and forwards them to self-hosted SigNoz.
+
+SigNoz stores the logs in ClickHouse, its telemetry database. When an engineer runs a query, SigNoz returns matching data to their browser or API client. The [architecture guide](https://signoz.io/docs/architecture/) explains these components, and the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/) covers their connections.
+
+For this design to meet the checkout service's policy, check the paths beyond the database too.
+
+- **Collection and forwarding.** Check every application, agent, and Collector destination, including any second exporter that sends a copy elsewhere.
+- **Storage and copies.** Keep ClickHouse storage, replicas, backups, archives, and downloaded results in approved locations.
+- **Access and sharing.** Include browser and API client locations, support access, and any log details sent through alerts or support files. A user's permission to read logs does not constrain where that user receives them.
+
+## Check separate statistics reporting
+
+Self-hosted SigNoz also sends deployment and usage statistics by default. Disabling the collection of user details, such as email addresses, leaves that reporting enabled. If your policy excludes statistics reporting, set `statsreporter.enabled` to `false` as described in the [statistics reporting guide](https://signoz.io/docs/telemetry/).
+
+## Apply stricter rules to sensitive fields
+
+Within the checkout deployment, some fields may need stricter handling than the rest of a log. If SigNoz must not receive email addresses, remove or mask them before export. Check for email addresses in the log body and log attributes. The [PII scrubbing guide](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) explains Collector processing.
+
+If you choose SigNoz Cloud, remove protected fields before sending logs there. Cloud [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) cannot prevent that transfer because the pipelines process logs after the logs reach SigNoz Cloud.
