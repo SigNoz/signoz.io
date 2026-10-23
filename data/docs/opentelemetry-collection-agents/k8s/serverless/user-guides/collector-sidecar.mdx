@@ -10,208 +10,15 @@ The [sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverl
 ## Prerequisites
 
 - The deployment collector, installed as the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) shows, whichever tab you used.
-- For the OpenTelemetry Operator, the operator installed as [Step 1: Install the OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/?controller=opentelemetry-operator#step-1-install-the-opentelemetry-operator) shows.
+- For the Foundryctl with OTel Operator tab, the operator installed as [Step 1: Install the OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/?tool=kustomize&controller=opentelemetry-operator#step-1-install-the-opentelemetry-operator) shows.
 
 ## Install the Collection Agent
 
-<Tabs entityName="controller">
-<TabItem value="default" label="K8s Infra" default>
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm">
 
-<Tabs entityName="sidecar-setup">
-<TabItem value="foundry" label="Foundry" default>
-
-### Step 1: Install foundryctl
-
-Run this on the machine where you use `kubectl`:
-
-```bash
-curl -fsSL https://signoz.io/foundry.sh | bash
-```
-
-For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
-
-### Step 2: Create casting.yaml
-
-Create a file named `casting.yaml` with this content:
-
-<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
-</Admonition>
-
-```yaml:casting.yaml defaultCollapsed
-apiVersion: v1alpha1
-kind: CollectionAgent
-metadata:
-  name: signoz
-spec:
-  deployment:
-    platform: aws
-    mode: kubernetes-serverless
-    flavor: kustomize
-  collector:
-    kind: sidecar
-    spec:
-      env:
-        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
-        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
-        K8S_CLUSTER_NAME: <CLUSTER_NAME>
-        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
-      config:
-        data:
-          collector/sidecar/sidecar.yaml: |
-            exporters:
-              otlphttp/signoz:
-                headers:
-                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-```
-
-**Verify these values:**
-
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<CLUSTER_NAME>`: The same value as in the deployment collector's `casting.yaml`, which becomes `k8s.cluster.name` on every signal.
-- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
-
-### Step 3: Generate the sidecar files
-
-Run this from the directory that contains `casting.yaml` to write the sidecar's files to `pours/collectionagent/collector/sidecar`:
-
-```bash
-foundryctl forge -f casting.yaml
-```
-
-### Step 4: Add the sidecar to your workloads
-
-Pick one of the two ways below to add the sidecar to each workload that takes it.
-
-<Tabs entityName="sidecar-add">
-<TabItem value="patch" label="Kustomize patch" default>
-
-Keep `casting.yaml` in your application's kustomization directory, the one that holds its `kustomization.yaml`, and run Step 3 there, so `pours/` lands beside `kustomization.yaml`.
-
-The sidecar's permissions go to the namespace's `default` service account. If your workloads run under service accounts of their own, create `signoz-rolebinding.yaml` beside `kustomization.yaml`:
-
-```yaml:signoz-rolebinding.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: signoz-collector-sidecar
-subjects:
-  - kind: ServiceAccount
-    name: <your-service-account>
-  - kind: ServiceAccount
-    name: default
-```
-
-**Verify these values:**
-
-- `<your-service-account>`: The service account of a workload that takes the sidecar, from `serviceAccountName` in its pod template; add one subject per account, and keep `default` while any such workload runs under it.
-
-Edit your application's `kustomization.yaml` to add the sidecar's directory, a patch for each workload that takes the sidecar, and the rolebinding file:
-
-```diff
- namespace: <your-namespace>
- resources:
-+  - pours/collectionagent/collector/sidecar
- patches:
-+  - path: pours/collectionagent/collector/sidecar/patch.yaml
-+    target:
-+      kind: <your-workload-kind>
-+      name: <your-workload>
-+  - path: pours/collectionagent/collector/sidecar/patch-cronjob.yaml
-+    target:
-+      kind: CronJob
-+      name: <your-cronjob>
-+  - path: signoz-rolebinding.yaml
-```
-
-**Verify these values:**
-
-- `<your-namespace>`: Your application's namespace.
-- `<your-workload-kind>`: The kind of a workload that takes the sidecar: `Deployment`, `StatefulSet`, `DaemonSet`, or `Job`.
-- `<your-workload>`: That workload's name, from its manifest, with one `target` for each workload.
-- `<your-cronjob>`: The name of a CronJob that takes the sidecar.
-
-Leave out the `patch-cronjob.yaml` entry if no CronJob takes the sidecar, and the `signoz-rolebinding.yaml` entry if you did not create that file. The kustomization's `namespace:` places the sidecar's config and permissions in your application's namespace.
-
-Run this on the machine where you use `kubectl` to apply your application:
-
-```bash
-kubectl apply -k <overlay>
-```
-
-**Verify these values:**
-
-- `<overlay>`: The directory that holds your application's `kustomization.yaml`, relative to where you run the command.
-
-</TabItem>
-<TabItem value="template" label="Pod template">
-
-Open `pours/collectionagent/collector/sidecar/patch.yaml`. Add its `initContainers` entry and its `volumes` entry to the pod template of each workload that takes the sidecar. In a CronJob, the pod template sits under `spec.jobTemplate`.
-
-Then run this from the directory that contains `casting.yaml` to apply the sidecar's config and permissions to your application's namespace:
-
-```bash
-kubectl -n <your-namespace> apply -k pours/collectionagent/collector/sidecar
-```
-
-**Verify these values:**
-
-- `<your-namespace>`: Your application's namespace.
-
-The sidecar's permissions go to the namespace's `default` service account. Workloads that run under service accounts of their own take the sidecar through a Kustomize patch, with `signoz-rolebinding.yaml`.
-
-Apply your application as usual.
-
-</TabItem>
-</Tabs>
-
-### Step 5: Verify the sidecar
-
-Run this on the machine where you use `kubectl` to check that a workload's pods run the sidecar:
-
-```bash
-kubectl -n <your-namespace> get pods -l <your-pod-selector> -o jsonpath='{.items[*].spec.initContainers[*].name}'
-```
-
-**Verify these values:**
-
-- `<your-namespace>`: Your application's namespace.
-- `<your-pod-selector>`: A label selector for the workload's pods, from `spec.selector.matchLabels` in its manifest.
-
-The output lists `signoz-collector-sidecar` once per pod.
-
-Once your application sends to the sidecar, as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector) shows, its traces, metrics, and logs appear in SigNoz with the `k8s.pod.name` and `k8s.namespace.name` resource attributes.
-
-## Apply Changes
-
-After a change to the sidecar's `casting.yaml`, follow the way you added the sidecar:
-
-- With a Kustomize patch: forge again, apply your application again, and restart each workload that runs the sidecar.
-- With the pod template: forge again, apply the sidecar's files again, copy the two entries again if they changed, and restart each workload that runs the sidecar.
-
-<details>
-
-<ToggleHeading>
-## Troubleshooting
-</ToggleHeading>
-
-### A workload's pods have no sidecar
-
-In Step 5, the `kubectl get pods` check prints nothing for a workload.
-
-**Cause:** with the Kustomize patch, no `target` in your application's `kustomization.yaml` names the workload's kind and name, so the patch is not applied to it. With the pod template, the workload's template lacks the two entries.
-
-**Fix:** add a `target` with the workload's kind and name, or copy the two entries into its template, then apply your application again.
-
-After the fix, the check prints `signoz-collector-sidecar` once per pod.
-
-</details>
-
-</TabItem>
-<TabItem value="manual" label="Manual">
-
-This tab adds the sidecar manually, the method from earlier versions of the install guide; the Foundry tab is the supported setup, and [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#migrate-to-foundry) moves this one over. It needs the k8s-infra chart installed as the Helm Chart tab of the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/?setup=helm) shows.
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key in the sidecar's `otlphttp` exporter, as shown in [Cloud → Self-Hosted for the OpenTelemetry Collector](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collector#cloud-to-self-hosted).
@@ -650,7 +457,201 @@ After the fix, the sidecar's logs show no `kubeletstats` errors and the **Pods**
 </Tabs>
 
 </TabItem>
-<TabItem value="opentelemetry-operator" label="OpenTelemetry Operator">
+<TabItem value="kustomize" label="Kustomize" default>
+
+<Tabs entityName="controller">
+<TabItem value="default" label="Foundryctl" default>
+
+### Step 1: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` with this content:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes-serverless
+    flavor: kustomize
+  collector:
+    kind: sidecar
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: The same value as in the deployment collector's `casting.yaml`, which becomes `k8s.cluster.name` on every signal.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
+
+### Step 3: Generate the sidecar files
+
+Run this from the directory that contains `casting.yaml` to write the sidecar's files to `pours/collectionagent/collector/sidecar`:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+### Step 4: Add the sidecar to your workloads
+
+Pick one of the two ways below to add the sidecar to each workload that takes it.
+
+<Tabs entityName="sidecar-add">
+<TabItem value="patch" label="Kustomize patch" default>
+
+Keep `casting.yaml` in your application's kustomization directory, the one that holds its `kustomization.yaml`, and run Step 3 there, so `pours/` lands beside `kustomization.yaml`.
+
+The sidecar's permissions go to the namespace's `default` service account. If your workloads run under service accounts of their own, create `signoz-rolebinding.yaml` beside `kustomization.yaml`:
+
+```yaml:signoz-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: signoz-collector-sidecar
+subjects:
+  - kind: ServiceAccount
+    name: <your-service-account>
+  - kind: ServiceAccount
+    name: default
+```
+
+**Verify these values:**
+
+- `<your-service-account>`: The service account of a workload that takes the sidecar, from `serviceAccountName` in its pod template; add one subject per account, and keep `default` while any such workload runs under it.
+
+Edit your application's `kustomization.yaml` to add the sidecar's directory, a patch for each workload that takes the sidecar, and the rolebinding file:
+
+```diff
+ namespace: <your-namespace>
+ resources:
++  - pours/collectionagent/collector/sidecar
+ patches:
++  - path: pours/collectionagent/collector/sidecar/patch.yaml
++    target:
++      kind: <your-workload-kind>
++      name: <your-workload>
++  - path: pours/collectionagent/collector/sidecar/patch-cronjob.yaml
++    target:
++      kind: CronJob
++      name: <your-cronjob>
++  - path: signoz-rolebinding.yaml
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+- `<your-workload-kind>`: The kind of a workload that takes the sidecar: `Deployment`, `StatefulSet`, `DaemonSet`, or `Job`.
+- `<your-workload>`: That workload's name, from its manifest, with one `target` for each workload.
+- `<your-cronjob>`: The name of a CronJob that takes the sidecar.
+
+Leave out the `patch-cronjob.yaml` entry if no CronJob takes the sidecar, and the `signoz-rolebinding.yaml` entry if you did not create that file. The kustomization's `namespace:` places the sidecar's config and permissions in your application's namespace.
+
+Run this on the machine where you use `kubectl` to apply your application:
+
+```bash
+kubectl apply -k <overlay>
+```
+
+**Verify these values:**
+
+- `<overlay>`: The directory that holds your application's `kustomization.yaml`, relative to where you run the command.
+
+</TabItem>
+<TabItem value="template" label="Pod template">
+
+Open `pours/collectionagent/collector/sidecar/patch.yaml`. Add its `initContainers` entry and its `volumes` entry to the pod template of each workload that takes the sidecar. In a CronJob, the pod template sits under `spec.jobTemplate`.
+
+Then run this from the directory that contains `casting.yaml` to apply the sidecar's config and permissions to your application's namespace:
+
+```bash
+kubectl -n <your-namespace> apply -k pours/collectionagent/collector/sidecar
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+
+The sidecar's permissions go to the namespace's `default` service account. Workloads that run under service accounts of their own take the sidecar through a Kustomize patch, with `signoz-rolebinding.yaml`.
+
+Apply your application as usual.
+
+</TabItem>
+</Tabs>
+
+### Step 5: Verify the sidecar
+
+Run this on the machine where you use `kubectl` to check that a workload's pods run the sidecar:
+
+```bash
+kubectl -n <your-namespace> get pods -l <your-pod-selector> -o jsonpath='{.items[*].spec.initContainers[*].name}'
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+- `<your-pod-selector>`: A label selector for the workload's pods, from `spec.selector.matchLabels` in its manifest.
+
+The output lists `signoz-collector-sidecar` once per pod.
+
+Once your application sends to the sidecar, as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector) shows, its traces, metrics, and logs appear in SigNoz with the `k8s.pod.name` and `k8s.namespace.name` resource attributes.
+
+## Apply Changes
+
+After a change to the sidecar's `casting.yaml`, follow the way you added the sidecar:
+
+- With a Kustomize patch: forge again, apply your application again, and restart each workload that runs the sidecar.
+- With the pod template: forge again, apply the sidecar's files again, copy the two entries again if they changed, and restart each workload that runs the sidecar.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### A workload's pods have no sidecar
+
+In Step 5, the `kubectl get pods` check prints nothing for a workload.
+
+**Cause:** with the Kustomize patch, no `target` in your application's `kustomization.yaml` names the workload's kind and name, so the patch is not applied to it. With the pod template, the workload's template lacks the two entries.
+
+**Fix:** add a `target` with the workload's kind and name, or copy the two entries into its template, then apply your application again.
+
+After the fix, the check prints `signoz-collector-sidecar` once per pod.
+
+</details>
+
+</TabItem>
+<TabItem value="opentelemetry-operator" label="Foundryctl with OTel Operator">
 
 ### Step 1: Install foundryctl
 
@@ -837,6 +838,9 @@ In Step 5, the `kubectl get pods` check prints nothing for a workload.
 After the fix, the check prints `otc-container` once per pod.
 
 </details>
+
+</TabItem>
+</Tabs>
 
 </TabItem>
 </Tabs>
