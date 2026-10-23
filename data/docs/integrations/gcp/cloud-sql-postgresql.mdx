@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-03
-updated_date: 2026-10-19
+updated_date: 2026-10-23
 title: Monitor GCP Cloud SQL for PostgreSQL Metrics and Logs
 description: Collect Cloud SQL for PostgreSQL metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
 doc_type: howto
@@ -167,6 +167,15 @@ With **Log Collection** turned on, SigNoz collects these logs from your Cloud SQ
 | --- | --- | --- |
 | PostgreSQL logs (`cloudsql.googleapis.com/postgres.log`) | Messages from the PostgreSQL server, such as errors, warnings, and slow queries | None. Use <a href="https://cloud.google.com/sql/docs/postgres/flags" target="_blank" rel="noopener noreferrer nofollow">database flags</a> such as `log_min_duration_statement` to choose what PostgreSQL writes. |
 | pgAudit logs (`cloudaudit.googleapis.com/data_access`) | The SQL statements run on your database, for auditing | Set up <a href="https://cloud.google.com/sql/docs/postgres/pg-audit" target="_blank" rel="noopener noreferrer nofollow">pgAudit</a> and turn on Data Access audit logs |
+
+Every log SigNoz collects carries these attributes you can filter on, listed under **GCP Cloud SQL for PostgreSQL** > **Data Collected** in the integration:
+
+| Attribute | Description |
+| --- | --- |
+| `gcp.project` | The GCP project the log came from. |
+| `gcp.resource_type` | The GCP resource type, such as `cloudsql_database`. |
+
+GCP resource labels also arrive as `gcp.label.<label-key>` attributes.
 
 Use this filter for your log sink:
 

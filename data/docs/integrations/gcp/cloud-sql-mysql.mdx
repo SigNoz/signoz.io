@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-20
-updated_date: 2026-10-19
+updated_date: 2026-10-23
 title: Monitor GCP Cloud SQL for MySQL Metrics and Logs in SigNoz
 description: Collect Cloud SQL for MySQL metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
 doc_type: howto
@@ -186,6 +186,15 @@ With **Log Collection** turned on, SigNoz collects these logs from your Cloud SQ
 <Admonition type="info">
 The general query log records every statement, so it can grow large quickly and raise your Cloud Logging, Pub/Sub, and SigNoz ingestion costs. Turn it on only while you need it.
 </Admonition>
+
+Every log SigNoz collects carries these attributes you can filter on, listed under **GCP Cloud SQL for MySQL** > **Data Collected** in the integration:
+
+| Attribute | Description |
+| --- | --- |
+| `gcp.project` | The GCP project the log came from. |
+| `gcp.resource_type` | The GCP resource type, such as `cloudsql_database`. |
+
+GCP resource labels also arrive as `gcp.label.<label-key>` attributes.
 
 Use this filter for your log sink:
 
