@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-18
-updated_date: 2026-10-19
+updated_date: 2026-10-23
 title: Monitor GCP Cloud Storage Metrics and Logs in SigNoz
 description: Collect GCP Cloud Storage metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
 doc_type: howto
@@ -150,6 +150,15 @@ With **Log Collection** turned on, SigNoz collects the <a href="https://cloud.go
 | Data Access audit logs | Reads of bucket settings (`ADMIN_READ`), object reads and listings (`DATA_READ`), and object creates, updates, and deletes (`DATA_WRITE`) | Turn on Data Access audit logs for Cloud Storage |
 
 Audit logs don't record access to public objects, or changes made by Object Lifecycle Management or Autoclass.
+
+Every log SigNoz collects carries these attributes you can filter on, listed under **GCP Cloud Storage** > **Data Collected** in the integration:
+
+| Attribute | Description |
+| --- | --- |
+| `gcp.project` | The GCP project the log came from. |
+| `gcp.resource_type` | The GCP resource type, such as `gcs_bucket`. |
+
+GCP resource labels also arrive as `gcp.label.<label-key>` attributes.
 
 Use this filter for your log sink:
 

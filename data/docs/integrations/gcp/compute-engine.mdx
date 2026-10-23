@@ -1,5 +1,5 @@
 ---
-date: 2026-10-19
+date: 2026-10-23
 title: Monitor GCP Compute Engine VM Metrics and Logs in SigNoz
 description: Collect Compute Engine VM metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
 doc_type: howto
@@ -178,6 +178,15 @@ With **Log Collection** turned on, SigNoz collects these logs for your VMs:
 <Admonition type="info">
 The audit log part of the filter matches every Compute Engine resource in the project, not only VMs. With Data Access audit logs turned on, routine list and get calls can add a lot of log volume.
 </Admonition>
+
+Every log SigNoz collects carries these attributes you can filter on, listed under **GCP Compute Engine** > **Data Collected** in the integration:
+
+| Attribute | Description |
+| --- | --- |
+| `gcp.project` | The GCP project the log came from. |
+| `gcp.resource_type` | The GCP resource type, such as `gce_instance`. |
+
+GCP resource labels also arrive as `gcp.label.<label-key>` attributes.
 
 Use this filter for your log sink:
 
