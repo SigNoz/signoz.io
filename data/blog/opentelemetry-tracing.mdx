@@ -102,7 +102,7 @@ The first span in a trace, the one with no parent, is called the **root span**. 
 
 A trace that stops at a service boundary is useless. The entire point is continuity across processes, and that requires **context propagation**.
 
-When a service creates a span for an outgoing request, the OpenTelemetry SDK serializes the current trace context (the TraceID, the active SpanID, and trace flags like sampling status) into the request's headers using the <a href="https://www.w3.org/TR/trace-context/" rel="noopener noreferrer nofollow" target="_blank">W3C Trace Context</a> standard, which carries this data in the `traceparent` header. The downstream service extracts this context, and any spans it creates automatically become children of the calling span. This is how a single logical trace spans multiple processes without any manual wiring.
+When a service creates a span for an outgoing request, the OpenTelemetry SDK serializes the current trace context (the TraceID, the active SpanID, and trace flags like sampling status) into the request's headers. The downstream service extracts this context, and any spans it creates automatically become children of the calling span. This is how a single logical trace spans multiple processes without any manual wiring.
 
 The standard format for this is the <a href="https://www.w3.org/TR/trace-context/" rel="noopener noreferrer nofollow" target="_blank">W3C Trace Context</a> specification, which defines two headers:
 
@@ -245,7 +245,7 @@ Where possible, follow OpenTelemetry's Semantic Conventions for standardized att
 
 **Recording events**
 
-Events mark specific moments within a span's lifetime. They are useful for logging state transitions or capturing details that does not warrant a separate span:
+Events mark specific moments within a span's lifetime. They are useful for logging state transitions or capturing details that do not warrant a separate span:
 
 ```python
 with tracer.start_as_current_span("checkout.process") as span:
