@@ -14,17 +14,17 @@ related_articles:
   - '/blog/what-is-opentelemetry'
 ---
 
-When a user clicks "Add to Cart" on an e-commerce site, that single action can fan out across a dozen services: a frontend gateway, an auth service, a cart service, an inventory check, or a database write. If any step slows down or fails outright, the user sees a spinner or an error.<br />
-You, the product owner, often see nothing because each service logs in isolation. You know *something* in your application system misbehaved, but **not the source of the problem nor its cause**.
+When a user clicks "Add to Cart" on an e-commerce site, that single action can fan out across a dozen services: a frontend gateway, an auth service, a cart service, an inventory lookup, and a database write. If any step slows down or fails outright, the user sees a spinner or an error.<br />
+You often sees nothing because each service logs in isolation. You know *something* in your system misbehaved, but **not the source of the problem nor its cause**.
 
 Distributed tracing solves this by recording the full journey of a request as it moves through your system. Every service the request touches produces a timestamped record of the work it performed: how long it took, whether it succeeded, and what it called next. These records are stitched together into a single **trace**: an end-to-end map of everything that happened to fulfill that request, across every service boundary.
 
 [OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is the open-source, vendor-neutral standard for generating and collecting this trace data. A <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a> graduated project, it provides the APIs, SDKs, and tooling to instrument applications in virtually any language without coupling your code to a specific observability backend.
 
 This guide covers how OpenTelemetry's tracing signal works from the inside, explaining:
-- the OpenTelemetry span data model,
-- how OpenTelemetry traces are propagated across contexts,
-- how OpenTelemetry APIs and SDKs work,
+- the span data model,
+- how context propagates across services,
+- how OTel's APIs and SDKs work,
 - what a production-grade tracing pipeline looks like, and
 - some common pitfalls to be aware of.
 
@@ -69,7 +69,7 @@ OpenTelemetry defines <a href="https://opentelemetry.io/docs/concepts/semantic-c
 
 - **Events:** Timestamped log messages attached to a span, marking specific moments during execution. A common use case is recording exceptions; when an error occurs, you capture the exception type, message, and optionally the stack trace as an event on the active span.
 
-- **Links:** References to spans in *other* traces. Unlike parent-child relationships, links describe causal connections that don't fit into a single trace tree. For example, a batch job that processes messages from multiple producers.
+- **Links:** References to other spans, often in *different* traces. Unlike parent-child relationships, links describe causal connections that don't fit into a single trace tree. For example, a batch job that processes messages from multiple producers.
 
 <KeyPointCallout title="Keep Span Names Low-Cardinality">
 
@@ -102,7 +102,7 @@ The first span in a trace, the one with no parent, is called the **root span**. 
 
 A trace that stops at a service boundary is useless. The entire point is continuity across processes, and that requires **context propagation**.
 
-When a service creates a span for an outgoing request, the OpenTelemetry SDK serializes the current trace context (the TraceID, the active SpanID, and trace flags like sampling status) into the request's headers. The downstream service extracts this context, and any spans it creates automatically become children of the calling span. This is how a single logical trace spans multiple processes without any manual wiring.
+When a service creates a span for an outgoing request, the OpenTelemetry SDK serializes the current trace context (the TraceID, the active SpanID, and trace flags like sampling status) into the request's headers using the <a href="https://www.w3.org/TR/trace-context/" rel="noopener noreferrer nofollow" target="_blank">W3C Trace Context</a> standard, which carries this data in the `traceparent` header. The downstream service extracts this context, and any spans it creates automatically become children of the calling span. This is how a single logical trace spans multiple processes without any manual wiring.
 
 The standard format for this is the <a href="https://www.w3.org/TR/trace-context/" rel="noopener noreferrer nofollow" target="_blank">W3C Trace Context</a> specification, which defines two headers:
 
