@@ -1,0 +1,52 @@
+---
+title: Can I collect and search third-party application logs without changing the code?
+description: Send existing third-party log files to SigNoz Cloud without code changes. Search the text or parse fields for precise filters.
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+Yes. An OpenTelemetry Collector can send an application's existing log files to SigNoz Cloud without code changes, provided the Collector can read them. Parsing extracts values from text or JSON, so you can search fields such as a response status or a recorded user ID.
+
+The setup happens outside the application. Configure the Collector's `filelog` receiver to read the files and forward their records to SigNoz Cloud. The [file collection guide](https://signoz.io/docs/userguide/collect_logs_from_file/) covers file access, container mounts and collection settings.
+
+Once collected, the log text is searchable. Parsing gives you separate fields to filter when text search is not specific enough.
+
+## Make the existing fields searchable
+
+For example, take a reporting application whose web server writes a text log for each request. A successful request to `/report` returns HTTP `200`. A `503` response means the service is unavailable.
+
+An access log for that failed request can look like this:
+
+```text
+127.0.0.1 - frank [23/Oct/2026:11:04:48 +0000] "GET /report HTTP/1.1" 503 180
+```
+
+A regex parser can extract the request, status and timestamp from this line while keeping the original text. You can then filter by the response status.
+
+Here, the Collector labels the source `third-party-web-example` and stores the parsed `status` as a string. In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), this filter finds its `503` records:
+
+```text
+resource.service.name = 'third-party-web-example' AND attribute.status:string = '503'
+```
+
+The query returns the failed `/report` request, with its full message visible.
+
+<Figure
+  src="/img/faqs/2026-10/third-party-status-search.webp"
+  alt="Logs Explorer shows the service name and parsed status filter with the matching report request and HTTP 503 response."
+  caption="One log record matches both filters."
+  width={1280}
+  height={286}
+  themeInvert={false}
+/>
+
+If the third-party application writes JSON instead, you can extract its nested fields. A MongoDB record, for example, can hold a listening address under `attr.address`. Parse the JSON, then copy that value into a log attribute such as `mongo_address` to filter it separately. The timestamp and severity can also come from fields already present in the JSON record.
+
+## Choose where to parse
+
+The Collector can parse logs before export. [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz Cloud provide another place to transform incoming records before storage. File access and collection remain the Collector's job. Use the [regex](https://signoz.io/docs/logs-pipelines/guides/regex-parser/) and [JSON parser](https://signoz.io/docs/logs-pipelines/guides/json/) guides for the UI setup.
+
+Failed parsing does not have to stop collection. With the Collector configured to forward failed parses, a malformed JSON record remained searchable by its original text. Check that behavior with your own log format and error settings.
+
+Recorded user or request IDs give you another way to search. Parsing cannot recover missing IDs or create a trace. The [log parsing article](https://signoz.io/blog/parsing-logs-with-the-opentelemetry-collector/) covers more ways to collect and transform existing logs.
