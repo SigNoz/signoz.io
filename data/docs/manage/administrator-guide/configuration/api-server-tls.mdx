@@ -1,0 +1,265 @@
+---
+date: 2026-10-19
+title: API Server TLS/HTTPS Configuration for Self-Hosted SigNoz
+description: Serve the Self-Hosted SigNoz UI and API over HTTPS with your own certificate. Set the apiserver.tls options for Docker or Kubernetes and test the setup.
+doc_type: howto
+tags: [Self-Host]
+---
+
+## Overview
+
+The SigNoz API server listens on port `8080` and serves the API and the SigNoz UI. By default, it serves plain HTTP. You can set it to serve HTTPS with your own certificate, without a reverse proxy (nginx, Traefik, or a cloud load balancer) that terminates TLS in front of SigNoz.
+
+## Prerequisites
+
+- Self-Hosted SigNoz v0.142.0 or later.
+- A certificate and its private key, both PEM-encoded. The certificate must match the hostname that users and API clients use to open SigNoz.
+
+## Enable TLS
+
+Set these four environment variables on the SigNoz container:
+
+```bash
+SIGNOZ_APISERVER_TLS_ENABLED=true
+SIGNOZ_APISERVER_TLS_CERT__FILE=<path-to-certificate>
+SIGNOZ_APISERVER_TLS_KEY__FILE=<path-to-private-key>
+SIGNOZ_APISERVER_TLS_MIN__VERSION=1.2
+```
+
+**Verify these values:**
+
+- `<path-to-certificate>`: The path of the certificate file inside the SigNoz container.
+- `<path-to-private-key>`: The path of the private key file inside the SigNoz container.
+
+The SigNoz process must be able to read both files. The tabs below show how to mount the files and set the variables for each installation method.
+
+<Tabs entityName="setup">
+<TabItem value="docker" label="Docker (Foundry)" default>
+
+### Step 1. Put the certificate next to casting.yaml
+
+Create a `certs` directory in the directory that holds your `casting.yaml`. Copy the certificate to `certs/server.crt` and the private key to `certs/server.key`.
+
+### Step 2. Update casting.yaml
+
+Add the environment variables to the `signoz` component. Then add two patches to the generated Compose file. The first patch mounts the `certs` directory. The second patch changes the container health check to HTTPS. Without the second patch, Docker marks the container unhealthy, because the health check gets `400 Bad Request` over plain HTTP.
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: Installation
+metadata:
+  name: signoz
+spec:
+  deployment:
+    flavor: compose
+    mode: docker
+  signoz:
+    spec:
+      env:
+        SIGNOZ_APISERVER_TLS_ENABLED: "true"
+        SIGNOZ_APISERVER_TLS_CERT__FILE: /etc/signoz/tls/server.crt
+        SIGNOZ_APISERVER_TLS_KEY__FILE: /etc/signoz/tls/server.key
+        SIGNOZ_APISERVER_TLS_MIN__VERSION: "1.2"
+  patches:
+    - target: "deployment/compose.yaml"
+      operations:
+        - op: add
+          path: /services/signoz-signoz-0/volumes
+          value:
+            - ../../certs:/etc/signoz/tls:ro
+        - op: replace
+          path: /services/signoz-signoz-0/healthcheck/test
+          value: ["CMD", "wget", "--spider", "-q", "--no-check-certificate", "https://localhost:8080/api/v1/health"]
+```
+
+Foundry writes the Compose file to `pours/deployment/`, so the volume path `../../certs` points to the `certs` directory next to `casting.yaml`.
+
+Foundry names the SigNoz service `<metadata.name>-signoz-0`. If your `metadata.name` is not `signoz`, change `signoz-signoz-0` in both patch paths.
+
+The first operation above creates the `volumes` list of the SigNoz service. If the service already has a `volumes` list, that operation replaces it and drops the existing mounts. The list exists when your casting sets `metastore.kind: sqlite` or adds its own mounts. To find out, run `foundryctl forge -f casting.yaml` before you add the patches, and look at the service in `pours/deployment/compose.yaml`. Foundry applies patches during `forge`, so after you add them, the file shows the replaced list. If the list exists, use this operation instead. It appends the certificate mount to the list:
+
+```yaml
+        - op: add
+          path: /services/signoz-signoz-0/volumes/-
+          value: ../../certs:/etc/signoz/tls:ro
+```
+
+### Step 3. Apply the change
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes (Helm)">
+
+### Step 1. Create a TLS secret
+
+Create a Kubernetes secret from the certificate and the private key in the namespace of your SigNoz release:
+
+```bash
+kubectl -n <namespace> create secret tls signoz-tls --cert=<path-to-certificate> --key=<path-to-private-key>
+```
+
+**Verify these values:**
+
+- `<namespace>`: The namespace of your SigNoz release, for example `signoz`.
+- `<path-to-certificate>` and `<path-to-private-key>`: The local paths of the certificate and the private key.
+
+### Step 2. Update values.yaml
+
+Add the environment variables, mount the secret, and replace the liveness and readiness probes with HTTPS probes. The default probes use plain HTTP. They get `400 Bad Request`, and Kubernetes restarts the pod. The chart uses the custom probes only when the default probes are disabled.
+
+```yaml:values.yaml minimap defaultCollapsed
+signoz:
+  env:
+    signoz_apiserver_tls_enabled: true
+    signoz_apiserver_tls_cert__file: /etc/signoz/tls/tls.crt
+    signoz_apiserver_tls_key__file: /etc/signoz/tls/tls.key
+    signoz_apiserver_tls_min__version: "1.2"
+  additionalVolumes:
+    - name: signoz-tls
+      secret:
+        secretName: signoz-tls
+  additionalVolumeMounts:
+    - name: signoz-tls
+      mountPath: /etc/signoz/tls
+      readOnly: true
+  livenessProbe:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  customLivenessProbe:
+    httpGet:
+      path: /api/v1/health
+      port: http
+      scheme: HTTPS
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+  customReadinessProbe:
+    httpGet:
+      path: /api/v1/health?live=1
+      port: http
+      scheme: HTTPS
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+```
+
+### Step 3. Apply the change
+
+```bash
+helm upgrade <release-name> signoz/signoz -n <namespace> -f values.yaml
+```
+
+**Verify these values:**
+
+- `<release-name>`: The name of your SigNoz Helm release, for example `signoz`.
+- `<namespace>`: The namespace of your SigNoz release.
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+1. Send a request to the health endpoint over HTTPS:
+
+   ```bash
+   curl --cacert <path-to-ca-certificate> https://<signoz-host>:8080/api/v1/health
+   ```
+
+   The response is `{"status":"ok"}`. If your certificate comes from a public certificate authority, you can omit `--cacert`.
+
+2. Send the same request over plain HTTP:
+
+   ```bash
+   curl -i http://<signoz-host>:8080/api/v1/health
+   ```
+
+   The response is `400 Bad Request` with the body `Client sent an HTTP request to an HTTPS server.`
+
+3. Open `https://<signoz-host>:8080` in your browser and sign in. If a private CA signed your certificate, or the certificate is self-signed, add the CA to the trust store of your operating system or browser first.
+
+**Verify these values:**
+
+- `<path-to-ca-certificate>`: The path, on the machine where you run `curl`, of the certificate authority (CA) file that signed your certificate. For a self-signed certificate, use the certificate itself, for example `certs/server.crt`.
+- `<signoz-host>`: The hostname in your certificate. It must resolve to SigNoz.
+
+<Admonition type="info" title="No external endpoint on Kubernetes?" defaultCollapsed="true">
+Forward the port with `kubectl -n <namespace> port-forward svc/<signoz-service> 8080:8080`, where `<signoz-service>` is the SigNoz service from `kubectl -n <namespace> get svc`. Add `--resolve <signoz-host>:8080:127.0.0.1` to the `curl` commands, and map `<signoz-host>` to `127.0.0.1` in your hosts file before you open the browser, so that the hostname in the certificate still matches.
+</Admonition>
+
+After you enable TLS, change health checks, bookmarks, and API clients to use `https://`.
+
+<details>
+<ToggleHeading>
+## Configuration options
+</ToggleHeading>
+
+| Option | Environment variable | Description | Default |
+|--------|----------------------|-------------|---------|
+| `apiserver.tls.enabled` | `SIGNOZ_APISERVER_TLS_ENABLED` | Serve HTTPS instead of HTTP. | `false` |
+| `apiserver.tls.cert_file` | `SIGNOZ_APISERVER_TLS_CERT__FILE` | Path of the PEM-encoded certificate file. Required when `enabled` is `true`. | none |
+| `apiserver.tls.key_file` | `SIGNOZ_APISERVER_TLS_KEY__FILE` | Path of the PEM-encoded private key file. Required when `enabled` is `true`. | none |
+| `apiserver.tls.min_version` | `SIGNOZ_APISERVER_TLS_MIN__VERSION` | Minimum TLS version that SigNoz accepts, `"1.2"` or `"1.3"`. | `"1.2"` |
+
+If you set `min_version` to `"1.3"`, clients that support only TLS 1.2 cannot connect.
+
+If you run SigNoz with a configuration file, set the same options under `apiserver.tls`:
+
+```yaml
+apiserver:
+  tls:
+    enabled: true
+    cert_file: <path-to-certificate>
+    key_file: <path-to-private-key>
+    min_version: "1.2"
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### SigNoz does not start and logs failed to validate config "apiserver"
+
+SigNoz logs this error when `cert_file` or `key_file` is empty, or when `min_version` has a value other than `"1.2"` or `"1.3"`. The log does not say which option is wrong.
+
+1. Make sure that `SIGNOZ_APISERVER_TLS_CERT__FILE` and `SIGNOZ_APISERVER_TLS_KEY__FILE` both have a value.
+2. Make sure that `SIGNOZ_APISERVER_TLS_MIN__VERSION` is `1.2` or `1.3`.
+
+### SigNoz does not start and logs cannot load tls::cert_file and tls::key_file
+
+SigNoz cannot read the files, the files are not PEM-encoded, or the key does not match the certificate. The text after the colon gives the reason, for example `no such file or directory`.
+
+1. Make sure that the paths point to the files inside the container, not on the host.
+2. Make sure that the volume or the secret is mounted at that path.
+3. On a Docker host with SELinux in enforcing mode, add the `z` label to the certificate mount: `../../certs:/etc/signoz/tls:ro,z`. See [Docker SELinux](https://signoz.io/docs/install/docker-selinux/).
+
+### The SigNoz pod restarts and the probes fail with status code 400
+
+The liveness and readiness probes still use plain HTTP. Disable the default probes and add the HTTPS custom probes from the Kubernetes tab.
+
+If the pod is in `CrashLoopBackOff` when you run `helm upgrade`, the StatefulSet does not replace it. Delete the pod once, so that Kubernetes creates it with the new probes:
+
+```bash
+kubectl -n <namespace> delete pod <signoz-pod>
+```
+
+**Verify these values:**
+
+- `<signoz-pod>`: The SigNoz pod, for example `signoz-0`. Run `kubectl -n <namespace> get pods` to find it.
+
+</details>
+
+## Next steps
+
+- [Serving on an External URL](https://signoz.io/docs/manage/administrator-guide/configuration/serving-on-external-url/): Serve SigNoz under a base path behind a reverse proxy.
+- [Configuration](https://signoz.io/docs/operate/configuration/): See the other Self-Hosted SigNoz configuration options.
+
+## Get Help
+
+<GetHelp />
