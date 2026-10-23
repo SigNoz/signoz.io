@@ -1,0 +1,931 @@
+---
+date: 2026-10-23
+title: K8s Serverless (EKS Fargate) - Sidecar
+description: Add the OpenTelemetry Collector sidecar of the EKS Fargate Collection Agent to your application pods, with Foundry or manually, to send data to SigNoz.
+doc_type: howto
+---
+
+<Tabs entityName="sidecar-setup">
+<TabItem value="foundry" label="Foundry" default>
+
+The [sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/#sidecar) runs the OpenTelemetry Collector inside each application pod you add it to. It receives the pod's traces, metrics, and logs over OTLP on `localhost`, adds the pod's Kubernetes resource attributes to every signal, and exports them to SigNoz. Pods without the sidecar keep sending to the deployment collector's Service.
+
+## Prerequisites
+
+- The deployment collector, installed as the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) shows.
+- For the OpenTelemetry Operator, the operator installed as [Step 1: Install the OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/?controller=opentelemetry-operator#step-1-install-the-opentelemetry-operator) shows.
+
+## Install the Collection Agent
+
+<Tabs entityName="controller">
+<TabItem value="default" label="K8s Infra" default>
+
+### Step 1: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` with this content:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes-serverless
+    flavor: kustomize
+  collector:
+    kind: sidecar
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: The same value as in the deployment collector's `casting.yaml`, which becomes `k8s.cluster.name` on every signal.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
+
+### Step 3: Generate the sidecar files
+
+Run this from the directory that contains `casting.yaml` to write the sidecar's files to `pours/collectionagent/collector/sidecar`:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+### Step 4: Add the sidecar to your workloads
+
+Pick one of the two ways below to add the sidecar to each workload that takes it.
+
+<Tabs entityName="sidecar-add">
+<TabItem value="patch" label="Kustomize patch" default>
+
+Keep `casting.yaml` in your application's kustomization directory, the one that holds its `kustomization.yaml`, and run Step 3 there, so `pours/` lands beside `kustomization.yaml`.
+
+The sidecar's permissions go to the namespace's `default` service account. If your workloads run under service accounts of their own, create `signoz-rolebinding.yaml` beside `kustomization.yaml`:
+
+```yaml:signoz-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: signoz-collector-sidecar
+subjects:
+  - kind: ServiceAccount
+    name: <your-service-account>
+  - kind: ServiceAccount
+    name: default
+```
+
+**Verify these values:**
+
+- `<your-service-account>`: The service account of a workload that takes the sidecar, from `serviceAccountName` in its pod template; add one subject per account, and keep `default` while any such workload runs under it.
+
+Edit your application's `kustomization.yaml` to add the sidecar's directory, a patch for each workload that takes the sidecar, and the rolebinding file:
+
+```diff
+ namespace: <your-namespace>
+ resources:
++  - pours/collectionagent/collector/sidecar
+ patches:
++  - path: pours/collectionagent/collector/sidecar/patch.yaml
++    target:
++      kind: <your-workload-kind>
++      name: <your-workload>
++  - path: pours/collectionagent/collector/sidecar/patch-cronjob.yaml
++    target:
++      kind: CronJob
++      name: <your-cronjob>
++  - path: signoz-rolebinding.yaml
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+- `<your-workload-kind>`: The kind of a workload that takes the sidecar: `Deployment`, `StatefulSet`, `DaemonSet`, or `Job`.
+- `<your-workload>`: That workload's name, from its manifest, with one `target` for each workload.
+- `<your-cronjob>`: The name of a CronJob that takes the sidecar.
+
+Leave out the `patch-cronjob.yaml` entry if no CronJob takes the sidecar, and the `signoz-rolebinding.yaml` entry if you did not create that file. The kustomization's `namespace:` places the sidecar's config and permissions in your application's namespace.
+
+Run this on the machine where you use `kubectl` to apply your application:
+
+```bash
+kubectl apply -k <overlay>
+```
+
+**Verify these values:**
+
+- `<overlay>`: The directory that holds your application's `kustomization.yaml`, relative to where you run the command.
+
+</TabItem>
+<TabItem value="template" label="Pod template">
+
+Open `pours/collectionagent/collector/sidecar/patch.yaml`. Add its `initContainers` entry and its `volumes` entry to the pod template of each workload that takes the sidecar. In a CronJob, the pod template sits under `spec.jobTemplate`.
+
+Then run this from the directory that contains `casting.yaml` to apply the sidecar's config and permissions to your application's namespace:
+
+```bash
+kubectl -n <your-namespace> apply -k pours/collectionagent/collector/sidecar
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+
+The sidecar's permissions go to the namespace's `default` service account. Workloads that run under service accounts of their own take the sidecar through a Kustomize patch, with `signoz-rolebinding.yaml`.
+
+Apply your application as usual.
+
+</TabItem>
+</Tabs>
+
+### Step 5: Verify the sidecar
+
+Run this on the machine where you use `kubectl` to check that a workload's pods run the sidecar:
+
+```bash
+kubectl -n <your-namespace> get pods -l <your-pod-selector> -o jsonpath='{.items[*].spec.initContainers[*].name}'
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+- `<your-pod-selector>`: A label selector for the workload's pods, from `spec.selector.matchLabels` in its manifest.
+
+The output lists `signoz-collector-sidecar` once per pod.
+
+Once your application sends to the sidecar, as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector) shows, its traces, metrics, and logs appear in SigNoz with the `k8s.pod.name` and `k8s.namespace.name` resource attributes.
+
+</TabItem>
+<TabItem value="opentelemetry-operator" label="OpenTelemetry Operator">
+
+### Step 1: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` with this content:
+
+<Admonition type="info" title="Required on every document: the controller annotation">
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` sets the OpenTelemetry Operator as the controller of the collector's workload. Foundry then generates an `OpenTelemetryCollector` resource for the operator to reconcile, instead of the plain Deployment and sidecar container it generates without the annotation. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+</Admonition>
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes-serverless
+    flavor: kustomize
+  collector:
+    kind: sidecar
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: The same value as in the deployment collector's `casting.yaml`, which becomes `k8s.cluster.name` on every signal.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
+
+### Step 3: Generate the sidecar files
+
+Keep `casting.yaml` in your application's kustomization directory, the one that holds its `kustomization.yaml`, so `pours/` lands beside `kustomization.yaml`. Run this there to write the sidecar's files:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+Foundry generates the `OpenTelemetryCollector` resource `signoz-collector-sidecar` in sidecar mode. The operator injects the sidecar into each new pod whose template carries the `sidecar.opentelemetry.io/inject` annotation.
+
+### Step 4: Add the sidecar to your workloads
+
+Add the sidecar's files to your application's `kustomization.yaml`, then annotate each workload that takes the sidecar.
+
+The sidecar's permissions go to the namespace's `default` service account. If your workloads run under service accounts of their own, create `signoz-rolebinding.yaml` beside `kustomization.yaml`:
+
+```yaml:signoz-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: signoz-collector-sidecar
+subjects:
+  - kind: ServiceAccount
+    name: <your-service-account>
+  - kind: ServiceAccount
+    name: default
+```
+
+**Verify these values:**
+
+- `<your-service-account>`: The service account of a workload that takes the sidecar, from `serviceAccountName` in its pod template; add one subject per account, and keep `default` while any such workload runs under it.
+
+Edit your application's `kustomization.yaml` to add the sidecar's directory and the rolebinding file:
+
+```diff
+ namespace: <your-namespace>
+ resources:
++  - pours/collectionagent/collector/sidecar
+ patches:
++  - path: signoz-rolebinding.yaml
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+
+Leave out the `signoz-rolebinding.yaml` entry if you did not create that file. The kustomization's `namespace:` places the sidecar's resource and permissions in your application's namespace.
+
+Add the annotation to the pod template of each workload that takes the sidecar, whichever way you manage the template:
+
+```diff
+ spec:
+   template:
+     metadata:
++      annotations:
++        sidecar.opentelemetry.io/inject: "signoz-collector-sidecar"
+```
+
+A CronJob takes the annotation under `spec.jobTemplate.spec.template.metadata.annotations`.
+
+The sidecar's resource must exist before your workloads' pods are created. On the first deploy, apply the sidecar's files on their own and check that the resource is listed. Run this from the directory that contains `casting.yaml`, with the same `<your-namespace>`:
+
+```bash
+kubectl -n <your-namespace> apply -k pours/collectionagent/collector/sidecar
+kubectl -n <your-namespace> get opentelemetrycollector signoz-collector-sidecar
+```
+
+Then run this on the machine where you use `kubectl` to apply your application:
+
+```bash
+kubectl apply -k <overlay>
+```
+
+**Verify these values:**
+
+- `<overlay>`: The directory that holds your application's `kustomization.yaml`, relative to where you run the command.
+
+The operator injects the sidecar into each new pod, so restart the workloads whose pods were already running, for example a Deployment:
+
+```bash
+kubectl -n <your-namespace> rollout restart deployment/<your-workload>
+```
+
+**Verify these values:**
+
+- `<your-workload>`: The name of the workload, from its manifest.
+
+Jobs and CronJob runs created before the resource ran without the sidecar; delete them and create them again.
+
+### Step 5: Verify the sidecar
+
+Run this on the machine where you use `kubectl` to check that a workload's pods run the sidecar:
+
+```bash
+kubectl -n <your-namespace> get pods -l <your-pod-selector> -o jsonpath='{.items[*].spec.initContainers[*].name}'
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+- `<your-pod-selector>`: A label selector for the workload's pods, from `spec.selector.matchLabels` in its manifest.
+
+The output lists `otc-container`, the sidecar the operator injected, once per pod.
+
+Once your application sends to the sidecar, as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector) shows, its traces, metrics, and logs appear in SigNoz with the `k8s.pod.name` and `k8s.namespace.name` resource attributes.
+
+</TabItem>
+</Tabs>
+
+## Apply Changes
+
+After a change to the sidecar's `casting.yaml`:
+
+<Tabs entityName="controller">
+<TabItem value="default" label="K8s Infra" default>
+
+- With a Kustomize patch: forge again, apply your application again, and restart each workload that runs the sidecar.
+- With the pod template: forge again, apply the sidecar's files again, copy the two entries again if they changed, and restart each workload that runs the sidecar.
+
+</TabItem>
+<TabItem value="opentelemetry-operator" label="OpenTelemetry Operator">
+
+Forge again, apply your application again, and restart the workloads that take the sidecar.
+
+</TabItem>
+</Tabs>
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+<Tabs entityName="controller">
+<TabItem value="default" label="K8s Infra" default>
+
+### A workload's pods have no sidecar
+
+In Step 5, the `kubectl get pods` check prints nothing for a workload.
+
+**Cause:** with the Kustomize patch, no `target` in your application's `kustomization.yaml` names the workload's kind and name, so the patch is not applied to it. With the pod template, the workload's template lacks the two entries.
+
+**Fix:** add a `target` with the workload's kind and name, or copy the two entries into its template, then apply your application again.
+
+After the fix, the check prints `signoz-collector-sidecar` once per pod.
+
+</TabItem>
+<TabItem value="opentelemetry-operator" label="OpenTelemetry Operator">
+
+### A workload's pods have no sidecar
+
+In Step 5, the `kubectl get pods` check prints nothing for a workload.
+
+**Cause:** the workload's pods were created before the `signoz-collector-sidecar` resource existed, or its pod template lacks the annotation.
+
+**Fix:** check that `kubectl -n <your-namespace> get opentelemetrycollector signoz-collector-sidecar` lists the resource and that the pod template carries the annotation, then restart the workload, for example with `kubectl -n <your-namespace> rollout restart deployment/<your-workload>`. Delete a Job and create it again.
+
+After the fix, the check prints `otc-container` once per pod.
+
+</TabItem>
+</Tabs>
+
+</details>
+
+</TabItem>
+<TabItem value="manual" label="Manual">
+
+This tab covers the manual method from earlier versions of the install guide; the Foundry tab is the supported setup, and [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#migrate-to-foundry) moves this one over.
+
+## Prerequisites
+
+- An EKS cluster with a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the `k8s-infra` release's namespace and your applications' namespaces.
+- `kubectl` configured to reach the cluster, and Helm 3 installed on the same machine.
+- A SigNoz Instance to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
+
+## Install k8s-infra and the Sidecar
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key in `override-values.yaml`, as shown in [Cloud → Self-Hosted for the k8s-infra chart](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=k8s-infra#cloud-to-self-hosted). Do the same in the sidecar's `otlphttp` exporter, as shown in [Cloud → Self-Hosted for the OpenTelemetry Collector](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collector#cloud-to-self-hosted).
+</Admonition>
+
+### Step 1: Install k8s-infra without the agent
+
+Run this on the machine where you use `kubectl` to add the Helm repository:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+```
+
+Create a file named `override-values.yaml`. `otelAgent.enabled: false` turns off the agent DaemonSet and keeps the chart's deployment collector:
+
+```yaml:override-values.yaml
+global:
+  clusterName: <CLUSTER_NAME>
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
+otelInsecure: false
+signozApiKey: <your-ingestion-key>
+otelAgent:
+  enabled: false
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz, which becomes `k8s.cluster.name` and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
+
+Run this from the directory that contains `override-values.yaml`:
+
+```bash
+helm install my-release signoz/k8s-infra --version 0.17.1 -f override-values.yaml
+```
+
+Helm installs the release `my-release` into the namespace of your current `kubectl` context, `default` unless you set another. A Fargate profile must select that namespace.
+
+### Step 2: Create the sidecar ConfigMap
+
+Create a file named `otel-agent-sidecar-config.yaml`. It holds the sidecar's config and the in-cluster kubeconfig the `kubeletstats` receiver uses to reach the kubelet through the Kubernetes API server:
+
+```yaml:otel-agent-sidecar-config.yaml minimap defaultCollapsed
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-agent-sidecar-config
+  namespace: <YOUR_NAMESPACE>
+data:
+  kubeconfig: |
+    apiVersion: v1
+    kind: Config
+    clusters:
+    - name: in-cluster
+      cluster:
+        server: https://kubernetes.default.svc:443
+        certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    contexts:
+    - name: in-cluster
+      context: { cluster: in-cluster, user: in-cluster }
+    current-context: in-cluster
+    users:
+    - name: in-cluster
+      user:
+        tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+  otel-agent-config.yaml: |
+    exporters:
+      debug:
+        sampling_initial: 2
+        sampling_thereafter: 500
+        verbosity: basic
+      otlphttp:
+        endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
+        headers:
+          signoz-ingestion-key: ${env:SIGNOZ_API_KEY}
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+      pprof:
+        endpoint: localhost:1777
+      zpages:
+        endpoint: localhost:55679
+    processors:
+      batch:
+        send_batch_size: 10000
+        timeout: 200ms
+      k8sattributes:
+        extract:
+          annotations: []
+          labels: []
+          metadata:
+            - k8s.namespace.name
+            - k8s.deployment.name
+            - k8s.statefulset.name
+            - k8s.daemonset.name
+            - k8s.cronjob.name
+            - k8s.job.name
+            - k8s.node.name
+            - k8s.node.uid
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.pod.start_time
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        passthrough: false
+        pod_association:
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+      resourcedetection:
+        detectors:
+        - eks
+        - env
+        - system
+        override: false
+        system:
+          resource_attributes:
+            host.id:
+              enabled: false
+            host.name:
+              enabled: false
+            os.type:
+              enabled: true
+        timeout: 2s
+
+    receivers:
+      kubeletstats:
+        auth_type: kubeConfig
+        collection_interval: 30s
+        endpoint: ${env:K8S_NODE_NAME}
+        metric_groups:
+        - container
+        - pod
+        - node
+        - volume
+        metrics:
+          container.cpu.usage:
+            enabled: true
+          container.uptime:
+            enabled: true
+          k8s.container.cpu_limit_utilization:
+            enabled: true
+          k8s.container.cpu_request_utilization:
+            enabled: true
+          k8s.container.memory_limit_utilization:
+            enabled: true
+          k8s.container.memory_request_utilization:
+            enabled: true
+          k8s.node.cpu.usage:
+            enabled: true
+          k8s.node.uptime:
+            enabled: true
+          k8s.pod.cpu.usage:
+            enabled: true
+          k8s.pod.cpu_limit_utilization:
+            enabled: true
+          k8s.pod.cpu_request_utilization:
+            enabled: true
+          k8s.pod.memory_limit_utilization:
+            enabled: true
+          k8s.pod.memory_request_utilization:
+            enabled: true
+          k8s.pod.uptime:
+            enabled: true
+      otlp:
+        protocols:
+          grpc: { endpoint: 0.0.0.0:4317, max_recv_msg_size_mib: 4 }
+          http: { endpoint: 0.0.0.0:4318 }
+
+    service:
+      extensions: [health_check, zpages, pprof]
+      pipelines:
+        logs:
+          receivers:  [otlp]
+          processors: [resourcedetection, k8sattributes, batch]
+          exporters:  [debug, otlphttp]
+        metrics:
+          receivers:  [otlp, kubeletstats]
+          processors: [resourcedetection, k8sattributes, batch]
+          exporters:  [otlphttp, debug]
+        traces:
+          receivers:  [otlp]
+          processors: [resourcedetection, k8sattributes, batch]
+          exporters:  [otlphttp, debug]
+
+      telemetry:
+        logs:    { encoding: json }
+```
+
+**Verify these values:**
+
+- `<YOUR_NAMESPACE>`: The namespace of the application pods that run the sidecar.
+
+The collector reads its endpoint and ingestion key from the sidecar's environment, which Step 4 sets.
+
+### Step 3: Create the service account and RBAC
+
+Create a file named `rbac.yaml` with a service account and the RBAC the sidecar needs to call the API server's node proxy:
+
+```yaml:rbac.yaml minimap defaultCollapsed
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-agent-sidecar
+  namespace: <YOUR_NAMESPACE>
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-kubeletstats-proxy
+rules:
+  # Needed for: GET /api/v1/nodes/<node>/proxy/stats/summary
+  - apiGroups: ['']
+    resources: ['nodes/stats', 'nodes/proxy']
+    verbs: ['get']
+  # Informers for enrichment (k8sattributes/resourcedetection)
+  - apiGroups: ['']
+    resources: ['pods', 'namespaces', 'nodes']
+    verbs: ['get', 'list', 'watch']
+  # Optional: owner lookups (ReplicaSets)
+  - apiGroups: ['apps']
+    resources: ['replicasets']
+    verbs: ['get', 'list', 'watch']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-kubeletstats-proxy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-kubeletstats-proxy
+subjects:
+  - kind: ServiceAccount
+    name: otel-agent-sidecar
+    namespace: <YOUR_NAMESPACE>
+```
+
+**Verify these values:**
+
+- `<YOUR_NAMESPACE>`: The same namespace as in Step 2.
+
+### Step 4: Add the sidecar to your application
+
+In your application's Deployment manifest, add the service account, the ConfigMap volume, and the sidecar container:
+
+```yaml minimap defaultCollapsed
+# Example Deployment fragment
+spec:
+  template:
+    spec:
+      ## Service Account for otel-agent-sidecar container ##
+      serviceAccountName: otel-agent-sidecar
+
+      ## Mount the otel-agent config configMap
+      volumes:
+        - name: otel-agent-config-vol
+          configMap:
+            name: otel-agent-sidecar-config
+
+      containers:
+        - name: your-app
+          image: <YOUR_IMAGE>
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://localhost:4318
+
+        ###### Otel Agent Sidecar container ####
+        - name: opentelemetry-collector-contrib
+          image: otel/opentelemetry-collector-contrib:0.139.0
+          command:
+            - /otelcol-contrib
+            - --config=/conf/otel-agent-config.yaml
+          env:
+            # This endpoint should be reachable from your pod
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: https://ingest.<region>.signoz.cloud:443
+            - name: SIGNOZ_API_KEY
+              value: <your-ingestion-key>
+            - name: KUBECONFIG
+              value: /conf/kubeconfig
+            - name: OTEL_EXPORTER_OTLP_INSECURE
+              value: 'true'
+            - name: OTEL_SECRETS_PATH
+              value: /secrets
+            - name: K8S_CLUSTER_NAME
+              value: <CLUSTER_NAME>
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: K8S_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: K8S_HOST_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: K8S_POD_UID
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.uid
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: SIGNOZ_COMPONENT
+              value: otel-agent
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME),k8s.node.name=$(K8S_NODE_NAME),host.name=$(K8S_NODE_NAME),k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
+          livenessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /
+              port: 13133
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          ports:
+            - containerPort: 13133
+              name: health-check
+              protocol: TCP
+            - containerPort: 8888
+              name: metrics
+              protocol: TCP
+            - containerPort: 4317
+              name: otlp
+              protocol: TCP
+            - containerPort: 4318
+              name: otlp-http
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /
+              port: 13133
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+            - mountPath: /conf
+              name: otel-agent-config-vol
+```
+
+**Verify these values:**
+
+- `<YOUR_IMAGE>`: Your application's image; keep its container as it is and add its `OTEL_EXPORTER_OTLP_ENDPOINT`, which points at the sidecar in the same pod.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: The same value as `global.clusterName` in Step 1.
+
+### Step 5: Apply the manifests
+
+Run this from the directory that contains the files from Steps 2 to 4:
+
+```bash
+kubectl apply -f otel-agent-sidecar-config.yaml
+kubectl apply -f rbac.yaml
+kubectl apply -f <app-manifest>.yaml
+```
+
+**Verify these values:**
+
+- `<app-manifest>.yaml`: Your application's Deployment manifest from Step 4.
+
+### Step 6: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that your application pods run with the sidecar:
+
+```bash
+kubectl get pods -n <YOUR_NAMESPACE>
+```
+
+The output should look similar to the following, with `2/2` under `READY` for each application pod: your application's container and the sidecar. Pod names and suffixes vary:
+
+```output
+NAME                        READY   STATUS    RESTARTS   AGE
+your-app-6b8f9c7d5d-4kq2m   2/2     Running   0          2m
+```
+
+Then check the chart's deployment collector in the `k8s-infra` release's namespace:
+
+```bash
+kubectl get pods
+```
+
+The output lists one `my-release-k8s-infra-otel-deployment` pod as `Running`.
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** view lists the pods that run the sidecar. Check **Logs Explorer** to confirm Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+The sidecars read their config when their pod starts. Every change to the config follows the same loop: edit `otel-agent-config.yaml` in `otel-agent-sidecar-config.yaml`, then run this from the directory that contains the file:
+
+```bash
+kubectl apply -f otel-agent-sidecar-config.yaml
+kubectl rollout restart -n <YOUR_NAMESPACE> deployment/<app-name>
+```
+
+**Verify these values:**
+
+- `<app-name>`: The name of your application's Deployment.
+
+What to change, and where:
+
+- **Sidecar config** (receivers, processors, pipelines): see [OpenTelemetry Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+- **Deployment collector** (cluster metrics, Kubernetes events): edit `override-values.yaml`, then run `helm upgrade my-release signoz/k8s-infra --version 0.17.1 -f override-values.yaml` from the directory that contains it. For the chart's settings, see [the chart's configuration](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+
+## Collect Container Logs
+
+Application logs reach the collector over OTLP from the application, or through CloudWatch Logs from Fargate's log router. For both routes and the CloudWatch setup, see [Collect EKS Fargate Logs with OpenTelemetry and CloudWatch](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/eks-fargate-logs/?fargate-setup=sidecar).
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Application pod stays Pending
+
+Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod -n <YOUR_NAMESPACE> <pod-name>
+```
+
+Replace `<pod-name>` with the pod's name from `kubectl get pods -n <YOUR_NAMESPACE>`. The events show `FailedScheduling`.
+
+**Cause:** no Fargate profile selects the namespace, so no Fargate node is started for the pod.
+
+**Fix:** add a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the namespace, then run this on the machine where you use `kubectl` to recreate the pods:
+
+```bash
+kubectl rollout restart -n <YOUR_NAMESPACE> deployment/<app-name>
+```
+
+After the fix, `kubectl get pods -n <YOUR_NAMESPACE>` shows the pods as `Running` with `2/2` under `READY`.
+
+### Sidecar logs a 404 for the kubelet stats
+
+Run this on the machine where you use `kubectl` to read the sidecar's logs:
+
+```bash
+kubectl logs -n <YOUR_NAMESPACE> deployment/<app-name> -c opentelemetry-collector-contrib --since=10m
+```
+
+The logs show `404 Not Found` for `/api/v1/nodes/<node-name>/proxy/stats/summary`.
+
+**Cause:** the `kubeletstats` receiver does not reach the kubelet of the pod's node through the Kubernetes API server.
+
+**Fix:** check that:
+
+- the receiver's `endpoint` is `${env:K8S_NODE_NAME}`, not empty and not a `host:port`;
+- the sidecar sets `K8S_NODE_NAME` from `spec.nodeName` and `KUBECONFIG=/conf/kubeconfig`;
+- the ClusterRole in `rbac.yaml` allows `get` on `nodes/stats` and `nodes/proxy`.
+
+Some EKS Fargate environments do not serve `/stats/summary` through the proxy. In that case, scrape cAdvisor through the proxy instead (`/api/v1/nodes/<node-name>/proxy/metrics/cadvisor`) with a `prometheus` receiver.
+
+After the fix, the sidecar's logs show no `kubeletstats` errors and the **Pods** view in SigNoz lists the pod.
+
+### helm install fails with `cannot re-use a name that is still in use`
+
+Run this on the machine where you use `kubectl` to list the releases in the current namespace:
+
+```bash
+helm list
+```
+
+**Cause:** the release `my-release` already exists.
+
+**Fix:** apply your changes with `helm upgrade my-release signoz/k8s-infra --version 0.17.1 -f override-values.yaml` from the directory that contains `override-values.yaml`.
+
+After the fix, `kubectl get pods` shows the `my-release-k8s-infra-otel-deployment` pod as `Running`.
+
+</details>
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+- [Configure the EKS Fargate Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/)
+- [Configure K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/)
+- [OpenTelemetry Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
+- [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)

@@ -1,21 +1,29 @@
 ---
-date: 2026-10-15
+date: 2026-10-23
 title: K8s Serverless (EKS Fargate) - Install
-description: Install the EKS Fargate collection agent with Foundry through Kustomize to send kubelet metrics, cluster metrics, Kubernetes events, and traces to SigNoz.
+description: Install the EKS Fargate Collection Agent with Foundry, an OpenTelemetry Collector Deployment and optional sidecar, to send metrics, traces, and logs to SigNoz.
 doc_type: howto
 ---
 
-This guide explains how to install the EKS Fargate Collection Agent with Foundry through Kustomize.
+This guide explains how to install the EKS Fargate Collection Agent with Foundry, with or without the OpenTelemetry Operator.
 
-If you run the sidecar setup from earlier versions of this guide, see [Sidecar Setup](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/sidecar-setup/).
+<Admonition type="warning" title="Migrating from the manual sidecar collector?" defaultCollapsed="true">
+Foundry, documented below, is now the supported way to install and manage the EKS Fargate Collection Agent.
+
+If you already run the manual sidecar collector from the Manual tab of [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?sidecar-setup=manual), follow [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#migrate-to-foundry) to move it over.
+</Admonition>
 
 ## Prerequisites
 
-- An EKS cluster with a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the `signoz` namespace, which the collector runs in.
+- An EKS cluster with a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the namespace the collector runs in.
 - `kubectl` configured to reach the cluster.
+- For the OpenTelemetry Operator, the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/#install-the-opentelemetry-operator), which Step 1 of that tab installs.
 - A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
 ## Install the Collection Agent
+
+<Tabs entityName="controller">
+<TabItem value="default" label="K8s Infra" default>
 
 <Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
 Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
@@ -29,11 +37,11 @@ Run this on the machine where you use `kubectl`:
 curl -fsSL https://signoz.io/foundry.sh | bash
 ```
 
-For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
 
 ### Step 2: Create casting.yaml
 
-Create a file named `casting.yaml` with one document for the collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/#how-it-works). `collector.kind: deployment` selects that collector:
+Create a file named `casting.yaml` with one document for the deployment collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/#how-it-works). `collector.kind: deployment` selects it:
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
@@ -69,14 +77,14 @@ spec:
 **Verify these values:**
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pod.
-- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
-- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz, which becomes `k8s.cluster.name` and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
 
 For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize" target="_blank" rel="noopener noreferrer nofollow">EKS Fargate Kustomize example</a>.
 
 <Admonition type="info" title="Change the namespace" defaultCollapsed="true">
-The `foundry.signoz.io/kubernetes-namespace` annotation under `metadata` sets the namespace the collector is applied to. A Fargate profile must select that namespace, or the collector pod stays `Pending`. The default is:
+The `foundry.signoz.io/kubernetes-namespace` annotation under `metadata` sets the namespace the deployment collector is applied to. A Fargate profile must select that namespace, or the deployment collector's pod stays `Pending`. The default is:
 
 ```yaml
 metadata:
@@ -100,7 +108,7 @@ This command:
 
 - writes the kustomize root `pours/collectionagent/collector/deployment`;
 - applies it with `kubectl apply -k` to the cluster of your current `kubectl` context;
-- creates the `signoz` namespace on the first apply, since the root holds the namespace, the collector's service account and RBAC, its config, its Service, and its Deployment.
+- creates the collector's namespace on the first apply, `signoz` from `metadata.name` in this casting. The root holds the namespace, the collector's service account and RBAC, its config, its Service, and its Deployment.
 
 Run the same command again after editing `casting.yaml` to apply the change.
 
@@ -117,7 +125,7 @@ To see the manifests before you apply them, run `kubectl kustomize pours/collect
 
 ### Step 4: Verify the Collection Agent
 
-Run this on the machine where you use `kubectl` to check that the collector pod is running on a Fargate node:
+Run this on the machine where you use `kubectl` to check that the deployment collector's pod is running on a Fargate node, in the namespace from `metadata.name`:
 
 ```bash
 kubectl get pods -n signoz -o wide
@@ -130,11 +138,15 @@ NAME                                           READY   STATUS    RESTARTS   AGE 
 signoz-collector-deployment-6d9c7b8f5c-k2x9p   1/1     Running   0          2m    10.0.12.34   fargate-ip-10-0-12-34.ec2.internal   <none>           <none>
 ```
 
-In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm Kubernetes events are flowing.
+In SigNoz, open the **[Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/)** views under **[Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** to confirm Kubernetes events are flowing.
+
+### Step 5: Add the sidecar to your workloads (optional)
+
+The [sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/#sidecar) receives an application's telemetry inside its own pod, and [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/) shows how to add it to your workloads. Skip this step if your applications send to the deployment collector's Service.
 
 ## Customize the Collection Agent
 
-Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again. For the sidecar, forge and apply as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#apply-changes) shows, then restart the workloads that run it.
 
 - **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
 
@@ -145,7 +157,7 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
         image: otel/opentelemetry-collector-contrib:0.139.0
   ```
 
-- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/deployment/deployment.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/deployment/deployment.yaml` in the deployment collector's document or `collector/sidecar/sidecar.yaml` in the sidecar's. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
 
   ```yaml
   spec:
@@ -162,7 +174,7 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
                         collection_interval: 60s
   ```
 
-- **Manifests** (resources, annotations): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against the files under `collectionagent/collector/deployment/`, such as `workload.yaml` for the collector's Deployment. For example, to set the collector's resource requests:
+- **Manifests** (resources, annotations): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against the files under `collectionagent/collector/deployment/`, such as `workload.yaml` for the deployment collector, or against `collectionagent/collector/sidecar/patch.yaml` for the sidecar's container. For example, to give the deployment collector more CPU and memory:
 
   ```yaml
   spec:
@@ -173,8 +185,11 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
             path: /spec/template/spec/containers/0/resources
             value:
               requests:
-                cpu: 250m
-                memory: 512Mi
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                cpu: 500m
+                memory: 1Gi
   ```
 
   Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
@@ -187,15 +202,15 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
 
 ### Collector pod stays Pending
 
-Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+In Step 4, the deployment collector's pod stays `Pending`. Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
 
 ```bash
 kubectl describe pod -n signoz <pod-name>
 ```
 
-Replace `<pod-name>` with the collector pod's name from `kubectl get pods -n signoz`. The events show `FailedScheduling`.
+Replace `<pod-name>` with the pod's name from `kubectl get pods -n signoz`. The events show `FailedScheduling`.
 
-**Cause:** no Fargate profile selects the `signoz` namespace, so no Fargate node is started for the pod.
+**Cause:** no Fargate profile selects the collector's namespace, so no Fargate node is started for the pod.
 
 **Fix:** add a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the namespace, then run this on the machine where you use `kubectl` to recreate the pod:
 
@@ -205,15 +220,15 @@ kubectl rollout restart -n signoz deployment/signoz-collector-deployment
 
 After the fix, `kubectl get pods -n signoz -o wide` shows the pod as `Running` on a `fargate-` node.
 
-### The Pods view stays empty
+### The pods view stays empty
 
-Run this on the machine where you use `kubectl` to read the collector's logs:
+In Step 4, the **Pods** view in SigNoz stays empty. Run this on the machine where you use `kubectl` to read the deployment collector's logs:
 
 ```bash
 kubectl logs -n signoz deployment/signoz-collector-deployment --since=10m
 ```
 
-The logs show errors from the `kubeletstats` scrapes: a `403`, or a `404` on `/api/v1/nodes/<node-name>/proxy/stats/summary`.
+The logs show errors from the kubelet scrapes: a `403`, or a `404` on `/api/v1/nodes/<node-name>/proxy/stats/summary`.
 
 **Cause:** with a `403`, the collector's service account is not allowed through the Kubernetes API server's node proxy. With a `404`, the kubelet on that node does not serve its stats through the proxy.
 
@@ -223,39 +238,43 @@ The logs show errors from the `kubeletstats` scrapes: a `403`, or a `404` on `/a
 kubectl auth can-i get nodes/proxy --as=system:serviceaccount:signoz:signoz-collector-deployment
 ```
 
-If it prints `no`, run `foundryctl cast -f casting.yaml` again from the directory that contains it. For a `404`, scrape the kubelets directly, as the example's <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#when-the-api-server-proxy-does-not-serve-kubelet-stats" target="_blank" rel="noopener noreferrer nofollow">API-server proxy section</a> shows.
+If it prints `no`, run Step 3 again. For a `404`, scrape the kubelets directly, as the example's <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#when-the-api-server-proxy-does-not-serve-kubelet-stats" target="_blank" rel="noopener noreferrer nofollow">API-server proxy section</a> shows.
 
 After the fix, the **Pods** view in SigNoz lists your pods.
 
 ### foundryctl cast stops with `unsupported collector kind "agent"`
 
-`foundryctl cast -f casting.yaml` stops before it applies anything, with the message `unsupported collector kind "agent"`.
+In Step 3, `foundryctl cast -f casting.yaml` stops before it applies anything, with the message `unsupported collector kind "agent"`.
 
-**Cause:** the casting has no `collector.kind`, so the collector kind defaults to `agent`, and on EKS Fargate the collector runs as a Deployment.
+**Cause:** the document has no `collector.kind`, so the collector kind defaults to `agent`, and on EKS Fargate the collector kinds are `deployment` and `sidecar`.
 
-**Fix:** add `kind: deployment` under `spec.collector`, as in Step 2, then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+**Fix:** add `kind: deployment` under `spec.collector`, as in Step 2, or `kind: sidecar` in the sidecar's document, then run Step 3 again.
 
-After the fix, `kubectl get pods -n signoz` shows the collector pod.
+After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod.
 
 ### foundryctl cast rejects a patch
 
-`foundryctl cast -f casting.yaml` stops before it applies anything, with a message that names the patch's target.
+In Step 3, `foundryctl cast -f casting.yaml` stops before it applies anything, with `failed to apply patch for target "<target>"` and one of these causes:
+
+- `doc is missing key: <path>: missing value`
+- `doc is missing path: <path>: missing value`
+- `patch target "<target>" did not match any generated material`
 
 **Cause:** the patch's target or path does not exist in what Foundry generates for EKS Fargate.
 
-**Fix:** target a file under `collectionagent/collector/deployment/`, such as `collectionagent/collector/deployment/workload.yaml`, with a `path` that exists in it. To see the files a patch can target, run this from the directory that contains `casting.yaml` and look under `pours/collectionagent/collector/deployment/`:
+**Fix:** remove the patch from `casting.yaml`, then run this from the directory that contains it:
 
 ```bash
 foundryctl forge -f casting.yaml
 ```
 
-Then run `foundryctl cast -f casting.yaml` again.
+Take the target and path from the files under `pours/collectionagent/collector/`, add the patch back, and run Step 3 again.
 
-After the fix, `kubectl get pods -n signoz` shows the collector pod.
+After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod.
 
 ### foundryctl cast reaches the wrong cluster or none
 
-Run this on the machine where you run `foundryctl` to see which cluster it uses:
+In Step 3, `foundryctl cast -f casting.yaml` applies to another cluster or cannot reach one. Run this on the machine where you run `foundryctl` to see which cluster it uses:
 
 ```bash
 kubectl config current-context
@@ -263,19 +282,343 @@ kubectl config current-context
 
 **Cause:** `foundryctl cast` applies to the cluster of your current `kubectl` context.
 
-**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. Replace `<context-name>` with a context from `kubectl config get-contexts`.
+**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run Step 3 again. Replace `<context-name>` with a context from `kubectl config get-contexts`.
 
-After the fix, `kubectl get pods -n signoz` shows the collector pod on that cluster.
+After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod on that cluster.
 
 </details>
 
+</TabItem>
+<TabItem value="opentelemetry-operator" label="OpenTelemetry Operator">
+
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
+
+### Step 1: Install the OpenTelemetry Operator
+
+Install the OpenTelemetry Operator, which reconciles the `OpenTelemetryCollector` resources Foundry generates for the collectors, and cert-manager, which issues the certificate of the operator's admission webhook. Run these on the machine where you use `kubectl`, with the AWS CLI and Helm 3 installed:
+
+1. Add a Fargate profile that selects the `cert-manager` and `opentelemetry-operator-system` namespaces:
+
+   ```bash
+   aws eks create-fargate-profile --cluster-name <cluster-name> \
+     --fargate-profile-name opentelemetry-operator \
+     --pod-execution-role-arn <pod-execution-role-arn> \
+     --selectors namespace=cert-manager namespace=opentelemetry-operator-system
+   ```
+
+   **Verify these values:**
+
+   - `<cluster-name>`: Your EKS cluster's name.
+   - `<pod-execution-role-arn>`: The ARN of the pod execution role your other Fargate profiles use.
+
+2. Install cert-manager with its webhook on port 10260, since on Fargate the kubelet holds the default port 10250, as cert-manager's <a href="https://cert-manager.io/docs/installation/compatibility/#aws-fargate" target="_blank" rel="noopener noreferrer nofollow">AWS Fargate notes</a> describe:
+
+   ```bash
+   helm install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+     --version v1.21.2 \
+     --namespace cert-manager \
+     --create-namespace \
+     --set crds.enabled=true \
+     --set webhook.securePort=10260
+   ```
+
+3. Wait until cert-manager's webhook is ready, so that it accepts the operator's certificate:
+
+   ```bash
+   kubectl -n cert-manager rollout status deploy/cert-manager-webhook
+   ```
+
+4. Install operator v0.139.0, which matches the OpenTelemetry Collector 0.139.0 that Foundry pins, and its CRDs:
+
+   ```bash
+   kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.139.0/opentelemetry-operator.yaml
+   ```
+
+5. Check the operator. It is ready when `READY` shows `1/1`:
+
+   ```bash
+   kubectl get deployment opentelemetry-operator-controller-manager -n opentelemetry-operator-system
+   ```
+
+### Step 2: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
+
+### Step 3: Create casting.yaml
+
+Create a file named `casting.yaml` with one document for the deployment collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/#how-it-works). `collector.kind: deployment` selects it:
+
+<Admonition type="info" title="Required on every document: the controller annotation">
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` sets the OpenTelemetry Operator as the controller of the collector's workload. Foundry then generates an `OpenTelemetryCollector` resource for the operator to reconcile, instead of the plain Deployment and sidecar container it generates without the annotation. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+</Admonition>
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes-serverless
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz, which becomes `k8s.cluster.name` and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize" target="_blank" rel="noopener noreferrer nofollow">EKS Fargate Kustomize example</a>.
+
+<Admonition type="info" title="Change the namespace" defaultCollapsed="true">
+The `foundry.signoz.io/kubernetes-namespace` annotation under `metadata` sets the namespace the deployment collector is applied to. A Fargate profile must select that namespace, or the deployment collector's pod stays `Pending`. The default is:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+    foundry.signoz.io/kubernetes-namespace: signoz   # namespace to apply into, created by the apply
+```
+
+The namespace defaults to `metadata.name`. The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes it.
+</Admonition>
+
+### Step 4: Deploy
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+This command:
+
+- writes the kustomize root `pours/collectionagent/collector/deployment`;
+- applies it with `kubectl apply -k` to the cluster of your current `kubectl` context;
+- creates the collector's namespace on the first apply, `signoz` from `metadata.name` in this casting. The root holds the namespace, the collector's service account and RBAC, and the `OpenTelemetryCollector` resource `signoz-collector-deployment`.
+
+The operator then creates the collector's workload and Service, `signoz-collector-deployment-collector`, from the resource. Run the same command again after editing `casting.yaml` to apply the change.
+
+<Admonition type="tip" title="Run kubectl yourself" defaultCollapsed="true">
+To run kubectl directly, generate the kustomize root and apply it. Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl forge -f casting.yaml   # writes the kustomize root under pours/collectionagent/collector/deployment
+kubectl apply -k pours/collectionagent/collector/deployment
+```
+
+To see the manifests before you apply them, run `kubectl kustomize pours/collectionagent/collector/deployment`.
+</Admonition>
+
+### Step 5: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that the deployment collector's pod is running on a Fargate node, in the namespace from `metadata.name`:
+
+```bash
+kubectl get pods -n signoz -o wide
+```
+
+The output should look similar to the following, with one `signoz-collector-deployment-collector` pod on a node whose name starts with `fargate-`. The operator names the workload after its `OpenTelemetryCollector` resource with a `-collector` suffix. Pod suffixes, IP addresses, and node names vary:
+
+```output
+NAME                                                     READY   STATUS    RESTARTS   AGE   IP           NODE                                 NOMINATED NODE   READINESS GATES
+signoz-collector-deployment-collector-6d9c7b8f5c-k2x9p   1/1     Running   0          2m    10.0.12.34   fargate-ip-10-0-12-34.ec2.internal   <none>           <none>
+```
+
+In SigNoz, open the **[Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/)** views under **[Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** to confirm Kubernetes events are flowing.
+
+### Step 6: Add the sidecar to your workloads (optional)
+
+The [sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/#sidecar) receives an application's telemetry inside its own pod, and [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?controller=opentelemetry-operator) shows how to add it to your workloads. Skip this step if your applications send to the deployment collector's Service.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again. For the sidecar, forge and apply as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?controller=opentelemetry-operator#apply-changes) shows, then restart the workloads that run it.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/deployment/deployment.yaml` in the deployment collector's document or `collector/sidecar/sidecar.yaml` in the sidecar's. It merges into the generated config, which becomes the resource's `spec.config` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/deployment/deployment.yaml: |
+              receivers:
+                receiver_creator:
+                  receivers:
+                    kubeletstats:
+                      config:
+                        collection_interval: 60s
+  ```
+
+- **Manifests** (resources, annotations): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/collector/deployment/opentelemetrycollector.yaml` or `collectionagent/collector/sidecar/opentelemetrycollector.yaml`, the collectors' `OpenTelemetryCollector` resources, with paths under `/spec`. For example, to give the deployment collector more CPU and memory:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/deployment/opentelemetrycollector.yaml
+        operations:
+          - op: replace
+            path: /spec/resources
+            value:
+              requests:
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                cpu: 500m
+                memory: 1Gi
+  ```
+
+  For every field of the resource, see the <a href="https://github.com/open-telemetry/opentelemetry-operator/blob/v0.139.0/docs/api/opentelemetrycollectors.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetryCollector API reference</a>. Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Collector pod stays Pending
+
+In Step 5, the deployment collector's pod stays `Pending`. Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the pod's name from `kubectl get pods -n signoz`. The events show `FailedScheduling`.
+
+**Cause:** no Fargate profile selects the collector's namespace, so no Fargate node is started for the pod.
+
+**Fix:** add a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the namespace, then run this on the machine where you use `kubectl` to recreate the pod:
+
+```bash
+kubectl rollout restart -n signoz deployment/signoz-collector-deployment-collector
+```
+
+After the fix, `kubectl get pods -n signoz -o wide` shows the pod as `Running` on a `fargate-` node.
+
+### The pods view stays empty
+
+In Step 5, the **Pods** view in SigNoz stays empty. Run this on the machine where you use `kubectl` to read the deployment collector's logs:
+
+```bash
+kubectl logs -n signoz deployment/signoz-collector-deployment-collector --since=10m
+```
+
+The logs show errors from the kubelet scrapes: a `403`, or a `404` on `/api/v1/nodes/<node-name>/proxy/stats/summary`.
+
+**Cause:** with a `403`, the collector's service account is not allowed through the Kubernetes API server's node proxy. With a `404`, the kubelet on that node does not serve its stats through the proxy.
+
+**Fix:** for a `403`, run this on the machine where you use `kubectl`. It prints `yes` once the ClusterRole Foundry generates is in place:
+
+```bash
+kubectl auth can-i get nodes/proxy --as=system:serviceaccount:signoz:signoz-collector-deployment
+```
+
+If it prints `no`, run Step 4 again. For a `404`, scrape the kubelets directly, as the example's <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/kubernetes-serverless/kustomize/README.md#when-the-api-server-proxy-does-not-serve-kubelet-stats" target="_blank" rel="noopener noreferrer nofollow">API-server proxy section</a> shows.
+
+After the fix, the **Pods** view in SigNoz lists your pods.
+
+### foundryctl cast stops with `unsupported collector kind "agent"`
+
+In Step 4, `foundryctl cast -f casting.yaml` stops before it applies anything, with the message `unsupported collector kind "agent"`.
+
+**Cause:** the document has no `collector.kind`, so the collector kind defaults to `agent`, and on EKS Fargate the collector kinds are `deployment` and `sidecar`.
+
+**Fix:** add `kind: deployment` under `spec.collector`, as in Step 3, or `kind: sidecar` in the sidecar's document, then run Step 4 again.
+
+After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod.
+
+### foundryctl cast rejects a patch
+
+In Step 4, `foundryctl cast -f casting.yaml` stops before it applies anything, with `failed to apply patch for target "<target>"` and one of these causes:
+
+- `doc is missing key: <path>: missing value`
+- `doc is missing path: <path>: missing value`
+- `patch target "<target>" did not match any generated material`
+
+**Cause:** the patch's target or path does not exist in what Foundry generates for the OpenTelemetry Operator.
+
+**Fix:** remove the patch from `casting.yaml`, then run this from the directory that contains it:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+Take the target from the files under `pours/collectionagent/collector/` and the path from the resource under `/spec`, add the patch back, and run Step 4 again.
+
+After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod.
+
+### foundryctl cast reaches the wrong cluster or none
+
+In Step 4, `foundryctl cast -f casting.yaml` applies to another cluster or cannot reach one. Run this on the machine where you run `foundryctl` to see which cluster it uses:
+
+```bash
+kubectl config current-context
+```
+
+**Cause:** `foundryctl cast` applies to the cluster of your current `kubectl` context.
+
+**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run Step 4 again. Replace `<context-name>` with a context from `kubectl config get-contexts`.
+
+After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod on that cluster.
+
+</details>
+
+</TabItem>
+</Tabs>
+
 ## Send data from your applications
 
-Kubelet and cluster metrics and Kubernetes events flow as soon as the collector is running. To send traces, metrics, and logs from your applications, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector).
+Kubelet and cluster metrics and Kubernetes events flow as soon as the deployment collector is running. To send traces, metrics, and logs from your applications to the sidecar in their own pod or to the deployment collector's Service, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector).
 
 ## Next Steps
 
 - [Configure the EKS Fargate Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/)
+- [Add the sidecar to your workloads](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/)
 - [Learn more about the EKS Fargate Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

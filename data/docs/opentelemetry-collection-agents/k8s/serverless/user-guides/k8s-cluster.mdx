@@ -1,15 +1,15 @@
 ---
-date: 2026-10-15
+date: 2026-10-23
 title: Monitor EKS Fargate Kubernetes Clusters with OpenTelemetry
-description: Monitor EKS Fargate clusters with an OpenTelemetry Collector Deployment installed with Foundry, and send metrics, logs, and traces to SigNoz.
+description: Monitor EKS Fargate clusters with the EKS Fargate Collection Agent, which runs the OpenTelemetry Collector to send metrics, traces, and logs to SigNoz.
 doc_type: tutorial
 ---
 
-This guide explains how to monitor serverless Kubernetes workloads on Amazon EKS Fargate using OpenTelemetry. You'll install the EKS Fargate Collection Agent with Foundry, which runs one OpenTelemetry Collector as a Deployment, and send telemetry to SigNoz for end-to-end observability.
+This guide explains how to monitor serverless Kubernetes workloads on Amazon EKS Fargate using OpenTelemetry. You install the EKS Fargate Collection Agent, one OpenTelemetry Collector Deployment, with Foundry and send its telemetry to SigNoz.
 
 ## What is Serverless Kubernetes Monitoring with OpenTelemetry?
 
-EKS Fargate runs Kubernetes Pods on serverless compute. Since there is no node access, DaemonSets and host mounts are not supported. One OpenTelemetry Collector runs as a Deployment and reaches the kubelet of every Fargate node through the Kubernetes API server. Your apps send traces, metrics, and logs to its Service via OTLP, and the collector forwards data to your SigNoz backend.
+EKS Fargate runs Kubernetes pods on serverless compute. Since there is no node access, DaemonSets and host mounts are not supported. One OpenTelemetry Collector runs as a Deployment and reaches the kubelet of every Fargate node through the Kubernetes API server. Your apps send traces, metrics, and logs to its Service via OTLP, and the collector forwards data to your SigNoz backend.
 
 To learn how Fargate differs from node-based setups and what the collector collects, see the [K8s Serverless Overview](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/overview/).
 
@@ -32,13 +32,13 @@ On EKS Fargate, one OpenTelemetry Collector runs as a Deployment:
 
 ## Step 1: Install the Collection Agent
 
-Install the collector with Foundry. Follow the complete instructions in the [K8s Serverless (EKS Fargate) - Install](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) guide.
+Install the collector with Foundry, with or without the OpenTelemetry Operator. Follow the complete instructions in the [K8s Serverless (EKS Fargate) - Install](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/) guide.
 
-If you run the sidecar setup from earlier versions of this guide, see [Sidecar Setup](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/sidecar-setup/).
+If you already run the manual sidecar collector from the Manual tab of [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?sidecar-setup=manual), follow [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#migrate-to-foundry) to move it over.
 
 ## Step 2: Send Telemetry from Your Applications
 
-Instrument your applications with OpenTelemetry and point them at the collector's Service. See [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector).
+Instrument your applications with OpenTelemetry and point them at the sidecar in their pod, if you added it, or at the deployment collector's Service. See [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector).
 
 ## Step 3: What Telemetry Can You Collect?
 
