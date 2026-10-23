@@ -1,0 +1,48 @@
+---
+title: How do I tell whether rising error logs mean more traffic or more failures?
+description: Compare failed requests with total requests in SigNoz Cloud to see whether an error spike comes from more traffic or a higher HTTP 5xx percentage.
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+Compare the percentage of completed requests that return server errors, alongside the total request count. SigNoz Cloud can calculate that percentage from logs when each completed request produces one completion record. If traffic grows while the percentage stays steady, more requests are failing in total, but the failed share has not increased.
+
+## Compare failures with traffic
+
+For example, take a checkout service that returns HTTP 200 when a request succeeds, and HTTP 500 when it cannot complete the request. Each completed request writes one log with its response status and request ID.
+
+The logs from three one-minute periods gave these counts:
+
+| Period | Completed requests | Requests with HTTP 500 | Failure percentage |
+| --- | ---: | ---: | ---: |
+| Earlier traffic | 1,000 | 10 | 1% |
+| Traffic doubles | 2,000 | 20 | 1% |
+| Failed share rises | 2,000 | 100 | 5% |
+
+In the second period, the failure count doubles because traffic doubles; the percentage remains 1%. In the third period, traffic stays at 2,000 requests while the failed share rises to 5%. That is the change an error count alone cannot show.
+
+## Count the same requests in both queries
+
+In [Logs Explorer](https://signoz.io/docs/logs-management/querying-logs/), the **Time Series** and **Table** views support multiple log-count queries and formulas. Use query B to count checkout's request-completion records. Query A counts the same records with HTTP status 500–599, which covers server errors.
+
+Keep the service, route, time range, aggregation interval and grouping the same in both queries. The formula `100*A/B` then gives the HTTP 5xx percentage for each interval. The [multi-query guide](https://signoz.io/docs/querying/multi-query-analysis/) explains how to combine the queries. When B is zero, there is no meaningful failure percentage; check missing request data separately.
+
+Counting all application logs would change the meaning of B. A request can write several messages, so only its completion record belongs in this request count.
+
+## Keep the counts beside the percentage
+
+Put the request count, server-error count and percentage on a dashboard so changes in traffic remain visible. When the percentage rises, filter those same completion logs to HTTP 5xx and open a failed record to read its status and request ID.
+
+<Figure
+  src="/img/faqs/measure-error-rates-from-logs/checkout-error-percentage.webp"
+  alt="SigNoz Cloud table showing 10 of 1,000 and 20 of 2,000 requests at 1%, then 100 of 2,000 at 5%."
+  caption="SigNoz Cloud compares request counts and HTTP 5xx percentages for the three one-minute periods."
+  width={1217}
+  height={489}
+  themeInvert={false}
+/>
+
+You can also use the percentage formula as the evaluation target for a [log-based alert](https://signoz.io/docs/alerts-management/log-based-alerts/). With one-minute points, **At least once** above 2% in a five-minute window checks whether any minute's percentage crosses that threshold.
+
+The comparison depends on collecting successful and failed completions consistently. Check for missing or duplicate records; error-only logs cannot supply the total request count. This example measures completed HTTP responses, so failures that never produce a completion record need another recorded outcome.
