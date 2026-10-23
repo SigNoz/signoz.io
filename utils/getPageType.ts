@@ -94,9 +94,9 @@ export const getPageType = (pathname: string): string => {
 
   // About and legal pages
   if (normalizedPath === '/about-us') return 'About Page'
-  if (normalizedPath === '/legal') return 'Legal Page'
   if (normalizedPath === '/legal/terms-of-service') return 'Terms Page'
   if (normalizedPath === '/legal/privacy') return 'Privacy Page'
+  if (normalizedPath === '/legal' || normalizedPath.startsWith('/legal/')) return 'Legal Page'
 
   // Enterprise pages
   if (normalizedPath === '/enterprise') return 'Enterprise Page'
