@@ -10,20 +10,23 @@ This guide explains how to install the EKS Fargate Collection Agent with Foundry
 <Admonition type="warning" title="Migrating from the manual sidecar collector?" defaultCollapsed="true">
 Foundry, documented below, is now the supported way to install and manage the EKS Fargate Collection Agent.
 
-If you already run the manual sidecar collector from the Manual tab of [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?sidecar-setup=manual), follow [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#migrate-to-foundry) to move it over.
+If you already run the manual sidecar collector from the Helm Chart tab of [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?setup=helm), follow [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#migrate-to-foundry) to move it over.
 </Admonition>
 
 ## Prerequisites
 
-- An EKS cluster with a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the namespace the collector runs in.
-- `kubectl` configured to reach the cluster.
-- For the OpenTelemetry Operator, the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/#install-the-opentelemetry-operator), which Step 1 of that tab installs.
+- An EKS cluster with a <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html" target="_blank" rel="noopener noreferrer nofollow">Fargate profile</a> that selects the collector's namespace and your applications' namespaces.
+- `kubectl` configured to reach the cluster, and Helm 3 installed on the same machine.
 - A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
+- For the OpenTelemetry Operator tab, the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/#install-the-opentelemetry-operator), which Step 1 of that tab installs.
 
 ## Install the Collection Agent
 
 <Tabs entityName="controller">
 <TabItem value="default" label="K8s Infra" default>
+
+<Tabs entityName="setup">
+<TabItem value="foundry" label="Foundry" default>
 
 <Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
 Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
@@ -289,6 +292,99 @@ After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod
 </details>
 
 </TabItem>
+<TabItem value="helm" label="Helm Chart">
+
+This tab installs the Collection Agent with the Helm chart, the method from earlier versions of this guide; the Foundry tab is the supported setup, and [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#migrate-to-foundry) moves this one over.
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key in `override-values.yaml`, as shown in [Cloud → Self-Hosted for the k8s-infra chart](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=k8s-infra#cloud-to-self-hosted).
+</Admonition>
+
+### Step 1: Install k8s-infra without the agent
+
+Run this on the machine where you use `kubectl` to add the Helm repository:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+```
+
+Create a file named `override-values.yaml`. `otelAgent.enabled: false` turns off the agent DaemonSet and keeps the chart's deployment collector:
+
+```yaml:override-values.yaml
+global:
+  clusterName: <CLUSTER_NAME>
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
+otelInsecure: false
+signozApiKey: <your-ingestion-key>
+otelAgent:
+  enabled: false
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz, which becomes `k8s.cluster.name` and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`, which becomes `deployment.environment` on the collected telemetry.
+
+Run this from the directory that contains `override-values.yaml`:
+
+```bash
+helm install my-release signoz/k8s-infra --version 0.17.1 -f override-values.yaml
+```
+
+Helm installs the release `my-release` into the namespace of your current `kubectl` context, `default` unless you set another. A Fargate profile must select that namespace.
+
+### Step 2: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check the chart's deployment collector in the `k8s-infra` release's namespace:
+
+```bash
+kubectl get pods
+```
+
+The output lists one `my-release-k8s-infra-otel-deployment` pod as `Running`.
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`. Check **Logs Explorer** to confirm Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+To change the deployment collector (cluster metrics, Kubernetes events), edit `override-values.yaml`, then run `helm upgrade my-release signoz/k8s-infra --version 0.17.1 -f override-values.yaml` from the directory that contains it. For the chart's settings, see [the chart's configuration](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+
+## Collect Container Logs
+
+Application logs reach the collector over OTLP from the application, or through CloudWatch Logs from Fargate's log router. For both routes and the CloudWatch setup, see [Collect EKS Fargate Logs with OpenTelemetry and CloudWatch](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/eks-fargate-logs/?fargate-setup=sidecar).
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### helm install fails with `cannot re-use a name that is still in use`
+
+Run this on the machine where you use `kubectl` to list the releases in the current namespace:
+
+```bash
+helm list
+```
+
+**Cause:** the release `my-release` already exists.
+
+**Fix:** apply your changes with `helm upgrade my-release signoz/k8s-infra --version 0.17.1 -f override-values.yaml` from the directory that contains `override-values.yaml`.
+
+After the fix, `kubectl get pods` shows the `my-release-k8s-infra-otel-deployment` pod as `Running`.
+
+</details>
+
+To run the sidecar with this setup, follow the Helm Chart tab of [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?setup=helm).
+
+</TabItem>
+</Tabs>
+
+</TabItem>
 <TabItem value="opentelemetry-operator" label="OpenTelemetry Operator">
 
 <Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
@@ -466,7 +562,7 @@ The [sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverl
 
 ## Customize the Collection Agent
 
-Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again. For the sidecar, forge and apply as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?controller=opentelemetry-operator#apply-changes) shows, then restart the workloads that run it.
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again. For the sidecar, forge and apply as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?controller=opentelemetry-operator#apply-changes-1) shows, then restart the workloads that run it.
 
 - **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
 
@@ -613,7 +709,7 @@ After the fix, `kubectl get pods -n signoz` shows the deployment collector's pod
 
 ## Send data from your applications
 
-Kubelet and cluster metrics and Kubernetes events flow as soon as the deployment collector is running. To send traces, metrics, and logs from your applications to the sidecar in their own pod or to the deployment collector's Service, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector).
+Kubelet and cluster metrics and Kubernetes events flow as soon as the deployment collector is running. With Foundry, to send traces, metrics, and logs from your applications to the sidecar in their own pod or to the deployment collector's Service, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector).
 
 ## Next Steps
 
