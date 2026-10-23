@@ -1,0 +1,34 @@
+---
+title: Investigate a crashing Kubernetes pod using logs and historical metrics
+description: Use SigNoz Cloud to compare a pod's error logs with CPU and memory history before and after a container restart.
+date: 2026-10-23
+tags: [kubernetes, logs, metrics]
+authors: [yuvraj]
+---
+
+In SigNoz Cloud, compare a pod's error logs with its CPU and memory history to investigate what happened before a container restart. The history remains available after the pod is deleted, provided both signals reached SigNoz Cloud and remain within their [retention periods](https://signoz.io/docs/userguide/retention-period/).
+
+Use the [Kubernetes integration](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) to collect pod logs and resource metrics before an incident. If you filter by service, verify the same `service.name` on both signals; collection does not add this mapping by default.
+
+## Find the error and compare resource history
+
+For example, we ran `crashing-pod-demo`, a small app that writes regular progress logs. We made the app exit once with code 1, and Kubernetes restarted its container inside the same pod. We could still query its logs and resource history after deleting the pod.
+
+In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), find the pod's logs using its name or service and the failure period. Open a matching log to read `k8s.pod.uid`, the unique identifier for that pod instance. Filter by that UID to exclude a replacement pod that reuses the name. From the error log, select **Metrics → Pod** to see the resource history.
+
+<Figure
+  src="/img/faqs/2026-10/crashing-pod-error-metrics.webp"
+  alt="An error log beside pod CPU and memory history in SigNoz Cloud"
+  caption="The app's exit message and collected resource history remain visible after pod deletion."
+  width="1280"
+  height="720"
+  themeInvert="false"
+/>
+
+The logs show progress messages, the exit message, and then `app_started` from the same pod. CPU and memory samples from before the restart remain available for comparison with that failure.
+
+The **Pod** view matches cluster and pod name and uses its own time range around the log. A reused name can include another pod's history, so use [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) when you need one pod UID or container. Match its filters to the error log's pod UID, namespace, cluster and container name. Use the log query's time range, with separate queries for `container.cpu.usage` (cores) and `container.memory.usage` (bytes).
+
+## Check the termination reason
+
+Read the error and resource history together before you decide why the container stopped. A memory rise alone does not prove an out-of-memory kill. Save the container's <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-states" target="_blank" rel="noopener noreferrer nofollow">Kubernetes termination details</a> during the incident to check its reason and exit code. The app's saved status confirms the logged exit code 1 and one restart. After a pod is deleted, its live Kubernetes status is unavailable.
