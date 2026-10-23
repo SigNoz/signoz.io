@@ -1,17 +1,17 @@
 ---
 title: How do I find a customer’s failed request using user IDs and nested JSON fields?
 meta_title: Find failed requests by user ID and nested JSON
-description: Find a customer's failed request in SigNoz, search nested JSON errors, and export the complete collected request trail with verified pagination.
+description: Find a customer's failed request in SigNoz Cloud, search nested JSON errors, and export the complete collected request trail with verified pagination.
 date: 2026-10-19
 authors: [yuvraj]
 tags: [logs]
 ---
 
-Search the customer’s user ID in Logs Explorer. The failed record’s request ID lets you retrieve the collected logs for that request.
+In SigNoz Cloud, search the customer’s user ID in Logs Explorer. The failed record’s request ID lets you retrieve the collected logs for that request.
 
 Suppose a customer reports a failed payment around **06:55 UTC on 19 October 2026**. You have their user ID: `customer-demo-1042`. We will follow that report through a synthetic example.
 
-Your application must log the user ID and request ID. SigNoz cannot recover an ID that the application never recorded.
+Your application must log the user ID and request ID. SigNoz Cloud cannot recover an ID that the application never recorded.
 
 ## 1. Find the customer’s logs
 
@@ -60,7 +60,7 @@ Select **Run Query**. One payment-failure record remains.
 
 ![The nested-stack query returns one Payment failed record for the customer.](/img/faqs/find-failed-requests-with-user-ids-and-json/nested-error-query.webp)
 
-Use your record’s error text and stored path. The sample exception name is not a required SigNoz filter.
+Use your record’s error text and stored path. The sample exception name is not a required SigNoz Cloud filter.
 
 ## 4. Copy the request ID
 
@@ -180,7 +180,7 @@ This procedure uses offsets. Fixed bounds do not freeze the dataset: late arriva
 
 ## Ask your agent
 
-You can also investigate through an agent connected to [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/). Use a separate [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) with only Viewer/read access. MCP also has tools that can change resources, so a read-only prompt does not replace access controls.
+You can also investigate logs in your SigNoz Cloud workspace through an agent connected to [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/). Use a separate [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) with only Viewer/read access. MCP also has tools that can change resources, so a read-only prompt does not replace access controls.
 
 If Noz is available in your SigNoz Cloud workspace, open **Noz** in Logs Explorer. Its [customer log triage guide](https://signoz.io/docs/ai/use-cases/noz-triage-customer-issue/) covers investigation by a recorded user or tenant ID.
 
@@ -227,7 +227,7 @@ Python index `1` means the second element. Use that position only if your applic
 
 Search `body.second_attempt_status = 504` after ingestion. The synthetic example returns one record; searching that field for `503` returns none. Adding the field affects new logs.
 
-The complete trail contains matching logs that SigNoz collected and still retains. Missing collection, dropped records, expired retention, or a narrow time range can leave gaps.
+The complete trail contains matching logs that SigNoz Cloud collected and still retains. Missing collection, dropped records, expired retention, or a narrow time range can leave gaps.
 
 </details>
 
@@ -235,11 +235,11 @@ The complete trail contains matching logs that SigNoz collected and still retain
 
 - [How do I parse JSON fields from a text log?](https://signoz.io/docs/logs-pipelines/guides/json/)
 - [Which search syntax and field prefixes can I use?](https://signoz.io/docs/userguide/search-syntax/)
-- [How does SigNoz transform native JSON log bodies?](https://signoz.io/docs/logs-management/features/json-logs/)
+- [How does SigNoz Cloud transform native JSON log bodies?](https://signoz.io/docs/logs-management/features/json-logs/)
 
 <details>
 <summary>Example verification</summary>
 
-The example uses 14 synthetic logs. The manual queries, pagination, and JSONL reconciliation were verified on 19 October 2026 in a Cloud staging workspace running `main-da556ab`. No agent response is presented as a tested result.
+The example uses 14 synthetic logs. The manual queries, pagination, and JSONL reconciliation were verified on 19 October 2026 in a SigNoz Cloud staging workspace running `main-da556ab`. No agent response is presented as a tested result.
 
 </details>
