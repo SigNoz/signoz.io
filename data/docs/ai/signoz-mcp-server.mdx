@@ -1,5 +1,5 @@
 ---
-date: 2026-10-18
+date: 2026-10-23
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Agent Integration Guide
 description: Connect Claude, Cursor, Copilot, and other AI agents to SigNoz via MCP for natural language access to metrics, logs, traces, and alerts.
@@ -376,7 +376,7 @@ curl -L https://github.com/SigNoz/signoz-mcp-server/releases/latest/download/sig
 curl -L https://github.com/SigNoz/signoz-mcp-server/releases/latest/download/signoz-mcp-server_linux_arm64.tar.gz | tar xz
 ```
 
-This extracts a `signoz-mcp-server` binary in the current directory. Move it somewhere on your `PATH` or note the absolute path for the config below.
+This extracts a `signoz-mcp-server_<os>_<arch>` directory in the current directory. The binary is at `bin/signoz-mcp-server` inside it, for example `signoz-mcp-server_linux_amd64/bin/signoz-mcp-server`. Move it somewhere on your `PATH` or note the absolute path for the config below.
 
 </TabItem>
 <TabItem value="go-install" label="Go Install">
@@ -1035,7 +1035,7 @@ Each MCP server release targets the latest SigNoz release. If a tool returns `40
 | `signoz_list_alert_rules` | List configured alert rules, including inactive or disabled rules |
 | `signoz_get_alert` | Get an alert rule definition by ID |
 | `signoz_get_alert_history` | Get a rule's firing and state-transition history (cursor-paginated) |
-| `signoz_create_alert` | Create a threshold, anomaly, or absent-data alert rule |
+| `signoz_create_alert` | Create a threshold, PromQL, or metric anomaly alert rule |
 | `signoz_update_alert` | Update an existing alert rule |
 | `signoz_delete_alert` | Delete an alert rule |
 | `signoz_list_dashboards` | List all dashboards with summaries |
@@ -1056,7 +1056,7 @@ Each MCP server release targets the latest SigNoz release. If a tool returns `40
 | `signoz_aggregate_logs` | Aggregate logs (count, avg, p99, etc.) with grouping |
 | `signoz_search_logs` | Search logs with flexible filtering |
 | `signoz_aggregate_traces` | Aggregate trace statistics with grouping |
-| `signoz_search_traces` | Search matching span rows with filtering, ordering, and pagination |
+| `signoz_search_traces` | Search span rows or discover trace IDs; rows include a default set of span fields, and `selectFields` requests others |
 | `signoz_get_trace_details` | Get full trace with all spans |
 | `signoz_execute_builder_query` | Run Query Builder v5 requests the dedicated tools cannot express, including multi-query requests, formulas, PromQL, and ClickHouse SQL |
 | `signoz_search_docs` | Search official SigNoz docs for product, setup, instrumentation, config, API, deployment, or troubleshooting questions |
