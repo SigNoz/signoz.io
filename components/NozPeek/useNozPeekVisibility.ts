@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { ensureDecimalScript } from '@/utils/decimal'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+import { useConsent } from '@/hooks/useConsent'
 
 function isDocsIntroPath(pathname: string | null): boolean {
   if (!pathname) return false
@@ -26,15 +27,20 @@ export function useNozPeekVisibility() {
 
   const enabled = !isDocsOnboardingPathname(pathname)
   const isIntro = isDocsIntroPath(pathname)
+  const hasFunctionalConsent = useConsent().categories.functional
 
   useEffect(() => {
     if (!enabled) return
     document.documentElement.setAttribute('data-docs-route', '')
-    ensureDecimalScript()
     return () => {
       document.documentElement.removeAttribute('data-docs-route')
     }
   }, [enabled])
+
+  // Opening the chat always loads it; preloading it is only done with functional consent.
+  useEffect(() => {
+    if (enabled && hasFunctionalConsent) ensureDecimalScript()
+  }, [enabled, hasFunctionalConsent])
 
   return { enabled, isIntro, pathname, dismissed, setDismissed }
 }

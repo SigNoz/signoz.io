@@ -30,8 +30,8 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://b2bjsstore.s3.us-west-2.amazonaws.com https://b-code.liadm.com https://a.usbrowserspeed.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://b2bjsstore.s3.us-west-2.amazonaws.com https://b-code.liadm.com https://a.usbrowserspeed.com https://cdn-cookieyes.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma https://cdn-cookieyes.com;
   img-src * blob: data:;
   media-src *;
   connect-src * https://api.reo.dev https://www.clarity.ms https://*.clarity.ms;

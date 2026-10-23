@@ -1,14 +1,18 @@
 import 'css/tailwind.css'
 import 'css/global.css'
+import 'css/cookieyes.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { GoogleTagManager } from '@next/third-parties/google'
+import Script from 'next/script'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import RB2BLoader from '@/components/Analytics/RB2BLoader'
+import ConsentedGoogleTagManager from '@/components/Analytics/ConsentedGoogleTagManager'
 import { AnonymousIdSetter } from './anonymous-id-setter'
+
+const COOKIEYES_ID = process.env.NEXT_PUBLIC_COOKIEYES_ID
 
 const inter = Inter({
   subsets: ['latin'],
@@ -69,7 +73,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <GoogleTagManager gtmId="GTM-N9B6D4H" />
+      {COOKIEYES_ID ? (
+        <Script
+          id="cookieyes"
+          src={`https://cdn-cookieyes.com/client_data/${COOKIEYES_ID}/script.js`}
+          strategy="beforeInteractive"
+        />
+      ) : null}
       <link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png" />
@@ -100,19 +110,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       <body className="text-[var(--l1-foreground)] antialiased">
         <SpeedInsights />
+        <ConsentedGoogleTagManager gtmId="GTM-N9B6D4H" />
         <Suspense fallback={null}>
           <PageViewTracker />
           <RB2BLoader />
         </Suspense>
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
-            height="0"
-            width="0"
-            style={{ display: 'none', visibility: 'hidden' }}
-          ></iframe>
-        </noscript>
-
         <AnonymousIdSetter />
         {children}
       </body>
