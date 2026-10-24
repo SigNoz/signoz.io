@@ -144,6 +144,36 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/guides/how-does-prometheus-work/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/is-prometheus-free-or-paid/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-Prometheus-used-for-in-DevOps/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/is-prometheus-a-visualization-tool/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/quantile-aggregation-for-statsd-exporter/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/ha-prometheus-cortex-cassandra/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
           source: '/docs/skill.md',
           destination: '/skill.md',
           permanent: true,
@@ -3122,7 +3152,7 @@ module.exports = () => {
         },
         {
           source: '/quantile-aggregation-for-statsd-exporter',
-          destination: '/blog/quantile-aggregation-for-statsd-exporter/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
         {
@@ -3142,7 +3172,7 @@ module.exports = () => {
         },
         {
           source: '/ha-prometheus-cortex-cassandra',
-          destination: '/blog/ha-prometheus-cortex-cassandra/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
         {
