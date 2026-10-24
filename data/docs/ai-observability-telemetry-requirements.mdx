@@ -1,24 +1,63 @@
 ---
-date: 2026-10-12
+date: 2026-10-24
 title: AI Observability Telemetry Requirements - GenAI Attributes
-description: Check which OpenTelemetry GenAI span attributes the SigNoz AI Observability dashboard and filters need, and how SigNoz counts LLM calls and tool calls.
+description: Check which OpenTelemetry GenAI span attributes SigNoz AI Observability reads, what each one holds, and which source keys SigNoz maps to it by default.
 doc_type: reference
 ---
 
-[AI Observability](https://signoz.io/docs/ai-observability/) reads these attributes from your spans. A panel stays empty until your spans carry the attributes that it uses. Most names come from the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>. If your instrumentation uses other names, map them in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/).
+[AI Observability](https://signoz.io/docs/ai-observability/) reads these attributes from your spans. A panel stays empty until your spans carry the attributes that it uses. Most names come from the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>.
+
+If a span does not carry a GenAI attribute, SigNoz takes the value from the first default source key in the table that the span has. SigNoz keeps most source keys on the span. For `gen_ai.input.messages` and `gen_ai.output.messages`, SigNoz removes the source key after it writes the GenAI attribute. If your instrumentation uses a name that is not in the table, map it in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/).
 
 ## Span attributes
 
-| Attribute | Used by |
-| --- | --- |
-| `gen_ai.request.model` | All LLM panels and the **model** filter. SigNoz counts a span with this attribute as an LLM call. |
-| `gen_ai.provider.name` | **Cost by provider** and the **provider** filter. |
-| `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | Token panels and cost. |
-| `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` | Cache token panels, cache cost, and **Prompt cache hit ratio**. |
-| `gen_ai.server.ttft` | **TTFT (p95)** and **Time to first token**. Streaming instrumentations, such as OpenLIT, send this attribute in seconds. |
-| `gen_ai.response.finish_reasons` | **Finish reasons**. |
-| `gen_ai.tool.name` | All **Tool calls** panels. SigNoz counts a span with this attribute as a tool call. |
-| `gen_ai.agent.name` | Agent spans for the **Per-trace usage** panels. |
+In the **Used by** column, **None** means that no AI Observability panel or column reads the attribute.
+
+### LLM spans
+
+The default `gen_ai.llm` mapping group runs on spans with an attribute key that contains `model` or `llm.input_messages`.
+
+| Attribute | Holds | Used by | Default source keys |
+| --- | --- | --- | --- |
+| `gen_ai.request.model` | The model that the call requested. | All LLM panels and the **model** filter. SigNoz counts a span with this attribute as an LLM call. | `reranker.model_name`, `llm.model_name`, `llm.request.model`, `ai.model.id`, `langfuse.observation.model.name`, `embedding.model_name`, `model`, `gen_ai.response.model` |
+| `gen_ai.response.model` | The model that served the response. | None | `llm.response.model`, `ai.response.model` |
+| `gen_ai.provider.name` | The model provider, for example `openai`. | **Cost by provider** and the **provider** filter. | `gen_ai.system`, `llm.vendor`, `llm.provider`, `llm.system`, `ai.model.provider` |
+| `gen_ai.operation.name` | The type of operation, for example `chat` or `LLM`. | The **Gen Ai Operation Name** filter of the Explorer. | `openinference.span.kind`, `llm.request.type`, `traceloop.span.kind` |
+| `gen_ai.usage.input_tokens` | The number of input tokens. | Token panels and cost. | `input_tokens`, `gen_ai.usage.prompt_tokens`, `llm.usage.prompt_tokens`, `llm.token_count.prompt`, `ai.usage.inputTokens`, `ai.usage.promptTokens` |
+| `gen_ai.usage.output_tokens` | The number of output tokens. | Token panels and cost. | `output_tokens`, `gen_ai.usage.completion_tokens`, `llm.usage.completion_tokens`, `llm.token_count.completion`, `ai.usage.outputTokens`, `ai.usage.completionTokens` |
+| `gen_ai.usage.cache_read.input_tokens` | Input tokens that the provider read from its prompt cache. | Cache token panels, cache cost, and **Prompt cache hit ratio**. | `cache_read_tokens`, `gen_ai.usage.input_tokens.cached`, `gen_ai.usage.prompt_token_details.cached_read_tokens`, `gen_ai.usage.cache_read_input_tokens`, `llm.token_count.prompt_details.cache_read`, `ai.usage.cachedInputTokens` |
+| `gen_ai.usage.cache_creation.input_tokens` | Input tokens that the provider wrote to its prompt cache. | Cache token panels and cache cost. | `cache_creation_tokens`, `gen_ai.usage.cache_write.input_tokens`, `gen_ai.usage.cache_creation_input_tokens`, `llm.token_count.prompt_details.cache_write` |
+| `gen_ai.usage.reasoning.output_tokens` | Output tokens that the model used for reasoning. These tokens are part of `gen_ai.usage.output_tokens`. | The **Usage Breakdown** of the trace in [Trace Details](https://signoz.io/docs/userguide/span-details/). | `gen_ai.usage.reasoning_tokens`, `gen_ai.usage.completion_token_details.reasoning_tokens`, `llm.token_count.completion_details.reasoning`, `ai.usage.reasoningTokens` |
+| `gen_ai.server.ttft` | The time to the first token of a streamed response. | **TTFT (p95)** and **Time to first token**. Streaming instrumentations, such as OpenLIT, send this attribute in seconds. | None |
+| `gen_ai.response.finish_reasons` | The reasons that the model stopped, for example `["stop"]`. | **Finish reasons**. | `llm.finish_reason`, `llm.response.stop_reason`, `llm.response.finish_reason`, `gen_ai.response.finish_reason`, `ai.response.finishReason` |
+| `gen_ai.input.messages` | The prompt messages. | The **input** column of the [Explorer](https://signoz.io/docs/ai-observability-explorer/), from the earliest span in the trace that has it. | `gen_ai.prompt`, `ai.prompt.messages`, `input.value` |
+| `gen_ai.output.messages` | The completion messages. | The **output** column of the Explorer, from the latest span in the trace that has it. | `gen_ai.completion`, `ai.response.toolCalls`, `ai.response.text`, `output.value` |
+| `gen_ai.conversation.id` | The ID of the conversation or session. | None | `gen_ai.client.session_id`, `session.id`, `langfuse.session.id` |
+
+### Tool spans
+
+The default `gen_ai.tool` mapping group runs on spans with an attribute key that contains `tool.name`, `ai.toolCall.`, `tool_call_args`, `tool_response`, or `tool_use_id`.
+
+| Attribute | Holds | Used by | Default source keys |
+| --- | --- | --- | --- |
+| `gen_ai.tool.name` | The name of the tool. | All **Tool calls** panels. SigNoz counts a span with this attribute as a tool call. | `gen_ai.client.tool_name`, `tool_name`, `tool.name`, `ai.toolCall.name` |
+| `gen_ai.tool.call.id` | The ID of the tool call. | None | `gen_ai.client.tool_use_id`, `tool.id`, `ai.toolCall.id` |
+| `gen_ai.tool.description` | The description of the tool. | None | `tool.description` |
+| `gen_ai.tool.call.arguments` | The arguments of the tool call. | None | `ai.toolCall.args`, `traceloop.entity.input`, `gcp.vertex.agent.tool_call_args`, `input.value` |
+| `gen_ai.tool.call.result` | The result of the tool call. | None | `ai.toolCall.result`, `traceloop.entity.output`, `gcp.vertex.agent.tool_response`, `output.value` |
+| `gen_ai.operation.name` | The type of operation, for example `execute_tool` or `TOOL`. | The **Gen Ai Operation Name** filter of the Explorer. | `openinference.span.kind`, `llm.request.type`, `traceloop.span.kind` |
+
+### Agent spans
+
+The default `gen_ai.agent` mapping group runs on spans with an attribute key that contains `agent`.
+
+| Attribute | Holds | Used by | Default source keys |
+| --- | --- | --- | --- |
+| `gen_ai.agent.name` | The name of the agent. | Agent spans for the **Per-trace usage** panels. | `crewai.agent.role`, `agent.name`, `agent_name` |
+| `gen_ai.agent.id` | The ID of the agent. | None | `agent_id`, `crewai.agent.id`, `agent.id` |
+| `gen_ai.agent.description` | The description of the agent. | None | `agent.description` |
+| `gen_ai.output.messages` | The final result of the agent. | The **output** column of the Explorer, from the latest span in the trace that has it. | `final_result` |
+| `gen_ai.operation.name` | The type of operation, for example `invoke_agent` or `AGENT`. | The **Gen Ai Operation Name** filter of the Explorer. | `openinference.span.kind`, `llm.request.type`, `traceloop.span.kind` |
 
 An AI trace is a trace with at least one LLM, tool, or agent span. Error panels use the error status of the span, not an attribute.
 
