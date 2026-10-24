@@ -66,18 +66,18 @@ test('Listicle stubs respect the selected default section', async () => {
 })
 
 test('Listicle stubs render flat listicle items from JSON', async () => {
-  const doc = createDoc('<Listicle name="llm-monitoring" />')
+  const doc = createDoc('<Listicle name="litellm-dashboards" />')
   const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
-      name: 'llm-monitoring',
+      name: 'litellm-dashboards',
     })
   )
 
-  assert.match(html, /LLM Monitoring Guides/)
-  assert.match(html, /Amazon Bedrock/)
-  assert.match(html, /Anthropic API/)
-  assert.match(html, /\/docs\/amazon-bedrock-monitoring/)
+  assert.match(html, /LiteLLM Dashboards/)
+  assert.match(html, /LiteLLM Proxy/)
+  assert.match(html, /LiteLLM SDK/)
+  assert.match(html, /\/docs\/dashboards\/dashboard-templates\/litellm-proxy-dashboard/)
 })
 
 test('Listicle stubs render metrics quick start sections from JSON', async () => {
