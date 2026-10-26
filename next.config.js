@@ -30,7 +30,7 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://ddwl4m2hdecbv.cloudfront.net https://b-code.liadm.com https://a.usbrowserspeed.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://b2bjsstore.s3.us-west-2.amazonaws.com https://b-code.liadm.com https://a.usbrowserspeed.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
@@ -143,6 +143,41 @@ module.exports = () => {
     },
     async redirects() {
       return withDocsOnboardingRedirects([
+        {
+          source: '/guides/how-does-prometheus-work/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/is-prometheus-free-or-paid/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-Prometheus-used-for-in-DevOps/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/is-prometheus-a-visualization-tool/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/quantile-aggregation-for-statsd-exporter/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/ha-prometheus-cortex-cassandra/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/skill.md',
+          destination: '/skill.md',
+          permanent: true,
+        },
         {
           source: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
           destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
@@ -876,6 +911,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/terms-of-service/',
+          destination: '/legal/terms-of-service/',
+          permanent: true,
+        },
+        {
+          source: '/privacy/',
+          destination: '/legal/privacy/',
+          permanent: true,
+        },
+        {
+          source: '/terms-of-reference/',
+          destination: '/legal/terms-of-reference/',
+          permanent: true,
+        },
+        {
           source: '/docs/alerts-management/notification-channel/',
           destination: '/docs/setup-alerts-notification/',
           permanent: true,
@@ -1302,12 +1352,14 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/celery/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework-type=background-workers&framework=celery#framework-instrumentation',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/django/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=django#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1332,7 +1384,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/falcon/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=falcon#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1342,7 +1395,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/flask/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=flask#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1352,7 +1406,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/hypercorn-unicorn-support/',
-          destination: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=hypercorn-unicorn#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1457,7 +1512,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=hypercorn-unicorn#framework-instrumentation',
           permanent: true,
         },
         // Python framework-specific redirects to consolidated page
@@ -3096,7 +3152,7 @@ module.exports = () => {
         },
         {
           source: '/quantile-aggregation-for-statsd-exporter',
-          destination: '/blog/quantile-aggregation-for-statsd-exporter/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
         {
@@ -3116,7 +3172,7 @@ module.exports = () => {
         },
         {
           source: '/ha-prometheus-cortex-cassandra',
-          destination: '/blog/ha-prometheus-cortex-cassandra/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
         {
@@ -3322,16 +3378,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/integrations/gcp/collect-logs/',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
-          source: '/docs/integrations/gcp/collect-logs',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
           source: '/blog/llm-observability/',
           destination: '/docs/llm-observability/',
           permanent: true,
@@ -3449,6 +3495,11 @@ module.exports = () => {
         {
           source: '/guides/prometheus-monitoring-101/',
           destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-llm/',
+          destination: '/blog/opentelemetry-ai-agent-observability/',
           permanent: true,
         },
       ])

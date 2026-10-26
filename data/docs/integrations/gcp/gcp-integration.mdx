@@ -1,54 +1,59 @@
 ---
-date: 2026-08-03
-title: GCP Integration - Monitor Google Cloud Metrics
-description: Learn how the SigNoz GCP integration works. Connect a Google Cloud account, deploy an OpenTelemetry Collector, and stream Cloud Monitoring metrics into SigNoz.
+published_date: 2026-08-03
+updated_date: 2026-10-19
+title: GCP Integration - Monitor Google Cloud Metrics & Logs
+description: Learn how the SigNoz GCP integration works. Connect a Google Cloud account, deploy an OpenTelemetry Collector, and stream GCP metrics and logs into SigNoz.
 doc_type: explanation
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
-The **SigNoz GCP Integration** brings metrics from your Google Cloud services into SigNoz, with pre-built dashboards for supported services. You connect a GCP account in the SigNoz UI, deploy an OpenTelemetry Collector inside your own GCP project, and point it at SigNoz.
+The **SigNoz GCP Integration** brings metrics and logs from your Google Cloud services into SigNoz. Each supported service comes with a ready-made dashboard.
 
-This first release uses a **manual flow**: you create and own the GCP resources (a service account and an OpenTelemetry Collector). SigNoz guides you through each resource with the docs in this section.
+This release uses a **manual flow**: you create and own the GCP resources (a service account, an OpenTelemetry Collector, and, for logs, a Pub/Sub topic and log sinks). SigNoz guides you through each resource with the docs in this section. The **SigNoz agent** setup is coming soon.
 
 <Admonition type="info">
-The GCP integration is available on **SigNoz Cloud** and **SigNoz Enterprise (Self-Hosted)**. Logs and traces are **not** part of this integration. Send traces by [instrumenting your applications](https://signoz.io/docs/instrumentation/) directly.
+The GCP integration is available on **SigNoz Cloud** and **SigNoz Enterprise (Self-Hosted)**. Traces are **not** part of this integration. Send traces by [instrumenting your applications](https://signoz.io/docs/instrumentation/) directly.
 </Admonition>
 
 ## How it works
 
-GCP does not PUSH telemetry to third parties, so SigNoz collects it with an OpenTelemetry Collector that runs **inside your GCP project**:
+GCP does not send your data to outside tools on its own. So SigNoz uses an **OpenTelemetry Collector**, a small program that runs **inside your GCP project**, to gather the data and send it to SigNoz over OTLP.
 
-- **Metrics** live in **Cloud Monitoring** and are pulled through the Monitoring API. The Collector's <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/googlecloudmonitoringreceiver" target="_blank" rel="noopener noreferrer nofollow">`googlecloudmonitoring`</a> receiver scrapes them on an interval and exports them to SigNoz over OTLP.
+- **Metrics** live in **Cloud Monitoring**. Every few minutes, the Collector reads them with the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/googlecloudmonitoringreceiver" target="_blank" rel="noopener noreferrer nofollow">`googlecloudmonitoring`</a> receiver.
+- **Logs** live in **Cloud Logging**. A **log sink** (a rule that picks which logs to forward) sends matching logs to a **Pub/Sub topic** (a message queue). Pub/Sub then pushes them to the Collector. Create this pipeline by following [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
 
-The Collector must run in your environment because the Monitoring API authenticates callers as a GCP service account, not with a SigNoz ingestion key, so SigNoz cannot read your metrics directly. The Collector runs where those credentials live, which also keeps the pipeline within GCP's trust boundary.
+The integration runs the Collector inside your GCP project. There, it signs in to Google Cloud with a service account in your project, so you never share GCP credentials with SigNoz. It also keeps your data inside GCP until it leaves for SigNoz.
 
 <Admonition type="info">
-These guides use **Cloud Run** for the Collector because it is the quickest managed option, but it is **not required**. You can run the Collector on any compute you prefer (a Compute Engine VM, GKE, an existing Kubernetes cluster, or a <a href="https://cloud.google.com/run/docs/resource-model" target="_blank" rel="noopener noreferrer nofollow">Cloud Run worker pool</a>). The metrics receiver works anywhere it can authenticate to the Monitoring API.
+These guides use **Cloud Run** for the Collector, but it is **not required**. The `googlecloudmonitoring` receiver works anywhere it can find Google Cloud credentials through <a href="https://cloud.google.com/docs/authentication/application-default-credentials" target="_blank" rel="noopener noreferrer nofollow">Application Default Credentials</a>, such as a Compute Engine VM, GKE, or an existing Kubernetes cluster. For logs, Pub/Sub must also be able to reach the Collector over HTTPS.
 </Admonition>
+
+You deploy the Collector yourself and edit its config each time you add a service. For logs, you also create the Pub/Sub topic and log sinks, and update the sink filter when you add a service.
 
 <Figure
   src="/img/docs/integrations/gcp/gcp-integration-architecture.webp"
-  alt="Architecture diagram: Cloud Monitoring flows into an OpenTelemetry Collector on Cloud Run, which exports metrics to SigNoz over OTLP"
-  caption="GCP integration architecture: an OpenTelemetry Collector in your project pulls metrics from Cloud Monitoring, then exports them to SigNoz"
-  className="box-shadowed-image"
+  width={1200}
+  height={520}
+  alt="Architecture diagram: the googlecloudmonitoring receiver in an OpenTelemetry Collector on Cloud Run pulls metrics from Cloud Monitoring in each monitored project. A log sink in each monitored project publishes logs to a Pub/Sub topic in the deployment project, and a push subscription sends them to the googlecloudpubsubpush receiver on port 8080. The otlphttp exporter sends metrics and logs to SigNoz over OTLP."
+  caption="GCP integration architecture: the Collector pulls metrics from Cloud Monitoring and receives logs through Pub/Sub, then sends both to SigNoz."
 />
 
 ## Setup
 
-Choose how you want to connect GCP to SigNoz:
+Use **Manual Setup** to collect metrics and logs from one or more GCP projects. The **SigNoz agent** setup is coming soon.
 
 <DocCardContainer>
 
 <DocCard
     title="Manual Setup"
-    description="Create and own the GCP resources yourself: a service account and an OpenTelemetry Collector. Available now."
+    description="Create and run the GCP resources yourself: a service account, an OpenTelemetry Collector, and, for logs, a Pub/Sub topic and log sinks."
     href="https://signoz.io/docs/integrations/gcp/manual-setup/"
 />
 
 <div className="block rounded border border-solid border-[var(--l1-border)] bg-[var(--l2-background)] p-4 opacity-60">
     <div className="flex flex-col gap-6">
         <div className="text-base font-medium leading-none text-[var(--l1-foreground)]">SigNoz Agent (Coming soon)</div>
-        <p className="m-0 text-[13px] leading-5 tracking-[-0.065px] text-[var(--l2-foreground)]">SigNoz deploys and manages the Collector for you: connect your GCP account, toggle a service on, and SigNoz provisions the metric receivers in the background.</p>
+        <p className="m-0 text-[13px] leading-5 tracking-[-0.065px] text-[var(--l2-foreground)]">SigNoz will deploy and manage the Collector for you: connect your GCP account, toggle a service on, and SigNoz provisions the metric receivers and log routing in the background.</p>
     </div>
 </div>
 
@@ -56,20 +61,25 @@ Choose how you want to connect GCP to SigNoz:
 
 ## Supported services
 
-Once the Collector is running, enable the individual GCP services you want to monitor. Each service page lists the metrics to add to your Collector config and ships with a pre-built SigNoz dashboard.
+After you connect GCP, turn on the services you want to monitor. Each service page shows what data is collected and which dashboard to open.
 
 <Listicle name="gcp-services" />
 
 <Admonition type="info">
-More services are being added. Each one is configured the same way: add its metric names to the `googlecloudmonitoring` receiver.
+More services are on the way. Each one is configured the same way: add its metric names to the `googlecloudmonitoring` receiver and, for logs, add its filter to your log sink.
 </Admonition>
 
 ## Costs to expect
 
-The manual flow runs resources in your GCP project, so the cost is billed to you, not SigNoz. Plan for:
+The manual flow runs resources in your GCP project, so GCP bills you for them, not SigNoz. Plan for:
 
-- **Cloud Run (Collector):** roughly **~$110/month** for a Collector sized at 2 vCPU and 4 GiB running continuously. This is a comfortable default; if you ingest low volumes, you can pick a smaller configuration (for example, 1 vCPU and 1–2 GiB) to lower the cost. Size it to your throughput and scale up only if the Collector shows memory pressure or dropped data. See <a href="https://cloud.google.com/run#pricing" target="_blank" rel="noopener noreferrer nofollow">Cloud Run pricing</a>.
+- **Cloud Run (Collector):** roughly **~$110/month** for a Collector sized at 2 vCPU and 4 GiB running all the time. You pick the size, so for low volumes you can choose something smaller (for example, 1 vCPU and 1 to 2 GiB). See <a href="https://cloud.google.com/run#pricing" target="_blank" rel="noopener noreferrer nofollow">Cloud Run pricing</a>.
+- **Pub/Sub (logs):** roughly **$80 per TiB** of logs. Pub/Sub charges $40 per TiB each time data passes through it, and every log passes through twice: once on the way in and once on the way out to the Collector. The first 10 GiB each month are free. See <a href="https://cloud.google.com/pubsub/pricing" target="_blank" rel="noopener noreferrer nofollow">Pub/Sub pricing</a>.
 - **Monitoring API (metrics):** **$0.01 per 1,000 read calls**, with the first 1 million read calls free per billing account each month. Write calls are free. See <a href="https://cloud.google.com/stackdriver/pricing" target="_blank" rel="noopener noreferrer nofollow">Cloud Monitoring pricing</a>.
+
+<Admonition type="info">
+Your log sink sends a **copy** of your logs to SigNoz. Your logs still land in GCP's built-in `_Default` log bucket, which Cloud Logging bills as before. If you don't need to keep those logs in GCP too, you can add an exclusion filter to the `_Default` sink. See [Avoid paying twice for logs](https://signoz.io/docs/integrations/gcp/collect-logs/#step-8-avoid-paying-twice-for-logs).
+</Admonition>
 
 ## Get Help
 

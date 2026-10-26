@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-10-15
 title: "Kubernetes StatefulSets Monitoring: Availability and Usage"
 description: Monitor Kubernetes StatefulSet availability and resource usage in SigNoz, covering available vs desired pods with CPU and memory utilization percentages.
 doc_type: explanation
@@ -93,7 +93,7 @@ The **StatefulSets** view shows rollout status and resource utilization. Statefu
 
 ### Pod Counts by Status
 
-- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the `k8s_cluster` receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#collect-cluster-metrics); all three must be flowing for this column to be populated.
 - Counts of the StatefulSet's pods grouped by their kubectl-style display status within the selected window. The status is derived exactly as on the Pods view; see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
 - A `CrashLoopBackOff` on an early ordinal blocks the rest of the StatefulSet from rolling out, while `OOMKilled` counts usually mean memory is undersized for the workload's data set; inspect the lowest failing ordinal first with `kubectl describe pod <name>-N`.
 

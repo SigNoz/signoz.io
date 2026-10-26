@@ -222,8 +222,9 @@ function Footer({ inDocsShell = false }: FooterProps) {
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
                 <FooterPillLink href="/about-us/">About</FooterPillLink>
-                <FooterPillLink href="/terms-of-service/">Terms</FooterPillLink>
-                <FooterPillLink href="/privacy/">Privacy</FooterPillLink>
+                <FooterPillLink href="/legal/">Legal</FooterPillLink>
+                <FooterPillLink href="/legal/terms-of-service/">Terms</FooterPillLink>
+                <FooterPillLink href="/legal/privacy/">Privacy</FooterPillLink>
                 <FooterPillLink href="https://trust.signoz.io/" newTab>
                   Security & Compliance
                 </FooterPillLink>
