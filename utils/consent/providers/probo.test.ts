@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { UNDECIDED_CONSENT } from '../parse'
-import { discardExpiredProboVisitor, parseProboCookie, proboAdapter } from './probo'
+import {
+  discardExpiredProboVisitor,
+  parseProboCookie,
+  proboAdapter,
+  removeDeniedTrackers,
+} from './probo'
 
 const BANNER = 'banner-1'
 
@@ -138,5 +143,74 @@ describe('proboAdapter', () => {
     proboAdapter.openPreferences()
     expect(listener).toHaveBeenCalledTimes(1)
     document.removeEventListener('probo-open-preferences', listener)
+  })
+})
+
+describe('removeDeniedTrackers', () => {
+  const categories = [
+    {
+      slug: 'necessary',
+      kind: 'NECESSARY',
+      cookies: [{ name: 'probo_consent', tracker_type: 'COOKIE' }],
+    },
+    {
+      slug: 'analytics',
+      kind: 'NORMAL',
+      cookies: [
+        { name: '_ga', tracker_type: 'COOKIE' },
+        { name: '_ga_*', tracker_type: 'COOKIE' },
+        { name: '_cltk', tracker_type: 'SESSION_STORAGE' },
+      ],
+    },
+    {
+      slug: 'advertising',
+      kind: 'NORMAL',
+      cookies: [{ name: 'li_adsId', tracker_type: 'LOCAL_STORAGE' }],
+    },
+  ]
+
+  beforeEach(() => {
+    localStorage.clear()
+    sessionStorage.clear()
+    clearCookies()
+    document.cookie = '_ga=GA1.1; path=/'
+    document.cookie = '_ga_ABC123=GS1.1; path=/'
+    document.cookie = 'probo_consent=x; path=/'
+    document.cookie = 'unlisted=1; path=/'
+    sessionStorage.setItem('_cltk', 'x')
+    localStorage.setItem('li_adsId', 'x')
+  })
+
+  it('removes the listed cookies and storage of every denied category, including patterns', () => {
+    removeDeniedTrackers(categories, { necessary: true, analytics: false, advertising: false })
+
+    expect(document.cookie).not.toMatch(/_ga/)
+    expect(document.cookie).toContain('probo_consent')
+    expect(document.cookie).toContain('unlisted')
+    expect(sessionStorage.getItem('_cltk')).toBeNull()
+    expect(localStorage.getItem('li_adsId')).toBeNull()
+  })
+
+  it('keeps what the visitor still allows', () => {
+    removeDeniedTrackers(categories, { necessary: true, analytics: true, advertising: false })
+
+    expect(document.cookie).toContain('_ga=')
+    expect(document.cookie).toContain('_ga_ABC123')
+    expect(sessionStorage.getItem('_cltk')).toBe('x')
+    expect(localStorage.getItem('li_adsId')).toBeNull()
+  })
+
+  it('runs when Probo loads a stored refusal, clearing trackers left from before the choice', () => {
+    vi.stubEnv('NEXT_PUBLIC_PROBO_BANNER_ID', BANNER)
+    proboAdapter.start({ onLoad: vi.fn(), onChoice: vi.fn() })
+    setCookie({ v: 4, action: 'REJECT_ALL', data: { necessary: true, analytics: false } })
+
+    document.dispatchEvent(
+      new CustomEvent('probo-ready', { detail: { config: { version: 4, categories } } })
+    )
+
+    expect(document.cookie).not.toMatch(/_ga/)
+    expect(localStorage.getItem('li_adsId')).toBeNull()
+    vi.unstubAllEnvs()
   })
 })

@@ -80,7 +80,80 @@ export const discardExpiredProboVisitor = () => {
   }
 }
 
-type ProboReadyDetail = { config?: { version?: number } }
+type ProboTracker = { name: string; tracker_type?: string }
+type ProboCategory = { slug: string; kind?: string; cookies?: ProboTracker[] }
+type ProboReadyDetail = { config?: { version?: number; categories?: ProboCategory[] } }
+
+let publishedCategories: ProboCategory[] = []
+
+const patternToRegExp = (pattern: string) =>
+  new RegExp(
+    `^${pattern
+      .split('*')
+      .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+      .join('.*')}$`
+  )
+
+const cookieDomains = (hostname: string) => {
+  const parts = hostname.split('.')
+  const domains: string[] = []
+  for (let i = 0; i < parts.length - 1; i++) {
+    const domain = parts.slice(i).join('.')
+    domains.push(domain, `.${domain}`)
+  }
+  return domains
+}
+
+// Deletes what the published banner lists under the categories the visitor does not allow: our
+// origin's cookies and storage. Cookies vendors keep on their own domains are out of reach.
+export const removeDeniedTrackers = (
+  categories: ProboCategory[],
+  granted: Record<string, unknown>
+) => {
+  const denied = categories.filter(
+    (category) => category.kind !== 'NECESSARY' && granted[category.slug] !== true
+  )
+  const patternsFor = (type: string) =>
+    denied.flatMap((category) =>
+      (category.cookies ?? [])
+        .filter((tracker) => tracker.tracker_type === type)
+        .map((tracker) => patternToRegExp(tracker.name))
+    )
+
+  const cookiePatterns = patternsFor('COOKIE')
+  for (const name of Object.keys(Cookies.get())) {
+    if (!cookiePatterns.some((pattern) => pattern.test(name))) continue
+    Cookies.remove(name, { path: '/' })
+    cookieDomains(location.hostname).forEach((domain) =>
+      Cookies.remove(name, { path: '/', domain })
+    )
+  }
+
+  const stores: [string, () => Storage][] = [
+    ['LOCAL_STORAGE', () => localStorage],
+    ['SESSION_STORAGE', () => sessionStorage],
+  ]
+  for (const [type, getStore] of stores) {
+    const patterns = patternsFor(type)
+    try {
+      const store = getStore()
+      Object.keys(store)
+        .filter((key) => patterns.some((pattern) => pattern.test(key)))
+        .forEach((key) => store.removeItem(key))
+    } catch {
+      // Ignore storage errors
+    }
+  }
+}
+
+const removeTrackersDeniedByCookie = () => {
+  const cookie = decodeProboCookie(Cookies.get(PROBO_COOKIE))
+  const granted = (cookie?.data && typeof cookie.data === 'object' ? cookie.data : {}) as Record<
+    string,
+    unknown
+  >
+  removeDeniedTrackers(publishedCategories, granted)
+}
 
 export const proboAdapter: ConsentAdapter = {
   cookieName: PROBO_COOKIE,
@@ -93,12 +166,16 @@ export const proboAdapter: ConsentAdapter = {
   hasPendingChoice: () => parseProboCookie(Cookies.get(PROBO_COOKIE)).status === 'decided',
   start: ({ onLoad, onChoice }) => {
     document.addEventListener('probo-ready', (event) => {
-      const version = (event as CustomEvent<ProboReadyDetail>).detail?.config?.version
+      const config = (event as CustomEvent<ProboReadyDetail>).detail?.config
+      publishedCategories = config?.categories ?? []
       const raw = Cookies.get(PROBO_COOKIE)
       const cookie = decodeProboCookie(raw)
 
-      if (cookie && cookie.v === version) {
-        onLoad(parseProboCookie(raw))
+      if (cookie && cookie.v === config?.version) {
+        const stored = parseProboCookie(raw)
+        // Also clears trackers left from before the choice, for example from before this banner.
+        if (stored.status === 'decided') removeTrackersDeniedByCookie()
+        onLoad(stored)
         return
       }
 
@@ -125,6 +202,7 @@ export const proboAdapter: ConsentAdapter = {
       const done = () => {
         observer?.disconnect()
         window.clearTimeout(timer)
+        removeTrackersDeniedByCookie()
         resolve()
       }
       const timer = window.setTimeout(done, 1500)
