@@ -121,7 +121,7 @@ export const SCALE = {
         'Unified, correlated logs, metrics, and traces help teams find root causes faster.',
     },
     {
-      value: '10 TB+ / day',
+      value: '2 PB+ / month',
       label: 'ingested in a single deployment',
       description:
         'Built on ClickHouse for high-cardinality Kubernetes, microservices, and AI workloads.',
