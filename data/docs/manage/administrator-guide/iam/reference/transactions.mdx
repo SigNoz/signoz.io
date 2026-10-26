@@ -81,10 +81,10 @@ The custom role editor does not list users, password reset tokens, cloud integra
 | `read` | View a user's details and their assigned roles. | signoz-admin |
 | `update` | Modify a user's display name. The email cannot be changed. | signoz-admin |
 | `delete` | Remove a user from the organization. | signoz-admin |
-| `attach` | Create a relationship with the user — assign a role to it, or create a password reset token for it. | signoz-admin |
-| `detach` | Remove a relationship from the user — unassign a role from it. | signoz-admin |
+| `attach` | Create a relationship with the user: assign a role to it, or create a password reset token for it. | signoz-admin |
+| `detach` | Remove a relationship from the user: unassign a role from it. | signoz-admin |
 
-Granting these relations on a custom role delegates user management without the full `signoz-admin` role. For example, a helpdesk role can hold `user:create`, `user:attach`, and `factor-password:create` to invite users and trigger password resets, while leaving role and service account management to admins.
+Granting these relations on a custom role delegates user management without the full `signoz-admin` role. For example, a helpdesk role can hold `user:create`, `user:attach`, `role:attach` on `signoz-viewer`, and `factor-password:create` to invite Viewers and trigger password resets, while leaving role and service account management to admins.
 
 <Admonition type="info">
 `create` and `list` cover the organization rather than a single user, so both can only be granted as **All** or **None**. `read`, `update`, `delete`, `attach`, and `detach` accept **Only selected**, with the user ID as the selector.
@@ -261,7 +261,7 @@ Controls the quick filters panel in the Logs, Traces, Exceptions, API Monitoring
 
 ## Selectors
 
-Roles, service accounts, API keys, and dashboards are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead. The subscription is workspace-wide and can only be granted as **All** or **None**.
+Most resources are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead. The subscription and password reset tokens (`factor-password`) take only `*`, so they can only be granted as **All** or **None**.
 
 ### Telemetry Selectors
 

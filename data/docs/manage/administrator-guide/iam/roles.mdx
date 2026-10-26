@@ -102,7 +102,7 @@ If the JSON contains errors, switching back to Interactive mode prompts you to d
 
 ### Example: delegate user management
 
-Custom roles can delegate user management without granting the full `signoz-admin` role. Grant relations on the `user` and `factor-password` resources to build roles such as a helpdesk role that can invite members and trigger password resets, while role and service account management stay with admins. The custom role editor does not list these resources, so create the role through the roles API with the transactions below.
+Custom roles can delegate user management without granting the full `signoz-admin` role. Grant relations on the `user` and `factor-password` resources to build roles such as a helpdesk role that can invite members as Viewers and trigger password resets, while role and service account management stay with admins. The custom role editor does not list these resources, so create the role through the roles API with the transactions below.
 
 ```json
 [
@@ -122,6 +122,13 @@ Custom roles can delegate user management without granting the full `signoz-admi
   },
   {
     "objectGroup": {
+      "resource": { "kind": "role", "type": "role" },
+      "selectors": ["signoz-viewer"]
+    },
+    "relation": "attach"
+  },
+  {
+    "objectGroup": {
       "resource": { "kind": "factor-password", "type": "metaresource" },
       "selectors": ["*"]
     },
@@ -130,7 +137,7 @@ Custom roles can delegate user management without granting the full `signoz-admi
 ]
 ```
 
-Creating a password reset token requires `factor-password:create` and `user:attach`. Inviting a user with no roles requires only `user:create`. Inviting a user with one or more roles additionally requires `user:attach` and `attach` on each requested role. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#user) for the full relation list and compound-transaction requirements.
+Creating a password reset token requires `factor-password:create` and `user:attach`. Inviting a user with no roles requires only `user:create`. Inviting a user with one or more roles additionally requires `user:attach` and `role:attach` on each requested role. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#user) for the full relation list and compound-transaction requirements.
 
 ## View a Role
 
