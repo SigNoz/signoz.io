@@ -16,7 +16,7 @@ The steps below set up the CloudWatch route.
 
 ## Prerequisites
 
-- The EKS Fargate Collection Agent, installed with Foundry (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/)) or with the Helm chart (see the Helm CLI tab of the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/?tool=helm)).
+- The EKS Fargate Collection Agent, installed with Foundry (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/)).
 - `kubectl` configured to reach the cluster, and access to create IAM policies and roles in your AWS account.
 
 ## Step 1: Create the aws-observability namespace
@@ -99,19 +99,9 @@ Then attach the CloudWatch Logs permissions to the pod execution role of your Fa
 
 ## Step 3: Create an IAM role for the collector
 
-Create an <a href="https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html" target="_blank" rel="noopener noreferrer nofollow">IAM role for the service account</a> of the collector that reads the logs, with the <a href="https://docs.aws.amazon.com/aws-managed-policy/latest/reference/CloudWatchReadOnlyAccess.html" target="_blank" rel="noopener noreferrer nofollow">CloudWatchReadOnlyAccess</a> policy, trusted by your cluster's OIDC provider for that collector's service account:
-
-- Foundry: `system:serviceaccount:signoz:signoz-collector-deployment`, the deployment collector's service account, where `signoz` is the namespace from `metadata.name` in `casting.yaml`.
-- Helm chart: `system:serviceaccount:<release-namespace>:my-release-k8s-infra-otel-deployment`, the service account of the `my-release` release's deployment collector.
-
-**Verify these values:**
-
-- `<release-namespace>`: The namespace of the `my-release` release.
+Create an <a href="https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html" target="_blank" rel="noopener noreferrer nofollow">IAM role for the service account</a> of the collector that reads the logs, with the <a href="https://docs.aws.amazon.com/aws-managed-policy/latest/reference/CloudWatchReadOnlyAccess.html" target="_blank" rel="noopener noreferrer nofollow">CloudWatchReadOnlyAccess</a> policy, trusted by your cluster's OIDC provider for that collector's service account, `system:serviceaccount:signoz:signoz-collector-deployment`. That is the deployment collector's service account, where `signoz` is the namespace from `metadata.name` in `casting.yaml`.
 
 ## Step 4: Read the logs into the collector
-
-<Tabs entityName="fargate-setup">
-<TabItem value="deployment" label="Foundry" default>
 
 In the deployment collector's document of `casting.yaml`, add the `awscloudwatch` receiver, list it in the `logs` pipeline, and annotate the deployment collector's service account with the role from Step 3:
 
@@ -154,49 +144,6 @@ spec:
 
 Lists replace, so the `logs` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc`, and `k8s_events`. Run `foundryctl cast -f casting.yaml` from the directory that contains `casting.yaml`.
 
-</TabItem>
-<TabItem value="sidecar" label="Helm CLI">
-
-In `override-values.yaml`, add the `awscloudwatch` receiver to the chart's deployment collector, list it in the `logs` pipeline, and annotate the deployment collector's service account with the role. The receiver runs in this one collector, so each log line is read once:
-
-```yaml:override-values.yaml
-otelDeployment:
-  serviceAccount:
-    annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<collector-role>
-  config:
-    receivers:
-      awscloudwatch:
-        region: <aws-region>
-        logs:
-          poll_interval: 1m
-          groups:
-            autodiscover:
-              limit: 100
-              prefix: <LOG_GROUP>
-              streams:
-                prefixes: [<LOG_STREAM_PREFIX>]
-    service:
-      pipelines:
-        logs:
-          receivers: [awscloudwatch]
-```
-
-**Verify these values:**
-
-- `<aws-region>`, `<LOG_GROUP>`, `<LOG_STREAM_PREFIX>`: The values from Step 2.
-- `<account-id>`: Your AWS account ID.
-- `<collector-role>`: The name of the IAM role from Step 3.
-
-The chart adds `k8s_events` to the `logs` pipeline, so list only `awscloudwatch`. Run this from the directory that contains `override-values.yaml`:
-
-```bash
-helm upgrade my-release signoz/k8s-infra --version 0.17.1 -f override-values.yaml
-```
-
-</TabItem>
-</Tabs>
-
 Then restart your application Deployments so the log router starts for their pods. Run this on the machine where you use `kubectl`:
 
 ```bash
@@ -224,7 +171,7 @@ Within the poll interval, the container logs show in **Logs Explorer** in SigNoz
 
 ### Container logs do not reach SigNoz
 
-In Step 4, no container logs show in **Logs Explorer**. Read the logs of the deployment collector, which runs the `awscloudwatch` receiver, as [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#view-the-collectors-logs) shows. For the Helm chart, read `deployment/my-release-k8s-infra-otel-deployment` in the `my-release` release's namespace. The logs show errors from the `awscloudwatch` receiver.
+In Step 4, no container logs show in **Logs Explorer**. Read the logs of the deployment collector, which runs the `awscloudwatch` receiver, as [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#view-the-collectors-logs) shows. The logs show errors from the `awscloudwatch` receiver.
 
 **Cause:** the collector's service account has no `eks.amazonaws.com/role-arn` annotation, or the role's trust policy does not name that service account.
 
@@ -234,7 +181,7 @@ In Step 4, no container logs show in **Logs Explorer**. Read the logs of the dep
 kubectl get serviceaccount -n signoz signoz-collector-deployment -o jsonpath='{.metadata.annotations}'
 ```
 
-Here `signoz` is the namespace from `metadata.name`. For the Helm chart, use `my-release-k8s-infra-otel-deployment` in the `my-release` release's namespace. The collector picks up the role when its pod starts, so restart it after a fix with `kubectl rollout restart -n signoz deployment/signoz-collector-deployment`. Under the OpenTelemetry Operator, restart `deployment/signoz-collector-deployment-collector`; for the Helm chart, restart `deployment/my-release-k8s-infra-otel-deployment`.
+Here `signoz` is the namespace from `metadata.name`. The collector picks up the role when its pod starts, so restart it after a fix with `kubectl rollout restart -n signoz deployment/signoz-collector-deployment`. Under the OpenTelemetry Operator, restart `deployment/signoz-collector-deployment-collector`.
 
 After the fix, the container logs show in **Logs Explorer** within the poll interval.
 

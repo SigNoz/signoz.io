@@ -9,15 +9,12 @@ The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/s
 
 ## Prerequisites
 
-- EKS Fargate Collection Agent installed with Foundry, with or without the OpenTelemetry Operator (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/))
+- EKS Fargate Collection Agent installed with Foundry (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/), or the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/) guide for the operator)
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Access to the cluster with `kubectl`
 - The `casting.yaml` and `foundryctl` you installed with
 
 ## Apply Changes
-
-<Tabs entityName="controller">
-<TabItem value="default" label="Foundryctl" default>
 
 For each change:
 
@@ -31,7 +28,7 @@ For each change:
 
    Foundry updates the collector's config, and the deployment collector's pod restarts with it.
 
-   For the sidecar, follow the way you added it, as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#apply-changes) shows:
+   For the sidecar, follow the way you added it, as [Collector Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#apply-changes) shows:
 
    - With a Kustomize patch: forge again, apply your application again, and restart each workload that runs the sidecar.
    - With a pod template: forge again, apply the sidecar's files again, copy the two entries again if they changed, and restart each workload that runs the sidecar.
@@ -42,29 +39,7 @@ For each change:
 
 4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for node, pod, and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for Kubernetes events, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
 
-</TabItem>
-<TabItem value="opentelemetry-operator" label="Foundryctl with OTel Operator">
-
-For each change:
-
-1. Add the section's snippet to `casting.yaml`, in the deployment collector's document (`collector.kind: deployment`) or the sidecar's (`collector.kind: sidecar`). Foundry already generates the default receivers and processors, so add only what you change.
-
-2. For the deployment collector, run this from the directory that contains `casting.yaml`:
-
-   ```bash
-   foundryctl cast -f casting.yaml
-   ```
-
-   Foundry updates the `OpenTelemetryCollector` resource, and the operator rolls the collector's workload with the new config.
-
-   For the sidecar, forge again as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?tool=kustomize&controller=opentelemetry-operator#apply-changes-1) shows, apply your application again, and restart each workload that takes the sidecar. For example, for a Deployment, run `kubectl -n <your-namespace> rollout restart deployment/<your-workload>` with your application's namespace and the workload's name.
-
-3. Check that the collector starts without configuration errors, as [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#view-the-collectors-logs) shows.
-
-4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/) for node, pod, and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for Kubernetes events, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
-
-</TabItem>
-</Tabs>
+With the OpenTelemetry Operator, the operator rolls the collector's workload after `foundryctl cast`, and the sidecar follows [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/#apply-changes) in the OpenTelemetry Operator guide.
 
 ## Send Data from Applications to the Collector
 
@@ -92,9 +67,6 @@ The sidecar adds the pod's Kubernetes resource attributes. Use port `4317` for O
 
 In any other pod, send to the deployment collector's Service:
 
-<Tabs entityName="controller">
-<TabItem value="default" label="Foundryctl" default>
-
 ```yaml
 env:
   - name: K8S_POD_IP
@@ -113,29 +85,7 @@ env:
     value: k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
 ```
 
-</TabItem>
-<TabItem value="opentelemetry-operator" label="Foundryctl with OTel Operator">
-
-```yaml
-env:
-  - name: K8S_POD_IP
-    valueFrom:
-      fieldRef:
-        fieldPath: status.podIP
-  - name: K8S_POD_UID
-    valueFrom:
-      fieldRef:
-        fieldPath: metadata.uid
-  - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: http://signoz-collector-deployment-collector.signoz.svc.cluster.local:4318
-  - name: OTEL_SERVICE_NAME
-    value: <service-name>
-  - name: OTEL_RESOURCE_ATTRIBUTES
-    value: k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
-```
-
-</TabItem>
-</Tabs>
+With the OpenTelemetry Operator, use `http://signoz-collector-deployment-collector.signoz.svc.cluster.local:4318`, the Service the operator creates in [Step 4: Deploy](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/#step-4-deploy) of the OpenTelemetry Operator guide.
 
 **Verify these values:**
 
@@ -235,11 +185,11 @@ Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/k
 
 ## Collect Container Logs
 
-Application logs reach SigNoz over OTLP from the application, or through CloudWatch Logs from Fargate's log router. For both routes and the CloudWatch setup, see [Collect EKS Fargate Logs with OpenTelemetry and CloudWatch](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/eks-fargate-logs/?fargate-setup=deployment).
+Application logs reach SigNoz over OTLP from the application, or through CloudWatch Logs from Fargate's log router. For both routes and the CloudWatch setup, see [Collect EKS Fargate Logs with OpenTelemetry and CloudWatch](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/eks-fargate-logs/).
 
 ## Resource Detection and Kubernetes Attributes
 
-Foundry adds these resource attributes by default, in the deployment collector and the sidecar, so you can filter and group by namespace, workload, or pod in SigNoz. They are the namespace, pod name and UID, node, and owning workload of the pod that sent the data, plus `k8s.cluster.name` from `K8S_CLUSTER_NAME`, `cloud.provider`, `cloud.platform`, and the attributes in the collector's `OTEL_RESOURCE_ATTRIBUTES`. Workloads that run the sidecar under service accounts of their own need `signoz-rolebinding.yaml`, as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#step-4-add-the-sidecar-to-your-workloads) shows.
+Foundry adds these resource attributes by default, in the deployment collector and the sidecar, so you can filter and group by namespace, workload, or pod in SigNoz. They are the namespace, pod name and UID, node, and owning workload of the pod that sent the data, plus `k8s.cluster.name` from `K8S_CLUSTER_NAME`, `cloud.provider`, `cloud.platform`, and the attributes in the collector's `OTEL_RESOURCE_ATTRIBUTES`. Workloads that run the sidecar under service accounts of their own need `signoz-rolebinding.yaml`, as [Collector Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#step-4-add-the-sidecar-to-your-workloads) shows.
 
 To add a pod label as a resource attribute, add this under `processors.k8sattributes` in the deployment collector's document:
 
@@ -350,9 +300,6 @@ Foundry's defaults set requests and limits to the same values:
 
 In `casting.yaml`, add a patch to the deployment collector's document to raise its requests and limits:
 
-<Tabs entityName="controller">
-<TabItem value="default" label="Foundryctl" default>
-
 ```yaml
 spec:
   patches:
@@ -398,45 +345,7 @@ spec:
               memory: 512Mi
 ```
 
-</TabItem>
-<TabItem value="opentelemetry-operator" label="Foundryctl with OTel Operator">
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/deployment/opentelemetrycollector.yaml
-      operations:
-        - op: replace
-          path: /spec/resources
-          value:
-            requests:
-              cpu: 500m
-              memory: 1Gi
-            limits:
-              cpu: 500m
-              memory: 1Gi
-```
-
-For the sidecar, add a patch to its document that sets the resources of its `OpenTelemetryCollector` resource:
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/sidecar/opentelemetrycollector.yaml
-      operations:
-        - op: replace
-          path: /spec/resources
-          value:
-            requests:
-              cpu: 250m
-              memory: 512Mi
-            limits:
-              cpu: 250m
-              memory: 512Mi
-```
-
-</TabItem>
-</Tabs>
+With the OpenTelemetry Operator, patch `/spec/resources` of `collectionagent/collector/deployment/opentelemetrycollector.yaml` and `collectionagent/collector/sidecar/opentelemetrycollector.yaml` instead, as [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/#customize-the-collection-agent) in the OpenTelemetry Operator guide shows.
 
 Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#apply-changes).
 
@@ -491,9 +400,6 @@ spec:
 
 Lists replace, so the snippet restates the `metrics` pipeline's default receivers. Then open the port on the collector with a patch in the same document:
 
-<Tabs entityName="controller">
-<TabItem value="default" label="Foundryctl" default>
-
 ```yaml
 spec:
   patches:
@@ -511,23 +417,7 @@ spec:
 
 Your applications reach the receiver on the deployment collector's Service, at `signoz-collector-deployment.signoz.svc.cluster.local:8125`, where `signoz` is the namespace from `metadata.name`.
 
-</TabItem>
-<TabItem value="opentelemetry-operator" label="Foundryctl with OTel Operator">
-
-```yaml
-spec:
-  patches:
-    - target: collectionagent/collector/deployment/opentelemetrycollector.yaml
-      operations:
-        - op: add
-          path: /spec/ports/-
-          value: {name: statsd, port: 8125, protocol: UDP}
-```
-
-The operator opens the port on the collector's Service, as the <a href="https://github.com/open-telemetry/opentelemetry-operator/blob/v0.139.0/docs/api/opentelemetrycollectors.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetryCollector API reference</a> describes for `ports`. Your applications reach the receiver at `signoz-collector-deployment-collector.signoz.svc.cluster.local:8125`, where `signoz` is the namespace from `metadata.name`.
-
-</TabItem>
-</Tabs>
+With the OpenTelemetry Operator, add the port under `/spec/ports` of the deployment collector's `OpenTelemetryCollector` resource, as [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/#customize-the-collection-agent) in the OpenTelemetry Operator guide describes, and reach it at `signoz-collector-deployment-collector.signoz.svc.cluster.local:8125`.
 
 In a pod that runs the sidecar, your application reaches the sidecar on `localhost`, so a receiver needs only its config, in the sidecar's document:
 
@@ -573,10 +463,7 @@ Lists replace, so the snippet restates the `metrics` pipeline with its two OTLP 
 
 ## Add the Sidecar to More Workloads
 
-Each workload takes the sidecar as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#step-4-add-the-sidecar-to-your-workloads) shows. To add it to one more workload:
-
-<Tabs entityName="controller">
-<TabItem value="default" label="Foundryctl" default>
+Each workload takes the sidecar as [Collector Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#step-4-add-the-sidecar-to-your-workloads) shows. To add it to one more workload:
 
 With a Kustomize patch, add a `target` for the workload under `patches:` in your application's `kustomization.yaml`. A CronJob takes `pours/collectionagent/collector/sidecar/patch-cronjob.yaml` with `kind: CronJob`:
 
@@ -597,31 +484,15 @@ If the workload runs under a service account of its own, add the account to the 
 
 With the pod template, add the `initContainers` entry and the `volumes` entry of `pours/collectionagent/collector/sidecar/patch.yaml` to the workload's pod template. In a CronJob, the pod template sits under `spec.jobTemplate`. Then apply the workload.
 
-</TabItem>
-<TabItem value="opentelemetry-operator" label="Foundryctl with OTel Operator">
-
-Add the annotation to the workload's pod template:
-
-```diff
- spec:
-   template:
-     metadata:
-+      annotations:
-+        sidecar.opentelemetry.io/inject: "signoz-collector-sidecar"
-```
-
-A CronJob takes the annotation under `spec.jobTemplate.spec.template.metadata.annotations`. If the workload runs under a service account of its own, add the account to the `subjects` of `signoz-rolebinding.yaml`. Then apply your application again, and the operator injects the sidecar into the workload's new pods.
-
-</TabItem>
-</Tabs>
+With the OpenTelemetry Operator, add the `sidecar.opentelemetry.io/inject` annotation to the workload's pod template, as [Step 3: Add the sidecar to your workloads](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/#step-3-add-the-sidecar-to-your-workloads) in the OpenTelemetry Operator guide shows.
 
 ## Migrate to Foundry
 
-If you already run the manual sidecar collector from the Helm CLI tab of [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/?tool=helm), move it to Foundry with these steps.
+If you already run the manual sidecar collector, move it to Foundry with these steps. That setup is the `k8s-infra` chart release `my-release` without its agent, plus an `opentelemetry-collector-contrib` sidecar container in your application's Deployments.
 
 1. Install foundryctl and create `casting.yaml`, as [Step 1](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/#step-1-install-foundryctl) and [Step 2](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/#step-2-create-castingyaml) of the install guide show.
 
-2. Add your customizations to `casting.yaml` under `spec.collector.spec.config.data`, keyed `collector/deployment/deployment.yaml` for the deployment collector and `collector/sidecar/sidecar.yaml` for the sidecar, as [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/#customize-the-collection-agent-1) shows.
+2. Add your customizations to `casting.yaml` under `spec.collector.spec.config.data`, keyed `collector/deployment/deployment.yaml` for the deployment collector and `collector/sidecar/sidecar.yaml` for the sidecar, as [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/#customize-the-collection-agent) shows.
 
 3. Remove the `my-release` chart release. Run this on the machine where you use `kubectl`:
 
@@ -641,7 +512,7 @@ If you already run the manual sidecar collector from the Helm CLI tab of [Sideca
 
 5. Remove the old sidecar from each of your application's Deployments: the `opentelemetry-collector-contrib` container, the `otel-agent-config-vol` volume, and `serviceAccountName: otel-agent-sidecar`.
 
-6. Add Foundry's sidecar as [Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#install-the-collection-agent) shows, or point the application at the deployment collector's Service as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector) shows. Then apply your application.
+6. Add Foundry's sidecar as [Collector Sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/#install-the-collection-agent) shows, or point the application at the deployment collector's Service as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector) shows. Then apply your application.
 
 7. Remove the old ConfigMap, service account, and RBAC. Run this on the machine where you use `kubectl`:
 
@@ -660,9 +531,6 @@ If you already run the manual sidecar collector from the Helm CLI tab of [Sideca
 
 ## View the Collector's Logs
 
-<Tabs entityName="controller">
-<TabItem value="default" label="Foundryctl" default>
-
 Run this on the machine where you use `kubectl` to read the deployment collector's logs:
 
 ```bash
@@ -675,23 +543,7 @@ To read the sidecar's logs in a workload's pods, name its container:
 kubectl logs -n <your-namespace> deployment/<your-workload> -c signoz-collector-sidecar --since=10m
 ```
 
-</TabItem>
-<TabItem value="opentelemetry-operator" label="Foundryctl with OTel Operator">
-
-Run this on the machine where you use `kubectl` to read the deployment collector's logs:
-
-```bash
-kubectl logs -n signoz deployment/signoz-collector-deployment-collector --since=10m
-```
-
-To read the sidecar's logs in a workload's pods, name the container the operator injects:
-
-```bash
-kubectl logs -n <your-namespace> deployment/<your-workload> -c otc-container --since=10m
-```
-
-</TabItem>
-</Tabs>
+With the OpenTelemetry Operator, read `deployment/signoz-collector-deployment-collector` and the injected sidecar container `otc-container` instead, the names [Step 5: Verify the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/#step-5-verify-the-collection-agent) and [Step 4: Verify the sidecar](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/otel-operator/#step-4-verify-the-sidecar) show.
 
 **Verify these values:**
 
