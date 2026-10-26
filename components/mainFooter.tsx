@@ -12,8 +12,7 @@ import FooterArt from '@/components/footer/FooterArt'
 import FooterStatus from '@/components/footer/FooterStatus'
 import './footer/footer-pill-links.css'
 import footerFx from './footer/footer-fx.module.css'
-import { openCookiePreferences } from '@/utils/consent/client'
-import { isConsentManagerEnabled } from '@/utils/consent/parse'
+import CookieSettingsLink from '@/components/consent/CookieSettingsLink'
 
 type FooterPillLinkProps = {
   href: string
@@ -226,15 +225,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
                 <FooterPillLink href="/about-us/">About</FooterPillLink>
                 <FooterPillLink href="/terms-of-service/">Terms</FooterPillLink>
                 <FooterPillLink href="/privacy/">Privacy</FooterPillLink>
-                {isConsentManagerEnabled() ? (
-                  <button
-                    type="button"
-                    className="footer-pill-link mt-5 appearance-none border-0 bg-transparent text-left"
-                    onClick={openCookiePreferences}
-                  >
-                    Cookie settings
-                  </button>
-                ) : null}
+                <CookieSettingsLink />
                 <FooterPillLink href="https://trust.signoz.io/" newTab>
                   Security & Compliance
                 </FooterPillLink>

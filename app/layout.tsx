@@ -10,8 +10,11 @@ import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import RB2BLoader from '@/components/Analytics/RB2BLoader'
 import ConsentedGoogleTagManager from '@/components/Analytics/ConsentedGoogleTagManager'
+import ProboConsentBanner from '@/components/consent/ProboConsentBanner'
+import { getConsentProvider } from '@/utils/consent/provider'
 import { AnonymousIdSetter } from './anonymous-id-setter'
 
+const CONSENT_PROVIDER = getConsentProvider()
 const COOKIEYES_ID = process.env.NEXT_PUBLIC_COOKIEYES_ID
 
 const inter = Inter({
@@ -73,7 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      {COOKIEYES_ID ? (
+      {CONSENT_PROVIDER === 'cookieyes' && COOKIEYES_ID ? (
         <Script
           id="cookieyes"
           src={`https://cdn-cookieyes.com/client_data/${COOKIEYES_ID}/script.js`}
@@ -117,6 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
         <AnonymousIdSetter />
         {children}
+        {CONSENT_PROVIDER === 'probo' ? <ProboConsentBanner /> : null}
       </body>
     </html>
   )
