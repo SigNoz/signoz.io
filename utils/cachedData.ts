@@ -2,6 +2,9 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { transformBlog, transformComparison, transformDoc, transformGuide } from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { getAllContent, getContentBySlug, isLocalContentOverlayEnabled } from './contentRepository'
+import { getTagValues } from './contentHelpers'
+import type { MDXContent } from './strapi'
+import type { CustomerStory } from '@/components/Customers/Customers.types'
 
 // --- Comparisons ---
 
@@ -254,6 +257,88 @@ export async function fetchBlogBySlug(slug: string) {
   return directResult
 }
 
+// --- Case studies (customer stories) ---
+
+// Field-projected: no `content` so the cached list stays well under the 2MB cache-item limit.
+const CUSTOMER_STORY_LIST_FIELDS = [
+  'title',
+  'description',
+  'path',
+  'publishedAt',
+  'date',
+  'company',
+  'person',
+  'role',
+  'quote',
+  'logo',
+  'logo_alt',
+  'featured',
+  'takeaway',
+  'takeaway_label',
+  'show_company_name_with_logo',
+]
+
+function transformCaseStudyToStory(entry: MDXContent): CustomerStory {
+  const contentPath = entry.path?.startsWith('/') ? entry.path : `/${entry.path || ''}`
+  return {
+    type: 'Customer story',
+    title: entry.title ?? '',
+    description: entry.description ?? '',
+    href: `/customers${contentPath}/`,
+    company: entry.company ?? '',
+    person: entry.person ?? '',
+    role: entry.role ?? '',
+    quote: entry.quote ?? undefined,
+    logo: entry.logo ?? '',
+    logoAlt: entry.logo_alt ?? entry.company ?? '',
+    filters: getTagValues(entry),
+    featured: entry.featured === true,
+    takeaway: entry.takeaway ?? undefined,
+    takeawayLabel: entry.takeaway_label ?? undefined,
+    showCompanyNameWithLogo: entry.show_company_name_with_logo === true,
+    publishedAt: entry.date || entry.publishedAt?.split('T')[0] || '',
+  }
+}
+
+async function fetchCaseStudies(deploymentStatus: string): Promise<CustomerStory[]> {
+  const entries = await getAllContent('case-studies', deploymentStatus, CUSTOMER_STORY_LIST_FIELDS)
+  return entries.map((entry) => transformCaseStudyToStory(entry))
+}
+
+async function cachedFetchCaseStudies(deploymentStatus: string): Promise<CustomerStory[]> {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'case-studies-list')
+  const result = await fetchCaseStudies(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-case-studies-list, skipping cache')
+  }
+  return result
+}
+
+export function getCachedCaseStudies(deploymentStatus: string) {
+  if (isLocalContentOverlayEnabled()) return fetchCaseStudies(deploymentStatus)
+  return cachedFetchCaseStudies(deploymentStatus)
+}
+
+export async function fetchAllCaseStudiesForPage(): Promise<CustomerStory[]> {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedCaseStudies(deploymentStatus)
+  } catch (cacheError) {
+    console.warn('Cached case studies fetch failed, retrying without cache:', cacheError)
+
+    try {
+      return await fetchCaseStudies(deploymentStatus)
+    } catch (directError) {
+      console.error('Direct case studies fetch also failed:', directError)
+      return []
+    }
+  }
+}
+
 // --- Docs ---
 
 async function fetchDocs(deploymentStatus: string) {
@@ -290,6 +375,75 @@ export async function fetchAllDocsForPage() {
       return await fetchDocs(deploymentStatus)
     } catch (directError) {
       console.error('Direct docs fetch also failed:', directError)
+      return []
+    }
+  }
+}
+
+// Fields only; no `content`. The full docs list serializes to ~16MB, which is
+// over the data cache's 2MB per-item limit, so its cache writes always fail.
+// This 445KB index caches reliably for consumers that never read doc bodies.
+const DOCS_INDEX_FIELDS = [
+  'title',
+  'path',
+  'date',
+  'published_date',
+  'updated_date',
+  'description',
+  'updatedAt',
+  'publishedAt',
+]
+
+export type DocsIndexEntry = {
+  slug: string
+  path: string
+  title?: string
+  description?: string
+  summary?: string
+  date?: string | null
+  published_date?: string | null
+  updated_date?: string | null
+  lastmod?: string | null
+}
+
+async function fetchDocsIndex(deploymentStatus: string): Promise<DocsIndexEntry[]> {
+  const docs = await getAllContent('docs', deploymentStatus, DOCS_INDEX_FIELDS)
+  return docs.map((doc) => {
+    const { slug, path, title, description, summary, date, published_date, updated_date, lastmod } =
+      transformDoc(doc)
+    return { slug, path, title, description, summary, date, published_date, updated_date, lastmod }
+  })
+}
+
+async function cachedFetchDocsIndex(deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'docs-list')
+  const result = await fetchDocsIndex(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-docs-index, skipping cache')
+  }
+  return result
+}
+
+export function getCachedDocsIndex(deploymentStatus: string) {
+  if (isLocalContentOverlayEnabled()) return fetchDocsIndex(deploymentStatus)
+  return cachedFetchDocsIndex(deploymentStatus)
+}
+
+export async function fetchAllDocsIndex(): Promise<DocsIndexEntry[]> {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedDocsIndex(deploymentStatus)
+  } catch (cacheError) {
+    console.warn('Cached docs index fetch failed, retrying without cache:', cacheError)
+
+    try {
+      return await fetchDocsIndex(deploymentStatus)
+    } catch (directError) {
+      console.error('Direct docs index fetch also failed:', directError)
       return []
     }
   }

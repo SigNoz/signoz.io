@@ -1,5 +1,5 @@
 ---
-date: 2026-05-20
+date: 2026-10-19
 title: Trace Explorer
 description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
 doc_type: explanation
@@ -19,6 +19,8 @@ The Traces Explorer page in SigNoz enables developers to filter, examine, and an
 - [Trace View](#traces-view)
 - [Time Series View](#time-series-view)
 - [Table View](#table-view)
+
+For LLM and agent traces, the [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/) shows one row for each AI trace, with tokens, cost, and call counts. You can also filter and aggregate on these trace totals, for example `trace.total_tokens > 1000`.
 
 ### List View
 
@@ -40,7 +42,7 @@ Use the **All Spans / Root Spans / Entrypoint Spans** dropdown on the right to c
 
 **Customize Columns**
 
-Click the **Options** button on the right side of the toolbar to add or remove columns from the list. For example, you can add `service.name`, `http_method`, `response_status_code`, or `event_type` to display alongside each span.
+Click the **Options** button on the right side of the toolbar to add or remove columns from the list. For example, you can add `service.name`, `http_method`, `response_status_code`, or `event_type` to display alongside each span. HTTP method and status code columns show their values as badges. This works for `http_method` and `response_status_code`, and for the OpenTelemetry attributes `http.method`, `http.request.method`, `http.status_code`, and `http.response.status_code`.
 
 <Figure
   src="/img/docs/product-features/trace-explorer/trace-explorer-list-view-options.webp"
@@ -68,12 +70,22 @@ You can increase the number of spans displayed up to 200/page using the dropdown
 
 ### Traces View
 
-The Traces View focuses on root spans — the starting span of each trace. Each row represents a single trace, showing the root service name, root operation name, root duration, number of spans, and Trace ID. Traces are sorted by descending root duration, which helps identify the longest running traces. You can increase the number of traces displayed up to 200/page using the dropdown on the top right.
+The Traces View focuses on root spans, the starting span of each trace. Each row represents a single trace, showing the root service name, root operation name, root duration, number of spans, and Trace ID. Traces are sorted by descending root duration, which helps identify the longest running traces. You can increase the number of traces displayed up to 200/page using the dropdown on the top right.
+
+The Traces View uses the same table as the [List View](#list-view):
+
+- Drag a column edge to resize the column.
+- Drag a column header to move the column.
+- Click a row or a Trace ID to open the trace details page. Cmd-click or Ctrl-click opens it in a new tab.
+
+SigNoz saves the column order and widths in your browser. The Traces View and the List View save their layouts separately.
+
+The toolbar above the table shows the Root Spans note, the download button, and the **Previous** and **Next** buttons. The toolbar stays visible while results load and when the query returns no traces.
 
 <Figure
-  src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-3.webp"
-  alt="Traces per page dropdown in Traces View"
-  caption="Traces View — root duration and number of traces per page"
+  src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-table.webp"
+  alt="Traces View table with the toolbar, root service name, operation, duration, span count, and Trace ID columns"
+  caption="Traces View with one row per trace"
 />
 
 ### Time Series View
@@ -85,6 +97,22 @@ The Time Series View provides a graphical representation of trace data over time
   alt="Timeseries View in the Trace Explorer"
   caption="Timeseries View in Trace Explorer"
 />
+
+#### Download chart data
+
+Click the **download** icon on the right of the Time Series chart header to export the data behind the chart. A popover opens with a **FORMAT** selector offering **csv** (default) and **jsonl**. Choose a format and click **Export** to download the file.
+
+The export mirrors what the chart shows:
+
+- **Series names match the chart legend**, including any custom legend format or group-by values.
+- **The value column carries the unit.** The value column header includes the human-readable Y-axis unit (for example, `value (ms)`). Display-only formats such as `short` or `none` are omitted.
+- **Duration values are exported in milliseconds** to match what the chart displays, not the raw nanosecond values returned by the API. A `p99` latency query, for example, exports the same millisecond values you see on the chart.
+
+Each row also includes the timestamp, the query name, the series name, and one column per group-by label.
+
+<Admonition type="info">
+The download button appears whenever the Time Series chart has data to export. No configuration or feature flag is required, and export behaves the same on SigNoz Cloud and self-hosted deployments.
+</Admonition>
 
 ### Table View
 
@@ -105,6 +133,34 @@ Both Time Series and Table views use the Query Builder for filtering, aggregatio
   alt="Query Builder showing Group By, Having, Order By, and Limit fields"
   caption="Query Builder in Time Series and Table views"
 />
+
+## Missing Spans
+
+A span shows as missing when a collected span references a Parent Span ID that no other span in the trace matches. That parent span still exists in your system but never reached SigNoz, so the waterfall view shows a gap where it should sit. SigNoz marks these traces with a "This trace has missing spans" banner in the trace details view.
+
+<Tooltip text="Tail sampling" content="Deciding whether to keep a trace after all its spans have arrived, so the decision can depend on what happened." link="https://signoz.io/docs/glossary/#tail-sampling" />, spans dropped in transit, and services that never export are the usual causes. For the full explanation and how to identify each cause, see [Why are some spans missing from a trace?](https://signoz.io/docs/traces-management/troubleshooting/faqs/#q-why-are-some-spans-missing-from-a-trace).
+
+## Export Spans and Traces
+
+The **Download** button exports the current results to a file. It appears in the top-right controls of both the [List View](#list-view) and the [Traces View](#traces-view), next to the per-page dropdown.
+
+To export your results:
+
+1. Apply the filters and span scope you want to export. The export honors your current filters and the selected time range.
+2. Click the **Download** icon in the top-right controls.
+3. In the popover, choose a **Format** and the **Number of Rows** to export.
+4. Click **Export** to download the file.
+
+The popover offers the same options in both views:
+
+| Option | Choices | Default |
+|---|---|---|
+| **Format** | `csv`, `jsonl` | `csv` |
+| **Number of Rows** | `10k`, `30k`, `50k` | `10k` |
+
+<Admonition>
+The Download button is available in both the List View and the Traces View, with identical format and row-limit options. To export chart data instead of individual rows, use the download control in the [Time Series View](#time-series-view).
+</Admonition>
 
 ## Trace Matching
 
@@ -197,9 +253,9 @@ To clear a filter, click **Clear All** next to the filter category. To reset all
 
 ### Adding Custom Quick Filters
 
-The quick filters panel shows a set of default filters (like Duration, Service Name, HTTP Method, etc.), but you can add any span or resource attribute as a custom quick filter.
+The quick filters panel shows a set of default filters (like Duration, Service Name, HTTP Method, etc.), but you can add any span or <Tooltip text="resource attribute" content="An attribute on a resource, such as service.name, host.name, or k8s.pod.name." link="https://signoz.io/docs/glossary/#resource-attribute" /> as a custom quick filter.
 
-To customize: click the **settings icon** at the top-right of the quick filters panel, then select **Edit quick filters**. This opens an editor showing your currently added filters and all other available attributes. Search for any attribute and add it to the panel.
+To customize, click the **settings icon** at the top-right of the quick filters panel. The **Edit quick filters** panel opens and shows your added filters and all other available attributes. Search for any attribute and add it to the panel.
 
 <Figure
   src="/img/docs/product-features/trace-explorer/traces-edit-quick-filters.webp"
@@ -211,15 +267,29 @@ To customize: click the **settings icon** at the top-right of the quick filters 
 Only users with the **Admin** role can edit quick filters. Users with the Viewer or Editor role do not have access to this feature.
 </Admonition>
 
+## Create Alerts and Dashboards from a View
+
+The **List**, **Trace**, **Time Series**, and **Table** views each have a **Create an alert** button and an **Add to dashboard** icon button in their header, next to the download icon. Both use the query of the current view.
+
+- **Create an alert**: Opens a new [trace-based alert](https://signoz.io/docs/alerts-management/trace-based-alerts/) with the current query.
+- **Add to dashboard**: Opens the dashboard picker. After you pick a dashboard, SigNoz opens it with a new panel for the query.
+
+The actions in the [Bottom Bar](https://signoz.io/docs/userguide/traces/#bottom-bar) do the same thing.
+
 ## Bottom Bar
 
 The bar at the bottom of each view provides quick actions for saving views, creating alerts, and adding panels to a dashboard.
 
-<Figure
-  src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-save-view.webp"
-  alt="Bottom bar showing Save this view, Create an Alert, and Add to Dashboard"
-  caption="Bottom bar — Save view, Create an Alert, Add to Dashboard"
-/>
+<figure>
+  <img
+    className="rounded-md"
+    src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-save-view.webp"
+    alt="Bottom bar showing Save this view, Create an Alert, and Add to Dashboard"
+  />
+  <figcaption>
+    <i>Bottom bar with Save this view, Create an Alert, and Add to Dashboard</i>
+  </figcaption>
+</figure>
 
 - **Save this view** — preserves your current filter and query configuration as a named view for quick access later. Click **Save this view**, enter a descriptive label, and confirm. You can access saved views from the **Select a view** dropdown at the bottom of the Explorer or from the **Views** tab at the top of the page.
 - **Create an Alert** — instantly creates a [Trace based Alert](https://signoz.io/docs/alerts-management/trace-based-alerts/) based on the current filters.

@@ -1,12 +1,23 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
 type ExperimentTrackerProps = {
   children?: React.ReactNode
   experimentId: string
   variantId: string
+}
+
+type ExperimentContextValue = {
+  experimentId: string
+  variantId: string
+}
+
+const ExperimentContext = createContext<ExperimentContextValue | null>(null)
+
+export function useExperimentContext() {
+  return useContext(ExperimentContext)
 }
 
 /**
@@ -16,6 +27,7 @@ type ExperimentTrackerProps = {
 export function ExperimentTracker({ children, experimentId, variantId }: ExperimentTrackerProps) {
   const logEvent = useLogEvent()
   const hasLoggedRef = useRef(false)
+  const contextValue = useMemo(() => ({ experimentId, variantId }), [experimentId, variantId])
 
   // Log which variant the user sees - only once when the component mounts
   useEffect(() => {
@@ -33,6 +45,7 @@ export function ExperimentTracker({ children, experimentId, variantId }: Experim
     }
   }, [experimentId, variantId, logEvent])
 
-  // Just render children, this component only handles tracking experiment views
-  return <>{children ?? null}</>
+  return (
+    <ExperimentContext.Provider value={contextValue}>{children ?? null}</ExperimentContext.Provider>
+  )
 }

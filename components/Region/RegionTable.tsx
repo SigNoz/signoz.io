@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useRegion } from './RegionContext'
 import { Copy, CheckCircle } from 'lucide-react'
-import Button from '@/components/ui/Button'
 import { AppTooltip } from '@/components/ui/AppTooltip'
 
 const CopyCell = ({ text }: { text: string }) => {
@@ -48,12 +47,10 @@ const CopyCell = ({ text }: { text: string }) => {
       <span className="font-mono text-sm">{text}</span>
       <AppTooltip content="Double-check this is your workspace region" side="top">
         <span className="inline-flex">
-          <Button
-            isButton
-            variant="ghost"
-            size="icon"
+          <button
+            type="button"
             onClick={handleCopy}
-            className="h-6 w-6 p-0 text-gray-400 opacity-0 transition-opacity hover:bg-transparent hover:text-gray-600 group-hover:opacity-100 dark:text-gray-500 dark:hover:text-gray-300"
+            className="inline-flex h-6 w-6 items-center justify-center p-0 text-[var(--l3-foreground)] opacity-0 transition-opacity hover:bg-transparent hover:text-[var(--l1-foreground)] group-hover:opacity-100"
             title="Copy to clipboard"
             aria-label="Copy to clipboard"
           >
@@ -62,7 +59,7 @@ const CopyCell = ({ text }: { text: string }) => {
             ) : (
               <Copy className="h-4 w-4" />
             )}
-          </Button>
+          </button>
         </span>
       </AppTooltip>
     </div>
@@ -75,7 +72,7 @@ const RegionTable = () => {
   if (isLoading) {
     return (
       <div className="w-full overflow-x-auto">
-        <div className="h-32 w-full animate-pulse rounded bg-signoz_slate-400" />
+        <div className="h-32 w-full animate-pulse rounded bg-[var(--l3-background)]" />
       </div>
     )
   }
@@ -95,16 +92,16 @@ const RegionTable = () => {
       <table className="w-full table-auto border-collapse text-left">
         <thead>
           <tr>
-            <th className="border-b border-gray-200 px-6 py-4 font-semibold text-gray-900 dark:text-gray-100">
+            <th className="border-b border-[var(--l2-border)] px-6 py-4 font-semibold text-[var(--l1-foreground)]">
               Name
             </th>
-            <th className="border-b border-gray-200 px-6 py-4 font-semibold text-gray-900 dark:text-gray-100">
+            <th className="border-b border-[var(--l2-border)] px-6 py-4 font-semibold text-[var(--l1-foreground)]">
               Cloud Provider
             </th>
-            <th className="border-b border-gray-200 px-6 py-4 font-semibold text-gray-900 dark:text-gray-100">
+            <th className="border-b border-[var(--l2-border)] px-6 py-4 font-semibold text-[var(--l1-foreground)]">
               Cloud Region
             </th>
-            <th className="border-b border-gray-200 px-6 py-4 font-semibold text-gray-900 dark:text-gray-100">
+            <th className="border-b border-[var(--l2-border)] px-6 py-4 font-semibold text-[var(--l1-foreground)]">
               Ingestion Endpoint
             </th>
           </tr>
@@ -113,14 +110,12 @@ const RegionTable = () => {
           {tableData.map((row, index) => (
             <tr
               key={`${row.cloudRegion}-${index}`}
-              className="border-b border-gray-200 last:border-0 dark:border-gray-700"
+              className="border-b border-[var(--l2-border)] last:border-0"
             >
-              <td className="px-6 py-4 text-gray-900 dark:text-gray-100">{row.name}</td>
-              <td className="px-6 py-4 uppercase text-gray-900 dark:text-gray-100">
-                {row.provider}
-              </td>
-              <td className="px-6 py-4 text-gray-900 dark:text-gray-100">{row.cloudRegion}</td>
-              <td className="px-6 py-4 text-gray-900 dark:text-gray-100">
+              <td className="px-6 py-4 text-[var(--l1-foreground)]">{row.name}</td>
+              <td className="px-6 py-4 uppercase text-[var(--l1-foreground)]">{row.provider}</td>
+              <td className="px-6 py-4 text-[var(--l1-foreground)]">{row.cloudRegion}</td>
+              <td className="px-6 py-4 text-[var(--l1-foreground)]">
                 <CopyCell text={row.dns} />
               </td>
             </tr>

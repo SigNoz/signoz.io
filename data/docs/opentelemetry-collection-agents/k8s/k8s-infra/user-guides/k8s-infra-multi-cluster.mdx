@@ -1,32 +1,34 @@
 ---
-date: 2026-06-11
+date: 2026-10-15
 title: Monitor Multiple K8S Clusters with k8s-Infra
-
 description: Configure the k8s-infra collection agent to monitor multiple Kubernetes clusters and view them together in SigNoz.
 ---
 
-This guide explains how to use the SigNoz `k8s-infra` Helm chart to monitor multiple Kubernetes clusters and view them together in SigNoz. The approach is simple: deploy the chart in each cluster, point them to the same SigNoz backend, and assign a unique cluster name.
+This guide explains how to monitor multiple Kubernetes clusters with the K8s Infra collection agent, installed with the `k8s-infra` Helm chart or with Foundry, and view them together in SigNoz. Install K8s Infra in each cluster, point every cluster to the same SigNoz backend, and give each cluster a unique name.
 
 ## Prerequisites
 
 - A SigNoz backend (SigNoz Cloud or self-hosted)
 - kubectl access to each target cluster
-- Helm v3 installed
+- Helm v3 installed, or `foundryctl` for a Foundry install (see [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/))
 
 ## How it works
 
 - Install `k8s-infra` separately in each cluster.  
 - Each deployment sends telemetry to a common SigNoz backend.  
-- A unique cluster identifier (`global.clusterName`) lets you filter and compare signals across clusters.  
+- A unique cluster identifier (`global.clusterName` in Helm values, `K8S_CLUSTER_NAME` in a Foundry `casting.yaml`) lets you filter and compare signals across clusters.  
 
 ## Step 1: Pick unique cluster names
 
 Choose a naming scheme that is stable and human-friendly. Examples:  
 - `prod-us1`, `prod-eu1`, `staging`, `dev-team-a`
 
-Set this value in `global.clusterName` for each cluster.
+Set this value in `global.clusterName` for each cluster, or in `K8S_CLUSTER_NAME` in both documents of each cluster's Foundry `casting.yaml`.
 
 ## Step 2: Prepare per-cluster overrides
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
 Create an overrides file per cluster (for example, `override-values-prod-us1.yaml`).  
 
@@ -37,24 +39,25 @@ _override-values.yaml_
 
 ```yaml
 global:
-  cloud: others                 # or aws/gcp/aks to enable resource detection
+  cloud: others                 # aws, gcp or azure to enable resource detection (chart default: other)
   clusterName: <UNIQUE_CLUSTER_NAME>
   deploymentEnvironment: <ENV>  # e.g., production, staging
-otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
 otelInsecure: false
 signozApiKey: <your-ingestion-key>
 presets:
   otlphttpExporter:
     enabled: true
-````
+```
 
-<Admonition>
-- Replace `<UNIQUE_CLUSTER_NAME>` with a unique name per cluster.
-- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
-- Replace `<your-ingestion-key>` with the one provided by SigNoz.
-</Admonition>
+**Verify these values:**
 
-  </TabItem>
+- `<UNIQUE_CLUSTER_NAME>`: The name you picked for this cluster in Step 1, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal.
+- `<ENV>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
   <TabItem value="self-hosted" label="Self-Hosted SigNoz">
 
 *override-values.yaml*
@@ -71,10 +74,41 @@ presets:
     enabled: true
 ```
 
-  </TabItem>
+**Verify these values:**
+
+- `<UNIQUE_CLUSTER_NAME>`: The name you picked for this cluster in Step 1, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal.
+- `<ENV>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+- `<SIGNOZ_OTLP_ENDPOINT>`: The host of your Self-Hosted SigNoz OTLP/HTTP endpoint. For SigNoz installed with Foundry in the same Kubernetes cluster, use `signoz-ingester.signoz.svc.cluster.local`. For SigNoz installed with the Helm chart in the same cluster, use `signoz-otel-collector.signoz.svc.cluster.local`. The second `signoz` in each address is the namespace SigNoz runs in. For a SigNoz outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+Create one directory per cluster, each with its own `casting.yaml`. Start from the casting for your platform in Install K8s Infra, with [Helm](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/?tool=helm&setup=foundry#install-with-foundry-and-helm) or [Kustomize](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/?tool=kustomize#install-with-foundry-and-kustomize), and set the cluster's name in both documents, the agent's and the deployment collector's (`collector.kind: deployment`):
+
+```yaml
+spec:
+  collector:
+    spec:
+      env:
+        K8S_CLUSTER_NAME: <UNIQUE_CLUSTER_NAME>
+```
+
+**Verify these values:**
+
+- `<UNIQUE_CLUSTER_NAME>`: The name you picked for this cluster in Step 1. Use the same value in both documents of a casting, and a different value in each cluster's casting.
+
+`foundryctl` writes `casting.yaml.lock` next to the casting, and the generated files under `pours/` in the directory it runs from, so a directory per cluster keeps each cluster's files apart. For a self-hosted SigNoz, change the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+
+</TabItem>
 </Tabs>
 
 ## Step 3: Install in each cluster
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
 Run the following in every cluster with its overrides file:
 
@@ -84,14 +118,33 @@ helm repo update
 helm install k8s-infra-<cluster> signoz/k8s-infra -n signoz-infra --create-namespace -f override-values-<cluster>.yaml
 ```
 
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+`foundryctl cast` installs into the cluster of your current `kubectl` context. For each cluster, run this on the machine where you use `kubectl`, from that cluster's directory:
+
+```bash
+kubectl config use-context <cluster-context>
+foundryctl cast -f casting.yaml
+```
+
+**Verify these values:**
+
+- `<cluster-context>`: The `kubectl` context of the cluster this casting is for. `kubectl config get-contexts` lists them.
+
+Each run installs the agent and the deployment collector into that cluster, in the `signoz` namespace unless the casting's `foundry.signoz.io/kubernetes-namespace` annotation sets another.
+
+</TabItem>
+</Tabs>
+
 ## Step 4: Verify in SigNoz
 
-* In Metrics/Logs/Traces views, filter by `clusterName` (from `global.clusterName`).
+* In Metrics/Logs/Traces views, filter by `k8s.cluster.name`, which carries the name you set as `global.clusterName` or `K8S_CLUSTER_NAME`.
 * Create dashboards per cluster or compare across clusters with group-by filters.
 
 ## Best practices
 
-* Use consistent, unique `global.clusterName` values.
+* Use consistent, unique `global.clusterName` (Helm CLI) or `K8S_CLUSTER_NAME` (Foundry) values.
 * Consider separate ingestion keys per cluster for isolation/rotation.
 * Ensure egress to your OTLP endpoint (`4318` for OTLP/HTTP; `443` for SigNoz Cloud).
 
@@ -100,4 +153,4 @@ helm install k8s-infra-<cluster> signoz/k8s-infra -n signoz-infra --create-names
 - [Install K8s-Infra](/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/)
 - [Configure K8s-Infra](/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/)
 - [K8s-Infra Overview](/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/)
-- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)

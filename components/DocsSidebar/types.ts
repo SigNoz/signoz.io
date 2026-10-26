@@ -5,6 +5,7 @@ export type Doc = {
   route: string
   label: string
   className?: string
+  published_date?: string
 }
 
 export type Category = {

@@ -1,9 +1,7 @@
 ---
 title: 'Configuring OpenTelemetry Kubernetes Metrics Collection for GKE Autopilot'
-date: 2026-02-04
+date: 2026-10-15
 description: Configure kubelet metrics collection in k8s-infra OpenTelemetry collection agent for GKE Autopilot clusters, where certain RBAC permissions are restricted.
-
-
 ---
 
 This guide explains how to configure kubelet metrics collection in the k8s-infra OpenTelemetry collection agent for GKE Autopilot clusters, where certain RBAC permissions are restricted.
@@ -29,34 +27,75 @@ Disabling these metrics allows us to match the agent configuration to GKE Autopi
 
 ## Configure Kubelet Metrics Collection for GKE Autopilot
 
-### Using the Helm Chart (Recommended)
+Each setup path below applies these settings for you: on GKE Autopilot, it disables `extra_metadata_labels` and the `{request|limit}_utilization` metrics.
 
-Our Helm chart for `k8s-infra` automatically handles GKE Autopilot restrictions. When deploying to GKE Autopilot, the chart disables `extra_metadata_labels` and `{request|limit}_utilization` metrics by default.
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
-#### Step 1: Set the Cloud Provider
+### Step 1: Set the cloud provider
 
-To override the default and set the cloud provider to GKE Autopilot, update your `values.yaml` for <a href="https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L3" target="_blank" rel="noopener noreferrer nofollow">global.cloud</a>:
+In your release's `override-values.yaml`, set <a href="https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/README.md" target="_blank" rel="noopener noreferrer nofollow">global.cloud</a> to `gcp/autogke`:
 
 ```yaml
 global:
   cloud: gcp/autogke
 ```
 
-#### Step 2: Apply the Configuration
+### Step 2: Apply the configuration
 
-Apply your configuration changes to the k8s-infra Helm release:
+Run this on the machine where you use `kubectl`, from the directory that contains `override-values.yaml`:
 
-```sh
-helm upgrade <RELEASE_NAME> signoz/k8s-infra \
-  -n <NAMESPACE> \
-  -f <YOUR_VALUES_FILE>.yaml
+```bash
+helm upgrade <RELEASE_NAME> signoz/k8s-infra -n <NAMESPACE> -f override-values.yaml
 ```
 
-Verify these values:
+**Verify these values:**
 
-- `<RELEASE_NAME>`: Name of your k8s-infra Helm release (e.g., `k8s-infra`)
-- `<NAMESPACE>`: Kubernetes namespace where k8s-infra is installed (e.g., `signoz`)
-- `<YOUR_VALUES_FILE>`: Path to your values YAML file (e.g., `values.yaml`)
+- `<RELEASE_NAME>`: The name of your k8s-infra release, `my-release` if you followed Install K8s Infra.
+- `<NAMESPACE>`: The namespace the release runs in.
+
+For a new install, use the GKE (Autopilot) values in [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/?tool=helm&setup=helm&k8s-vendor=gke-autopilot#install-with-the-helm-cli).
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+### Step 1: Set the platform and mode
+
+In both documents of your `casting.yaml`, set `spec.deployment.platform` to `gcp` and `spec.deployment.mode` to `kubernetes-auto`.
+
+The full casting is in the GKE (Autopilot) tab of [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/?tool=helm&setup=foundry&k8s-vendor=gke-autopilot#install-with-foundry-and-helm); start from it for a new install.
+
+### Step 2: Apply the configuration
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+</TabItem>
+</Tabs>
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+### Step 1: Set the platform and mode
+
+In both documents of your `casting.yaml`, set `spec.deployment.platform` to `gcp` and `spec.deployment.mode` to `kubernetes-auto`.
+
+The full casting is in the GKE (Autopilot) tab of [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/?tool=kustomize&k8s-vendor=gke-autopilot#install-with-foundry-and-kustomize); start from it for a new install.
+
+### Step 2: Apply the configuration
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+</TabItem>
+</Tabs>
 
 ### Manual Configuration
 
@@ -64,7 +103,7 @@ If you manage your own OpenTelemetry Collector configuration, you must explicitl
 
 Update your `values.yaml` or collector configuration:
 
-```yaml
+```yaml defaultCollapsed
 receivers:
   kubeletstats:
     # Disable extra metadata labels that require nodes/proxy access
@@ -79,15 +118,19 @@ receivers:
         enabled: false
       k8s.pod.memory_request_utilization:
         enabled: false
-      container.cpu_limit_utilization:
+      k8s.container.cpu_limit_utilization:
         enabled: false
-      container.cpu_request_utilization:
+      k8s.container.cpu_request_utilization:
         enabled: false
-      container.memory_limit_utilization:
+      k8s.container.memory_limit_utilization:
         enabled: false
-      container.memory_request_utilization:
+      k8s.container.memory_request_utilization:
         enabled: false
 ```
+
+<Admonition type="info">
+The k8s-infra Helm chart also enables `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`, `k8s.container.memory_request_utilization`, and `k8s.container.memory_limit_utilization` by default (see [Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#collect-kubelet-metrics)). They power the Containers view's utilization columns and need the same restricted RBAC access as the pod-level `{request|limit}_utilization` metrics above. Disable them on GKE Autopilot too.
+</Admonition>
 
 ### Validate
 
@@ -113,5 +156,5 @@ These metrics provide comprehensive visibility into your cluster's resource cons
 
 1. **[K8s-Infra Overview](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/)**
 2. **[Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/)**
-3. **[Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)**
+3. **[Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)**
 4. **[Best Practices for OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

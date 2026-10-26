@@ -24,6 +24,7 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
               iconText={card.iconText || ''}
               title={card.title}
               description={card.description}
+              button={card.button}
               className={card.className}
               variant={variant}
               titleLevel={titleLevel}

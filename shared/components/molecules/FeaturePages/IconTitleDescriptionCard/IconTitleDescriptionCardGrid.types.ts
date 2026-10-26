@@ -1,10 +1,12 @@
 import { IconTitleDescriptionCardVariant } from './IconTitleDescriptionCard.types'
+import { FeatureButtonConfig } from '../FeatureButton/FeatureButton.types'
 
 export type IconTitleDescriptionCardData = {
   icon?: React.ReactNode
   iconText?: string
   title?: string | React.ReactNode
   description?: string | React.ReactNode
+  button?: FeatureButtonConfig
   className?: string
 }
 

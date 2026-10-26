@@ -1,0 +1,260 @@
+---
+date: 2026-07-15
+title: Control OpenTelemetry Metric Cardinality with a Processor
+description: Use a community OpenTelemetry Collector processor to detect and contain metric cardinality explosions before they reach SigNoz, keeping dashboards working.
+doc_type: howto
+---
+
+## Overview
+
+One mislabeled metric can spawn thousands of new time series and overwhelm your metrics backend. Bake a user ID, a full request path, or a unique pod name into an attribute and every distinct value becomes its own series. This is a **cardinality explosion**.
+
+This guide shows how to run the community <a href="https://github.com/YElayyat/otel-cardinality-processor" target="_blank" rel="noopener noreferrer nofollow">Cardinality Guardian</a> processor in your OpenTelemetry Collector. It flags labels whose value count is spiking and contains them **before** the collector exports the data to SigNoz. It strips only the offending label from a metric, not the whole data point, so the rest of your dashboards keep working.
+
+<Admonition type="info">
+This processor is built and maintained by a community author. It is **not** part of the official <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-collector-contrib</a> distribution and is not maintained by SigNoz or the OpenTelemetry project. Review the source and pin a version before using it in production.
+</Admonition>
+
+A few things to know before you start:
+
+- **Metrics only.** The processor operates on metric data. Logs and traces are unaffected.
+- **Naming quirk.** The component built into the collector is named `cardinalityprocessor`, but the key you use in the `processors:` block of your config is `cardinality_guardian`.
+- **Where it runs.** You add it to a collector that *you* run. SigNoz Cloud's managed collector cannot load custom processors, so this sits in your own collector, upstream of the OTLP export to SigNoz.
+
+## Prerequisites
+
+- An OpenTelemetry Collector you control, [exporting metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/).
+- Go toolchain, to build a custom collector with the OpenTelemetry Collector Builder (OCB).
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## How it works
+
+The processor tracks the number of distinct values for each metric attribute during a fixed time window. It compares that count with the previous window. If the increase exceeds your configured threshold, the processor flags the attribute and applies the selected [enforcement mode](#enforcement-modes).
+
+<details>
+<ToggleHeading>
+
+### Detection details
+
+</ToggleHeading>
+
+- The processor divides time into windows called **epochs** (`epoch_duration_seconds`, default 300 seconds).
+- For each `(metric, attribute)` pair, it estimates the number of distinct values using <a href="https://en.wikipedia.org/wiki/HyperLogLog" target="_blank" rel="noopener noreferrer nofollow">HyperLogLog++</a>.
+- It compares the current estimate with the previous epoch. If the increase exceeds `max_cardinality_delta_per_epoch` (default 100), enforcement applies for the rest of the epoch.
+- Attributes with many stable values do not trigger enforcement. Attributes whose value count grows at a steady rate may also remain below the threshold. See the note in [Validate](#validate).
+
+</details>
+
+## Build a custom collector with OCB
+
+The processor is not in the default SigNoz or contrib collector images, so you build a collector binary that includes it using the <a href="https://opentelemetry.io/docs/collector/custom-collector/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector Builder</a> (OCB).
+
+1. **Download OCB** matching your OS and the collector version you want to build. Check the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases/releases" target="_blank" rel="noopener noreferrer nofollow">collector-releases</a> page for the current version and replace `<version>` and the platform suffix below:
+
+   ```bash
+   curl --proto '=https' --tlsv1.2 -fL -o ocb \
+     https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/cmd%2Fbuilder%2Fv<version>/ocb_<version>_darwin_arm64
+   chmod +x ocb
+   ```
+
+2. **Create `builder.yaml`.** Keep every `gomod` version aligned to the same collector release you downloaded OCB for. The `cardinalityprocessor` entry is what pulls in the community processor:
+
+   ```yaml:builder.yaml
+   dist:
+     name: otelcol-custom
+     description: Custom OTel Collector with the cardinality processor
+     output_path: ./build
+
+   receivers:
+     - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v<version>
+
+   processors:
+     - gomod: go.opentelemetry.io/collector/processor/batchprocessor v<version>
+     - gomod: github.com/YElayyat/otel-cardinality-processor v1.5.1
+       name: cardinalityprocessor
+       import: github.com/YElayyat/otel-cardinality-processor/cardinalityprocessor
+
+   exporters:
+     - gomod: go.opentelemetry.io/collector/exporter/otlphttpexporter v<version>
+   ```
+
+   The custom binary only contains the components you list here. It **must include every receiver, processor, and exporter your existing `otel-collector-config.yaml` references**, or the collector fails to start with an "unknown type" error. The example above uses `otlphttpexporter` because the standard SigNoz Cloud collector config exports over OTLP/HTTP; add any others your config uses.
+
+3. **Compile:**
+
+   ```bash
+   ./ocb --config=builder.yaml
+   ```
+
+   OCB writes the binary to `./build/otelcol-custom`.
+
+<details>
+<ToggleHeading>
+
+### Quick try with the author's Docker image
+
+</ToggleHeading>
+
+If you only want to test the behavior, the author publishes a prebuilt image. Only use it after reviewing what it contains. It is a third-party image, not a SigNoz or OpenTelemetry release:
+
+```bash
+docker pull ghcr.io/yelayyat/otel-cardinality-processor:1.5.1
+```
+
+</details>
+
+## Configure the processor
+
+Add the `cardinality_guardian` block to your existing `otel-collector-config.yaml` and reference it in your `metrics` pipeline. Do not replace the rest of your config.
+
+```yaml:otel-collector-config.yaml
+processors:
+  cardinality_guardian:
+    max_cardinality_delta_per_epoch: 100
+    epoch_duration_seconds: 300
+    enforcement_mode: tag_only
+    never_drop_labels:
+      - service.name
+      - deployment.environment
+    metric_overrides:
+      http.server.request.duration: 5000
+```
+
+Enable it in the pipeline. Place it after `batch` and before your exporter. The processor tracks unique attribute values per epoch, so batching does not affect detection, but running after batch means it operates on the final data shape the exporter sends. The `telemetry` block exposes the processor's own diagnostics on `:8888`, used in [Validate](#validate):
+
+```yaml:otel-collector-config.yaml
+service:
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 0.0.0.0
+                port: 8888
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch, cardinality_guardian]
+      exporters: [otlphttp]
+```
+
+The values `service.name` and `http.server.request.duration` above are examples. Replace them with the attributes and metrics in your own telemetry.
+
+#### Export diagnostics to SigNoz (optional)
+
+Those `:8888` diagnostics stay outside your pipelines. To send them to SigNoz, add a `prometheus` receiver that self-scrapes `:8888` and a diagnostics pipeline that reuses your existing exporter. Add `prometheusreceiver` to your `builder.yaml` so the build includes it.
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: cardinality-guardian
+          static_configs:
+            - targets: ['localhost:8888']
+
+service:
+  pipelines:
+    metrics/diagnostics:
+      receivers: [prometheus]
+      exporters: [otlphttp]
+```
+
+<details>
+<ToggleHeading>
+
+### Configuration fields
+
+</ToggleHeading>
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `max_cardinality_delta_per_epoch` | int | `100` | New unique values per `(metric, attribute)` per epoch before enforcement triggers. |
+| `epoch_duration_seconds` | int | `300` | Length of the detection window, in seconds (minimum 10). |
+| `enforcement_mode` | string | `tag_only` | Action to take on an offending attribute. See [Enforcement modes](#enforcement-modes). |
+| `never_drop_labels` | []string | `[]` | Attributes that are never stripped, regardless of growth. |
+| `metric_overrides` | map[string]int | `{}` | Per-metric threshold overrides; falls back to the global value when unset. |
+| `top_offenders_count` | int | `10` | Number of highest-delta trackers to emit as diagnostic telemetry. |
+| `max_tracker_count` | int | `0` | Cap on tracked `(metric, attribute)` pairs (`0` = unlimited). |
+
+</details>
+
+## Enforcement modes
+
+**enforcement_mode** controls what happens to an attribute once it is flagged:
+
+| Mode | What it does | Metric types |
+|------|--------------|--------------|
+| **tag_only** | Adds an `otel.metric.overflow: true` attribute but changes nothing else. Use this first to observe what *would* be enforced. | All |
+| **overflow_attribute** | Keeps the attribute key but replaces the exploding value with a sentinel (`otel.cardinality_overflow`), collapsing many series into one. | All |
+| **strip_and_reaggregate** | Removes the offending attribute and re-aggregates the data points that now share a label set. | Gauge and Delta Sum only |
+
+<Admonition type="warning">
+`strip_and_reaggregate` supports **Gauges** and **Delta Sums**. For Cumulative Sums, Histograms, and Exponential Histograms it falls back to `tag_only` behavior. Confirm your metric temporality before you rely on re-aggregation. See [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+</Admonition>
+
+## Validate
+
+Start in **tag_only** mode so nothing is dropped while you confirm the processor works.
+
+**1. Find the offending label.** In SigNoz [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/), open the **Summary** tab and click the metric to see its time-series count and per-attribute cardinality.
+
+<Figure
+  src="/img/docs/metrics/cardinality-processor/offending-label.webp"
+  alt="Offending label in SigNoz Metrics Explorer"
+  caption="user.id is the exploding label."
+/>
+
+**2. Confirm the processor is acting.** It publishes diagnostics on the collector's Prometheus endpoint, port **8888**. Read them with `curl localhost:8888/metrics`, or use the optional [diagnostics scraper](#export-diagnostics-to-signoz-optional) to view them in SigNoz. The useful ones, as they appear in SigNoz:
+
+- **otelcol_processor_cardinality_labels.stripped_total**: its rate spikes when enforcement fires.
+- **otelcol_processor_cardinality_top.offenders**: names the highest-growth label, so you can spot the culprit.
+- **otelcol_processor_cardinality_trackers.active**: how many pairs are currently tracked.
+
+On the raw `:8888` endpoint these render with underscores instead of the dot, for example **otelcol_processor_cardinality_labels_stripped_total**.
+
+<Figure
+  src="/img/docs/metrics/cardinality-processor/labels-stripped-rate.webp"
+  alt="labels_stripped rate in SigNoz"
+  caption="labels_stripped rate climbs as the processor enforces."
+/>
+
+<Admonition type="info">
+Detection is delta-based. The processor reacts to a label whose value count is **growing**, so a spike triggers enforcement but steady churn may not. Treat it as a guard against cardinality explosions, not a cap on already-high cardinality. To bound a steadily churning label, drop or aggregate it at the source. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/).
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Enforcement isn't happening on a metric
+
+- Likely cause: the attribute's growth is below `max_cardinality_delta_per_epoch`, or the metric matches a lower threshold in `metric_overrides`.
+- Fix: lower the threshold (globally or per metric), or shorten `epoch_duration_seconds` so growth is measured over a tighter window.
+- Verify: `otelcol_processor_cardinality_top.offenders` lists the attribute and its delta.
+
+### Re-aggregation falls back to tagging
+
+- Likely cause: the metric is a Cumulative Sum, Histogram, or Exponential Histogram, which `strip_and_reaggregate` does not support.
+- Fix: convert the source to delta temporality where appropriate (see [Reducing metrics costs](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality)), or accept `tag_only` behavior for those metrics.
+- Verify: affected data points carry `otel.metric.overflow: true` instead of a reduced label set.
+
+### Trackers stop growing / new offenders are missed
+
+- Likely cause: `max_tracker_count` is set and the limit has been reached.
+- Fix: raise `max_tracker_count`, or set it to `0` for unlimited. Each tracker costs roughly 2 KB of memory.
+- Verify: `otelcol_processor_cardinality_trackers.active` is at or near your configured cap.
+
+</details>
+
+## Next steps
+
+- [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) - why dropping labels alone doesn't reduce samples, and what to do instead.
+- [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/) - strategies to keep metric costs under control.
+- [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) - inspect series and cardinality for a metric.
+
+## Get Help
+
+<GetHelp />

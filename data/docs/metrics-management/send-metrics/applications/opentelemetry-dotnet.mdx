@@ -1,5 +1,5 @@
 ---
-date: 2026-06-23
+date: 2026-08-27
 title: Send Metrics from .NET Application using OpenTelemetry
 description: Send custom and runtime metrics from your .NET application to SigNoz using OpenTelemetry automatic instrumentation.
 doc_type: howto
@@ -7,7 +7,7 @@ doc_type: howto
 
 This guide shows you how to send custom and runtime metrics from your .NET application to SigNoz using OpenTelemetry automatic instrumentation.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -128,7 +128,7 @@ ENTRYPOINT ["/bin/bash", "-c", ". $HOME/.otel-dotnet-auto/instrument.sh && exec 
 
 ### Step 2. Add environment variables to your deployment
 
-```yaml
+```yaml defaultCollapsed
 env:
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
@@ -204,7 +204,7 @@ dotnet run
 
 ### Step 1. Add the instrumentation to your Dockerfile
 
-```dockerfile
+```dockerfile defaultCollapsed
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY . .
@@ -419,6 +419,8 @@ meter.CreateObservableGauge(
 ## Troubleshooting
 
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Metrics not appearing?
 

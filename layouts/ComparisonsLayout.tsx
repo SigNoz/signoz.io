@@ -32,7 +32,6 @@ export default function ComparisonsLayout({
         authors={authors}
         toc={toc}
         contentType="comparison"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

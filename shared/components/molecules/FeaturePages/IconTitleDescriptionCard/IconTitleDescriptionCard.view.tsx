@@ -1,3 +1,4 @@
+import FeatureButton from '../FeatureButton'
 import { IconTitleDescriptionCardProps } from './IconTitleDescriptionCard.types'
 
 const VARIANT_STYLES = {
@@ -16,6 +17,7 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
   iconText,
   title,
   description,
+  button,
   className = '',
   variant = 'lg',
   titleLevel = 'h4',
@@ -27,9 +29,9 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
     <div
       className={`relative flex h-full w-full flex-col items-start ${styles.gap} px-8 py-6 ${className}`}
     >
-      <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-[0.05rem] text-signoz_vanilla-400">
+      <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-[0.05rem] text-[var(--l2-foreground)]">
         {icon && (
-          <span className="flex h-5 w-5 items-center justify-center text-signoz_vanilla-100">
+          <span className="flex h-5 w-5 items-center justify-center text-[var(--l1-foreground)]">
             {icon}
           </span>
         )}
@@ -38,15 +40,19 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
 
       {title && (
         <Heading
-          className={`m-0 text-left font-semibold text-signoz_vanilla-100 ${styles.heading}`}
+          className={`m-0 text-left font-semibold text-[var(--l1-foreground)] ${styles.heading}`}
         >
           {title}
         </Heading>
       )}
 
       {description && (
-        <div className="m-0 w-full text-left text-sm text-signoz_vanilla-400">{description}</div>
+        <div className="m-0 w-full text-left text-sm text-[var(--l2-foreground)]">
+          {description}
+        </div>
       )}
+
+      {button && <FeatureButton button={button} className="mt-2 flex w-fit items-center gap-2" />}
     </div>
   )
 }

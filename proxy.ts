@@ -3,9 +3,15 @@ import type { NextRequest } from 'next/server'
 import { waitUntil, ipAddress } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
 import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
-import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
+import {
+  detectBotFromUserAgent,
+  isAnalyticsExcludedUserAgent,
+  logEventServerSide,
+} from './utils/logEvent'
+import { getPageType } from '@/utils/getPageType'
 import {
   buildDocsMarkdownRewritePath,
+  hasDocsMarkdownExtension,
   shouldRewriteDocsToMarkdown,
 } from '@/utils/docs/markdownRouting'
 import { buildDocsOnboardingPath, isDocsPathname } from '@/utils/docs/onboardingPath'
@@ -15,6 +21,15 @@ import {
   buildApiReferenceOpenAPISpecRewritePath,
   shouldRewriteApiReferenceToOpenAPISpec,
 } from '@/utils/apiReferenceMarkdownRouting'
+import {
+  AGENT_MARKDOWN_SELF_FETCH_HEADER,
+  buildContentMarkdownRewritePath,
+  buildPageMarkdownRewritePath,
+  hasMarkdownExtension,
+  servesMarkdownAlternate,
+  shouldRewriteContentToMarkdown,
+  shouldRewritePageToMarkdown,
+} from '@/utils/agentMarkdownRouting'
 
 const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
 
@@ -45,14 +60,19 @@ export function proxy(req: NextRequest) {
   // Get user agent and detect bot
   const userAgent = req.headers.get('user-agent') || ''
   const { isBot, botType } = detectBotFromUserAgent(userAgent)
+  const isExcludedFromAnalytics = isAnalyticsExcludedUserAgent(userAgent)
 
   const acceptHeader = req.headers.get('accept') || ''
   const contentTypeHeader = req.headers.get('content-type') || ''
 
-  const prefersMarkdown = acceptHeader.toLowerCase().includes('text/markdown')
-
   // Get request details
   const pathname = req.nextUrl.pathname
+
+  const prefersMarkdownAccept = acceptHeader.toLowerCase().includes('text/markdown')
+  const hasMdSuffix = hasMarkdownExtension(pathname) || hasDocsMarkdownExtension(pathname)
+  const hasMarkdownAlternate =
+    servesMarkdownAlternate(pathname) || shouldRewriteDocsToMarkdown(pathname, false)
+  const prefersMarkdown = prefersMarkdownAccept || (hasMdSuffix && hasMarkdownAlternate)
 
   // Redirect legacy ?source=onboarding URLs to /docs-onboarding/ path
   const isLegacyOnboardingDocsRequest =
@@ -75,7 +95,7 @@ export function proxy(req: NextRequest) {
   requestHeaders.set(GROWTHBOOK_ANONYMOUS_ID_HEADER, growthBookAnonymousId)
 
   // Log bot requests
-  if (isBot) {
+  if (isBot && !isExcludedFromAnalytics) {
     // Use waitUntil to ensure logging completes before function termination
     waitUntil(
       logEventServerSide({
@@ -108,12 +128,36 @@ export function proxy(req: NextRequest) {
       headers: requestHeaders,
     },
   })
-  const docsMarkdownRewrite = shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
+  // Internal self-fetch from /api/page-markdown renders the page's HTML; never
+  // re-enter markdown routing for it.
+  const isAgentMarkdownSelfFetch = req.headers.get(AGENT_MARKDOWN_SELF_FETCH_HEADER) != null
+  const isReadRequest = req.method === 'GET' || req.method === 'HEAD'
+
+  const docsMarkdownRewrite =
+    !isAgentMarkdownSelfFetch && shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
   const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, prefersMarkdown, isBot)
+  const contentMarkdownRewrite =
+    !isAgentMarkdownSelfFetch &&
+    isReadRequest &&
+    shouldRewriteContentToMarkdown(pathname, prefersMarkdown)
+  const pageMarkdownRewrite =
+    !isAgentMarkdownSelfFetch &&
+    isReadRequest &&
+    shouldRewritePageToMarkdown(pathname, prefersMarkdown)
 
-  if (docsMarkdownRewrite) {
+  const markdownRewritePath = docsMarkdownRewrite
+    ? buildDocsMarkdownRewritePath(pathname)
+    : apiRefYamlRewrite
+      ? buildApiReferenceOpenAPISpecRewritePath(pathname)
+      : contentMarkdownRewrite
+        ? buildContentMarkdownRewritePath(pathname)
+        : pageMarkdownRewrite
+          ? buildPageMarkdownRewritePath(pathname)
+          : null
+
+  if (markdownRewritePath) {
     const rewriteUrl = req.nextUrl.clone()
-    rewriteUrl.pathname = buildDocsMarkdownRewritePath(pathname)
+    rewriteUrl.pathname = markdownRewritePath
     res = NextResponse.rewrite(rewriteUrl, {
       request: {
         headers: requestHeaders,
@@ -122,18 +166,41 @@ export function proxy(req: NextRequest) {
     if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
       res.headers.set('x-markdown-rewrite', 'true')
     }
-  } else if (apiRefYamlRewrite) {
-    const rewriteUrl = req.nextUrl.clone()
-    rewriteUrl.pathname = buildApiReferenceOpenAPISpecRewritePath(pathname)
 
-    res = NextResponse.rewrite(rewriteUrl, {
-      request: {
-        headers: requestHeaders,
-      },
-    })
-    if (INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER) {
-      res.headers.set('x-markdown-rewrite', 'true')
+    // Markdown responses run no client JS, so log the page view server-side as a Bot Page Request.
+    if (!isBot && !isExcludedFromAnalytics && req.method === 'GET') {
+      const pageTypePath = pathname.replace(/\/+$/, '').replace(/\.md$/, '') || '/'
+
+      waitUntil(
+        logEventServerSide({
+          eventName: 'Bot Page Request',
+          eventType: 'track',
+          attributes: {
+            pageLocation: pathname,
+            pageType: getPageType(pageTypePath),
+            pageUrl: req.nextUrl.toString(),
+            ...(referer !== 'direct' ? { pageReferrer: referer } : {}),
+            custom_source: 'server',
+            custom_prefers_markdown: true,
+            custom_content_type: 'text/markdown',
+            custom_user_agent: userAgent,
+            custom_os: getOSFromUserAgent(userAgent),
+            custom_ip: ip,
+            custom_vercel_ip: vercelIp,
+            custom_referrer: referer,
+            custom_is_bot: false,
+            custom_has_javascript: false,
+          },
+          anonymousId: growthBookAnonymousId,
+        })
+      )
     }
+  }
+
+  // URLs that serve both HTML and markdown representations must vary CDN/proxy
+  // caches on the Accept header so one representation never poisons the other.
+  if (isDocsPathname(pathname) || servesMarkdownAlternate(pathname)) {
+    res.headers.append('Vary', 'Accept')
   }
 
   // Preserve request path for server-rendered global not-found suggestions.

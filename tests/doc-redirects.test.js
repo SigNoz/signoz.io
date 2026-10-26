@@ -98,6 +98,7 @@ test('docPathToRoute maps docs paths to routes', () => {
 test('rename with redirect passes without exiting', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return RENAME_DIFF
     }
@@ -123,6 +124,7 @@ test('rename with redirect passes without exiting', (t) => {
 test('no doc changes still passes without warnings', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return ''
     }
@@ -152,6 +154,7 @@ test('no doc changes still passes without warnings', (t) => {
 test('non-doc changes are ignored', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return 'M\0package.json\0'
     }
@@ -181,6 +184,7 @@ test('non-doc changes are ignored', (t) => {
 test('rename without redirect exits with failure', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return RENAME_DIFF
     }
@@ -220,6 +224,7 @@ test('rename without redirect exits with failure', (t) => {
 test('deletion without redirect exits with failure', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return DELETE_DIFF
     }
@@ -259,6 +264,7 @@ test('deletion without redirect exits with failure', (t) => {
 test('redirect pointing to missing doc exits with failure', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return ''
     }
@@ -303,6 +309,7 @@ test('redirect pointing to missing doc exits with failure', (t) => {
 test('chained redirect ending with missing doc exits with failure', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return ''
     }
@@ -347,6 +354,7 @@ test('chained redirect ending with missing doc exits with failure', (t) => {
 test('chained redirect resolving to doc passes', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return ''
     }
@@ -376,6 +384,7 @@ test('chained redirect resolving to doc passes', (t) => {
 test('rename with redirect mismatch logs warning but passes', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return RENAME_DIFF
     }
@@ -411,6 +420,7 @@ test('rename with redirect mismatch logs warning but passes', (t) => {
 test('rename with self redirect exits with failure', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return RENAME_DIFF
     }
@@ -450,6 +460,7 @@ test('rename with self redirect exits with failure', (t) => {
 test('deletion with self redirect exits with failure', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return DELETE_DIFF
     }
@@ -497,6 +508,7 @@ test('uses GITHUB_BASE_REF when provided', (t) => {
       assert.equal(cmd, 'git merge-base HEAD origin/docs-pr')
       return 'abc123'
     }
+    if (cmd.startsWith('git cat-file -e ')) return ''
     if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
       return RENAME_DIFF
     }
@@ -518,6 +530,62 @@ test('uses GITHUB_BASE_REF when provided', (t) => {
   assert.equal(exitStub.wasCalled(), false)
   assert.ok(logs.log.some((line) => line.includes('Doc redirect check passed')))
   assert.ok(commands.includes('git merge-base HEAD origin/docs-pr'))
+})
+
+test('rename of a doc created within the same PR needs no redirect', (t) => {
+  // cat-file -e throws: the old path never existed at the merge base
+  const restoreExec = stubExecSync((cmd) => {
+    if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) throw new Error('fatal: path does not exist')
+    if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
+      return RENAME_DIFF
+    }
+    if (cmd.startsWith('git diff --name-status -z --find-renames HEAD')) {
+      return ''
+    }
+    throw new Error(`Unexpected command: ${cmd}`)
+  })
+  t.after(restoreExec)
+
+  const exitStub = stubProcessExit()
+  t.after(exitStub.restore)
+
+  // This fixture has no redirect for the renamed doc, so it normally fails
+  const restoreCwd = enterFixture('redirects-missing-rename')
+  t.after(restoreCwd)
+
+  const { main } = loadScript()
+  const logs = captureConsole(() => main())
+  assert.equal(exitStub.wasCalled(), false)
+  assert.equal(logs.error.length, 0)
+  assert.ok(logs.log.some((line) => line.includes('Doc redirect check passed')))
+})
+
+test('deletion of a doc created within the same PR needs no redirect', (t) => {
+  const restoreExec = stubExecSync((cmd) => {
+    if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git cat-file -e ')) throw new Error('fatal: path does not exist')
+    if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
+      return DELETE_DIFF
+    }
+    if (cmd.startsWith('git diff --name-status -z --find-renames HEAD')) {
+      return ''
+    }
+    throw new Error(`Unexpected command: ${cmd}`)
+  })
+  t.after(restoreExec)
+
+  const exitStub = stubProcessExit()
+  t.after(exitStub.restore)
+
+  const restoreCwd = enterFixture('redirects-missing-deleted')
+  t.after(restoreCwd)
+
+  const { main } = loadScript()
+  const logs = captureConsole(() => main())
+  assert.equal(exitStub.wasCalled(), false)
+  assert.equal(logs.error.length, 0)
+  assert.ok(logs.log.some((line) => line.includes('Doc redirect check passed')))
 })
 
 test.after(() => {

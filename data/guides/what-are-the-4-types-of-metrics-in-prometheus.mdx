@@ -9,21 +9,12 @@ authors: [yuvraj]
 description: "The 4 types of Prometheus metrics explained: counter, gauge, histogram, and summary, when to use each, and how to pick the right one."
 keywords: [Prometheus metrics, monitoring, observability, counters, gauges, histograms, summaries]
 related_articles:
-  - '/guides/what-are-prometheus-labels'
-  - '/guides/how-to-get-all-the-metrics-of-an-instance-with-prometheus-api'
-  - '/guides/how-to-write-a-prometheus-query-that-returns-the-value-of-the-label'
-  - '/guides/prometheus-metrics-endpoint'
+  - '/guides/what-is-the-difference-between-a-gauge-and-a-counter'
   - '/guides/what-is-a-bucket-in-prometheus'
-  - '/guides/filter-prometheus-results-by-metric-value-not-by-label-value'
+  - '/guides/what-are-prometheus-labels'
 ---
 
-Prometheus, a powerful open-source monitoring system, uses four core metric types to collect and analyze data. These metric types — counters, gauges, histograms, and summaries — form the foundation of effective system monitoring and observability. Understanding these metric types is crucial for developers and system administrators who want to gain insights into their applications and infrastructure.
-
-## What are Prometheus Metrics and Why are They Important?
-
-Prometheus metrics are numerical measurements collected at regular intervals to monitor the health, performance, and behavior of systems and applications. These metrics play a vital role in observability by providing quantifiable data points that reflect the state and performance of your infrastructure.
-
-Prometheus uses a dimensional data model, allowing for flexible and efficient data storage and querying. This model sets Prometheus apart from traditional monitoring solutions by enabling multi-dimensional data analysis and powerful aggregation capabilities.
+[Prometheus](https://signoz.io/guides/what-is-prometheus-for-monitoring/) is an open-source monitoring and alerting toolkit that collects and stores time-series data. Its client libraries offer four core metric types: counters, gauges, histograms, and summaries. This guide explains what each type measures, how to query it, and how to choose one for your application.
 
 ## The 4 Core Types of Prometheus Metrics Explained
 
@@ -33,13 +24,13 @@ Prometheus offers four primary metric types: counters, gauges, histograms, and s
 
 Counters are metrics that represent cumulative values that only increase over time. They're ideal for tracking events, requests, or occurrences that accumulate.
 
-Key characteristics of counters:
+**Key characteristics of counters:**
 
 - Monotonically increasing values
 - Reset to zero on restart
 - Cannot decrease in value
 
-Use cases for counters include:
+**Use cases for counters include:**
 
 - Total number of HTTP requests
 - Number of errors encountered
@@ -49,7 +40,6 @@ To interpret counter data, you typically calculate the rate of increase over tim
 
 ```
 rate(http_requests_total[5m])
-
 ```
 
 This query calculates the average rate of increase of the `http_requests_total` counter over the last 5 minutes.
@@ -58,13 +48,13 @@ This query calculates the average rate of increase of the `http_requests_total` 
 
 Gauges represent single numerical values that can arbitrarily go up and down. They're perfect for measuring current states or values that fluctuate.
 
-Key characteristics of gauges:
+**Key characteristics of gauges:**
 
 - Can increase or decrease
 - Represent a snapshot of a current value
 - Useful for measuring volatile metrics
 
-Common use cases for gauges include:
+**Common use cases for gauges include:**
 
 - CPU usage percentage
 - Memory utilization
@@ -75,7 +65,6 @@ To effectively use gauges, focus on their current value and trends over time. Fo
 
 ```
 avg_over_time(cpu_usage_percent[5m]) > 80
-
 ```
 
 This query checks if the average CPU usage over the last 5 minutes exceeds 80%.
@@ -84,13 +73,13 @@ This query checks if the average CPU usage over the last 5 minutes exceeds 80%.
 
 Histograms measure the distribution of values across predefined buckets. They're invaluable for understanding the spread and concentration of data points.
 
-Key components of histograms:
+**Key components of histograms:**
 
 - Cumulative counters for configurable buckets
 - Total sum of observed values
 - Count of observations
 
-Histograms excel in scenarios such as:
+**Histograms excel in scenarios such as:**
 
 - Response time distribution
 - Request size analysis
@@ -100,7 +89,6 @@ To effectively use histograms, configure bucket sizes that align with your speci
 
 ```
 histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
-
 ```
 
 This query estimates the 95th percentile of request durations over the last 5 minutes.
@@ -109,13 +97,13 @@ This query estimates the 95th percentile of request durations over the last 5 mi
 
 Summaries are similar to histograms but calculate streaming φ-quantiles (percentiles) over a sliding time window. They're useful when you need precise percentile calculations.
 
-Key features of summaries:
+**Key features of summaries:**
 
 - Configurable quantiles
 - Total sum of observed values
 - Count of observations
 
-Use summaries when:
+**Use summaries when:**
 
 - Exact percentiles are required
 - You need to calculate averages over time
@@ -125,7 +113,6 @@ To query a summary metric for the 99th percentile of request durations:
 
 ```
 http_request_duration_seconds{quantile="0.99"}
-
 ```
 
 This query returns the 99th percentile value directly from the summary metric.
@@ -157,13 +144,6 @@ To maximize the effectiveness of your Prometheus metrics:
 
 By adhering to these practices, you'll create a robust and scalable monitoring system that provides valuable insights into your infrastructure and applications.
 
-## Key Takeaways
-
-- Prometheus offers four core metric types: counters, gauges, histograms, and summaries.
-- Each metric type serves specific monitoring needs and use cases.
-- Understanding the characteristics of each type is crucial for effective monitoring.
-- Proper selection and implementation of metrics can significantly improve system observability.
-
 ## FAQs
 
 ### What's the difference between a histogram and a summary in Prometheus?
@@ -182,19 +162,17 @@ Different metric types have varying impacts on performance and storage. Counters
 
 Prometheus can handle millions of time series, but practical limits depend on your hardware resources. [High cardinality](https://signoz.io/blog/high-cardinality-data/) (many unique label combinations) can impact performance more than the total number of metrics. Monitor Prometheus' resource usage and optimize your metrics accordingly.
 
-## Enhance Your Monitoring with SigNoz
+## Enhance Your Monitoring with SigNoz Cloud
 
-While Prometheus offers powerful monitoring capabilities, managing and visualizing complex metrics can be challenging. SigNoz provides a comprehensive solution that builds upon Prometheus' strengths while offering enhanced visualization and analysis tools.
+While Prometheus offers powerful monitoring capabilities, managing and visualizing complex metrics can be challenging. SigNoz Cloud provides a comprehensive solution that builds upon Prometheus' strengths while offering enhanced visualization and analysis tools.
 
-<GetStartedSigNoz />
+[SigNoz Cloud](https://signoz.io/teams/) is the easiest way to get started. Sign up for a free account and get 30 days of unlimited access to all features.
 
-With SigNoz, you can:
+With SigNoz Cloud, you can:
 
 - Easily visualize Prometheus metrics, including [histogram buckets](https://signoz.io/guides/what-is-a-bucket-in-prometheus/)
 - Create custom dashboards for your specific monitoring needs
 - Set up alerts based on complex queries and thresholds
 - Correlate metrics with traces for deeper insights into application performance
 
-By integrating [SigNoz](https://signoz.io/docs/introduction/) with your existing Prometheus setup, you can take your monitoring to the next level, making it easier to understand and act on your metrics data.
-
-Related reading: [sending Prometheus metrics to SigNoz](https://signoz.io/docs/userguide/prometheus-metrics/), [metric types explained](https://signoz.io/guides/what-is-the-difference-between-a-gauge-and-a-counter/), and [querying and aggregating metrics](https://signoz.io/docs/metrics-management/querying-metrics/).
+To start, configure the OpenTelemetry Collector to [send your Prometheus metrics to SigNoz Cloud](https://signoz.io/docs/userguide/prometheus-metrics/). Once the metrics arrive, you can [query and aggregate them](https://signoz.io/docs/metrics-management/querying-metrics/) to compare services, track request rates, and investigate latency.

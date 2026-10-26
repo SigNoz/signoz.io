@@ -57,7 +57,7 @@ export const LLM_OBSERVABILITY_CARDS: IconTitleDescriptionCardData[] = [
 ]
 
 export const VENDORS: { key: VendorKey; label: string }[] = [
-  { key: 'signoz', label: 'SigNoz' },
+  { key: 'signoz', label: 'SigNoz Cloud' },
   { key: 'langfuse', label: 'Langfuse' },
   { key: 'langsmith', label: 'LangSmith' },
   { key: 'braintrust', label: 'Braintrust' },

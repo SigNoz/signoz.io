@@ -1,11 +1,11 @@
 ---
-date: 2026-06-11
+date: 2026-10-15
 title: Send logs from Java to SigNoz using OpenTelemetry
 doc_type: howto
 description: Learn how to send logs from Java application to SigNoz using OpenTelemetry (Automatic and Manual Instrumentation).
 ---
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -112,7 +112,7 @@ Verify these values:
 
 If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
 
-[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
 
 </Admonition>
 
@@ -211,7 +211,7 @@ Add the following OpenTelemetry dependencies to your project.
 <Tabs entityName="build-tool">
 <TabItem value="maven" label="Maven" default>
 
-```xml
+```xml minimap defaultCollapsed
 <dependencyManagement>
   <dependencies>
     <dependency>
@@ -341,7 +341,7 @@ Verify these values:
 
 If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
 
-[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
 
 </Admonition>
 
@@ -455,7 +455,7 @@ Initialize the SDK at the start of your application. When you create spans and m
 
 Create or update your main application file `src/main/java/com/example/Application.java`.
 
-```java:src/main/java/com/example/Application.java
+```java:src/main/java/com/example/Application.java defaultCollapsed minimap
 package com.example;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -651,6 +651,8 @@ export JAVA_TOOL_OPTIONS="-javaagent:/path/to/opentelemetry-javaagent.jar \
 ## Troubleshooting
 
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Logs are not appearing in SigNoz
 

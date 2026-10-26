@@ -37,7 +37,7 @@ const ChangelogTitle: React.FC<ChangelogTitleProps> = ({ title, link }) => {
   return (
     <h2 id={sluggify(title)}>
       <Link
-        className="group flex items-center gap-2 !text-signoz_vanilla-100 !no-underline"
+        className="group flex items-center gap-2 !text-[var(--l1-foreground)] !no-underline"
         href={link}
       >
         {title}

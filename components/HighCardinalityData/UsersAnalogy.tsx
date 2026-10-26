@@ -54,8 +54,8 @@ export default function UsersAnalogy() {
           onClick={() => setQuery(null)}
           className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
             query === null
-              ? 'bg-zinc-100 text-black'
-              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+              ? 'bg-[var(--l1-foreground)] text-[var(--l1-background)]'
+              : 'bg-[var(--l3-background)] text-[var(--l3-foreground)] hover:bg-[var(--l3-background-hover)]'
           }`}
         >
           Reset
@@ -64,8 +64,8 @@ export default function UsersAnalogy() {
           onClick={() => setQuery('total')}
           className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
             query === 'total'
-              ? 'bg-green-600 text-white'
-              : 'bg-green-900/30 text-green-300 hover:bg-green-900/50'
+              ? 'bg-green-600 text-[var(--base-white)]'
+              : 'bg-[var(--callout-success-background)] text-[var(--callout-success-title)] hover:bg-[color-mix(in_srgb,var(--accent-forest)_20%,transparent)]'
           }`}
         >
           Count Total (Card: 1)
@@ -74,8 +74,8 @@ export default function UsersAnalogy() {
           onClick={() => setQuery('region')}
           className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
             query === 'region'
-              ? 'bg-blue-600 text-white'
-              : 'bg-blue-900/30 text-blue-300 hover:bg-blue-900/50'
+              ? 'bg-blue-600 text-[var(--base-white)]'
+              : 'bg-[var(--callout-primary-background)] text-[var(--callout-primary-title)] hover:bg-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)]'
           }`}
         >
           Group by Region (Card: 4)
@@ -84,8 +84,8 @@ export default function UsersAnalogy() {
           onClick={() => setQuery('userId')}
           className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
             query === 'userId'
-              ? 'bg-red-600 text-white'
-              : 'bg-red-900/30 text-red-300 hover:bg-red-900/50'
+              ? 'bg-red-600 text-[var(--base-white)]'
+              : 'bg-[var(--callout-error-background)] text-[var(--callout-error-title)] hover:bg-[color-mix(in_srgb,var(--accent-cherry)_20%,transparent)]'
           }`}
         >
           Group by User ID (Card: 40)
@@ -107,7 +107,7 @@ export default function UsersAnalogy() {
             key={groupName}
             className={`transition-all duration-500 ${
               query === 'region'
-                ? 'rounded-xl bg-zinc-800/50 p-4'
+                ? 'rounded-xl bg-[var(--l3-background-60)] p-4'
                 : query === 'userId'
                   ? 'bg-transparent'
                   : 'contents'
@@ -115,7 +115,7 @@ export default function UsersAnalogy() {
           >
             {/* Group Label */}
             {query === 'region' && (
-              <div className="mb-3 w-full border-b border-zinc-700 pb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="mb-3 w-full border-b border-[var(--l2-border)] pb-1 text-xs font-semibold uppercase tracking-wider text-[var(--l3-foreground)]">
                 {groupName}
               </div>
             )}
@@ -126,7 +126,7 @@ export default function UsersAnalogy() {
                 <div
                   key={user.id}
                   className={`group relative rounded-full transition-all duration-500
-                    ${query === 'userId' ? 'h-8 w-8 border border-zinc-600 md:h-10 md:w-10' : 'h-6 w-6'}
+                    ${query === 'userId' ? 'h-8 w-8 border border-[var(--l3-border)] md:h-10 md:w-10' : 'h-6 w-6'}
                     ${query === 'total' ? 'bg-green-500' : ''}
                   `}
                   style={{
@@ -136,7 +136,7 @@ export default function UsersAnalogy() {
                 >
                   {/* Tooltip for User ID */}
                   {query === 'userId' && (
-                    <div className="absolute inset-0 flex items-center justify-center font-mono text-[8px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="absolute inset-0 flex items-center justify-center font-mono text-[8px] text-[var(--base-white)] opacity-0 transition-opacity group-hover:opacity-100">
                       ID
                     </div>
                   )}
@@ -146,7 +146,7 @@ export default function UsersAnalogy() {
 
             {/* Per-group summary for User ID mode */}
             {query === 'userId' && (
-              <div className="mt-1 text-center font-mono text-[10px] text-zinc-500">
+              <div className="mt-1 text-center font-mono text-[10px] text-[var(--l3-foreground)]">
                 {groupName}
               </div>
             )}
@@ -155,7 +155,7 @@ export default function UsersAnalogy() {
       </div>
 
       {/* Inline Explanation */}
-      <div className="mx-auto mt-8 max-w-xl text-center italic text-zinc-300">
+      <div className="mx-auto mt-8 max-w-xl text-center italic text-[var(--l2-foreground)]">
         {query === null && 'Scattered data. The database sees a pile of records.'}
         {query === 'total' && 'One single answer. The database just counts. Fast.'}
         {query === 'region' &&

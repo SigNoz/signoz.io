@@ -1,8 +1,9 @@
 ---
-date: 2024-06-06
-
-title: MongoDB Metrics 
-description: View MongoDB metrics in SigNoz
+date: 2026-10-12
+title: MongoDB Metrics - Scrape the MongoDB Exporter into SigNoz
+description: Learn how to scrape MongoDB metrics from the MongoDB exporter with the OpenTelemetry Collector and plot them in SigNoz dashboards, using a FastAPI sample app.
+doc_type: tutorial
+tags: [Self-Host]
 ---
 
 This tutorial shows you how you can visualise MongoDB metrics in SigNoz. We take an example of a FastAPI sample app which uses MongoDB to walk through this tutorial. 
@@ -32,9 +33,7 @@ curl http://localhost:9216/metrics
 
 ### Update Otel Collector config file to scrape MongoDb metrics
 
-Add a job name corresponding to mongodb exporter in otel-collector config file in your SigNoz install
-
-[signoz/otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml)
+Add a job name corresponding to mongodb exporter in the `otel-collector-config.yaml` file of your SigNoz install.
 
 ```java
 - job_name: "mongo-collector"
@@ -51,7 +50,7 @@ Make changes in otel-collector file
 
 ### Restart Otel Collector container
 
-```
+```bash
 docker compose --env-file ./docker/clickhouse-setup/env/x86_64.env -f docker/clickhouse-setup/docker-compose.yaml restart otel-collector
 ```
 

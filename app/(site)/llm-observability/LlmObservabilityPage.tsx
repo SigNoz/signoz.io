@@ -21,7 +21,6 @@ import ComparisonTable from '@/shared/components/molecules/FeaturePages/Comparis
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -29,7 +28,6 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Hero Start Trial',
@@ -41,7 +39,6 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Hero Docs',
@@ -61,9 +58,9 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Track AI workflows, RAG pipelines, and agents alongside microservices. Get unified
-          alerting, <br className="hidden md:block" /> dashboards, and correlation across your
-          entire stack.
+          With SigNoz Cloud, track AI workflows, RAG pipelines, and agents alongside microservices.
+          Get unified alerting, <br className="hidden md:block" /> dashboards, and correlation
+          across your entire stack.
         </>
       }
       buttons={headerButtons}
@@ -117,12 +114,7 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
                   frameworks, get instant visibility <br className="hidden md:block" /> without
                   writing custom telemetry code.
                 </p>
-                <Button
-                  variant="secondary"
-                  rounded="full"
-                  className="flex w-fit items-center gap-2"
-                  asChild
-                >
+                <Button variant="secondary" className="flex w-fit items-center gap-2" asChild>
                   <TrackingLink
                     href="/docs/llm-observability/"
                     clickType="Secondary CTA"
@@ -195,7 +187,7 @@ const HowSigNozCompares: React.FC = () => {
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
               <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
                 <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-                  How SigNoz Compares to <br /> LLM-Only Tools
+                  How SigNoz Cloud Compares to <br /> LLM-Only Tools
                 </h2>
                 <SectionLayout
                   variant="no-border"
@@ -218,7 +210,6 @@ const StartMonitoring: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Bottom CTA Start Trial',
@@ -230,7 +221,6 @@ const StartMonitoring: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Bottom CTA Docs',
@@ -271,8 +261,8 @@ const StartMonitoring: React.FC = () => {
                 </div>
                 <div className="flex flex-col items-center gap-6 text-justify text-signoz_vanilla-400 lg:items-start">
                   Your existing application code remains completely untouched while traces start
-                  flowing to SigNoz in real-time, giving you instant visibility into every aspect of
-                  your LLM operations.
+                  flowing to SigNoz Cloud in real-time, giving you instant visibility into every
+                  aspect of your LLM operations.
                   <ButtonGroup buttons={startMonitoringButtons} />
                 </div>
               </div>

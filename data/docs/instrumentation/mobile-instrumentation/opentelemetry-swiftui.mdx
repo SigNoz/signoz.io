@@ -1,6 +1,5 @@
 ---
-date: 2026-05-27
-
+date: 2026-08-26
 title: iOS app in SwiftUI instrumentation
 meta_title: Instrument iOS SwiftUI Apps with OpenTelemetry
 description: Learn how to instrument your SwiftUI iOS app with OpenTelemetry and send traces to SigNoz Cloud or self-hosted deployments. Covers SDK setup, tracer init, and span creation.
@@ -15,7 +14,7 @@ This document contains instructions on how to set up OpenTelemetry instrumentati
 
 - A SwiftUI-based iOS application in Xcode.
 - Swift toolchain installed; see [Swift getting started](https://www.swift.org/getting-started/#installing-swift).
-- Access to a SigNoz Cloud account or self-hosted SigNoz instance.
+- Access to a SigNoz Cloud account or Self-Hosted SigNoz instance.
 
 ## Send traces to SigNoz
 
@@ -56,7 +55,7 @@ dependencies: [
 
 Create `OpentelemetrySetup.swift` and configure the exporter.
 
-```swift:OpentelemetrySetup.swift
+```swift:OpentelemetrySetup.swift defaultCollapsed minimap
 // OpenTelemetrySetup.swift
 import Foundation
 import GRPC
@@ -112,7 +111,7 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 </Admonition>
 
 <Admonition type="info">
-Using self-hosted SigNoz? Most steps are identical. Update the endpoint and remove the ingestion key header as shown in <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer nofollow">Cloud → Self-Hosted</a>.
+Using Self-Hosted SigNoz? Most steps are identical. Update the endpoint and remove the ingestion key header as shown in <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer nofollow">Cloud → Self-Hosted</a>.
 </Admonition>
 
 Once you replace the content of the file, you need to add `init` in the `<project_name>.swift file` 
@@ -127,7 +126,7 @@ init() {
 
 To send telemetry data to SigNoz, you can create a function to add spans and data. But prior to that you need to import `OpenTelemetryApi` & create instance of tracer, using the following snippet
 
-```swift:ContentView.swift
+```swift:ContentView.swift defaultCollapsed
 import OpenTelemetryApi // Import OpenTelemetryApi for the tracer
 
 //this should be inside ContentView Struct
@@ -166,6 +165,8 @@ Run your application from Xcode.
 - Open a recent trace and verify that spans from your iOS app are present with the attributes you set.
 
 ## Troubleshooting
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 - If you do not see your iOS service in SigNoz, confirm the endpoint/port is reachable from the simulator or device and that the ingestion key (for Cloud) is correct.
 

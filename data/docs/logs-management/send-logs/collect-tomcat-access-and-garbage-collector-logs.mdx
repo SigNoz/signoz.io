@@ -1,7 +1,7 @@
 ---
-date: 2026-05-13
+date: 2026-10-12
 title: Collecting Tomcat Access and Garbage Collector Logs
-description: Collect Tomcat access logs and garbage collector logs with OpenTelemetry Collector and send them to SigNoz.
+description: Collect Tomcat access logs and garbage collector logs with the OpenTelemetry Collector filelog receiver, and search and analyze them in SigNoz.
 doc_type: howto
 hide_table_of_contents: true
 ---
@@ -28,9 +28,13 @@ receivers:
   filelog/access_logs:
     include: [/<path_to_access_log>/localhost_access_log.*] # Path to access logs
     start_at: end
+    resource:
+      service.name: tomcat-access
   filelog/gc_logs:
     include: [/<path_to_gc_log>/garbage-collection.log.*] # Path to garbage collector logs
     start_at: end
+    resource:
+      service.name: tomcat-gc
 ```
 
 <Admonition type="info">
@@ -38,6 +42,7 @@ receivers:
 - Update log paths using server arguments:
   - Access logs: `-Dcatalina.base=<new_access_logs_path>`
   - GC logs: `-Xloggc:<new_gc_logs_path>`
+- The `resource` field tags each receiver's logs so they're distinguishable in SigNoz. See [Tagging Logs from Multiple Applications](https://signoz.io/docs/userguide/collect_logs_from_file/#tagging-logs-from-multiple-applications) for more.
 </Admonition>
 
 #### 3. Update Pipelines Configuration
@@ -84,7 +89,7 @@ Check the SigNoz UI for the exported logs.
 #### Scenario 1: SigNoz Running on the Same Host
 
 ##### 1. Modify Docker Compose File
-Update <a href="https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose.yaml" target="_blank" rel="noopener noreferrer nofollow">`docker-compose-minimal.yaml`</a> to mount your log files:
+Update `docker-compose-minimal.yaml` to mount your log files:
 
 ```yaml:/deploy/docker/docker-compose-minimal.yaml 
 otel-collector:
@@ -96,22 +101,26 @@ otel-collector:
 ```
 
 ##### 2. Add Filelog Receiver
-Update <a href="https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml" target="_blank" rel="noopener noreferrer nofollow">`otel-collector-config.yaml`</a> to include the filelog receiver:
+Update `otel-collector-config.yaml` to include the filelog receiver:
 
 ```yaml:/deploy/docker/otel-collector-config.yaml
 receivers:
   filelog/access_logs:
     include: [/<path>/localhost_access_log.*] # Path to access logs
     start_at: end
+    resource:
+      service.name: tomcat-access
   filelog/gc_logs:
     include: [/<path>/garbage-collection.log.*] # Path to GC logs
     start_at: end
+    resource:
+      service.name: tomcat-gc
 ```
 
 ##### 3. Update Pipelines Configuration
 Modify the pipeline to include the filelog receiver:
 
-```yaml::/deploy/docker/otel-collector-config.yaml
+```yaml:/deploy/docker/otel-collector-config.yaml
 service:
   pipelines:
     logs:
@@ -143,14 +152,18 @@ Check the SigNoz UI for the exported logs.
 ##### 1. Create OTel Collector Configuration
 Define `otel-collector-config.yaml`:
 
-```yaml
+```yaml defaultCollapsed minimap
 receivers:
   filelog/access_logs:
     include: [/<path>/localhost_access_log.*]
     start_at: end
+    resource:
+      service.name: tomcat-access
   filelog/gc_logs:
     include: [/<path>/garbage-collection.log.*]
     start_at: end
+    resource:
+      service.name: tomcat-gc
 processors:
   batch:
     send_batch_size: 10000
@@ -180,3 +193,7 @@ For HTTPS, configure certificates as per <a href="https://github.com/open-teleme
 
 </TabItem>
 </Tabs>
+
+## Troubleshooting
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.

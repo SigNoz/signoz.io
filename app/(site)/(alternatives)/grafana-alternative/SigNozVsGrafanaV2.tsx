@@ -38,17 +38,17 @@ import TrackingLink from '@/components/TrackingLink'
 const data = [
   {
     name: 'Small engineering team',
-    SigNoz: 1078,
+    'SigNoz Cloud': 1078,
     Grafana: 1960,
   },
   {
     name: 'Midsize engineering team',
-    SigNoz: 4903,
+    'SigNoz Cloud': 4903,
     Grafana: 8920,
   },
   {
     name: 'Large engineering team',
-    SigNoz: 9412,
+    'SigNoz Cloud': 9412,
     Grafana: 17140,
   },
 ]
@@ -56,7 +56,9 @@ const data = [
 const ValueComparisonChart = () => {
   return (
     <div className="w-full rounded-lg bg-gray-900 p-6">
-      <h4 className="mb-4 text-xl text-white">Get up to 45% more value for money with SigNoz</h4>
+      <h4 className="mb-4 text-xl text-white">
+        Get up to 45% more value for money with SigNoz Cloud
+      </h4>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -94,9 +96,9 @@ const ValueComparisonChart = () => {
               wrapperStyle={{
                 color: '#fff',
               }}
-              itemSorter={(item) => (item.dataKey === 'SigNoz' ? 0 : 1)}
+              itemSorter={(item) => (item.dataKey === 'SigNoz Cloud' ? 0 : 1)}
             />
-            <Bar dataKey="SigNoz" fill="#ff7f50" />
+            <Bar dataKey="SigNoz Cloud" fill="#ff7f50" />
             <Bar dataKey="Grafana" fill="#4ade80" />
           </BarChart>
         </ResponsiveContainer>
@@ -121,15 +123,15 @@ const SigNozVsGrafanaV2 = () => {
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-green-200">
-              SigNoz vs Grafana
+              SigNoz Cloud vs Grafana
             </p>
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
               Grafana Alternative
             </h1>
             <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
-              Skip the Loki + Tempo + Mimir patchwork. SigNoz delivers logs, metrics, and traces on
-              a single OpenTelemetry-native datastore so you get unified context from Day 1 without
-              managing multiple backends.
+              Skip the Loki + Tempo + Mimir patchwork. SigNoz Cloud delivers logs, metrics, and
+              traces on a single OpenTelemetry-native datastore so you get unified context from Day
+              1 without managing multiple backends.
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">
@@ -140,10 +142,7 @@ const SigNozVsGrafanaV2 = () => {
                   clickText="Get Started with SigNoz Cloud"
                   clickLocation="Hero Section"
                 >
-                  <Button
-                    variant="legacyPrimary"
-                    className="flex items-center justify-center gap-2 font-bold"
-                  >
+                  <Button variant="default" className="w-full">
                     Get Started with SigNoz Cloud <ArrowRight className="h-4 w-4" />
                   </Button>
                 </TrackingLink>
@@ -154,10 +153,7 @@ const SigNozVsGrafanaV2 = () => {
                   clickText="Self-Host SigNoz"
                   clickLocation="Hero Section"
                 >
-                  <Button
-                    variant="legacySecondary"
-                    className="flex items-center justify-center gap-2 font-bold"
-                  >
+                  <Button variant="secondary" className="w-full">
                     <Server className="h-4 w-4" />
                     Self-Host SigNoz
                   </Button>
@@ -195,7 +191,7 @@ const SigNozVsGrafanaV2 = () => {
           >
             <Link href="#why-choose-signoz" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-green-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              Why do Engineering Teams Choose SigNoz over Grafana?
+              Why do Engineering Teams Choose SigNoz Cloud over Grafana?
             </Link>
           </h2>
 
@@ -260,8 +256,8 @@ const SigNozVsGrafanaV2 = () => {
                   intelligent out-of-box correlation between the three signals.
                 </p>
                 <p className="mt-4 text-gray-300">
-                  For open-source and self-hosted users of SigNoz, there is less operational
-                  overhead and a better developer experience because of using a single data store.
+                  For users of Self-Hosted SigNoz, there is less operational overhead and a better
+                  developer experience because of using a single data store.
                 </p>
               </div>
             </div>
@@ -333,7 +329,7 @@ const SigNozVsGrafanaV2 = () => {
                   )
                 </p>
                 <p className="mt-4 text-gray-300">
-                  We did a logs performance benchmark of open-source SigNoz with Elasticsearch and
+                  We did a logs performance benchmark of Self-Hosted SigNoz with Elasticsearch and
                   Loki. Our key findings for Loki showed:
                 </p>
                 <ul className="mt-2 list-disc pl-6 text-gray-300">
@@ -478,13 +474,13 @@ const SigNozVsGrafanaV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                  SigNoz is much easier to self-host
+                  Self-Hosted SigNoz is much easier to operate
                 </h4>
                 <p className="text-gray-300">
-                  If you want a self-hosted solution, SigNoz is a better choice. Since Grafana has
-                  multiple backends for different telemetry signals, it's difficult to manage. With
-                  SigNoz, you only need to manage a single backend for a full-stack observability
-                  setup. We also provide{' '}
+                  If you want a self-hosted solution, Self-Hosted SigNoz is a better choice. Since
+                  Grafana has multiple backends for different telemetry signals, it's difficult to
+                  manage. With Self-Hosted SigNoz, you only need to manage a single backend for a
+                  full-stack observability setup. We also provide{' '}
                   <Link
                     href="https://signoz.io/pricing/"
                     className="text-blue-400 hover:text-blue-300"
@@ -495,13 +491,13 @@ const SigNozVsGrafanaV2 = () => {
                 </p>
                 <div className="mt-6 flex flex-wrap gap-4">
                   <Link href="/docs/install/">
-                    <Button variant="legacyPrimary" className="flex items-center gap-2">
+                    <Button variant="default" className="flex items-center gap-2">
                       Start with Community Edition
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                   <Link href="/enterprise/">
-                    <Button variant="legacySecondary" className="flex items-center gap-2">
+                    <Button variant="secondary" className="flex items-center gap-2">
                       Sign-up for Managed Self-host
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -737,8 +733,8 @@ const SigNozVsGrafanaV2 = () => {
           </h2>
 
           <p className="mb-8 text-[1.1rem] text-gray-300">
-            We did a pricing comparison of SigNoz with other popularity observability tools
-            including Grafana. SigNoz can save up to 45% of your Grafana bill.
+            We did a pricing comparison of SigNoz Cloud with other popularity observability tools
+            including Grafana. SigNoz Cloud can save up to 45% of your Grafana bill.
           </p>
 
           <div className="mb-12">
@@ -769,18 +765,12 @@ const SigNozVsGrafanaV2 = () => {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/teams/" className="block max-w-md">
-                <Button
-                  variant="legacyPrimary"
-                  className="flex w-full items-center justify-center gap-2 font-bold"
-                >
+                <Button variant="default" className="w-full">
                   Try SigNoz Cloud <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/docs/install/" className="block max-w-md">
-                <Button
-                  variant="legacySecondary"
-                  className="flex w-full items-center justify-center gap-2 font-bold"
-                >
+                <Button variant="secondary" className="w-full">
                   <Server className="h-4 w-4" />
                   Self-Host SigNoz
                 </Button>

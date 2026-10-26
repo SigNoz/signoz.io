@@ -1,0 +1,84 @@
+---
+date: 2026-07-31
+title: Telemetry Access Reference
+description: Complete reference for telemetry access control in SigNoz covering selector formats, transaction evaluation, query authorization, and enforcement behavior.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: reference
+---
+
+<Admonition type="warning">
+Fine-grained access control is currently in beta.
+</Admonition>
+
+## Overview
+
+Telemetry resources (logs, traces, metrics, meter metrics) control who can query telemetry data in SigNoz. They support a single relation, `read`, scoped by a telemetry selector. The three assignable managed roles (`signoz-admin`, `signoz-editor`, `signoz-viewer`) have unrestricted (`*`) read access on every telemetry resource; `signoz-anonymous` has none. Restrictions apply only through custom roles.
+
+This page covers how telemetry transactions are written and evaluated. For the per-resource transaction tables and the selector format, see the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
+
+## Selector Keys
+
+`signoz.workspace.key.id` is the only key that telemetry transactions can be scoped by. Its value is the ingestion key ID, which you can find on the Ingestion Settings page.
+
+- The key may be written unprefixed or as `resource.signoz.workspace.key.id`; both are treated the same.
+- Key scoping is supported only for `builder_query` selectors. Key-scoped `promql` or `clickhouse_sql` selectors are rejected.
+- Values starting with `$` (dashboard variables) are rejected in selectors. Use the resolved value instead.
+- A bare query type is canonicalized on save: `builder_query` is stored as `builder_query/*`.
+
+## Transaction Evaluation
+
+Broader transactions implicitly cover narrower requests within the same query type. Each selector in the list below covers every selector above it:
+
+1. `builder_query/signoz.workspace.key.id/<key-id>` (one specific ingestion key)
+2. `builder_query/signoz.workspace.key.id/*` (any ingestion key)
+3. `builder_query/*` (all builder queries on the signal)
+4. `*` (everything on the signal)
+
+Transactions never widen across query types: a `builder_query` transaction does not satisfy a PromQL query, and vice versa.
+
+## How Queries Are Authorized
+
+Every query in SigNoz, whether it runs in an explorer, a dashboard panel, an alert evaluation preview, or through the API, is checked against the caller's telemetry transactions. The transactions a query requires depend on its query type:
+
+| Query | Transactions Required |
+|-------|----------------------|
+| Builder query on a signal | `read` on that signal's telemetry resource, with a selector derived from the query's filter |
+| PromQL query | `metrics:read` with selector `promql/*` |
+| ClickHouse SQL query | `read` with selector `clickhouse_sql/*` on **all** of `logs`, `traces`, `metrics`, and `meter-metrics` |
+| Formulas, joins, and trace operators | No transaction of their own; the queries they reference are checked |
+
+For builder queries, the required selector is derived from the query's filter expression.
+
+<Admonition type="warning">
+With a key-scoped transaction, the filter is **mandatory**. Every query must include a top-level `signoz.workspace.key.id = '<key-id>'` or `signoz.workspace.key.id IN (...)` filter, and the query is checked against those key IDs. Any other query (no key filter, or the key combined with `OR`, `NOT`, or `!=`) is checked against `builder_query/*`, which a key-scoped role does not hold, so it fails with a `403` "not authorized" error.
+</Admonition>
+
+## Query Behavior with Scoped Transactions
+
+For a role granted `builder_query/signoz.workspace.key.id/key-a` on a signal:
+
+| Query filter | Result |
+|--------------|--------|
+| `signoz.workspace.key.id = 'key-a'` | Allowed |
+| `signoz.workspace.key.id IN ('key-a')` | Allowed |
+| `signoz.workspace.key.id = 'key-a' AND severity_text = 'ERROR'` | Allowed |
+| No filter on the key | Denied |
+| `signoz.workspace.key.id = 'key-b'` | Denied |
+| `signoz.workspace.key.id IN ('key-a', 'key-b')` | Denied (needs the `key-b` transaction too) |
+| `signoz.workspace.key.id = 'key-a' OR severity_text = 'ERROR'` | Denied (the key is not pinned at the top level) |
+| `NOT signoz.workspace.key.id = 'key-a'` or `signoz.workspace.key.id != 'key-b'` | Denied |
+
+A denied query returns a `403` "not authorized" error.
+
+## Enforcement Behavior
+
+- **The transaction is a gate, not a row filter.** SigNoz admits or rejects the query as written; it does not inject filters. The query's own filter is what narrows the rows returned.
+- **Dashboard variables are substituted before the check.** A panel filtering `signoz.workspace.key.id = $key` is checked against the resolved value.
+- **A key-scoped role cannot run PromQL or ClickHouse SQL queries.** Allowing them requires `promql/*` (on metrics) or `clickhouse_sql/*` (on logs, traces, metrics, and meter metrics) selectors, which grant access to all data for that query type.
+- **Roles are additive.** A principal receives the union of transactions from all assigned roles. To restrict a user, a scoped custom role must replace their managed role, not sit alongside it.
+
+## Next Steps
+
+- [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/) — Per-resource transaction tables and selector formats
+- [Scope Telemetry Access by Ingestion Key](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key/) — Step-by-step walkthrough
+- [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/) — How role-based access control works in SigNoz

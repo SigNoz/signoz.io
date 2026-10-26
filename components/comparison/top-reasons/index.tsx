@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from './styles.module.css'
 import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/Button'
 
 const TopReasons = (props) => {
   if (props?.points) {
@@ -98,7 +99,10 @@ const OpenSourceReason = () => {
             source, so you can take a look at our code, test it out, and then make an informed
             decision.
           </p>
-          <Link href="https://github.com/SigNoz/signoz" className="button button--primary">
+          <Link
+            href="https://github.com/SigNoz/signoz"
+            className={buttonVariants({ variant: 'default' })}
+          >
             Check out our GitHub repo
           </Link>
         </div>

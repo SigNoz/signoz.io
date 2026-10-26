@@ -1,0 +1,157 @@
+---
+date: 2026-08-03
+title: Telemetry Data Requirements for Infrastructure Monitoring
+description: Understand the required resource attributes and metric types for SigNoz Infrastructure Monitoring, and verify data source dependencies for accurate dashboards.
+doc_type: reference
+---
+
+## Overview
+
+The Infrastructure Monitoring depends on a set of resource attributes and metric types. When those attributes are missing or mis-typed, SigNoz cannot link list views (Hosts, Pods, Nodes, Deployments, etc.) with their details and queries fail silently. Use this guide to verify the required attributes, understand data source dependencies, and identify platform-specific gaps.
+
+## Prerequisites
+
+- Host and Kubernetes workloads must export metrics to SigNoz through an OpenTelemetry (OTel) Collector or a supported agent.
+- For Kubernetes, you need both cluster-level metrics (from the OTel `k8s_cluster` receiver) **and** per-node kubelet metrics (from the OTel `kubeletstats` receiver). Missing either source breaks entity resolution.
+
+## Mandatory attributes and required metrics
+
+### Hosts
+
+- **Required attributes**: `host.name` (unique per host). **Recommended**: `host.id` as a reliable fallback when hostnames collide (cloned VMs, ephemeral EC2 instances).
+- **Required metrics** (hostmetrics receiver):
+  - `system.cpu.time` (with `state` attribute for non-idle / idle / wait)
+  - `system.memory.usage` (with `state` for used / total)
+  - `system.filesystem.usage` (with `state` for used / total)
+  - `system.cpu.load_average.15m`
+- A host is reported as **ACTIVE** if any one of the above arrives within the last 10 minutes.
+- **Setup**:
+  - [Configure the Hostmetrics Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/#configure-the-hostmetrics-receiver) for the metrics.
+  - [Configure the resourcedetection processor](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/#configure-the-resourcedetection-processor) for `host.name` / `host.id` enrichment.
+
+### Pods
+
+- **Required attributes**: `k8s.pod.name`, `k8s.pod.uid`, `k8s.namespace.name`, `k8s.cluster.name`. The pod UID is required because the Pod Counts by Phase query uses it for deduplication.
+- **Required metrics**:
+  - From kubeletstats: `k8s.pod.cpu.usage`, `k8s.pod.cpu_request_utilization`, `k8s.pod.cpu_limit_utilization`, `k8s.pod.memory.working_set`, `k8s.pod.memory_request_utilization`, `k8s.pod.memory_limit_utilization`
+  - From k8s_cluster: `k8s.pod.phase`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for pod CPU / memory / utilization metrics.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for `k8s.pod.phase`.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.
+
+### Containers
+
+- **Required attributes**: `k8s.container.name`, `k8s.pod.uid`, `k8s.pod.name`, `k8s.namespace.name`, `k8s.cluster.name`. `container.image.name` and `container.image.tag` populate the Image:Tag column but aren't required for the row to appear.
+- **Required metrics**:
+  - From kubeletstats: `container.cpu.usage`, `container.memory.working_set`, `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`, `k8s.container.memory_request_utilization`, `k8s.container.memory_limit_utilization`
+  - From k8s_cluster: `k8s.container.ready`, `k8s.container.restarts`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for container CPU / memory / utilization.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for readiness and restarts.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to attach `k8s.container.name` to container-level metrics.
+
+### Nodes
+
+- **Required attributes**: `k8s.node.name`, `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.node.cpu.usage`, `k8s.node.memory.working_set`
+  - From k8s_cluster: `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` (both **disabled by default**, enable via `allocatable_types_to_report: [cpu, memory]`), `k8s.node.condition_ready`, `k8s.pod.phase` (for the Pod Counts by Phase column)
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for node CPU / memory.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for allocatable, condition_ready, and pod.phase.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.
+
+### Namespaces
+
+- **Required attributes**: `k8s.namespace.name`, `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.pod.cpu.usage`, `k8s.pod.memory.working_set`
+  - From k8s_cluster: `k8s.pod.phase`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for pod CPU / memory.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for `k8s.pod.phase`.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.
+
+### Clusters
+
+- **Required attributes**: `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.node.cpu.usage`, `k8s.node.memory.working_set`
+  - From k8s_cluster: `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` (both **disabled by default**, enable via `allocatable_types_to_report: [cpu, memory]`), `k8s.node.condition_ready`, `k8s.pod.phase`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for node CPU / memory.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for allocatable, condition_ready, and pod.phase.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.
+
+### Deployments
+
+- **Required attributes**: `k8s.deployment.name`, `k8s.namespace.name`, `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.pod.cpu.usage`, `k8s.pod.cpu_request_utilization`, `k8s.pod.cpu_limit_utilization`, `k8s.pod.memory.working_set`, `k8s.pod.memory_request_utilization`, `k8s.pod.memory_limit_utilization`
+  - From k8s_cluster: `k8s.deployment.available`, `k8s.deployment.desired`, `k8s.pod.phase`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for pod CPU / memory / utilization.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for deployment.available / desired and pod.phase.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to attach `k8s.deployment.name` to pod-level metrics.
+
+### StatefulSets
+
+- **Required attributes**: `k8s.statefulset.name`, `k8s.namespace.name`, `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.pod.cpu.usage`, `k8s.pod.cpu_request_utilization`, `k8s.pod.cpu_limit_utilization`, `k8s.pod.memory.working_set`, `k8s.pod.memory_request_utilization`, `k8s.pod.memory_limit_utilization`
+  - From k8s_cluster: `k8s.statefulset.current_pods`, `k8s.statefulset.desired_pods`, `k8s.pod.phase`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for pod CPU / memory / utilization.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for statefulset.current_pods / desired_pods and pod.phase.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to attach `k8s.statefulset.name` to pod-level metrics.
+
+### DaemonSets
+
+- **Required attributes**: `k8s.daemonset.name`, `k8s.namespace.name`, `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.pod.cpu.usage`, `k8s.pod.cpu_request_utilization`, `k8s.pod.cpu_limit_utilization`, `k8s.pod.memory.working_set`, `k8s.pod.memory_request_utilization`, `k8s.pod.memory_limit_utilization`
+  - From k8s_cluster: `k8s.daemonset.current_scheduled_nodes`, `k8s.daemonset.desired_scheduled_nodes`, `k8s.pod.phase`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for pod CPU / memory / utilization.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for daemonset.current_scheduled_nodes / desired_scheduled_nodes and pod.phase.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to attach `k8s.daemonset.name` to pod-level metrics.
+
+### Jobs
+
+- **Required attributes**: `k8s.job.name`, `k8s.namespace.name`, `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.pod.cpu.usage`, `k8s.pod.cpu_request_utilization`, `k8s.pod.cpu_limit_utilization`, `k8s.pod.memory.working_set`, `k8s.pod.memory_request_utilization`, `k8s.pod.memory_limit_utilization`
+  - From k8s_cluster: `k8s.job.active_pods`, `k8s.job.successful_pods`, `k8s.job.failed_pods`, `k8s.job.desired_successful_pods`, `k8s.pod.phase`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for pod CPU / memory / utilization.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for job.active_pods / successful_pods / failed_pods / desired_successful_pods and pod.phase.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to attach `k8s.job.name` to pod-level metrics.
+
+### Volumes
+
+- **Required attributes**: `k8s.persistentvolumeclaim.name`, `k8s.namespace.name`, `k8s.cluster.name`.
+- **Required metrics**:
+  - From kubeletstats: `k8s.volume.capacity`, `k8s.volume.available`, `k8s.volume.inodes`, `k8s.volume.inodes.used`, `k8s.volume.inodes.free`
+- `Volume Used` is a computed value (`capacity − available`), not a separate metric.
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for `k8s.volume.*` metrics.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.
+
+## Data source dependencies
+
+SigNoz Infrastructure Monitoring uses three OpenTelemetry receivers: the **hostmetrics** receiver emits `system.*` metrics from each host; the **kubeletstats** receiver, deployed on each node, scrapes per-pod, per-node, per-container, and per-volume metrics from the local kubelet; the **k8s_cluster** receiver, deployed as a singleton, scrapes the Kubernetes API server for workload-controller status, pod phase, node conditions, and allocatable values.
+
+<Admonition type="warning">
+EKS Fargate and some managed Kubernetes clusters block kubelet metric scraping by default. This causes Pods to fail resolution in Listings even when Services or Deployments appear healthy. To enable kubelet stats collection, follow our [k8s-infra OpenTelemetry agent guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/)
+</Admonition>
+
+## Troubleshooting checklist
+
+1. Verify required attributes: Use the Metrics Explorer to query `k8s.pod.cpu.usage` or `system.cpu.time` and confirm that `host.name`, `[entity].uid`, and `[entity].name` labels exist and are populated.
+2. Confirm Metrics Data Sources: Ensure both cluster-level and kubelet scrape jobs are enabled.
+3. Check if kubelet scraping is allowed on the platform.
+
+## Next Steps
+- [OpenTelemetry Collection Agents Overview](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)
+- [k8s-infra OpenTelemetry Collection Agent Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/)

@@ -2,6 +2,7 @@
 import { useRef, useState, useMemo } from 'react'
 import { detectBotFromUserAgent } from '@/utils/logEvent'
 import DOMPurify from 'dompurify'
+import siteMetadata from '@/data/siteMetadata'
 
 function snapshotSanitizedSSR(): string | null {
   try {
@@ -140,21 +141,12 @@ export default function GlobalError({
     <html lang="en">
       <head>
         <title>SigNoz | The Open Source Datadog Alternative</title>
-        <meta
-          name="description"
-          content="SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool."
-        />
+        <meta name="description" content={siteMetadata.description} />
         <meta property="og:title" content="SigNoz | The Open Source Datadog Alternative" />
-        <meta
-          property="og:description"
-          content="SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool."
-        />
+        <meta property="og:description" content={siteMetadata.description} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="SigNoz | The Open Source Datadog Alternative" />
-        <meta
-          name="twitter:description"
-          content="SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool."
-        />
+        <meta name="twitter:description" content={siteMetadata.description} />
       </head>
       <body
         style={{

@@ -1,396 +1,437 @@
 ---
-date: 2026-05-18
-title: NGINX OpenTelemetry Instrumentation Guide
-description: Setup OpenTelemetry instrumentation for NGINX web servers. Send traces, metrics, and logs to SigNoz for real-time monitoring and performance insights.
-hide_table_of_contents: true
+date: 2026-10-06
+title: NGINX OpenTelemetry Instrumentation - Trace Requests
+description: Trace NGINX requests with the native OpenTelemetry module and send spans to SigNoz. Covers VM, Docker, and Kubernetes setup, validation, and fixes.
+doc_type: howto
 ---
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your NGINX Web Servers and send Traces, Metrics and Logs to SigNoz.
+This guide shows you how to trace requests through NGINX with OpenTelemetry and send the spans to SigNoz. You load the native NGINX OpenTelemetry module (`ngx_otel_module`), point it at SigNoz, and NGINX creates a server span for every request it handles.
 
-## Send traces to SigNoz Cloud
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Set the exporter endpoint to `http://<signoz-host>:4317` and remove the `header signoz-ingestion-key` line. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted) for details.
+</Admonition>
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+## Prerequisites
 
-Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
+- Linux on x86-64 or ARM64
+- NGINX from the <a href="https://nginx.org/en/linux_packages.html" target="_blank" rel="noopener noreferrer nofollow">nginx.org packages</a> or the official `nginx` Docker image. The module package matches these builds. Ubuntu and Debian repositories do not ship it.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send traces to SigNoz
 
 <Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
+<Admonition type="info" title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux
 
-From VMs, there are two ways to send data to SigNoz Cloud.
+Use this section if you run NGINX on a server or VM without containers.
+</Admonition>
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+### Step 1. Install the OpenTelemetry module
 
-### Send traces directly to SigNoz cloud
+Set up the nginx.org package repository for your distribution with the <a href="https://nginx.org/en/linux_packages.html#instructions" target="_blank" rel="noopener noreferrer nofollow">official NGINX instructions</a>. Then install NGINX and the module:
 
-**Step 1 : Install NGINX module**
-
-<Tabs entityName="module-installation">
-<TabItem value="package-installation" label="Package Installation" default>
+<Tabs entityName="os">
+<TabItem value="debian" label="Debian / Ubuntu" default>
 
 ```bash
-apt-get update && apt-get install -y nginx-otel-module
+sudo apt update
+sudo apt install nginx nginx-module-otel
 ```
 
 </TabItem>
-<TabItem value="compile-locally" label="Compile Locally">
+<TabItem value="rhel" label="RHEL and derivatives">
 
 ```bash
-apt-get update && apt-get install -y unzip
-apt-get install nginx
-systemctl start nginx
-wget https://github.com/open-telemetry/opentelemetry-cpp-contrib/releases/download/webserver%2Fv1.1.0/opentelemetry-webserver-sdk-x64-linux.tgz -P /opt
-cd /opt && tar xvfz opentelemetry-webserver-sdk-x64-linux.tgz
-cd /opt/opentelemetry-webserver-sdk && ./install.sh
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/opentelemetry-webserver-sdk/sdk_lib/lib
-echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.26.0/ngx_http_opentelemetry_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
+sudo yum install nginx nginx-module-otel
 ```
 
 </TabItem>
 </Tabs>
 
-**Step 2: Configure NGINX**
+The package installs `ngx_otel_module.so` into `/etc/nginx/modules/`.
 
-Add the following to top of your `nginx.conf` file, this will load the installed module.
+### Step 2. Load the module
 
-```nginx
-load_module modules/ngx_http_opentelemetry_module.so;
+Add this line at the top of `/etc/nginx/nginx.conf`, outside every block:
 
-http {
-  opentelemetry_config /etc/nginx/opentelemetry_config.yaml;
+```nginx:/etc/nginx/nginx.conf
+load_module modules/ngx_otel_module.so;
+```
+
+### Step 3. Configure the exporter
+
+Create `/etc/nginx/conf.d/otel.conf`. The default `nginx.conf` includes `conf.d/*.conf` inside its `http` block, so these directives apply to every server:
+
+```nginx:/etc/nginx/conf.d/otel.conf
+otel_exporter {
+    endpoint https://ingest.<region>.signoz.cloud:443;
+    header signoz-ingestion-key <your-ingestion-key>;
 }
+
+otel_service_name <service-name>;
+otel_resource_attr service.version <service-version>;
+otel_trace on;
+otel_trace_context propagate;
 ```
 
-**Step 3: Make OpenTelemetry configuration file**
-
-Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
-
-```yaml:opentelemetry_config.yaml
-service_name: <service-name>
-sampler:
-  type: always_on
-exporter:
-  otlp:
-    endpoint: https://ingest.<region>.signoz.cloud:443/v1/traces
-    headers:
-      signoz-ingestion-key: <your-ingestion-key>
-```
-
-Verify these values:
+**Verify these values:**
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
+- `<service-name>`: A descriptive name for this NGINX instance (for example, `edge-nginx`)
+- `<service-version>` (optional): Your release version or git SHA (for example, `1.4.2`). Delete the line if you do not need it.
 
-**Step 4: Restart NGINX**
+Two directives control tracing:
 
-Restart `nginx` using the below command:
+- `otel_trace on` creates a span for every request.
+- `otel_trace_context propagate` continues an incoming W3C `traceparent` header and passes the context to upstream servers. Instrumented backends then join the same trace.
 
-```bash
-systemctl restart nginx
-```
+### Step 4. Restart NGINX
 
-The traces should start getting generated.
-
-### Send traces via OTel Collector binary
-
-**Step 1. Install OTel Collector binary**
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) in your VM.
-
-**Step 2 : Install NGINX module**
-
-<Tabs entityName="module-installation">
-<TabItem value="package-installation" label="Package Installation" default>
+Check the configuration, then restart NGINX:
 
 ```bash
-apt-get update && apt-get install -y nginx-otel-module
+sudo nginx -t
+sudo systemctl restart nginx
 ```
 
-</TabItem>
-
-<TabItem value="compile-locally" label="Compile Locally">
-
-```bash
-apt-get update && apt-get install -y unzip
-apt-get install nginx
-systemctl start nginx
-wget https://github.com/open-telemetry/opentelemetry-cpp-contrib/releases/download/webserver%2Fv1.1.0/opentelemetry-webserver-sdk-x64-linux.tgz -P /opt
-cd /opt && tar xvfz opentelemetry-webserver-sdk-x64-linux.tgz
-cd /opt/opentelemetry-webserver-sdk && ./install.sh
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/opentelemetry-webserver-sdk/sdk_lib/lib
-echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.26.0/ngx_http_opentelemetry_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
-```
-
-</TabItem>
-</Tabs>
-
-**Step 3: Configure NGINX**
-
-Add the following to top of your `nginx.conf` file, this will load the installed module.
-
-```nginx:nginx.conf
-load_module modules/ngx_http_opentelemetry_module.so;
-
-http {
-  opentelemetry_config /etc/nginx/opentelemetry_config.yaml;
-}
-```
-
-**Step 4: Make OpenTelemetry configuration file**
-
-Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
-
-```yaml:opentelemetry_config.yaml
-service_name: <service-name>
-sampler:
-  type: always_on
-exporter:
-  otlp:
-    endpoint: http://localhost:4318/v1/traces
-```
-
-Verify these values:
-
-- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
-
-**Step 5: Restart NGINX**
-
-Restart `nginx` using the below command:
-
-```bash
-systemctl restart nginx
-```
-
-The traces should start getting generated.
+`nginx -t` should print `syntax is ok` and `test is successful`. Use `restart` rather than `reload`: a fresh nginx.org install leaves the service stopped, and `reload` fails on a stopped service.
 
 </TabItem>
 <TabItem value="docker" label="Docker">
 
-**Step 1: Create Dockerfile**
+The official `nginx` image has `-otel` tags (for example, `nginx:1.31-otel`) that include the module. The image fills in environment variables in files under `/etc/nginx/templates/` at startup, so you can pass the ingestion key at runtime.
 
-Here is a sample `Dockerfile` that installs NGINX 1.26.0 with OpenTelemetry WebServer SDK:
+### Step 1. Create the exporter template
 
-```Dockerfile:Dockerfile
-FROM nginx:1.26.0
+Create `otel.conf.template` next to your `Dockerfile`:
 
-RUN apt-get update && apt-get install -y unzip
+```nginx:otel.conf.template
+otel_exporter {
+    endpoint https://ingest.<region>.signoz.cloud:443;
+    header signoz-ingestion-key ${SIGNOZ_INGESTION_KEY};
+}
 
-ADD https://github.com/open-telemetry/opentelemetry-cpp-contrib/releases/download/webserver%2Fv1.1.0/opentelemetry-webserver-sdk-x64-linux.tgz /opt
-
-RUN cd /opt && \
-    unzip opentelemetry-webserver-sdk-x64-linux.tgz.zip && \
-    tar xvfz opentelemetry-webserver-sdk-x64-linux.tgz
-
-RUN cd /opt/opentelemetry-webserver-sdk && ./install.sh
-
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/opentelemetry-webserver-sdk/sdk_lib/lib
-RUN echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.26.0/ngx_http_opentelemetry_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
-
-COPY opentelemetry_module.conf /etc/nginx/conf.d
+otel_service_name <service-name>;
+otel_trace on;
+otel_trace_context propagate;
 ```
 
-**Step 2: Create configuration file**
+**Verify these values:**
 
-Create the `opentelemetry_module.conf` file. This configuration enables OpenTelemetry and exports traces directly to SigNoz Cloud
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<service-name>`: A descriptive name for this NGINX instance (for example, `edge-nginx`)
 
-```nginx:opentelemetry_module.conf
+Keep `${SIGNOZ_INGESTION_KEY}` as written. The container start script replaces it with the environment variable.
+
+### Step 2. Create the Dockerfile
+
+```dockerfile:Dockerfile
+FROM nginx:1.31-otel
+
+# load_module must be the first line of nginx.conf
+RUN sed -i '1i load_module modules/ngx_otel_module.so;' /etc/nginx/nginx.conf
+
+COPY otel.conf.template /etc/nginx/templates/otel.conf.template
+COPY default.conf /etc/nginx/conf.d/default.conf
+```
+
+Replace `default.conf` with your own server configuration. The image writes the rendered template to `/etc/nginx/conf.d/otel.conf`, which the default `nginx.conf` includes inside its `http` block.
+
+### Step 3. Build and run the container
+
+```bash
+docker build -t nginx-otel .
+docker run -d -p 8080:80 -e SIGNOZ_INGESTION_KEY="<your-ingestion-key>" nginx-otel
+```
+
+**Verify these values:**
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+This setup runs the official `nginx:1.31-otel` image and mounts its configuration from a ConfigMap. A Secret holds the ingestion key.
+
+### Step 1. Create a Secret for the ingestion key
+
+```bash
+kubectl create secret generic signoz-ingestion \
+  --from-literal=ingestion-key="<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 2. Create the ConfigMap
+
+The ConfigMap holds two files. `nginx.conf` loads the module and holds your server block. `otel.conf.template` holds the exporter settings, and the image fills in the ingestion key at startup:
+
+```yaml:nginx-otel-configmap.yaml defaultCollapsed
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-otel
+data:
+  nginx.conf: |
+    load_module modules/ngx_otel_module.so;
+
+    worker_processes auto;
+    events {}
+
+    http {
+        include /etc/nginx/conf.d/otel.conf;
+
+        server {
+            listen 80;
+            location / {
+                proxy_pass http://<upstream-service>:<port>;
+            }
+        }
+    }
+  otel.conf.template: |
+    otel_exporter {
+        endpoint https://ingest.<region>.signoz.cloud:443;
+        header signoz-ingestion-key ${SIGNOZ_INGESTION_KEY};
+    }
+    otel_service_name <service-name>;
+    otel_trace on;
+    otel_trace_context propagate;
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<service-name>`: A descriptive name for this NGINX instance (for example, `edge-nginx`)
+- `<upstream-service>:<port>`: The Kubernetes Service that NGINX proxies to. Replace the `server` block with your own configuration.
+
+<Admonition type="warning">
+Include only `conf.d/otel.conf`, not `conf.d/*.conf`. The image ships a `conf.d/default.conf` that also listens on port 80 and serves its welcome page before your server block.
+</Admonition>
+
+### Step 3. Mount the ConfigMap in your Deployment
+
+Add the environment variable and volume mounts to the NGINX container in your Deployment:
+
+```yaml:nginx-deployment.yaml defaultCollapsed
+spec:
+  template:
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.31-otel
+        env:
+        - name: SIGNOZ_INGESTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: signoz-ingestion
+              key: ingestion-key
+        volumeMounts:
+        - name: nginx-otel
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: nginx-otel
+          mountPath: /etc/nginx/templates/otel.conf.template
+          subPath: otel.conf.template
+      volumes:
+      - name: nginx-otel
+        configMap:
+          name: nginx-otel
+```
+
+### Step 4. Apply the changes
+
+```bash
+kubectl apply -f nginx-otel-configmap.yaml
+kubectl apply -f nginx-deployment.yaml
+kubectl rollout status deployment/<deployment-name>
+```
+
+**Verify these values:**
+
+- `<deployment-name>`: The Deployment that runs NGINX
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+1. Send a few requests through NGINX, for example `curl http://localhost/`.
+2. Open SigNoz and navigate to **Traces**.
+3. Filter by the `service.name` you set with `otel_service_name`.
+
+<Figure
+    src="/img/docs/instrumentation/nginx/traces-explorer.webp"
+    alt="SigNoz Traces Explorer listing NGINX request spans filtered by service.name edge-nginx"
+    caption="NGINX request spans in the Traces Explorer, filtered by service name"
+/>
+
+4. Click a span to see its attributes, such as `http.method`, `http.target`, and `http.status_code`.
+
+<Figure
+    src="/img/docs/instrumentation/nginx/trace-detail.webp"
+    alt="SigNoz trace detail view showing an NGINX server span with its HTTP attributes"
+    caption="An NGINX server span with the attributes the module records"
+/>
+
+NGINX exports spans every 5 seconds, so wait a few seconds before you refresh.
+
+Each span is named after the `location` block that matched the request, such as `/` or `/api/orders`. To set a different name, add `otel_span_name` inside a `location` block:
+
+```nginx
+location /api/orders {
+    otel_span_name "GET /api/orders";
+    proxy_pass http://orders:8080;
+}
+```
+
+NGINX marks spans for `5xx` responses as errors. Spans for `4xx` responses keep an unset status.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+NGINX writes exporter errors to its error log. On a VM, check `/var/log/nginx/error.log`. In Docker and Kubernetes, run `docker logs <container>` or `kubectl logs deployment/<deployment-name>`.
+
+### Why does `nginx -t` report `unknown directive "otel_exporter"`?
+
+NGINX has not loaded the module. Add `load_module modules/ngx_otel_module.so;` as the first line of `nginx.conf`, outside every block, then run `nginx -t` again. The error can name any `otel_*` directive.
+
+### Why does the log show `OTel export failure: Invalid or missing key`?
+
+SigNoz rejected the ingestion key. Check the `header signoz-ingestion-key` value, and confirm that the key belongs to the region in your endpoint. In Docker and Kubernetes, confirm that the `SIGNOZ_INGESTION_KEY` environment variable reaches the container.
+
+### Why does the log show `OTel export failure: Stream removed`?
+
+The endpoint contains a path, such as `/v1/traces`. The module exports over OTLP/gRPC, which takes only a host and port. Set the endpoint to `https://ingest.<region>.signoz.cloud:443`.
+
+### Why does the log show `OTel export failure: failed to connect to all addresses`?
+
+The endpoint lacks the `https://` prefix, so the module opens an unencrypted connection to a TLS port. Write the endpoint as `https://ingest.<region>.signoz.cloud:443`. For a Collector on the same host, check that it listens on port `4317`.
+
+### Why does the service show as `unknown_service:nginx`?
+
+The configuration has no `otel_service_name` directive. Add it to the `http` context, next to `otel_exporter`.
+
+### Why is the NGINX span in a separate trace from the backend?
+
+By default, NGINX ignores trace headers. It starts a new trace for its own span and forwards the original `traceparent` header unchanged, so the backend joins the caller's trace instead. Add `otel_trace_context propagate;` so NGINX continues the incoming trace and passes its own span context upstream.
+
+For more help with missing data, see [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The Collector sits between NGINX and SigNoz. NGINX sends spans to the Collector, and the Collector forwards them to SigNoz.
+
+### Why use it?
+
+- **Cleaning up data**: Filter out noisy spans, or remove sensitive attributes before they leave your servers.
+- **Adding context**: Tag spans with host, Kubernetes, or cloud metadata.
+- **One agent for all signals**: The same Collector can also scrape NGINX metrics and tail NGINX logs.
+
+To send spans through a Collector, point the exporter at the Collector's OTLP/gRPC receiver and remove the `header` line, because the Collector holds the ingestion key:
+
+```nginx:/etc/nginx/conf.d/otel.conf
+otel_exporter {
+    endpoint http://localhost:4317;
+}
+```
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) to set up the Collector, and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) for its options.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Alternative: OpenTelemetry webserver module (Optional)
+
+</ToggleHeading>
+
+The OpenTelemetry project maintains a separate <a href="https://github.com/open-telemetry/opentelemetry-cpp-contrib/tree/main/instrumentation/otel-webserver-module" target="_blank" rel="noopener noreferrer nofollow">webserver module</a> for NGINX. Besides the request span, it creates a span for each NGINX module that handles the request, such as `ngx_http_rewrite_module`. Use it only if you need those per-module spans.
+
+<Admonition type="warning">
+The latest release (v1.1.0) supports only NGINX 1.25.5 and 1.26.0 on x86-64. Use the native module above for any other NGINX version.
+</Admonition>
+
+This Dockerfile installs the webserver module on NGINX 1.26.0:
+
+```dockerfile:Dockerfile
+FROM nginx:1.26.0
+
+RUN apt-get update && apt-get install -y curl \
+ && curl -fsSL https://github.com/open-telemetry/opentelemetry-cpp-contrib/releases/download/webserver%2Fv1.1.0/opentelemetry-webserver-sdk-x64-linux.tgz \
+      | tar xz -C /opt \
+ && cd /opt/opentelemetry-webserver-sdk && ./install.sh
+
+ENV LD_LIBRARY_PATH=/opt/opentelemetry-webserver-sdk/sdk_lib/lib
+RUN sed -i '1i load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.26.0/ngx_http_opentelemetry_module.so;' /etc/nginx/nginx.conf
+
+COPY opentelemetry_module.conf.template /etc/nginx/templates/opentelemetry_module.conf.template
+```
+
+Create `opentelemetry_module.conf.template` next to the `Dockerfile`:
+
+```nginx:opentelemetry_module.conf.template
 NginxModuleEnabled ON;
 NginxModuleOtelSpanExporter otlp;
 NginxModuleOtelExporterEndpoint https://ingest.<region>.signoz.cloud:443;
-NginxModuleOtelSpanProcessor batch;
-NginxModuleOtelSampler AlwaysOn;
-NginxModuleOtelExporterOtlpHeaders signoz-ingestion-key=<your-ingestion-key>;
+NginxModuleOtelSslEnabled ON;
+NginxModuleOtelSslCertificatePath /etc/ssl/certs/ca-certificates.crt;
+NginxModuleOtelExporterOtlpHeaders signoz-ingestion-key=${SIGNOZ_INGESTION_KEY};
 NginxModuleServiceName <service-name>;
 NginxModuleServiceNamespace <service-namespace>;
 NginxModuleServiceInstanceId <service-instance-id>;
 NginxModuleResolveBackends ON;
-NginxModuleTrustIncomingSpans ON;
 NginxModuleTraceAsError ON;
 ```
 
-Verify these values:
+**Verify these values:**
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
-- `<service-namespace>`: A namespace for the service (e.g., `my-team`).
-- `<service-instance-id>`: A unique identifier for this instance (e.g., `nginx-prod-1`).
+- `<service-name>`: A descriptive name for this NGINX instance (for example, `edge-nginx`)
+- `<service-namespace>`: A namespace for the service (for example, `platform`)
+- `<service-instance-id>`: A unique ID for this instance (for example, `nginx-1`)
 
-**Step 3: Build and run your Docker image**
+Build and run it as shown in the Docker tab, passing `SIGNOZ_INGESTION_KEY` with `-e`.
 
-```bash
-docker build -t nginx-otel .
-docker run -p 8080:80 nginx-otel
-```
+<Admonition type="warning">
+Keep `NginxModuleOtelSslEnabled ON`. Without it, the module sends unencrypted data to the TLS endpoint, and the export fails without an error in the NGINX log.
+</Admonition>
 
-You can access the application at `http://localhost:8080` .
+</details>
 
-</TabItem>
-</Tabs>
+## Send NGINX metrics and logs
 
-</TabItem>
-<TabItem value='self-host' label='Self-Host'>
+The OpenTelemetry module sends traces only. Use the OpenTelemetry Collector for the other signals:
 
-## Send Traces to Self-Hosted SigNoz
+- **Metrics**: Enable the NGINX `stub_status` endpoint and scrape it with the Collector's `nginx` receiver. See [Monitor NGINX metrics](https://signoz.io/docs/metrics-management/nginx-metrics/).
+- **Logs**: Tail the NGINX access and error logs with the Collector and parse them into structured fields. See [NGINX logs](https://signoz.io/docs/integrations/nginx/).
 
-**Step 1 : Install NGINX module**
+## Next steps
 
-<Tabs entityName="module-installation">
-<TabItem value="package-installation" label="Package Installation" default>
+- [Create trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) on NGINX error rate or latency
+- [Import the NGINX dashboard](https://signoz.io/docs/dashboards/dashboard-templates/nginx/) after you send metrics
+- Configure sampling and span attributes with the NGINX <a href="https://nginx.org/en/docs/ngx_otel_module.html" target="_blank" rel="noopener noreferrer nofollow">ngx_otel_module reference</a>
 
-```bash
-apt-get update && apt-get install -y nginx-otel-module
-```
+## Get Help
 
-</TabItem>
-<TabItem value="compile-locally" label="Compile Locally">
-
-```bash
-apt-get update && apt-get install -y unzip
-apt-get install nginx
-systemctl start nginx
-wget https://github.com/open-telemetry/opentelemetry-cpp-contrib/releases/download/webserver%2Fv1.1.0/opentelemetry-webserver-sdk-x64-linux.tgz -P /opt
-cd /opt && tar xvfz opentelemetry-webserver-sdk-x64-linux.tgz
-cd /opt/opentelemetry-webserver-sdk && ./install.sh
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/opentelemetry-webserver-sdk/sdk_lib/lib
-echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.26.0/ngx_http_opentelemetry_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
-```
-
-</TabItem>
-</Tabs>
-
-**Step 2: Configure NGINX**
-
-Add the following to top of your `nginx.conf` file, this will load the installed module.
-
-```nginx:nginx.conf
-load_module modules/ngx_http_opentelemetry_module.so;
-
-http {
-  opentelemetry_config /etc/nginx/opentelemetry_config.yaml;
-}
-```
-
-**Step 3: Make OpenTelemetry configuration file**
-
-Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
-
-```yaml:opentelemetry_config.yaml
-service_name: <service-name>
-sampler:
-  type: always_on
-exporter:
-  otlp:
-    endpoint: <SIGNOZ_URL>
-```
-
-Verify these values:
-
-- `<SIGNOZ_URL>`: Your self-hosted SigNoz endpoint (e.g., `http://localhost:4318/v1/traces`).
-- `<service-name>`: A descriptive name for your service (e.g., `my-nginx-app`).
-
-**Step 4: Restart NGINX**
-
-Restart `nginx` using the below command:
-
-```bash
-systemctl restart nginx
-```
-
-The traces should start getting generated.
-
-</TabItem>
-</Tabs>
-
-## Send metrics to SigNoz Cloud
-
-**Step 1. Install OTel Collector binary**
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) in your VM.
-
-**Step 2. Add /status route to nginx.conf**
-
-Add the following block to your `nginx.conf`, this adds /status route to the NGINX server. This will serve the metrics.
-
-```nginx:nginx.conf
-server {
-
-location /status {
-stub_status on;
-}
-```
-
-**Step 3. Modify config.yaml of Otel Collector**
-
-Add the following in `config.yaml` of `otel-col`.
-
-```yaml:config.yaml
-receivers:
-  nginx:
-    endpoint: 'http://localhost:80/status'
-    collection_interval: 10s
-
-service:
-  telemetry:
-    metrics:
-      level: basic
-  pipelines:
-    metrics:
-      receivers: [otlp, nginx]
-      processors: [batch]
-      exporters: [otlp]
-    logs:
-      receivers: [filelog]
-      processors: [attributes]
-      exporters: [otlp]
-```
-
-**Step 4. Run the NGINX server**
-
-Execute the following command to run otel-col in background.
-
-```bash
-./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
-```
-
-## Send logs to SigNoz Cloud
-
-Logs for NGINX are enabled and stored on the path `/var/log/nginx/access.log`. We can export the logs to SigNoz as follows.
-
-**Step 1. Install OTel Collector binary**
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) in your VM.
-
-**Step 2. Modify config.yaml of Otel Collector**
-
-Add the following in `config.yaml` of `otel-col`.
-
-```yaml:config.yaml
-filelog:
-  include:
-    - /var/log/nginx/*.log
-```
-
-**Step 3. Run the NGINX server**
-
-Execute the following command to run otel-col in background.
-
-```bash
-./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
-```
-
-## Sample NGINX Application
-
-We have included a sample NGINX Server at [Sample NGINX Server Github Repo](https://github.com/UnCool-0x/sample-nginx-app)
-
-## Monitor NGINX Logs
-
-Follow [this](https://signoz.io/docs/integrations/nginx/) documentation for monitoring NGINX logs.
+<GetHelp />

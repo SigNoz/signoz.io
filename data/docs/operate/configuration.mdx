@@ -1,7 +1,9 @@
 ---
-date: 2025-03-10
+date: 2026-07-07
 title: Configuration
 description: Learn how to configure SigNoz
+doc_type: reference
+tags: [Self-Host]
 ---
 
 SigNoz provides multiple methods to configure your installation. This document outlines the available configuration options and their usage. It also outlines some common use cases and how to achieve them.
@@ -73,3 +75,30 @@ Environment variables in SigNoz follow a specific naming convention to ensure co
 | `sqlstore.max_open_conns: 10` | `SIGNOZ_SQLSTORE_MAX__OPEN__CONNS=10` |
 
 Environment variables take precedence over values specified in configuration files.
+
+## Querier Query Concurrency
+
+The querier runs the ClickHouse queries that back each query-range request, such as a multi-panel dashboard load or an alert evaluation. Use `max_concurrent_queries` under the `querier` section to cap how many of those ClickHouse queries run in parallel for a single request. Running the sub-queries concurrently (up to this limit) instead of one at a time improves response latency for requests that issue many queries, such as dashboards with many panels or alert rules with many conditions.
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `querier.max_concurrent_queries` | Maximum number of ClickHouse queries a single query-range request runs concurrently. | `8` |
+
+Set it in your configuration file:
+
+```yaml
+querier:
+  max_concurrent_queries: 8
+```
+
+Or through the equivalent environment variable:
+
+```bash
+SIGNOZ_QUERIER_MAX__CONCURRENT__QUERIES=8
+```
+
+<Admonition type="warning">
+`max_concurrent_queries` now caps every ClickHouse query in a request, not only the sub-queries triggered by a cache miss, and its default increased from `4` to `8`. If you run a resource-constrained ClickHouse cluster and previously relied on the old default of `4`, re-evaluate this limit after upgrading, since the same value now applies to a broader set of per-request queries.
+</Admonition>
+
+See the [example configuration file](https://github.com/SigNoz/signoz/blob/main/conf/example.yaml) for the full `querier` section and other available options.

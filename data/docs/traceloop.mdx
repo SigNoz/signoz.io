@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-08-03
 title: Traceloop Observability - Monitor LLM Usage
 description: Learn how to integrate Traceloop OpenLLMetry with SigNoz for LLM observability. Monitor AI application traces with specialized instrumentation.
 doc_type: howto
@@ -11,7 +11,7 @@ This guide walks you through integrating SigNoz with traceloop(OpenLLMetry) to g
 
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self-Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - Internet access to send telemetry data to SigNoz Cloud
 - Python 3.10+ with `traceloop-sdk` installed
 - For Python: `pip` installed for managing Python packages
@@ -78,7 +78,7 @@ TRACELOOP_HEADERS="signoz-access-token=<your-ingestion-key>" \
 - Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
   remove the ingestion key header as shown in
   <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
 </Admonition>
@@ -87,7 +87,7 @@ TRACELOOP_HEADERS="signoz-access-token=<your-ingestion-key>" \
 
 Your AI usage should now automatically emit traces.
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+You should be able to view traces in SigNoz Cloud under the traces tab:
 
 <Figure
   src="/img/docs/llm/traceloop/traceloop-traces.webp"
@@ -140,9 +140,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
 
+Use the same OpenTelemetry pipeline for the frameworks and providers you instrument:
 
+- [Instrument LLM apps with OpenLIT](https://signoz.io/docs/openlit/) - a one-line OpenTelemetry SDK covering GenAI, vector DB, and GPU telemetry
+- [Instrument LLM apps with Langtrace](https://signoz.io/docs/langtrace/) - an OpenTelemetry-native SDK that exports LLM spans straight to SigNoz
+- [Monitor Hermes with OpenTelemetry](https://signoz.io/docs/hermes-monitoring/) - trace long-running agent sessions, skill execution, and subagent runs
+- [Monitor Mistral AI with OpenTelemetry](https://signoz.io/docs/mistral-observability/) - track Mistral model latency, token usage, and error rates
+- [Qwen observability with OpenTelemetry](https://signoz.io/docs/qwen-observability/) - trace Qwen model calls with latency and token usage
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

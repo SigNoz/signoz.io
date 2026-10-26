@@ -34,23 +34,28 @@ type AgentMdxComponentPolicy = 'custom-stub' | 'reviewed-fallback'
 
 export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'Admonition',
+  'DashboardActions',
   'DocCard',
+  'DocsCtaCard',
   'DocCardContainer',
   'Figure',
   'HostingDecision',
   'KeyPointCallout',
   'Listicle',
+  'ListicleDirectory',
   'MCPInstallButton',
   'RegionTable',
   'TabItem',
   'Tabs',
+  'CodeTab',
+  'CodeTabs',
   'ToggleHeading',
+  'Tooltip',
+  'TroubleshootingWizard',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
-  'CloneRepo',
   'CommonPrerequisites',
-  'DashboardActions',
   'DSConfigIntro',
   'DSConfigOss',
   'DSSendDataEc2',
@@ -70,8 +75,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'MetricsDefinition',
   'MultiNodePart1',
   'MultiNodePart2',
-  'OtelOperatorAutoInstrumentation',
-  'OtelOperatorOTLPEndpoint',
   'PrereqsInstrument',
   'RetentionInfo',
   'SigNozCloud',
@@ -119,6 +122,10 @@ const formatLabel = (value: string): string =>
     .join(' ')
 
 const MCP_INSTALL_REGIONS = ['us', 'eu', 'in', 'us2', 'eu2', 'in2'] as const
+
+const V2_MIN_SIGNOZ_VERSION = 'v0.135.0'
+const DASHBOARD_IMPORT_HINT =
+  'Import it in SigNoz with Dashboards → + New dashboard → Import JSON (https://signoz.io/docs/dashboards/import-dashboard/).'
 
 const buildMcpInstallLink = (client: string, region: string): string | null => {
   const mcpUrl = `https://mcp.${region}.signoz.cloud/mcp`
@@ -222,6 +229,85 @@ const createUnknownComponentStub = (name: string): ComponentType<StubProps> => {
   return UnknownComponentStub
 }
 
+// The TroubleshootingWizard renders as an interactive click-through on the page.
+// For agent markdown we emit its decision tree as static text so the logic is
+// still readable without the UI. The full explanations live in the surrounding
+// prose (Steps 1-3 and "Common errors and fixes"), which agents also receive.
+const createTroubleshootingWizardStub = (): ComponentType<StubProps> => {
+  const li = (text: string, children?: ReactNode) =>
+    React.createElement('li', null, text, children ?? null)
+  const ul = (...items: ReactNode[]) => React.createElement('ul', null, ...items)
+
+  const TroubleshootingWizardStub = () =>
+    React.createElement(
+      'section',
+      null,
+      React.createElement(
+        'p',
+        null,
+        React.createElement(
+          'strong',
+          null,
+          'Interactive troubleshooter (rendered as a clickable wizard on the page). Decision tree:'
+        )
+      ),
+      React.createElement(
+        'ol',
+        null,
+        li(
+          'Set OTEL_<SIGNAL>_EXPORTER=console (Java, Node.js, Python, .NET, Ruby, PHP; in Go add a stdout exporter in code), restart, and exercise the code path.',
+          ul(
+            li(
+              'No data in the console: instrumentation problem. Check SDK init order, runtime version support, third-party library support, and that the code path ran.'
+            ),
+            li('Data in the console: continue.')
+          )
+        ),
+        li(
+          'Enable OTEL_LOG_LEVEL=debug (or your language equivalent) and read the export errors.',
+          ul(
+            li('401 / 403 / Unauthenticated: wrong, expired, or revoked ingestion key.'),
+            li(
+              '404 Not Found: wrong endpoint or path. Remove any trailing slash, use the correct signal path, and note SigNoz Cloud uses port 443.'
+            ),
+            li('Connection refused / timeout / no such host: check the topology below.'),
+            li('Exports succeed but nothing appears in SigNoz: wrong region.'),
+            li('No errors: check the topology below.')
+          )
+        ),
+        li(
+          'Topology:',
+          ul(
+            li(
+              'Direct to SigNoz Cloud: run curl -v https://ingest.<region>.signoz.cloud:443. Fails to connect means a firewall or network policy; connects but no data means the key, endpoint, or region is wrong.'
+            ),
+            li(
+              'Through a Collector: add the Collector debug exporter. Data in the Collector logs means a Collector-to-SigNoz export problem (otlphttp endpoint/key/region, exporter wired into the pipeline). Nothing in the Collector logs means an app-to-Collector problem (OTEL_EXPORTER_OTLP_ENDPOINT, ports 4317/4318, network).'
+            )
+          )
+        )
+      )
+    )
+
+  TroubleshootingWizardStub.displayName = 'TroubleshootingWizardStub'
+  return TroubleshootingWizardStub
+}
+
+const createListicleItemListStub = (listicleConfigs: Map<string, ListicleConfig>) =>
+  createItemListStub(
+    (props) => {
+      const name = getStringProp(props, 'name')
+      const config = name ? (listicleConfigs.get(name) ?? null) : null
+      if (!config) return []
+      return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
+    },
+    (props) => {
+      const name = getStringProp(props, 'name')
+      const config = name ? (listicleConfigs.get(name) ?? null) : null
+      return config?.markdownTitle || 'Listicle'
+    }
+  )
+
 const createKnownComponentStubs = (
   listicleConfigs: Map<string, ListicleConfig>
 ): Record<KnownAgentMdxComponentName, ComponentType<StubProps>> => ({
@@ -240,6 +326,49 @@ const createKnownComponentStubs = (
       null,
       React.createElement('img', { src, alt }),
       caption ? React.createElement('figcaption', null, caption) : null
+    )
+  },
+  DashboardActions: (props) => {
+    const v2Url =
+      getStringProp(props, 'dashboardJsonV2Url') || getStringProp(props, 'dashboardJsonUrl')
+    const v1Url = getStringProp(props, 'dashboardJsonV1Url')
+
+    if (!v2Url && !v1Url) {
+      const UnknownDashboardActions = createUnknownComponentStub('DashboardActions')
+      return React.createElement(UnknownDashboardActions, props)
+    }
+
+    const entries: Array<[string, string]> = []
+    if (v2Url) {
+      entries.push([
+        `V2 dashboard JSON (recommended, requires SigNoz ${V2_MIN_SIGNOZ_VERSION} or newer)`,
+        v2Url,
+      ])
+    }
+    if (v1Url) {
+      entries.push([
+        `V1 dashboard JSON (deprecated, only for SigNoz older than ${V2_MIN_SIGNOZ_VERSION})`,
+        v1Url,
+      ])
+    }
+
+    return React.createElement(
+      'section',
+      null,
+      React.createElement('p', null, React.createElement('strong', null, 'Dashboard JSON')),
+      React.createElement(
+        'ul',
+        null,
+        ...entries.map(([label, href]) =>
+          React.createElement(
+            'li',
+            { key: href },
+            `${label}: `,
+            React.createElement('a', { href }, href)
+          )
+        )
+      ),
+      React.createElement('p', null, DASHBOARD_IMPORT_HINT)
     )
   },
   DocCard: (props) => {
@@ -310,7 +439,39 @@ const createKnownComponentStubs = (
       props.children
     )
   },
+  CodeTabs: (props) => React.createElement('div', null, props.children),
+  CodeTab: (props) => {
+    const label = getStringProp(props, 'label')
+    return React.createElement(
+      'section',
+      null,
+      label ? React.createElement('h3', null, label) : null,
+      props.children
+    )
+  },
   ToggleHeading: (props) => React.createElement('div', null, props.children),
+  // Hovering means nothing in plain text, so keep the term inline followed by its
+  // definition in brackets. Must stay inline (not a block) or the sentence splits apart.
+  Tooltip: (props) => {
+    const text = getStringProp(props, 'text')
+    const link = getStringProp(props, 'link')
+    const content = getStringProp(props, 'content')
+
+    if (!text) {
+      return React.createElement(React.Fragment, null)
+    }
+
+    const term = link
+      ? React.createElement('a', { href: link }, text)
+      : React.createElement('span', null, text)
+
+    if (!content) {
+      return term
+    }
+
+    return React.createElement(React.Fragment, null, term, ` (${content})`)
+  },
+  TroubleshootingWizard: createTroubleshootingWizardStub(),
   RegionTable: () => {
     return React.createElement(
       'p',
@@ -318,20 +479,11 @@ const createKnownComponentStubs = (
       'SigNoz Cloud region and endpoint reference is available in the rendered docs.'
     )
   },
+  // Marketing CTA: no informational value for agents reading the docs as markdown.
+  DocsCtaCard: () => React.createElement(React.Fragment, null),
   HostingDecision: createItemListStub([...HOSTING_DECISION_ITEMS], 'Hosting Options'),
-  Listicle: createItemListStub(
-    (props) => {
-      const name = getStringProp(props, 'name')
-      const config = name ? (listicleConfigs.get(name) ?? null) : null
-      if (!config) return []
-      return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
-    },
-    (props) => {
-      const name = getStringProp(props, 'name')
-      const config = name ? (listicleConfigs.get(name) ?? null) : null
-      return config?.markdownTitle || 'Listicle'
-    }
-  ),
+  Listicle: createListicleItemListStub(listicleConfigs),
+  ListicleDirectory: createListicleItemListStub(listicleConfigs),
 })
 
 export const extractMdxComponentNames = (rawMdx: string): string[] => {
@@ -357,7 +509,7 @@ export const extractMdxComponentNames = (rawMdx: string): string[] => {
   return Array.from(names)
 }
 
-const LISTICLE_NAME_PATTERN = /<Listicle\s[^>]*name=["']([^"']+)["']/g
+const LISTICLE_NAME_PATTERN = /<Listicle(?:Directory)?\s[^>]*name=["']([^"']+)["']/g
 
 const extractListicleNames = (rawMdx: string): string[] => {
   const names = new Set<string>()

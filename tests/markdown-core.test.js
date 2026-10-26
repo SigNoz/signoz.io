@@ -5,7 +5,7 @@ const { loadTsModule } = require('./helpers/loadTsModule')
 const { htmlToMarkdown, hastToMarkdown } = loadTsModule('utils/docs/markdownCore.ts')
 
 const HEADING_WITH_AUTOLINK_CHROME =
-  '<h2 class="content-header" id="overview"><a href="#overview" aria-hidden="true" tabindex="-1"><span class="content-header-link"><svg class="h-5 linkicon w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536"></path></svg></span></a>Overview</h2>'
+  '<h2 class="content-header" id="overview">Overview<a href="#overview" aria-hidden="true" tabindex="-1"><span class="content-header-link"><svg class="h-5 linkicon w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536"></path></svg></span></a></h2>'
 
 test('htmlToMarkdown removes docs heading autolink chrome', async () => {
   const markdown = await htmlToMarkdown(HEADING_WITH_AUTOLINK_CHROME, { cleanForDocsUi: true })

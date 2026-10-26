@@ -1,0 +1,191 @@
+const test = require('node:test')
+const assert = require('node:assert/strict')
+const { loadTsModule } = require('./helpers/loadTsModule')
+
+const { renderPageHtmlToAgentMarkdown } = loadTsModule('utils/pageHtmlToMarkdown.ts')
+const { LLMS_TXT_DIRECTIVE } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
+
+const SAMPLE_PAGE_HTML = `<!DOCTYPE html>
+<html>
+  <head>
+    <title>SigNoz | Pricing</title>
+    <meta name="description" content="Transparent, usage-based pricing." />
+    <link rel="canonical" href="https://signoz.io/pricing/" />
+  </head>
+  <body>
+    <header><a href="/">Nav logo</a><nav><a href="/docs/">Docs nav link</a></nav></header>
+    <main>
+      <h1>Pricing</h1>
+      <p>Pay only for the telemetry you send.</p>
+      <div data-markdown-ignore><p>Human-only widget</p></div>
+      <div aria-hidden="true">Decorative text</div>
+      <form><input type="email" /><button>Subscribe</button></form>
+      <h2>Plans</h2>
+      <ul><li><a href="/teams/">Teams</a></li></ul>
+      <script>console.log('tracking')</script>
+    </main>
+    <footer><p>Footer boilerplate</p></footer>
+  </body>
+</html>`
+
+test('renderPageHtmlToAgentMarkdown keeps main content and metadata', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(SAMPLE_PAGE_HTML)
+
+  assert.match(markdown, /# Pricing/)
+  assert.match(markdown, /Transparent, usage-based pricing\./)
+  assert.match(markdown, /Pay only for the telemetry you send\./)
+  assert.match(markdown, /## Plans/)
+  assert.match(markdown, /\[Teams\]\(\/teams\/\)/)
+  assert.match(markdown, /Source: https:\/\/signoz\.io\/pricing\//)
+  // The llms.txt pointer moved from the footer into the top directive.
+  assert.doesNotMatch(markdown, /Full content index:/)
+})
+
+test('renderPageHtmlToAgentMarkdown emits the llms.txt directive once, near the top', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(SAMPLE_PAGE_HTML)
+
+  const escaped = LLMS_TXT_DIRECTIVE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  assert.equal((markdown.match(new RegExp(escaped, 'g')) || []).length, 1)
+  assert.equal(
+    markdown.indexOf(LLMS_TXT_DIRECTIVE) < markdown.indexOf('Pay only for the telemetry you send.'),
+    true
+  )
+})
+
+test('renderPageHtmlToAgentMarkdown drops chrome, ignored, and hidden content', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(SAMPLE_PAGE_HTML)
+
+  assert.doesNotMatch(markdown, /Docs nav link/)
+  assert.doesNotMatch(markdown, /Footer boilerplate/)
+  assert.doesNotMatch(markdown, /Human-only widget/)
+  assert.doesNotMatch(markdown, /Decorative text/)
+  assert.doesNotMatch(markdown, /Subscribe/)
+  assert.doesNotMatch(markdown, /console\.log/)
+})
+
+test('renderPageHtmlToAgentMarkdown avoids duplicating a leading h1 as the title', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(SAMPLE_PAGE_HTML)
+
+  const headingMatches = markdown.match(/^# /gm) || []
+  assert.equal(headingMatches.length, 1)
+})
+
+test('renderPageHtmlToAgentMarkdown falls back to the document title when main has no h1', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(
+    `<!DOCTYPE html><html><head><title>SigNoz | Enterprise</title></head><body><main><p>Enterprise-grade observability.</p></main></body></html>`,
+    { fallbackCanonicalUrl: 'https://signoz.io/enterprise/' }
+  )
+
+  assert.match(markdown, /# SigNoz \| Enterprise/)
+  assert.match(markdown, /Source: https:\/\/signoz\.io\/enterprise\//)
+})
+
+test('renderPageHtmlToAgentMarkdown keeps nested header/footer/aside prose inside content', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(`<!DOCTYPE html>
+<html>
+  <head><title>Guide</title></head>
+  <body>
+    <main>
+      <header><h1>Guide title</h1><p>Header intro prose.</p></header>
+      <article>
+        <header><h2>Article heading</h2></header>
+        <p>Body copy.</p>
+        <aside><p>Callout aside prose.</p></aside>
+        <footer><p>Article footer note.</p></footer>
+        <nav><a href="/next/">Next page</a></nav>
+      </article>
+    </main>
+  </body>
+</html>`)
+
+  // Direct children of the content root are shared shell and get dropped.
+  assert.doesNotMatch(markdown, /Header intro prose/)
+  // Nested header/aside/footer are in-content and keep their prose.
+  assert.match(markdown, /## Article heading/)
+  assert.match(markdown, /Body copy\./)
+  assert.match(markdown, /Callout aside prose\./)
+  assert.match(markdown, /Article footer note\./)
+  // nav is never prose and is dropped at any depth.
+  assert.doesNotMatch(markdown, /Next page/)
+})
+
+test('renderPageHtmlToAgentMarkdown drops top-level shell when the page has no main', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(`<!DOCTYPE html>
+<html>
+  <head><title>Bare</title></head>
+  <body>
+    <header><p>Site header boilerplate</p></header>
+    <p>Bare page content.</p>
+    <footer><p>Site footer boilerplate</p></footer>
+  </body>
+</html>`)
+
+  assert.match(markdown, /Bare page content\./)
+  assert.doesNotMatch(markdown, /Site header boilerplate/)
+  assert.doesNotMatch(markdown, /Site footer boilerplate/)
+})
+
+test('renderPageHtmlToAgentMarkdown returns null for empty documents', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown('<html><head></head><body></body></html>')
+  assert.equal(markdown, null)
+})
+
+const ANNOTATED_TABLE_HTML = `<!DOCTYPE html>
+<html>
+  <head><title>Compare</title></head>
+  <body>
+    <main>
+      <h1>Compare</h1>
+      <div data-md-table="Feature|SigNoz|ClickStack">
+        <div data-md-row="">
+          <div><div data-md-cell="">Platform</div></div>
+          <div data-md-cell="✓ OTel Native"><svg></svg><span>OTel Native</span></div>
+          <div data-md-cell="✗"><svg></svg></div>
+        </div>
+        <div data-md-row="">
+          <div data-md-cell="">Anomaly
+            Detection</div>
+          <div data-md-cell="✓">yes</div>
+          <div data-md-cell="">DIY via SQL</div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>`
+
+test('renderPageHtmlToAgentMarkdown converts annotated grids into GFM tables', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(ANNOTATED_TABLE_HTML, {
+    fallbackCanonicalUrl: 'https://signoz.io/compare/',
+  })
+
+  assert.match(markdown, /\| Feature\s+\| SigNoz\s+\| ClickStack\s+\|/)
+  assert.match(markdown, /\| Platform\s+\| ✓ OTel Native \| ✗\s+\|/)
+  // Cell overrides win; whitespace in text fallbacks collapses to one line.
+  assert.match(markdown, /\| Anomaly Detection \| ✓\s+\| DIY via SQL \|/)
+  assert.doesNotMatch(markdown, /\| yes\s+\|/)
+})
+
+test('renderPageHtmlToAgentMarkdown chunks header-length rows when no row markers exist', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(`<!DOCTYPE html>
+<html>
+  <head><title>Compare</title></head>
+  <body>
+    <main>
+      <h1>Compare</h1>
+      <div data-md-table="Feature|SigNoz|Dynatrace">
+        <div>header ignored</div>
+        <div data-md-cell="">APM</div>
+        <div data-md-cell="">✅</div>
+        <div data-md-cell="">✅ <small>7-day trial</small></div>
+        <div data-md-cell="">Open Source</div>
+        <div data-md-cell="">✅</div>
+        <div data-md-cell="">❌</div>
+      </div>
+    </main>
+  </body>
+</html>`)
+
+  assert.match(markdown, /\| Feature\s+\| SigNoz \| Dynatrace\s+\|/)
+  assert.match(markdown, /\| APM\s+\| ✅\s+\| ✅ 7-day trial \|/)
+  assert.match(markdown, /\| Open Source \| ✅\s+\| ❌\s+\|/)
+})

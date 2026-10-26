@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-27
 title: Ingestion Troubleshooting
 meta_title: Ingestion Troubleshooting Guide for SigNoz Cloud
 description: Diagnose and fix SigNoz Cloud ingestion issues including connection errors, invalid keys, auth failures, and retry behaviour. Covers diagnostic log setup and an issues catalog.
@@ -26,6 +26,10 @@ For more details refer: Ingestion Endpoint documentation [here](/docs/ingestion/
 
 ## General Troubleshooting
 
+<Admonition type="info">
+This page covers ingestion status codes and errors once your telemetry is being exported. If you're not sure your application is generating or exporting telemetry at all, start with [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) instead.
+</Admonition>
+
 When encountering issues with ingestion, follow these steps to diagnose and potentially resolve the problem:
 
 1. **Enable diagnostic logs**: To enhance error tracking, configure your OTLP client to capture comprehensive diagnostic logs by following the instructions listed [below](#collect-diagnostic-logs).
@@ -40,12 +44,16 @@ When encountering issues with ingestion, follow these steps to diagnose and pote
 
 6. **Monitor non-retried errors**: Be on the lookout for scenarios where transient errors are not being retried. Despite best efforts, there may be corner cases where the ingestion endpoint returns non-retriable status codes for transient errors. If you believe you've encountered this scenario, please reachout to SigNoz support.
 
+<Admonition type="tip">
+To quickly confirm that data is actually landing in SigNoz, call the [Stats API](https://signoz.io/docs/telemetry-stats-api/): `GET /api/v1/stats`. Non-zero `telemetry.traces.count`, `telemetry.logs.count`, or `telemetry.metrics.count` values and recent `last_observed` timestamps confirm that the corresponding signal is being received. The metric keys cover scalar samples only, so exponential histograms do not show up there.
+</Admonition>
+
 ## Collect Diagnostic Logs
 Diagnostic Logs capture critical information that helps identify root causes of issues and provides essential context for troubleshooting, whether performed by you or the SigNoz Support team.
 
 ### Opentelemetry Collector
 In order to enable detailed log information, add the following snippet to your collector configuration:
-```
+```yaml
 service:
   telemetry:
     logs:

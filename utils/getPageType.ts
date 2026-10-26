@@ -25,6 +25,7 @@ export const getPageType = (pathname: string): string => {
     '/llm-observability',
     '/observability-for-ai-native-companies',
     '/cloudwatch-alternative',
+    '/dash0-alternative',
   ]
   if (featurePages.includes(normalizedPath)) return 'Feature Page'
 
@@ -69,8 +70,8 @@ export const getPageType = (pathname: string): string => {
   // Other specific pages
   if (normalizedPath === '/dashboards') return 'Dashboard Listing Page'
   if (normalizedPath === '/pricing') return 'Pricing Page'
-  if (normalizedPath === '/case-study') return 'Case Study Listing Page'
-  if (normalizedPath.startsWith('/case-study/')) return 'Case Study Page' // Match /case-study/*
+  if (normalizedPath === '/customers') return 'Customer Listing Page'
+  if (normalizedPath.startsWith('/customers/')) return 'Customer Story Page' // Match /customers/*
   if (normalizedPath === '/login') return 'Sign In Page'
   if (normalizedPath === '/teams') return 'Teams Page'
   if (normalizedPath === '/api-reference' || normalizedPath.startsWith('/api-reference/'))
@@ -93,8 +94,9 @@ export const getPageType = (pathname: string): string => {
 
   // About and legal pages
   if (normalizedPath === '/about-us') return 'About Page'
-  if (normalizedPath === '/terms-of-service') return 'Terms Page'
-  if (normalizedPath === '/privacy') return 'Privacy Page'
+  if (normalizedPath === '/legal/terms-of-service') return 'Terms Page'
+  if (normalizedPath === '/legal/privacy') return 'Privacy Page'
+  if (normalizedPath === '/legal' || normalizedPath.startsWith('/legal/')) return 'Legal Page'
 
   // Enterprise pages
   if (normalizedPath === '/enterprise') return 'Enterprise Page'
