@@ -15,7 +15,7 @@ related_articles:
 ---
 
 When a user clicks "Add to Cart" on an e-commerce site, that single action can fan out across a dozen services: a frontend gateway, an auth service, a cart service, an inventory lookup, and a database write. If any step slows down or fails outright, the user sees a spinner or an error.<br />
-You often sees nothing because each service logs in isolation. You know *something* in your system misbehaved, but **not the source of the problem nor its cause**.
+You often see nothing because each service logs in isolation. You know *something* in your system misbehaved, but **neither the source of the problem nor its cause**.
 
 Distributed tracing solves this by recording the full journey of a request as it moves through your system. Every service the request touches produces a timestamped record of the work it performed: how long it took, whether it succeeded, and what it called next. These records are stitched together into a single **trace**: an end-to-end map of everything that happened to fulfill that request, across every service boundary.
 
@@ -39,7 +39,7 @@ The rest of this section unpacks how that works, starting with the two primitive
 
 A **trace** represents the complete path of a single request through a distributed system. It is identified by a globally unique **TraceID** (a 16-byte identifier) that every service involved in handling that request shares.
 
-A trace is composed of **spans**. Each span represents a single, named, timed operation, such as an HTTP request being handled, a database query executing, a message being published to a queue. A span captures when the operation started, when it ended, whether it succeeded, and the metadata that makes debugging possible. Every span carries its own unique **SpanID** (an 8-byte identifier).
+A trace is composed of **spans**. Each span represents a single, named, timed operation, such as an HTTP request being handled, a database query executing, or a message being published to a queue. A span captures when the operation started, when it ended, whether it succeeded, and the metadata that makes debugging possible. Every span carries its own unique **SpanID** (an 8-byte identifier).
 
 Together, traces and spans give you something that logs alone cannot: a causal, time-ordered view of everything that happened to a request, across every process it touched.
 
@@ -118,7 +118,7 @@ Regardless of the mechanism, the result is the same: when you create a new span,
 
 For most common protocols (HTTP, gRPC, messaging systems), OpenTelemetry's instrumentation libraries handle injection and extraction automatically. You don't write propagation code by hand unless you are working with a custom transport, or utilizing [OpenTelemetry in languages like Rust](https://signoz.io/blog/opentelemetry-rust/).
 
-### Why are The OpenTelemetry API and SDK separate components?
+### Why are the OpenTelemetry API and SDK separate components?
 
 OpenTelemetry splits its tracing surface into two layers: the **<a href="https://opentelemetry.io/docs/specs/otel/trace/api/" rel="noopener noreferrer nofollow" target="_blank">Tracing API</a>**, which your application code calls to create spans and propagate context, and the **<a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/" rel="noopener noreferrer nofollow" target="_blank">Tracing SDK</a>**, which does the actual work of recording, processing, and exporting those spans.
 
@@ -136,7 +136,7 @@ Once spans are recorded by the SDK, they need to be transmitted to an observabil
 
 OTLP organizes data in a three-tiered hierarchy of `Resource → Scope → Data` that eliminates metadata redundancy across batches. It supports transmission over both gRPC (the default, on port 4317) and HTTP (on port 4318), with <a href="https://protobuf.dev/" rel="noopener noreferrer nofollow" target="_blank">Protobuf encoding</a> for compact, schema-safe payloads.
 
-Because OTLP is an open standard, any compatible observability backend can ingest your traces without translation or data loss. This is what makes OpenTelemetry genuinely vendor-neutral — you instrument once, and the choice of backend is a configuration change.
+Because OTLP is an open standard, any compatible observability backend can ingest your traces without translation or data loss. This is what makes OpenTelemetry genuinely vendor-neutral: you instrument once, and the choice of backend is a configuration change.
 
 
 ## Generating Traces from your Applications
@@ -423,12 +423,12 @@ This convention means the same application image can run in development (with 10
 
 A handful of habits keep your traces useful, affordable, and reliable as volume grows:
 
-1. **Keep span names low-cardinality.** A span name should identify a *class* of operation. Instead, push high-cardinality IDs and parameters into attributes, not the name (see [the span data model](#the-span-data-model)).
+1. **Keep span names low-cardinality.** A span name should identify a *class* of operation. You should push high-cardinality IDs and parameters into attributes instead (see [the span data model](#the-span-data-model)).
 2. **Follow semantic conventions.** Use OpenTelemetry's <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" rel="noopener noreferrer nofollow" target="_blank">standardized attribute names</a> so backends can correlate and analyze spans out of the box.
-3. **Set resource attributes consistently.** Always populate `service.name`, and add `service.version` and `deployment.environment` so you can filter traces by service and environment.
+3. **Set resource attributes consistently.** Always populate `service.name`, and add `service.version` and `deployment.environment.name` so you can filter traces by service and environment.
 4. **Instrument what matters, not everything.** Prioritize entry points, outbound calls, and business-critical operations, and skip trivial internal functions (see [Choosing What to Instrument](#choosing-what-to-instrument)).
 5. **Export in batches.** Use `BatchSpanProcessor` in production, never `SimpleSpanProcessor`, so export stays off the request's critical path.
-6. **Initialize the SDK first.** Configure OpenTelemetry before your application imports its HTTP and database libraries, or the instrumentation hooks register with the libraries at startup time.
+6. **Initialize the SDK first.** Configure OpenTelemetry before your application imports its HTTP and database libraries, or the instrumentation hooks miss their window and your traces come out fragmented.
 
 
 ## Common Pitfalls
@@ -453,7 +453,7 @@ Sometimes traces are connected but incomplete. Expected spans simply do not appe
 
 ### High-Cardinality Span Names
 
-One of the most expensive mistakes in production are span names that embed variable data (user IDs, request parameters, timestamps), creating an unbounded number of unique span groups in your backend, which degrades query performance, inflates storage costs, and breaks any dashboard or alert built on span name aggregations.
+One of the most expensive mistakes in production is span names that embed variable data (user IDs, request parameters, timestamps), creating an unbounded number of unique span groups in your backend, which degrades query performance, inflates storage costs, and breaks any dashboard or alert built on span name aggregations.
 
 The fix is always the same, as covered in [the span data model](#the-span-data-model) section above: keep the span name generic and move variable data into attributes.
 
