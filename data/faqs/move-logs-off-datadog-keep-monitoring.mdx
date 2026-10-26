@@ -33,10 +33,14 @@ Compare the records at both destinations over the same fixed time range. Check c
 
 Once those checks pass, you can remove checkout’s old log route while leaving inventory’s route and existing monitoring in place. Keep the previous configuration so you can restore checkout’s old route if needed. After restoring it, check that new checkout logs reach the original destination.
 
-To check this sequence, we used a second Collector as the original log destination. Only the selected checkout logs reached SigNoz Cloud. After we restored the old route, new checkout logs reached that Collector and were absent from the Cloud search.
+In our example, a second Collector stood in for the original logging backend. We switched checkout's logs to SigNoz Cloud, then restored the old route. After restoration, new checkout logs reached the original Collector and no longer appeared in SigNoz Cloud.
 
-## What stays separate?
+Changing the log route applies to new logs. Your historical Datadog logs stay there, and saved searches, parsing rules, dashboards and alerts need a separate migration plan. Restoring the route cannot recover logs that were never collected.
 
-Changing the collection route affects newly collected logs. It does not automatically transfer Datadog history, saved searches, parsing rules, dashboards or alerts. Those items need a separate migration plan. Restoring a route cannot recover logs that were never collected.
+## Bring logs, metrics and traces together
 
-Keeping a trace ID in a log also does not transfer the trace from Datadog. To open a matching trace from a log in SigNoz Cloud, that trace must be available there too. See the [logs and traces correlation guide](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) for the collection requirements.
+You can start with logs and later bring checkout's metrics and traces into SigNoz Cloud to investigate in one place. When errors rise, compare traffic and error trends in the metrics, open a failed payment's trace to inspect its recorded service calls, and read the logs for the error details.
+
+To open a matching trace from a log, the log needs its trace ID and the trace must still be available in SigNoz Cloud. The [logs and traces correlation guide](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) covers the setup.
+
+Moving more telemetry from Datadog to SigNoz Cloud can also lower your overall costs. The [cost comparison](https://signoz.io/blog/cost-effective-datadog-alternative/) models one workload; compare [current pricing](https://signoz.io/pricing/) with your own volume, retention, required features and contract.
