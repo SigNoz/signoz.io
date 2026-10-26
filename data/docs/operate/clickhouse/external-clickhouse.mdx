@@ -1,8 +1,9 @@
 ---
-date: 2024-06-06
-tags : [Self-Host]
-title: Using External ClickHouse
+date: 2026-10-12
+title: External ClickHouse - Run SigNoz on Your Own ClickHouse
 description: Configure SigNoz to use an external ClickHouse instance with Zookeeper, distributed cluster setup, and required prerequisites.
+doc_type: howto
+tags: [Self-Host]
 ---
 
 <SigNozCloud />
@@ -14,10 +15,10 @@ instructions below.
 ### Prerequisites
 
 - Must have at least one Zookeeper instance
-- Distributed cluster named `cluster` set up required: [clickhouse-cluster.xml][3]
+- Distributed cluster named `cluster` set up required: [cluster configuration][3]
 - User credentaials passed must have enough privileges to create/manage databases and tables
 - Secure connection is not supported between SigNoz and ClickHouse yet
-- (Optional) UDF script and histogram quantile binary required: [custom-function.xml][1]
+- (Optional) UDF script and histogram quantile binary required: [custom function configuration][1]
 and [histogramQuantile binary][2]
 
 <Admonition type="info">
@@ -29,8 +30,8 @@ migration files due to the limitations of `golang-migrate` library.
 
 1. Run at least an instance of Zookeeper.
 2. Create configuration for distributed cluster named `cluster` as described in
-    [clickhouse-cluster.xml][3] and include it in `/etc/clickhouse-server/config.d/`.
-3. Include Zookeeper information in above [clickhouse-cluster.xml][3] file as well.
+    [cluster configuration][3] and include it in `/etc/clickhouse-server/config.d/`.
+3. Include Zookeeper information in above [cluster configuration][3] file as well.
 4. (Optional) Below steps are only required if you want to use _histogram quantile_ 
     functions using **Query Builder**.
     - Include [custom function configuration][1] in the `/etc/clickhouse-server/` directory.
@@ -83,6 +84,6 @@ helm --namespace platform install my-release signoz/signoz -f override-values.ya
 
 ---
 
-[1]: https://github.com/SigNoz/signoz/blob/main/deploy/common/clickhouse/custom-function.xml
-[2]: https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/user_scripts/histogramQuantile
-[3]: https://github.com/SigNoz/signoz/blob/main/deploy/common/clickhouse/cluster.xml
+[1]: https://github.com/SigNoz/foundry/blob/main/docs/examples/docker/compose/pours/deployment/telemetrystore/clickhouse/functions.yaml
+[2]: https://github.com/SigNoz/signoz/releases/tag/histogram-quantile%2Fv0.0.1
+[3]: https://github.com/SigNoz/foundry/blob/main/docs/examples/docker/compose/pours/deployment/telemetrystore/clickhouse/config-0-0.yaml

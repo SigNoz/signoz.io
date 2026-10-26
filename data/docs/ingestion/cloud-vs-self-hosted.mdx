@@ -1,12 +1,12 @@
 ---
-date: 2026-08-25
+date: 2026-10-15
 title: Cloud vs Self-Hosted Ingestion
 meta_title: Cloud vs Self-Hosted Ingestion - Key Differences
 description: Understand the differences between SigNoz Cloud and self-hosted ingestion. Compare endpoints, authentication, TLS, CORS, and learn how to adapt guides across both setups.
 
 ---
 
-Most ingestion steps are identical for SigNoz Cloud and self-hosted SigNoz. The main differences are endpoint, authentication, and TLS. Use this page when a doc only shows one environment and you want to adapt it to the other.
+Most ingestion steps are identical for SigNoz Cloud and Self-Hosted SigNoz. The main differences are endpoint, authentication, and TLS. Use this page when a doc only shows one environment and you want to adapt it to the other.
 
 Review the [OpenTelemetry environment variables reference](https://signoz.io/docs/ingestion/opentelemetry-environment-variables/) for endpoint paths, protocols, headers, and signal-specific overrides.
 
@@ -29,7 +29,10 @@ Review the [OpenTelemetry environment variables reference](https://signoz.io/doc
 
 ## Cloud to Self-Hosted
 
-Using a guide that only shows SigNoz Cloud steps? Apply the following minimal changes to send data to self-hosted SigNoz:
+Using a guide that only shows SigNoz Cloud steps? Apply the following minimal changes to send data to Self-Hosted SigNoz:
+
+<Tabs entityName="ingestion-client">
+<TabItem value="sdk" label="Language SDKs" default>
 
 ### Language SDKs
 
@@ -46,6 +49,9 @@ Notes:
 - If you enable TLS for self-hosted (via ingress/reverse proxy), use `https://<host>:443` and set `OTEL_EXPORTER_OTLP_INSECURE=false` (or omit it) and trust the certificates as needed.
 - OTLP/HTTP appends `/v1/{traces|metrics|logs}` automatically when you use the signal-agnostic endpoint variable `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
+</TabItem>
+<TabItem value="collector" label="OpenTelemetry Collector">
+
 ### OpenTelemetry Collector (gateway/agent)
 
 ```diff
@@ -61,6 +67,65 @@ Notes:
 ```
 
 If you switch to HTTPS on self-hosted, change the endpoint to `https://<host>:443`, remove `tls.insecure: true`, and add a `tls` block only if you need to trust custom CAs.
+
+</TabItem>
+<TabItem value="collection-agent" label="Collection Agent">
+
+### Collection Agent
+
+<Tabs entityName="collection-agent">
+<TabItem value="k8s-infra" label="K8s-infra Chart" default>
+
+```diff
+ global:
+   clusterName: <CLUSTER_NAME>
+   deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+-otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
+-otelInsecure: false
+-signozApiKey: <your-ingestion-key>
++otelCollectorEndpoint: http://<signoz-host>:4318
++otelInsecure: true
+```
+
+Apply the same change to the values for your platform, then run `helm upgrade my-release signoz/k8s-infra -f override-values.yaml` from the directory that contains `override-values.yaml`.
+
+**Verify these values:**
+
+- `<signoz-host>`: in the same cluster, `signoz-ingester.<namespace>.svc.cluster.local` for SigNoz installed with Foundry or `signoz-otel-collector.<namespace>.svc.cluster.local` for the Helm chart, where `<namespace>` is SigNoz's namespace; otherwise, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+
+With TLS, use the `https://` address and `otelInsecure: false`.
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+```diff
+ spec:
+   collector:
+     spec:
+       env:
+-        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
++        SIGNOZ_INGESTION_ENDPOINT: http://<signoz-host>:4318
+-        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+-      config:
+-        data:
+-          collector/agent/agent.yaml: |
+-            exporters:
+-              otlphttp/signoz:
+-                headers:
+-                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+Make the same change in every document of `casting.yaml`, on every platform and with Kustomize. Then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+**Verify these values:**
+
+- `<signoz-host>`: in the same cluster, `signoz-ingester.<namespace>.svc.cluster.local` for SigNoz installed with Foundry or `signoz-otel-collector.<namespace>.svc.cluster.local` for the Helm chart, where `<namespace>` is SigNoz's namespace; otherwise, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
 
 ## Self-Hosted to Cloud
 

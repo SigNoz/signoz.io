@@ -1,11 +1,12 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 
 import TrackingLink from '@/components/TrackingLink'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
-import WhySignozProtoWorld, { type WhySignozWorldHandle } from './WhySignozProtoWorld'
+import type { WhySignozWorldHandle } from './WhySignozProtoWorld'
 import { WHY_SIGNOZ_STEPS } from './whySignozStages'
 import styles from './why-signoz.module.css'
 import { buttonVariants } from '@/components/ui/Button'
@@ -13,9 +14,21 @@ import { cn } from 'app/lib/utils'
 
 const STEPS = WHY_SIGNOZ_STEPS.length
 
+// React.lazy (not next/dynamic) so worldRef still reaches the world's imperative handle.
+const WhySignozProtoWorldLazy = lazy(() => import('./WhySignozProtoWorld'))
+
+// Matches the `lg:motion-safe:flex` wrapper that shows the world.
+const WORLD_MEDIA_QUERY = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)'
+
+// Matches the world root's sizing (why-signoz-proto.css) so the pinned stage doesn't reflow.
+function WorldPlaceholder() {
+  return <div className="w-full max-w-[640px]" style={{ height: 'min(88vh, 780px)' }} aria-hidden />
+}
+
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [reducedMotion, setReducedMotion] = useState(false)
+  const showWorld = useMediaQuery(WORLD_MEDIA_QUERY)
   const driverRef = useRef<HTMLDivElement | null>(null)
   const worldRef = useRef<WhySignozWorldHandle | null>(null)
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
@@ -263,7 +276,13 @@ export default function WhySignoz() {
             </div>
 
             <div className="hidden min-w-0 justify-center lg:motion-safe:flex">
-              <WhySignozProtoWorld ref={worldRef} />
+              {showWorld ? (
+                <Suspense fallback={<WorldPlaceholder />}>
+                  <WhySignozProtoWorldLazy ref={worldRef} />
+                </Suspense>
+              ) : (
+                <WorldPlaceholder />
+              )}
             </div>
           </div>
         </div>

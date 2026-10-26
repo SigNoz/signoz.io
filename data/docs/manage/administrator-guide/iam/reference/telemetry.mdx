@@ -1,5 +1,5 @@
 ---
-date: 2026-07-31
+date: 2026-10-26
 title: Telemetry Access Reference
 description: Complete reference for telemetry access control in SigNoz covering selector formats, transaction evaluation, query authorization, and enforcement behavior.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -69,6 +69,18 @@ For a role granted `builder_query/signoz.workspace.key.id/key-a` on a signal:
 | `NOT signoz.workspace.key.id = 'key-a'` or `signoz.workspace.key.id != 'key-b'` | Denied |
 
 A denied query returns a `403` "not authorized" error.
+
+## Infrastructure Monitoring Access
+
+Infrastructure Monitoring views and their API endpoints (hosts and the Kubernetes resources: pods, containers, nodes, namespaces, clusters, volumes, deployments, statefulsets, jobs, daemonsets, and checks) are authorized against the `metrics` telemetry resource. Each request requires `metrics:read`.
+
+- **Managed roles** (`signoz-admin`, `signoz-editor`, `signoz-viewer`) hold unrestricted `metrics:read` and open every Infrastructure Monitoring view without any change.
+- **Key-scoped custom roles** open the list views (hosts, pods, containers, nodes, namespaces, clusters, volumes, deployments, statefulsets, jobs, daemonsets) only when the request pins an ingestion key the role was granted. A list request whose filter does not pin a granted `signoz.workspace.key.id` is checked against `builder_query/*`, which a key-scoped role does not hold, so it returns a `403` "not authorized" error.
+- **The Checks view requires a wildcard `metrics:read` grant** (selector `*` or `builder_query/*`). A key-scoped selector never satisfies it, so key-scoped custom roles cannot open Checks regardless of their filter.
+
+<Admonition type="warning">
+A custom role scoped to an ingestion key that could previously open Infrastructure Monitoring now returns a `403` on any list request that does not pin a granted key, and on the Checks view in every case. Pin a granted key in the request, or grant a wildcard `metrics:read`, to restore access.
+</Admonition>
 
 ## Enforcement Behavior
 

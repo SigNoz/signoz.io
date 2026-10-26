@@ -1,88 +1,1043 @@
 ---
-date: 2026-08-03
+date: 2026-10-26
 title: OpenTelemetry Operator - Install
-description: How to install OpenTelemetry Operator in your Kubernetes Cluster.
+description: Install the OpenTelemetry Operator collection agent on Kubernetes with Foundry through Helm or Kustomize to send metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
-[OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator) makes it easier to set up the OpenTelemetry collector and auto-instrument workloads deployed on Kubernetes.
+This guide explains how to install the OpenTelemetry Operator collection agent on a Kubernetes cluster with Foundry, through Helm or Kustomize.
 
-A Kubernetes operator is a method of packaging, deploying, and managing a Kubernetes application. OpenTelemetry Operator helps a lot in managing OpenTelemetry collectors and enables auto-instrumentation.
+## Prerequisites
 
-## Prerequisite
+- A Kubernetes cluster.
+- `kubectl` configured to reach the cluster.
+- For the Helm path or the operator's Helm chart, Helm 3 installed on the same machine.
+- <a href="https://cert-manager.io/docs/installation/" target="_blank" rel="noopener noreferrer nofollow">cert-manager</a> installed in the cluster. The operator uses it for the certificate of its admission webhook.
+- A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
-Before installing the OpenTelemetry Operator, ensure you have:
+## Install the OpenTelemetry Operator
 
-- A running Kubernetes cluster (v1.19 or later recommended)
-- Administrative kubectl access to your cluster
-- SigNoz installed and running ([Installation Guide](https://signoz.io/docs/install/))
-- [cert-manager](https://cert-manager.io/docs/installation/) installed in your cluster
-
-
-## Installing the OpenTelemetry Operator
-
-Choose your preferred installation method to deploy the operator:
+Foundry generates the collectors as `OpenTelemetryCollector` resources for the operator to reconcile. Install operator v0.139.0, which matches the OpenTelemetry Collector 0.139.0 these resources run:
 
 <Tabs entityName="k8s-method">
-<TabItem label="Kubectl - Apply Manifest" value="manifest">
-Deploy the operator directly using the latest release manifest:
+<TabItem label="Manifest" value="manifest" default>
+
+Run this on the machine where you use `kubectl` to install the operator and its CRDs:
 
 ```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.139.0/opentelemetry-operator.yaml
 ```
 
-Verify the installation:
+Then run this on the same machine to check the operator:
+
 ```bash
 kubectl get deployment opentelemetry-operator-controller-manager -n opentelemetry-operator-system
 ```
+
+The operator is ready when `READY` shows `1/1`.
+
 </TabItem>
 <TabItem label="Helm Chart" value="helm">
-Add the OpenTelemetry Helm repository:
+
+Run this on the machine where you use `kubectl` to install the operator's Helm chart, version 0.100.0, which installs operator v0.139.0 and its CRDs:
 
 ```bash
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 helm repo update
-```
-
-Install the OpenTelemetry Operator:
-
-```bash
 helm install opentelemetry-operator open-telemetry/opentelemetry-operator \
+  --version 0.100.0 \
   --create-namespace \
   --namespace opentelemetry-operator-system
 ```
 
-Check the [OpenTelemetry Operator Helm Chart Documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator#install-chart) for advanced configuration options.
+Then run this on the same machine to check the operator:
+
+```bash
+kubectl get deployment opentelemetry-operator -n opentelemetry-operator-system
+```
+
+The operator is ready when `READY` shows `1/1`. For every chart setting, see the <a href="https://github.com/open-telemetry/opentelemetry-helm-charts/tree/opentelemetry-operator-0.100.0/charts/opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator Helm chart</a>.
+
 </TabItem>
 </Tabs>
 
-Once the `opentelemetry-operator` deployment is ready, you can proceed with creating OpenTelemetry Collector instances and configuring automatic instrumentation.
+## Install the Collection Agent
 
-## OpenTelemetry Collector
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
 
-The OpenTelemetry Operator provides a [Custom Resource Definition (CRD) for OpenTelemetry Collectors](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/opentelemetrycollectors.md) with flexible deployment options through the `.Spec.Mode` property. You can deploy collectors as:
-
-The `.Spec.Config` property contains the OpenTelemetry Collector configuration YAML. Explore additional [deployment mode examples](https://github.com/open-telemetry/opentelemetry-operator?tab=readme-ov-file#deployment-modes) in the official repository.
-
-OpenTelemetry Operator provides [examples](https://github.com/open-telemetry/opentelemetry-operator?tab=readme-ov-file#deployment-modes) for each deployment mode.
-
-<Admonition type="tip">
-To quickly deploy OpenTelemetry Collectors for node-level and cluster-level data collection with SigNoz, you can use our [Configure Guide](/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/) which provides ready-to-use DaemonSet and Deployment manifests with pre-configured settings for sending telemetry directly to SigNoz.  
- 
-This guide includes:
-- DaemonSet and Deployment CRs tailored for SigNoz (Cloud & Self-Hosted)
-- RBAC examples for required permissions
-- Step-by-step instructions for both deployment modes  
- 
-[Go to the Configure Guide →](/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/)
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
 </Admonition>
 
+### Step 1: Install foundryctl
 
-## Next Step
-- [Configure Otel Operator OtelCollectors](/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/)
-- [Learn more about Otel-Operator](/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/)
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works):
+
+<Admonition type="info" title="Required on every document: the controller annotation">
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` sets the OpenTelemetry Operator as the controller of the collector's workload: Foundry generates an `OpenTelemetryCollector` resource for the operator to reconcile, instead of the plain DaemonSet or Deployment that [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/) uses. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+</Admonition>
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+<Tabs entityName="k8s-vendor">
+<TabItem value="generic" label="Generic" default>
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Helm example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+<TabItem value="eks" label="AWS EKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+<Admonition type="warning" title="Nodes that require IMDSv2">
+The AWS detectors of the `resourcedetection` processor read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS resource attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
+
+Then restart the collectors so they detect again. Run this on the machine where you use `kubectl`:
+
+```bash
+kubectl rollout restart -n signoz daemonset/signoz-collector-agent-collector deployment/signoz-collector-deployment-collector
+```
+</Admonition>
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Helm example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+<TabItem value="gke" label="GKE (Standard)">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Helm example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+<TabItem value="aks" label="AKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Helm example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="info" title="Change the namespace or pin the chart version" defaultCollapsed="true">
+Annotations under `metadata` set where the collectors are installed and which chart is used. Set them in both documents so both collectors land in the same namespace. The defaults are:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+    foundry.signoz.io/kubernetes-namespace: signoz                       # namespace to install into, created if missing
+    foundry.signoz.io/kubernetes-helm-chart: opentelemetry-kube-stack    # chart name, archive URL, or local path
+    foundry.signoz.io/kubernetes-helm-repo-url: https://open-telemetry.github.io/opentelemetry-helm-charts
+    foundry.signoz.io/kubernetes-helm-chart-version: 0.13.0              # or another opentelemetry-kube-stack version
+```
+
+The namespace defaults to `metadata.name`. The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/helm-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes each one.
+</Admonition>
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+This installs the `opentelemetry-kube-stack` chart, version 0.13.0, into the `signoz` namespace as two releases, `signoz-collector-agent` and `signoz-collector-deployment`, and creates the namespace when it is missing. Each release creates one `OpenTelemetryCollector` resource with the release's name, and the operator creates the collector workloads from it. Run the same command again after editing `casting.yaml` to apply the change.
+
+<Admonition type="tip" title="Run Helm yourself" defaultCollapsed="true">
+To run Helm directly, generate the values files and pass each one to Helm. Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl forge -f casting.yaml   # writes one values.yaml per collector under pours/collectionagent/collector/
+helm upgrade --install signoz-collector-agent opentelemetry-kube-stack \
+   --repo https://open-telemetry.github.io/opentelemetry-helm-charts --version 0.13.0 \
+   --namespace signoz --create-namespace \
+   -f pours/collectionagent/collector/agent/values.yaml
+helm upgrade --install signoz-collector-deployment opentelemetry-kube-stack \
+   --repo https://open-telemetry.github.io/opentelemetry-helm-charts --version 0.13.0 \
+   --namespace signoz \
+   -f pours/collectionagent/collector/deployment/values.yaml
+```
+</Admonition>
+
+### Step 4: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that the pods are running:
+
+```bash
+kubectl get pods -n signoz
+```
+
+The output should look similar to the following, with one `signoz-collector-agent-collector` pod per node. The operator names each workload after its `OpenTelemetryCollector` resource with a `-collector` suffix. Pod suffixes vary, and if SigNoz runs in the same namespace its pods are listed too:
+
+```output
+NAME                                                     READY   STATUS    RESTARTS   AGE
+signoz-collector-agent-collector-7xk2p                   1/1     Running   0          2m
+signoz-collector-agent-collector-q9m4d                   1/1     Running   0          2m
+signoz-collector-deployment-collector-6d9c7b8f5c-k2x9p   1/1     Running   0          2m
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm container logs and Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml` or `collector/deployment/deployment.yaml`. It merges into the generated config, which becomes the resource's `spec.config` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/agent/agent.yaml: |
+              receivers:
+                kubeletstats:
+                  collection_interval: 60s
+  ```
+
+- **Chart values** (resources, tolerations, node selector): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/collector/agent/values.yaml` or `collectionagent/collector/deployment/values.yaml`. Each collector's values sit under `/collectors/agent` or `/collectors/deployment`. For example, to set the agent's resource requests:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/agent/values.yaml
+        operations:
+          - op: add
+            path: /collectors/agent/resources
+            value:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+  ```
+
+  For every chart value, see the <a href="https://github.com/open-telemetry/opentelemetry-helm-charts/tree/opentelemetry-kube-stack-0.13.0/charts/opentelemetry-kube-stack" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-kube-stack chart</a>. Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### foundryctl cast fails on the OpenTelemetryCollector resources
+
+Run this on the machine where you use `kubectl` to check the operator's CRD and Deployment:
+
+```bash
+kubectl get crd opentelemetrycollectors.opentelemetry.io
+kubectl get deployments -n opentelemetry-operator-system
+```
+
+**Cause:** the OpenTelemetry Operator or its CRDs are not installed, or the operator is not ready yet. The operator's admission webhook checks every `OpenTelemetryCollector` resource, so the resources need a running operator.
+
+**Fix:** install the operator as shown in [Install the OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/#install-the-opentelemetry-operator), wait until its Deployment shows `1/1` under `READY`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods.
+
+### Agent pod stays Pending
+
+Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`.
+
+**Cause:** another collector holds host ports `4317`, `4318`, `8888`, and `13133` on the node, for example a K8s Infra agent.
+
+**Fix:** keep one of the two agents and remove the other.
+
+After the fix, `kubectl get pods -n signoz` shows one agent pod per node as `Running`.
+
+### foundryctl cast rejects a patch
+
+`foundryctl cast -f casting.yaml` stops before it installs anything, with a message that names the patch's target.
+
+**Cause:** the patch's target or path does not exist in what Foundry generates for the OpenTelemetry Operator.
+
+**Fix:** target `collectionagent/collector/agent/values.yaml` or `collectionagent/collector/deployment/values.yaml`, with a `path` under `/collectors/agent` or `/collectors/deployment`. To see the files a patch can target, run this from the directory that contains `casting.yaml` and look under `pours/collectionagent/collector/`:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+Then run `foundryctl cast -f casting.yaml` again.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods.
+
+### foundryctl cast reaches the wrong cluster or none
+
+Run this on the machine where you run `foundryctl` to see which cluster it uses:
+
+```bash
+kubectl config current-context
+```
+
+**Cause:** `foundryctl cast` applies to the cluster of your current `kubectl` context.
+
+**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. Replace `<context-name>` with a context from `kubectl config get-contexts`.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods on that cluster.
+
+</details>
+
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
+
+### Step 1: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#how-it-works):
+
+<Admonition type="info" title="Required on every document: the controller annotation">
+`foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator` sets the OpenTelemetry Operator as the controller of the collector's workload: Foundry generates an `OpenTelemetryCollector` resource for the operator to reconcile, instead of the plain DaemonSet or Deployment that [K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/) uses. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">annotations table in the Foundry example</a>.
+</Admonition>
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+<Tabs entityName="k8s-vendor">
+<TabItem value="generic" label="Generic" default>
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Kustomize example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+<TabItem value="eks" label="AWS EKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+<Admonition type="warning" title="Nodes that require IMDSv2">
+The AWS detectors of the `resourcedetection` processor read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS resource attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
+
+Then restart the collectors so they detect again. Run this on the machine where you use `kubectl`:
+
+```bash
+kubectl rollout restart -n signoz daemonset/signoz-collector-agent-collector deployment/signoz-collector-deployment-collector
+```
+</Admonition>
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Kustomize example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+<TabItem value="gke" label="GKE (Standard)">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Kustomize example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+<TabItem value="aks" label="AKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Kustomize example for the OpenTelemetry Operator</a>.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="info" title="Change the namespace" defaultCollapsed="true">
+The `foundry.signoz.io/kubernetes-namespace` annotation under `metadata` sets the namespace both collectors are applied to. Set it in both documents so both collectors land in the same namespace. The default is:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-collector-controller: opentelemetry-operator
+    foundry.signoz.io/kubernetes-namespace: signoz   # namespace to apply into, created by the apply
+```
+
+The namespace defaults to `metadata.name`. The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/kustomize-opentelemetry-operator/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes it.
+</Admonition>
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+This command:
+
+- writes one kustomize root per collector, `pours/collectionagent/collector/agent` and `pours/collectionagent/collector/deployment`;
+- applies each root with `kubectl apply -k` to the cluster of your current `kubectl` context;
+- creates the `signoz` namespace on the first apply, since each root holds the namespace, the collector's service account and RBAC, and its `OpenTelemetryCollector` resource.
+
+The operator then creates the collector workloads from the two resources. Run the same command again after editing `casting.yaml` to apply the change.
+
+<Admonition type="tip" title="Run kubectl yourself" defaultCollapsed="true">
+To run kubectl directly, generate the kustomize roots and apply each one. Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl forge -f casting.yaml   # writes one kustomize root per collector under pours/collectionagent/collector/
+kubectl apply -k pours/collectionagent/collector/agent
+kubectl apply -k pours/collectionagent/collector/deployment
+```
+
+To see the manifests before you apply them, run `kubectl kustomize` on a root, for example `kubectl kustomize pours/collectionagent/collector/agent`.
+</Admonition>
+
+### Step 4: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that the pods are running:
+
+```bash
+kubectl get pods -n signoz
+```
+
+The output should look similar to the following, with one `signoz-collector-agent-collector` pod per node. The operator names each workload after its `OpenTelemetryCollector` resource with a `-collector` suffix. Pod suffixes vary, and if SigNoz runs in the same namespace its pods are listed too:
+
+```output
+NAME                                                     READY   STATUS    RESTARTS   AGE
+signoz-collector-agent-collector-7xk2p                   1/1     Running   0          2m
+signoz-collector-agent-collector-q9m4d                   1/1     Running   0          2m
+signoz-collector-deployment-collector-6d9c7b8f5c-k2x9p   1/1     Running   0          2m
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm container logs and Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml` or `collector/deployment/deployment.yaml`. It merges into the generated config, which becomes the resource's `spec.config` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/agent/agent.yaml: |
+              receivers:
+                kubeletstats:
+                  collection_interval: 60s
+  ```
+
+- **Manifests** (resources, tolerations, node selector): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/collector/agent/opentelemetrycollector.yaml` or `collectionagent/collector/deployment/opentelemetrycollector.yaml`, the collectors' `OpenTelemetryCollector` resources, with paths under `/spec`. For example, to set the agent's resource requests:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/agent/opentelemetrycollector.yaml
+        operations:
+          - op: replace
+            path: /spec/resources
+            value:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+  ```
+
+  For every field of the resource, see the <a href="https://github.com/open-telemetry/opentelemetry-operator/blob/v0.139.0/docs/api/opentelemetrycollectors.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetryCollector API reference</a>. Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### foundryctl cast fails on the OpenTelemetryCollector resources
+
+Run this on the machine where you use `kubectl` to check the operator's CRD and Deployment:
+
+```bash
+kubectl get crd opentelemetrycollectors.opentelemetry.io
+kubectl get deployments -n opentelemetry-operator-system
+```
+
+**Cause:** the OpenTelemetry Operator or its CRDs are not installed, or the operator is not ready yet. The operator's admission webhook checks every `OpenTelemetryCollector` resource, so the resources need a running operator.
+
+**Fix:** install the operator as shown in [Install the OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/#install-the-opentelemetry-operator), wait until its Deployment shows `1/1` under `READY`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods.
+
+### Agent pod stays Pending
+
+Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`.
+
+**Cause:** another collector holds host ports `4317`, `4318`, `8888`, and `13133` on the node, for example a K8s Infra agent.
+
+**Fix:** keep one of the two agents and remove the other.
+
+After the fix, `kubectl get pods -n signoz` shows one agent pod per node as `Running`.
+
+### foundryctl cast rejects a patch
+
+`foundryctl cast -f casting.yaml` stops before it applies anything, with a message that names the patch's target.
+
+**Cause:** the patch's target or path does not exist in what Foundry generates for the OpenTelemetry Operator.
+
+**Fix:** target `collectionagent/collector/agent/opentelemetrycollector.yaml` or `collectionagent/collector/deployment/opentelemetrycollector.yaml`, with a `path` under `/spec`. To see the files a patch can target, run this from the directory that contains `casting.yaml` and look under `pours/collectionagent/collector/`:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+Then run `foundryctl cast -f casting.yaml` again.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods.
+
+### foundryctl cast reaches the wrong cluster or none
+
+Run this on the machine where you run `foundryctl` to see which cluster it uses:
+
+```bash
+kubectl config current-context
+```
+
+**Cause:** `foundryctl cast` applies to the cluster of your current `kubectl` context.
+
+**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. Replace `<context-name>` with a context from `kubectl config get-contexts`.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods on that cluster.
+
+</details>
+
+</TabItem>
+</Tabs>
+
+## Send data from your applications
+
+Node, pod, and container metrics, container logs, and Kubernetes events flow as soon as the collector pods are running. To send traces, metrics, and logs from your applications through the agent, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector).
+
+## Next Steps
+
+- [Configure the OpenTelemetry Operator collectors](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/)
+- [Learn more about the OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
-
-
-
-
