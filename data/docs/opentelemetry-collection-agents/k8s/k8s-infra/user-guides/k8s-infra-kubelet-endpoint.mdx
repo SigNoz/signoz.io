@@ -1,6 +1,6 @@
 ---
 title: Configuring Kubernetes Metrics Collection for IPv6 and Non-Standard Clusters
-date: 2026-08-03
+date: 2026-10-15
 description: User guide to configure Kubernetes metrics collection in k8s-infra OpenTelemetry collection agent for IPv6, dual-stack, or non-standard Kubernetes environments.
 ---
 
@@ -16,11 +16,11 @@ Before setting up OpenTelemetry monitoring for your Kubernetes cluster, ensure y
 
 ## How k8s-infra Connects to the Kubelet API
 
-The `k8s-infra` collection agent includes a `kubeletMetrics` preset that uses the OpenTelemetry Collector's **`kubeletstats` receiver** to gather essential Kubernetes node and pod metrics. By default, this preset connects to the Kubelet API at `${env:K8S_HOST_IP}:10250`, relying on the node's IP address.
+The `k8s-infra` collection agent includes a `kubeletMetrics` preset that uses the OpenTelemetry Collector's **`kubeletstats` receiver** to gather essential Kubernetes node and pod metrics. By default, this preset connects to the Kubelet API at `${env:K8S_HOST_IP}:10250`, relying on the node's IP address. K8s Infra installed with Foundry runs the same receiver with the same default endpoint.
 
 When the `endpoint` field is left unconfigured, the receiver falls back to using the pod's hostname to reach the Kubelet API. However, both the default IP-based approach and the hostname fallback can fail in certain environments:
 
-However, relying on node hostname resolution can be problematic—especially in some cloud provider environments—where DNS for node hostnames may be unavailable or unreliable,
+Relying on node hostname resolution can be problematic, especially in some cloud provider environments, where DNS for node hostnames may be unavailable or unreliable,
 leading to failed metric collection.
 
 ## Configure kubeletMetrics Endpoint for IPv6 or Custom Networking
@@ -28,6 +28,9 @@ leading to failed metric collection.
 The `kubeletstats` receiver connects to the Kubelet API on each node. Using the node IP is sufficient for most clusters, but some environments may need to use the node name instead for metrics collection.
 
 ### Step 1: Set the Endpoint
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
 To override the default and use the node name, update your `values.yaml` for [presets.kubeletMetrics](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L354):
 
@@ -39,7 +42,32 @@ presets:
 
 Other kubeletMetrics settings (authType, collectionInterval, etc.) can remain at defaults unless you have specific requirements.
 
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+In `casting.yaml`, add this to the agent's document to use the node name:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              kubeletstats:
+                endpoint: '${env:K8S_NODE_NAME}:10250'
+```
+
+Every agent pod sets `K8S_NODE_NAME` to the name of its node. The other `kubeletstats` settings keep Foundry's defaults.
+
+</TabItem>
+</Tabs>
+
 ### Step 2: Apply the Configuration
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
 Apply your configuration changes to the k8s-infra Helm release:
 
@@ -48,6 +76,20 @@ helm upgrade <RELEASE_NAME> signoz/k8s-infra \
   -n <NAMESPACE> \
   -f <YOUR_VALUES_FILE>.yaml
 ```
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+The agent pods restart with the new endpoint.
+
+</TabItem>
+</Tabs>
 
 ### Step 3: Validate
 
@@ -64,6 +106,8 @@ presets:
   kubeletMetrics:
     endpoint: '${env:K8S_HOST_IP}:10250'
 ```
+
+With Foundry, set the same value as `endpoint` under `kubeletstats` in `casting.yaml`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. `${env:K8S_HOST_IP}:10250` is Foundry's default endpoint.
 
 </Admonition>
 ## Next Steps
