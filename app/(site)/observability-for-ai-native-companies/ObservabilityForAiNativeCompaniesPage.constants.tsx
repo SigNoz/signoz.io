@@ -41,12 +41,7 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
         Track multi-step workflows like "calls dialed" to "leads qualified" for voice agents, or
         visualize drop-off rates across your AI agent pipelines to identify where users abandon
         flows.
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="flex w-fit items-center gap-2"
-          asChild
-        >
+        <Button variant="secondary" className="flex w-fit items-center gap-2" asChild>
           <TrackingLink
             href="/docs/trace-funnels/overview/"
             clickType="Observability for AI Native Companies Card CTA"
@@ -69,12 +64,7 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
         Enable AI agents to query your telemetry via Model Context Protocol. Agents can debug
         themselves, create dashboards, or perform root-cause analysis by importing telemetry data
         directly.
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="flex w-fit items-center gap-2"
-          asChild
-        >
+        <Button variant="secondary" className="flex w-fit items-center gap-2" asChild>
           <TrackingLink
             href="/docs/ai/signoz-mcp-server/"
             clickType="Observability for AI Native Companies Card CTA"

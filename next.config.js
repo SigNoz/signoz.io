@@ -1,4 +1,7 @@
+const path = require('path')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
+
+const reactRouterDomCompat = './components/OpenAPISpec/reactRouterDomCompat.ts'
 
 /**
  * Generate /docs-onboarding/* versions of all /docs/* redirects.
@@ -27,7 +30,7 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://b2bjsstore.s3.us-west-2.amazonaws.com https://b-code.liadm.com https://a.usbrowserspeed.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
@@ -87,6 +90,10 @@ module.exports = () => {
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     trailingSlash: true,
     turbopack: {
+      resolveAlias: {
+        'react-router-dom': reactRouterDomCompat,
+        'react-router-dom/server.js': reactRouterDomCompat,
+      },
       rules: {
         '*.svg': {
           loaders: ['@svgr/webpack'],
@@ -136,6 +143,51 @@ module.exports = () => {
     },
     async redirects() {
       return withDocsOnboardingRedirects([
+        {
+          source: '/guides/how-does-prometheus-work/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/is-prometheus-free-or-paid/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-Prometheus-used-for-in-DevOps/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/is-prometheus-a-visualization-tool/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/quantile-aggregation-for-statsd-exporter/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/ha-prometheus-cortex-cassandra/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/docs/skill.md',
+          destination: '/skill.md',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
+          permanent: true,
+        },
         {
           source: '/case-study/',
           destination: '/customers/',
@@ -214,6 +266,31 @@ module.exports = () => {
         {
           source: '/case-study/:path*',
           destination: '/customers/:path*/',
+          permanent: true,
+        },
+        {
+          source: '/blog/distributed-tracing-golang/',
+          destination: '/docs/instrumentation/opentelemetry-golang/',
+          permanent: true,
+        },
+        {
+          source: '/blog/distributed-tracing/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/java-auto-instrumentation/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-java/',
+          destination: '/blog/opentelemetry-spring-boot/',
           permanent: true,
         },
         {
@@ -834,6 +911,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/terms-of-service/',
+          destination: '/legal/terms-of-service/',
+          permanent: true,
+        },
+        {
+          source: '/privacy/',
+          destination: '/legal/privacy/',
+          permanent: true,
+        },
+        {
+          source: '/terms-of-reference/',
+          destination: '/legal/terms-of-reference/',
+          permanent: true,
+        },
+        {
           source: '/docs/alerts-management/notification-channel/',
           destination: '/docs/setup-alerts-notification/',
           permanent: true,
@@ -995,7 +1087,7 @@ module.exports = () => {
         },
         {
           source: '/blog/opentelemetry-distributed-tracing-part-1/',
-          destination: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          destination: '/blog/opentelemetry-tracing/',
           permanent: true,
         },
         {
@@ -1046,7 +1138,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-44dhfywli-MO0PhJOea9XObIfn9TfeUw',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-48vy70dbr-VTyAjAIvP5XH5MaimiJPxg',
           basePath: false,
           permanent: true,
         },
@@ -1260,12 +1352,14 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/celery/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework-type=background-workers&framework=celery#framework-instrumentation',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/django/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=django#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1290,7 +1384,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/falcon/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=falcon#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1300,7 +1395,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/flask/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=flask#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1310,7 +1406,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/hypercorn-unicorn-support/',
-          destination: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=hypercorn-unicorn#framework-instrumentation',
           permanent: true,
         },
         {
@@ -1415,7 +1512,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
-          destination: '/docs/instrumentation/opentelemetry-python/',
+          destination:
+            '/docs/instrumentation/opentelemetry-python/?framework=hypercorn-unicorn#framework-instrumentation',
           permanent: true,
         },
         // Python framework-specific redirects to consolidated page
@@ -1549,12 +1647,12 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/mobile-instrumentation/java/',
-          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/mobile-instrumentation/kotlin/',
-          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
           permanent: true,
         },
         {
@@ -1933,12 +2031,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source:
-            '/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/',
-          destination: '/guides/upstream-connect-error/',
-          permanent: true,
-        },
-        {
           source: '/docs/tutorial/writing-clickhouse-queries-in-dashboard/',
           destination: '/docs/userguide/writing-clickhouse-traces-query/',
           permanent: true,
@@ -2094,6 +2186,11 @@ module.exports = () => {
         {
           source: '/docs/integrations/aws/integration-template/',
           destination: '/docs/integrations/aws/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/opentelemetry-hasura/',
+          destination: '/docs/integrations/outposts/hasura/',
           permanent: true,
         },
         {
@@ -2491,18 +2588,8 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/firebase-alternatives',
-          destination: '/comparisons/firebase-alternatives/',
-          permanent: true,
-        },
-        {
           source: '/appdynamics-competitors',
           destination: '/comparisons/appdynamics-competitors/',
-          permanent: true,
-        },
-        {
-          source: '/heroku-alternatives',
-          destination: '/comparisons/heroku-alternatives/',
           permanent: true,
         },
         {
@@ -2519,11 +2606,6 @@ module.exports = () => {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/clickhouse',
           destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
-          permanent: true,
-        },
-        {
-          source: '/azure-alternatives',
-          destination: '/comparisons/azure-alternatives/',
           permanent: true,
         },
         {
@@ -2569,11 +2651,6 @@ module.exports = () => {
         {
           source: '/docs/infrastructure-monitoring/',
           destination: '/docs/infrastructure-monitoring/overview/',
-          permanent: true,
-        },
-        {
-          source: '/platform-engineering-vs-DevOps',
-          destination: '/comparisons/platform-engineering-vs-DevOps/',
           permanent: true,
         },
         {
@@ -2662,11 +2739,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/platform-engineering-tools',
-          destination: '/comparisons/platform-engineering-tools/',
-          permanent: true,
-        },
-        {
           source: '/datadog-vs-appdynamics',
           destination: '/comparisons/datadog-vs-appdynamics/',
           permanent: true,
@@ -2674,21 +2746,6 @@ module.exports = () => {
         {
           source: '/log-analysis-tools',
           destination: '/blog/best-log-management-tools/',
-          permanent: true,
-        },
-        {
-          source: '/docker-alternatives',
-          destination: '/comparisons/docker-alternatives/',
-          permanent: true,
-        },
-        {
-          source: '/aws-vs-gcp-vs-azure',
-          destination: '/comparisons/aws-vs-gcp-vs-azure/',
-          permanent: true,
-        },
-        {
-          source: '/network-security-monitoring-tools',
-          destination: '/comparisons/network-security-monitoring-tools/',
           permanent: true,
         },
         {
@@ -2717,11 +2774,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/aws-alternatives',
-          destination: '/comparisons/aws-alternatives/',
-          permanent: true,
-        },
-        {
           source: '/newrelic-vs-prometheus',
           destination: '/comparisons/newrelic-vs-prometheus/',
           permanent: true,
@@ -2729,11 +2781,6 @@ module.exports = () => {
         {
           source: '/prometheus-alternatives',
           destination: '/comparisons/prometheus-alternatives/',
-          permanent: true,
-        },
-        {
-          source: '/digitalocean-alternatives',
-          destination: '/comparisons/digitalocean-alternatives/',
           permanent: true,
         },
         {
@@ -2919,7 +2966,7 @@ module.exports = () => {
         },
         {
           source: '/does-signoz-work-well-with-existing-prometheus-setups/',
-          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
           permanent: true,
         },
         {
@@ -2974,7 +3021,7 @@ module.exports = () => {
         },
         {
           source: '/java-auto-instrumentation',
-          destination: '/opentelemetry/java-auto-instrumentation/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
@@ -3105,7 +3152,7 @@ module.exports = () => {
         },
         {
           source: '/quantile-aggregation-for-statsd-exporter',
-          destination: '/blog/quantile-aggregation-for-statsd-exporter/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
         {
@@ -3120,12 +3167,12 @@ module.exports = () => {
         },
         {
           source: '/out-of-box-application-monitoring-prometheus',
-          destination: '/blog/out-of-box-application-monitoring-prometheus/',
+          destination: '/blog/opentelemetry-vs-prometheus/',
           permanent: true,
         },
         {
           source: '/ha-prometheus-cortex-cassandra',
-          destination: '/blog/ha-prometheus-cortex-cassandra/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
         {
@@ -3155,7 +3202,7 @@ module.exports = () => {
         },
         {
           source: '/does-signoz-work-well-with-existing-prometheus-setups',
-          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
           permanent: true,
         },
         {
@@ -3200,16 +3247,6 @@ module.exports = () => {
             '/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
           destination:
             '/faqs/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
-          permanent: true,
-        },
-        {
-          source: '/cloud-infrastructure',
-          destination: '/blog/cloud-infrastructure/',
-          permanent: true,
-        },
-        {
-          source: '/what-is-platform-engineering',
-          destination: '/blog/what-is-platform-engineering/',
           permanent: true,
         },
         {
@@ -3341,16 +3378,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/integrations/gcp/collect-logs/',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
-          source: '/docs/integrations/gcp/collect-logs',
-          destination: '/docs/integrations/gcp/collect-metrics/',
-          permanent: true,
-        },
-        {
           source: '/blog/llm-observability/',
           destination: '/docs/llm-observability/',
           permanent: true,
@@ -3435,6 +3462,46 @@ module.exports = () => {
           destination: '/docs/instrumentation/javascript/opentelemetry-graphql/',
           permanent: true,
         },
+        {
+          source: '/blog/opentelemetry-collector-prometheus-receiver/',
+          destination: '/docs/userguide/prometheus-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-are-the-benefits-of-prometheus/',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/blog/out-of-box-application-monitoring-prometheus/',
+          destination: '/blog/opentelemetry-vs-prometheus/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-the-advantage-of-prometheus/',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/blog/prometheus-query/',
+          destination: '/guides/promql-cheat-sheet/',
+          permanent: true,
+        },
+        {
+          source: '/guides/prometheus-monitoring-101/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-llm/',
+          destination: '/blog/opentelemetry-ai-agent-observability/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
@@ -3472,6 +3539,10 @@ module.exports = () => {
           fullySpecified: false,
         },
       })
+
+      const compat = path.join(__dirname, reactRouterDomCompat)
+      config.resolve.alias['react-router-dom$'] = compat
+      config.resolve.alias['react-router-dom/server.js'] = compat
 
       return config
     },

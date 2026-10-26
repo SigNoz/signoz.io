@@ -7,6 +7,7 @@
  */
 
 import siteMetadata from '@/data/siteMetadata'
+import { getLegalRoutes } from '@/utils/legal'
 
 export const PRODUCT_SITEMAP_ROUTES = [
   'pricing',
@@ -39,13 +40,17 @@ export const CORPORATE_SITEMAP_ROUTES = [
   'tags',
   'about-us',
   'contact-us',
-  'terms-of-service',
-  'terms-of-reference',
-  'privacy',
+  'legal',
   'support',
   'startups',
   'security',
 ] as const
+
+// Legal document routes come from data/legal, so they are added at build time.
+export const getCorporateSitemapRoutes = (): string[] => [
+  ...CORPORATE_SITEMAP_ROUTES,
+  ...getLegalRoutes(),
+]
 
 export const ALTERNATIVES_SITEMAP_ROUTES = [
   'datadog-alternative',
@@ -53,6 +58,7 @@ export const ALTERNATIVES_SITEMAP_ROUTES = [
   'newrelic-alternative',
   'clickstack-alternative',
   'cloudwatch-alternative',
+  'dash0-alternative',
   'product-comparison',
   'product-comparison/datadog-savings',
   'product-comparison/migrate-from-datadog',

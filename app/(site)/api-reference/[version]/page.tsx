@@ -6,6 +6,7 @@ import {
   fetchAvailableAPIVersions,
   resolveLatestVersion,
 } from '@/utils/apiReference'
+import { parseStabilityIndex } from '@/utils/apiReferenceStability'
 import siteMetadata from '@/data/siteMetadata'
 import OpenAPISpec from '@/components/OpenAPISpec'
 import APIVersionSwitcher from '@/components/APIVersionSwitcher'
@@ -70,12 +71,13 @@ export default async function APIReferencePage(props: PageProps) {
 
   if (!specContent) notFound()
 
+  const stability = parseStabilityIndex(specContent)
   const availableVersions = versionInfos.map((v) => v.version)
 
   return (
     <div className="relative">
       <APIVersionSwitcher currentVersion={version} availableVersions={availableVersions} />
-      <OpenAPISpec specContent={specContent} />
+      <OpenAPISpec specContent={specContent} stability={stability} />
     </div>
   )
 }

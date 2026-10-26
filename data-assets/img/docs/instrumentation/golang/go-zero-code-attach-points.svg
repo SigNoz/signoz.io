@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" width="1000" height="330" font-family="'Inter', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <marker id="arrGray" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#636e72"/>
+    </marker>
+    <marker id="arrBlue" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#74b9ff"/>
+    </marker>
+    <marker id="arrAmber" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#fdcb6e"/>
+    </marker>
+    <marker id="arrPurple" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#a29bfe"/>
+    </marker>
+    <marker id="arrOrange" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#F97316"/>
+    </marker>
+    <linearGradient id="signoz-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="glow-o" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#F97316" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes pulse-signoz {
+        0%,100% { filter: url(#glow-o); }
+        50%      { filter: none; }
+      }
+      .signoz-box { animation: pulse-signoz 3s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="330" fill="url(#bgGrad)" rx="14"/>
+
+  <text x="500" y="38" text-anchor="middle" fill="#f5f6fa" font-size="19" font-weight="700">Each option attaches at a different point</text>
+
+  <!-- approach chips: x=65 w=200 | x=305 w=190 | x=535 w=210, y=90 h=54 -->
+  <rect x="65" y="90" width="200" height="54" rx="8" fill="#20222e" stroke="#74b9ff" stroke-width="1.5"/>
+  <text x="165" y="112" text-anchor="middle" fill="#74b9ff" font-size="13" font-weight="600">OpenTelemetry SDK</text>
+  <text x="165" y="130" text-anchor="middle" fill="#9aa3b2" font-size="11">you write the spans</text>
+
+  <rect x="305" y="90" width="190" height="54" rx="8" fill="#20222e" stroke="#fdcb6e" stroke-width="1.5"/>
+  <text x="400" y="112" text-anchor="middle" fill="#fdcb6e" font-size="13" font-weight="600">otelc</text>
+  <text x="400" y="130" text-anchor="middle" fill="#9aa3b2" font-size="11">injected by the compiler</text>
+
+  <rect x="535" y="90" width="210" height="54" rx="8" fill="#20222e" stroke="#a29bfe" stroke-width="1.5"/>
+  <text x="640" y="112" text-anchor="middle" fill="#a29bfe" font-size="13" font-weight="600">eBPF agent</text>
+  <text x="640" y="130" text-anchor="middle" fill="#9aa3b2" font-size="11">probes on live functions</text>
+
+  <!-- chip to stage arrows: start 144+5=149, end 190-11=179 -->
+  <path d="M165,149 L 165,179" fill="none" stroke="#74b9ff" stroke-width="1.5" marker-end="url(#arrBlue)"/>
+  <path d="M400,149 L 400,179" fill="none" stroke="#fdcb6e" stroke-width="1.5" marker-end="url(#arrAmber)"/>
+  <path d="M640,149 L 640,179" fill="none" stroke="#a29bfe" stroke-width="1.5" marker-end="url(#arrPurple)"/>
+
+  <!-- lifecycle stages: y=190 h=64 -->
+  <rect x="65" y="190" width="200" height="64" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="165" y="226" text-anchor="middle" fill="#dfe6e9" font-size="13">Your source code</text>
+
+  <rect x="305" y="190" width="190" height="64" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="400" y="226" text-anchor="middle" fill="#dfe6e9" font-size="13">go build</text>
+
+  <rect x="535" y="190" width="210" height="64" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="640" y="226" text-anchor="middle" fill="#dfe6e9" font-size="13">Running Go process</text>
+
+  <rect x="795" y="190" width="140" height="64" rx="8" fill="url(#signoz-grad)" class="signoz-box"/>
+  <text x="865" y="226" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">SigNoz</text>
+
+  <!-- stage chain arrows -->
+  <path d="M270,222 L 294,222" fill="none" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrGray)"/>
+  <path d="M500,222 L 524,222" fill="none" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrGray)"/>
+  <path d="M750,222 L 784,222" fill="none" stroke="#F97316" stroke-width="1.5" marker-end="url(#arrOrange)"/>
+  <text x="770" y="210" text-anchor="middle" fill="#9aa3b2" font-size="10">OTLP</text>
+
+  <text x="500" y="300" text-anchor="middle" fill="#9aa3b2" font-size="12">All three export OTLP spans. Only the eBPF agent runs as a separate privileged process.</text>
+
+  <!-- flowing packets along the lifecycle -->
+  <circle r="3.5" fill="#636e72" opacity="0.9">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="0s" path="M270,222 L 292,222"/>
+  </circle>
+  <circle r="3.5" fill="#636e72" opacity="0.9">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="0.6s" path="M500,222 L 522,222"/>
+  </circle>
+  <circle r="3.5" fill="#F97316" opacity="0.9">
+    <animateMotion dur="1.4s" repeatCount="indefinite" begin="1.2s" path="M750,222 L 782,222"/>
+  </circle>
+</svg>

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in Deno
 description: Learn how to add manual OpenTelemetry instrumentation in Deno. Create custom spans, add attributes, and record errors for deeper observability in SigNoz.
 doc_type: howto
@@ -61,7 +61,109 @@ Tips:
 - Start spans with descriptive names that match business steps (`checkout`, `fetch-user`, etc.).
 - The `startActiveSpan` callback automatically handles span context propagation.
 
-## Step 3. Add attributes and events
+## Step 3. Propagate context
+
+Deno uses the same `@opentelemetry/api` surface as Node.js and keeps the active span in an `AsyncLocalStorage` context. `startActiveSpan` links child spans through `await` chains and callbacks. Two things break that chain: a span you start without activating, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+`startActiveSpan` activates the span for the duration of its callback. `startSpan` creates the span without activating it, so nothing nested inside becomes its child:
+
+```ts:in-process.ts
+// validateOrder's spans become children of process-order
+await tracer.startActiveSpan("process-order", async (span) => {
+  try {
+    await validateOrder(orderId);
+  } finally {
+    span.end();
+  }
+});
+
+// validateOrder's spans do NOT become children of process-order
+const span = tracer.startSpan("process-order");
+try {
+  await validateOrder(orderId);
+} finally {
+  span.end();
+}
+```
+
+To activate an existing span outside the callback form, put it on a context and run your work inside `context.with()`:
+
+```ts:context-with.ts
+import { context, trace } from "npm:@opentelemetry/api";
+
+const span = tracer.startSpan("process-order");
+const ctx = trace.setSpan(context.active(), span);
+
+try {
+  await context.with(ctx, async () => {
+    // Child spans created here attach to process-order
+    await validateOrder(orderId);
+  });
+} finally {
+  span.end();
+}
+```
+
+### Across a service boundary
+
+Deno's built-in OpenTelemetry integration instruments `fetch` and `Deno.serve`, so those hops propagate on their own. Write the calls yourself for anything else, such as a queue or a custom protocol.
+
+Set the span kind on both ends. SigNoz reads `Client` and `Server` to build the service map and APM metrics.
+
+```ts:propagate.ts minimap defaultCollapsed
+import { context, propagation, SpanKind, trace } from "npm:@opentelemetry/api";
+
+const tracer = trace.getTracer("order-service");
+
+// Outgoing: inject writes traceparent into the carrier
+async function chargeCard(payload: unknown) {
+  return await tracer.startActiveSpan("charge-card", { kind: SpanKind.CLIENT }, async (span) => {
+    try {
+      const headers: Record<string, string> = { "content-type": "application/json" };
+      propagation.inject(context.active(), headers);
+
+      return await fetch("https://payments.internal/charge", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+    } finally {
+      span.end();
+    }
+  });
+}
+
+// Incoming: extract returns a context to start the entry span in.
+// Deno.serve already parents your spans, so reach for this when the context
+// arrives on something Deno does not instrument, such as a queue message.
+async function handleCharge(message: { headers: Headers }) {
+  const carrier: Record<string, string> = {};
+  message.headers.forEach((value, key) => (carrier[key] = value));
+
+  const activeContext = propagation.extract(context.active(), carrier);
+
+  return await tracer.startActiveSpan("handle-charge", { kind: SpanKind.SERVER }, activeContext, async (span) => {
+    try {
+      // handle-charge is now a child of charge-card in the caller's trace
+      return await capturePayment(message);
+    } finally {
+      span.end();
+    }
+  });
+}
+```
+
+The third argument to `startActiveSpan` is the parent context. Leave it out and the entry span takes whatever is active. At the edge of your service that is nothing, so the span starts a fresh trace.
+
+<Admonition type="warning">
+`Headers` is not a plain record, and the default getter only reads plain objects. Passing a `Headers` instance straight to `extract` returns an empty context and raises nothing, so copy it into an object first, as above.
+
+Because `Deno.serve` is instrumented, extracting inside its handler is redundant. The request already has a server span, and your manual span nests beneath that one. The trace stays connected either way.
+</Admonition>
+
+## Step 4. Add attributes and events
 
 Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
 
@@ -95,7 +197,7 @@ async function processOrder(orderId: string, amount: number) {
 - Keep attribute keys consistent (use <a href="https://opentelemetry.io/docs/specs/semconv/" target="_blank" rel="noopener noreferrer nofollow">semantic conventions</a> when possible).
 - Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
 
-## Step 4. Record errors
+## Step 5. Record errors
 
 Flag failures on the span so they are easy to query in SigNoz.
 
@@ -151,6 +253,13 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - Use `startActiveSpan` to ensure the span context is propagated correctly to child operations.
 - When calling external services, the instrumentation must propagate context through request headers.
 
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `propagation.inject` and that the outgoing request carries a `traceparent` header.
+- Make sure that the receiver passes the extracted context as the third argument to `startActiveSpan(name, options, ctx, fn)`.
+- Copy `Request.headers` into a plain object before calling `extract`. The default getter cannot read a `Headers` instance.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
+
 ### Why don't attributes or events appear on the span?
 
 - Attribute values must be strings, numbers, booleans, or arrays of these types.
@@ -162,6 +271,7 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 - [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Deno application
 - [Explore your traces in SigNoz](https://signoz.io/docs/userguide/traces/)
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages
 
 ## Get Help
 

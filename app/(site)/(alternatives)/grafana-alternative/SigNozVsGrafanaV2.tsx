@@ -142,10 +142,7 @@ const SigNozVsGrafanaV2 = () => {
                   clickText="Get Started with SigNoz Cloud"
                   clickLocation="Hero Section"
                 >
-                  <Button
-                    variant="legacyPrimary"
-                    className="flex items-center justify-center gap-2 font-bold"
-                  >
+                  <Button variant="default" className="w-full">
                     Get Started with SigNoz Cloud <ArrowRight className="h-4 w-4" />
                   </Button>
                 </TrackingLink>
@@ -156,10 +153,7 @@ const SigNozVsGrafanaV2 = () => {
                   clickText="Self-Host SigNoz"
                   clickLocation="Hero Section"
                 >
-                  <Button
-                    variant="legacySecondary"
-                    className="flex items-center justify-center gap-2 font-bold"
-                  >
+                  <Button variant="secondary" className="w-full">
                     <Server className="h-4 w-4" />
                     Self-Host SigNoz
                   </Button>
@@ -497,13 +491,13 @@ const SigNozVsGrafanaV2 = () => {
                 </p>
                 <div className="mt-6 flex flex-wrap gap-4">
                   <Link href="/docs/install/">
-                    <Button variant="legacyPrimary" className="flex items-center gap-2">
+                    <Button variant="default" className="flex items-center gap-2">
                       Start with Community Edition
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                   <Link href="/enterprise/">
-                    <Button variant="legacySecondary" className="flex items-center gap-2">
+                    <Button variant="secondary" className="flex items-center gap-2">
                       Sign-up for Managed Self-host
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -771,18 +765,12 @@ const SigNozVsGrafanaV2 = () => {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/teams/" className="block max-w-md">
-                <Button
-                  variant="legacyPrimary"
-                  className="flex w-full items-center justify-center gap-2 font-bold"
-                >
+                <Button variant="default" className="w-full">
                   Try SigNoz Cloud <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/docs/install/" className="block max-w-md">
-                <Button
-                  variant="legacySecondary"
-                  className="flex w-full items-center justify-center gap-2 font-bold"
-                >
+                <Button variant="secondary" className="w-full">
                   <Server className="h-4 w-4" />
                   Self-Host SigNoz
                 </Button>

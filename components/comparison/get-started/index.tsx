@@ -1,6 +1,8 @@
 import React from 'react'
 import styles from './styles.module.css'
 import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const GetStarted = (props) => {
   const { withHackerNews, withMigrationSupport, data } = props
@@ -49,7 +51,7 @@ const GetStartedSection = (props) => {
         </h3>
         <p className={styles.desc}>SigNoz Cloud is the easiest way to run SigNoz</p>
         <Link
-          className={`button button--secondary ${styles.trySigNozCtaBtn}`}
+          className={cn(buttonVariants({ variant: 'secondary' }), styles.trySigNozCtaBtn)}
           href="/teams/"
           prefetch={false}
         >

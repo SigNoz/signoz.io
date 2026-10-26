@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-10-26
 title: .NET OpenTelemetry Instrumentation Guide
 description: Learn how to instrument your .NET app with OpenTelemetry zero-code auto-instrumentation, sending traces to SigNoz from VMs, Kubernetes, or Docker.
 doc_type: howto
@@ -7,14 +7,14 @@ doc_type: howto
 
 This guide shows you how to instrument your .NET application with OpenTelemetry and send traces to SigNoz using zero-code automatic instrumentation. This approach requires no code changes to your application.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
 
 - <a href="https://dotnet.microsoft.com/en-us/platform/support/policy#supported-versions" target="_blank" rel="noopener noreferrer nofollow">Supported .NET version</a> or <a href="https://opentelemetry.io/docs/zero-code/dotnet/#compatibility" target="_blank" rel="noopener noreferrer nofollow">.NET Framework 4.6.2+</a>.
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- A SigNoz Cloud account or Self-Hosted SigNoz instance
 
 ## Send traces to SigNoz
 
@@ -163,13 +163,15 @@ metadata:
   name: dotnet-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4318
+    endpoint: http://<collector-service>:4318
   propagators:
     - tracecontext
     - baggage
   dotnet:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
 ```
+
+Replace `<collector-service>` with the address of the collector Service that receives the application's telemetry. If you installed the Collection Agent with the OpenTelemetry Operator guide, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector) for its Service.
 
 Deploy this resource to your cluster.
 
@@ -381,6 +383,7 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 - [Manual Instrumentation](https://signoz.io/docs/instrumentation/dotnet/manual-instrumentation/) to create custom spans for business operations
 - [Send Metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet/) from your .NET application to correlate traces with metrics.
 - [Set up Alerts](https://signoz.io/docs/setup-alerts-notification/) to get notified on errors and latency.
+- Use the [OpenTelemetry Injector](https://signoz.io/docs/instrumentation/opentelemetry-injector/) to start this agent with no change to the application, when one Linux host runs several services.
 - [.NET OpenTelemetry tutorial](https://signoz.io/blog/opentelemetry-dotnet/), for a code-first walkthrough with manual instrumentation examples.
 
 **Sample application**:

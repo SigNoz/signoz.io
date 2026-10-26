@@ -1,50 +1,127 @@
 ---
 
-title: What is Prometheus for Monitoring?
-date: 2024-07-12
-tags: [faq, prometheus]
-authors: [daniel]
-description: Prometheus is an open-source monitoring tool used for collecting and processing metrics in time series format.
-keywords: [prometheus,monitor,monitoring,metrics]
+title: "What Is Prometheus? OSS Monitoring & Alerting Toolkit"
+meta_title: "What Is Prometheus? Understanding the OSS Monitoring & Alerting Toolkit"
+date: 2026-10-26
+tags: [prometheus, monitoring]
+authors: [saurabh_patil]
+description: "Prometheus is an open-source monitoring and alerting toolkit that collects and stores time-series metrics. Learn how it works, its components, and setup."
+keywords: [prometheus,monitoring, time series database]
 related_articles:
-  - '/guides/what-is-Prometheus-used-for-in-DevOps'
   - '/comparisons/prometheus-alternatives'
-  - '/guides/how-does-prometheus-work'
+  - '/comparisons/prometheus-vs-grafana'
   - '/blog/prometheus-vs-influxdb'
   - '/comparisons/newrelic-vs-prometheus'
-  - '/comparisons/prometheus-vs-grafana'
 ---
 
+Prometheus is an open-source monitoring and alerting toolkit originally built at SoundCloud. Since its inception in 2012, it has grown into a robust monitoring system and, in August 2018, became a graduated project of the Cloud Native Computing Foundation (CNCF).
 
-In monitoring, Prometheus is used for collecting and processing metrics from its targets, which can be applications, servers, databases, or any system that exposes metrics via an HTTP endpoint. It uses a pull-based model, where it periodically scrapes the targets' metrics endpoints to gather data on various aspects such as resource utilization, response times, error rates, and custom application metrics.  This data is then stored in a time-series database and can be queried using PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)), enabling users to analyze trends, visualize data in dashboards, and set up alerts based on predefined conditions.
+In monitoring, Prometheus is used for collecting and processing metrics from its targets, which can be applications, servers, databases, or any system that exposes metrics via an HTTP endpoint. It uses a pull-based model, where it periodically scrapes the targets' metrics endpoints to gather data on various aspects such as resource utilization, response times, error rates, and custom application metrics.  This data is then stored in a time-series database and can be queried using [PromQL (Prometheus Query Language)](https://signoz.io/guides/promql-cheat-sheet/), enabling users to analyze trends, visualize data in dashboards, and set up alerts based on predefined conditions.
 
-## What is Prometheus?
+## How Prometheus Works
 
-Prometheus is an open-source monitoring and alerting toolkit originally built at SoundCloud. Since its inception in 2012, it has grown to become a robust monitoring system, now part of the Cloud Native Computing Foundation (CNCF). Prometheus excels in collecting and storing metrics as time series data, recording information with a timestamp and optional key-value pairs called labels.
+Prometheus uses a pull-based model: the Prometheus server scrapes metrics over HTTP from the `/metrics` endpoints exposed by your targets, at a configured interval. It stores each sample in its local <Tooltip text="time-series database (TSDB)" content="A database that stores measurements with timestamps so you can query how values change over time." />, where every series is identified by a metric name and a set of key-value labels. You can query this data with PromQL, and Prometheus evaluates alerting rules against it, sending any alerts that fire to Alertmanager. Here's how each part works:
 
-## Components in Prometheus Architecture
+**Pull-based Scraping**
 
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-Untitled.webp" alt="Prometheus architecture" caption="Prometheus architecture" />
+The Prometheus server requests metrics from configured targets, such as applications, databases, and microservices, over HTTP or HTTPS. Each target exposes a metrics endpoint, commonly `/metrics`, which Prometheus scrapes at a configured interval. Applications can expose these metrics through client libraries, while exporters make metrics available from systems that do not expose them directly.
 
+**Time-series storage**
 
+Prometheus stores the collected measurements locally in its *time-series database (TSDB)*. Each time series is identified by a metric name and a set of [key-value labels](https://signoz.io/guides/what-are-prometheus-labels/), with each sample recording a value and timestamp. For example, labels on a request counter can distinguish requests by HTTP method or response status, so you can examine each group separately.
 
-Prometheus is made up of different components which work together, allowing Prometheus to effectively monitor targets. They are:
+**Service discovery**
 
-- Prometheus Server
-- Pushgateway
-- Alert Manager
-- Prometheus Targets
-- Client Libraries
-- Prometheus Exporters
-- Service Discovery
+Targets can be listed in the configuration file or found through [service discovery](https://signoz.io/guides/what-is-prometheus-target/). In Kubernetes, Prometheus can discover targets as workloads change. With file-based discovery, it watches target lists maintained in files. This reduces the need to update the main configuration whenever a monitored instance changes.
+
+**PromQL queries**
+
+Prometheus Query Language (PromQL) lets you filter, aggregate, and calculate values from stored metrics. For example, `rate(http_requests_total[5m])` estimates the average requests per second over the previous five minutes for each matching time series. You can use queries to investigate a change in traffic, compare services, or define alert conditions.
+
+**Alerting**
+
+Prometheus evaluates alerting rules written with PromQL at configured intervals. A rule might check whether a service's error rate stays above a threshold for five minutes. When the alert fires, Prometheus sends it to Alertmanager, which groups related alerts, applies silences and inhibition rules, and routes notifications to receivers such as Slack, email, or PagerDuty.
+
+**Visualization**
+
+The built-in Prometheus web UI displays query results as tables or graphs, which is useful for checking a metric or investigating a problem. For reusable dashboards, Grafana can query [Prometheus as a data source](https://signoz.io/guides/how-to-see-prometheus-metrics-in-grafana/). SigNoz Cloud offers another way to collect these metrics. The [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) scrapes Prometheus-format metrics from your targets and sends them to SigNoz Cloud for storage and visualization. We'll cover this setup later in the article.
+
+## How to Set Up Prometheus
+
+This quick start guide shows how to run Prometheus locally and check that it can collect metrics from itself. The commands below use a Linux or macOS shell.
+
+### Step 1: Download Prometheus
+
+Visit the <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">Prometheus download</a> page and select the package for your operating system and CPU architecture. Download a stable release and extract the archive. On Windows, extract the ZIP archive and run `prometheus.exe` instead of `./prometheus`.
+
+<Figure src="/img/guides/2026/10/prometheus-setup-download.webp" alt="Prometheus download page with operating system and architecture selectors and release packages" caption="Choose the Prometheus package for your operating system and architecture" />
+
+### Step 2: Configure the prometheus.yml file
+
+Open `prometheus.yml` in the extracted directory. For this example, use the following configuration to scrape Prometheus itself every 15 seconds:
+
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+```
+
+The `targets` entry points to the running Prometheus server. You can add more scrape jobs later for your applications and exporters.
+
+### Step 3: Start the Prometheus server
+
+From the extracted directory, check the configuration and start Prometheus:
+
+```bash
+./promtool check config prometheus.yml
+./prometheus --config.file=prometheus.yml
+```
+
+Keep the process running while you use the web UI. Prometheus listens on port `9090` by default.
+
+### Step 4: Access the Prometheus UI
+
+Open `http://localhost:9090/` in your browser. After at least one scrape interval, enter `up{job="prometheus"}` in the query field and click **Execute**. A value of `1` means the last scrape succeeded; `0` means it failed.
+
+The UI screenshots below were captured with Prometheus 3.8.0 on port `19090` because the default port was already in use. Your instance will show `localhost:9090` when you follow the configuration above. To use another port, change both the scrape target and the server's `--web.listen-address` setting.
+
+<Figure src="/img/guides/2026/10/prometheus-setup-query.webp" alt="Prometheus query UI showing up for the prometheus job returning 1" caption="A value of 1 confirms that Prometheus successfully scraped itself" />
+
+Open **Status → Target health**, or visit `http://localhost:9090/targets`, to inspect the scrape endpoint. The `prometheus` target should show **UP**.
+
+<Figure src="/img/guides/2026/10/prometheus-setup-targets.webp" alt="Prometheus Target health page showing the prometheus scrape pool with one target UP" caption="The Target health page confirms that the self-monitoring target is UP" />
+
+## Core Metric Types in Prometheus
+
+Prometheus client libraries offer [four core metric types](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/). Choose one based on what you measure.
+
+- **Counter** - A counter accumulates events, such as HTTP requests or errors. It increases during normal operation and can reset to zero when the application restarts. Use `rate()` to calculate its per-second rate of increase.
+
+- **Gauge** - A gauge represents a value that can rise or fall, such as current memory usage or requests in progress. The [difference between gauges and counters](https://signoz.io/guides/what-is-the-difference-between-a-gauge-and-a-counter/) determines which fits your measurement.
+
+- **Histogram** - A histogram records a distribution of observations, such as request durations, using buckets. Classic histograms expose cumulative bucket counts, a sum, and a count; native histograms use composite samples with dynamic buckets. Our guide to [histogram buckets](https://signoz.io/guides/what-is-a-bucket-in-prometheus/) explains classic bucket boundaries. PromQL can estimate percentiles from histogram data.
+
+- **Summary** - A summary records observation counts and sums and can calculate configured quantiles in the application over a sliding time window. Unlike histogram-derived percentiles, these precomputed quantiles cannot be meaningfully aggregated across instances.
+
+  For example, averaging the p95 latencies reported by two application instances does not give the service's combined p95. For that calculation, aggregate histogram data first, then estimate the percentile with `histogram_quantile()`. Classic histograms need compatible bucket boundaries. This distinction also matters when a StatsD exporter translates application timers into Prometheus metrics: choose a histogram representation when you need [percentiles across instances](https://signoz.io/guides/understanding-histogram-quantile-based-on-rate-in-prometheus/).
+
+## Key Components of Prometheus Architecture
+
+A Prometheus deployment is built around the Prometheus server, which scrapes and stores metrics. The other components help it find targets, expose metrics from your applications and third-party systems, handle short-lived jobs, and route alerts.
+
+<Figure src="/img/guides/2026/10/prometheus-architecture-compact-dark-v2.webp" alt="Prometheus architecture showing metric sources, service discovery, the scraper, TSDB, PromQL, Alertmanager, query clients, and optional remote storage" caption="Prometheus scrapes metrics from targets, stores them locally, and supports queries and alerts. Remote storage is optional." />
 
 ### Prometheus Server
 
-The Prometheus server is the core component responsible for scraping and storing time series data. It periodically pulls metrics from instrumented jobs, known as targets, and stores the collected data locally. This server forms the heart of the Prometheus monitoring system.
+The Prometheus server is the core component responsible for scraping and storing time-series data. It periodically scrapes metrics from configured targets and stores the collected samples locally. It also processes PromQL queries and evaluates [recording and alerting rules](https://signoz.io/guides/what-is-a-prometheus-rule/).
 
 ### Pushgateway
 
-The Pushgateway is an intermediary component that allows short-lived jobs, such as batch jobs, to push their metrics to Prometheus. This is particularly useful for jobs that do not exist long enough to be scraped by the Prometheus server directly.
+The [Pushgateway](https://signoz.io/guides/prometheus-pushgateway/) is an optional intermediary that allows selected service-level batch jobs to push metrics to it for Prometheus to scrape. This is useful when a job finishes before Prometheus can scrape it directly. Pushgateway retains pushed metrics until they are explicitly deleted, so you need to manage stale metrics.
 
 ### Exporters
 
@@ -52,7 +129,7 @@ Exporters are used to expose metrics from third-party systems, such as databases
 
 ### Alertmanager
 
-The Alertmanager handles alerts generated by the Prometheus server. It is responsible for deduplicating, grouping, and routing alerts to appropriate receivers, such as email, PagerDuty, or Slack. This ensures that alerts are managed and delivered efficiently.
+Alertmanager handles alerts generated by the Prometheus server. It deduplicates and groups alerts, then routes notifications to receivers such as email, PagerDuty, or Slack. Silences mute notifications for matching alerts during a specified period, while inhibition suppresses notifications when another firing alert already explains the problem.
 
 ### Client Libraries
 
@@ -64,102 +141,25 @@ Prometheus targets are the endpoints from which the Prometheus server scrapes me
 
 ### Service Discovery
 
-Service discovery mechanisms enable Prometheus to automatically find and scrape targets in dynamic environments. This can include Kubernetes, Consul, or other service discovery systems. Service discovery allows Prometheus to adapt to changes in the infrastructure without manual intervention.
+Service discovery helps Prometheus find targets in dynamic environments such as Kubernetes and Consul. The Prometheus server then scrapes the discovered endpoints according to its scrape configuration. This keeps the target list aligned with changes in your infrastructure without requiring you to edit each target manually.
 
-## Quick Start with Prometheus
+## Benefits of Prometheus monitoring
 
-This quick start guide will help you get Prometheus up and running in a few simple steps.
+Prometheus helps you investigate problems, monitor changing infrastructure, and define alerts using the metrics you collect.
 
-1. Download Prometheus
+- **Query metrics by service, instance, or status.** Labels and PromQL let you narrow down a problem. For example, you can compare error rates across services or check whether one instance is handling more traffic than the others.
+- **Keep monitoring independent.** Each Prometheus server collects, stores, and queries its own data without requiring a separate storage service. This helps keep monitoring available when other parts of your infrastructure fail.
+- **Monitor changing infrastructure.** Service discovery helps Prometheus keep track of targets in environments such as Kubernetes, reducing the need to maintain endpoint lists manually.
+- **Monitor existing systems through exporters.** Exporters expose metrics from databases, operating systems, and other services, so you don't have to build every integration yourself.
+- **Define alerts around your metrics.** PromQL expressions let you specify the conditions that need attention. Alertmanager can group related alerts and route notifications to the appropriate team.
+- **Use it without software licence fees.** Prometheus is open source. You still need to account for infrastructure, storage, and the work involved in operating it.
 
-To download Prometheus on your system, visit the <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">Prometheus download</a> page. Set your system architecture and identify the appropriate package for your operating system (Linux, macOS, Windows). Click on the download link for the latest stable release.
+## Monitor Prometheus metrics with SigNoz Cloud
 
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-Screenshot_2024-07-12_at_07.23.50.webp" alt="Prometheus download links" caption="Prometheus download links" />
+SigNoz Cloud is a managed observability platform built on OpenTelemetry that brings metrics, logs, and traces into one place. You can use it to visualize your Prometheus metrics, build dashboards, and set up alerts without running the monitoring backend yourself.
 
+If your application or exporter already exposes metrics at a `/metrics` endpoint, the OpenTelemetry Collector's Prometheus receiver can scrape that endpoint and send the metrics to SigNoz Cloud over OTLP. You can keep your existing instrumentation, and this collection path does not require a Prometheus server between the endpoint and the Collector.
 
-1. Configure `prometheus.yml` file
+[Get started with SigNoz Cloud](https://signoz.io/teams/) and follow the [Prometheus metrics integration guide](https://signoz.io/docs/userguide/prometheus-metrics/) to configure collection. Once your metrics appear in Metrics Explorer, you can use them to build dashboards and configure alerts.
 
-After downloading Prometheus, extract the tarball downloaded file. You'll find a file named `prometheus.yml` in the extracted directory.
-
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-Screenshot_2024-07-12_at_07.45.09.webp" alt="Prometheus extracted folder" caption="Prometheus extracted folder" />
-
-
-
-Prometheus uses a configuration file named `prometheus.yml` to specify which targets to monitor and how to scrape them. Open `prometheus.yml` in a text editor.
-
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-Screenshot_2024-07-12_at_07.25.29.webp" alt="Prometheus.yml file" caption="Prometheus.yml file" />
-
-
-
-In the `prometheus.yml` file, you will see that Prometheus is configured to scrape metrics from itself. You can add other scrape configurations for Prometheus to scrape metrics from different targets on your system.
-
-1. Start Prometheus server
-
-Navigate to the directory where you extracted Prometheus and execute the following command to start Prometheus:
-
-```jsx
-./prometheus --config.file=prometheus.yml
-```
-
-This command will start Prometheus and use the specified configuration file to determine which targets to scrape.
-
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-Screenshot_2024-07-12_at_07.42.25.webp" alt="Prometheus started" caption="Prometheus started" />
-
-
-1. Access the Prometheus UI
-
-Once Prometheus is started, in your browser, visit [localhost:9090](http://localhost:9090) to access the Prometheus UI:
-
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-Screenshot_2024-07-12_at_07.43.47.webp" alt="Prometheus UI" caption="Prometheus UI" />
-
-
-
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-Screenshot_2024-07-12_at_07.45.59.webp" alt="Prometheus targets" caption="Prometheus targets" />
-
-
-
-## Benefits of Monitoring Systems with Prometheus
-
-Monitoring systems with Prometheus offers several key benefits that are crucial for maintaining the reliability and performance of modern infrastructure. They include:
-
-1. Scalability: Prometheus's architecture is designed for horizontal scalability, allowing you to easily add more Prometheus servers to handle increased monitoring load as your infrastructure grows.
-2. Flexibility: Its dimensional data model and powerful PromQL query language provide a high degree of flexibility in defining and aggregating metrics, enabling you to tailor your monitoring to specific needs.
-3. Multi-Dimensional Data Model: Prometheus's labels allow you to attach key-value pairs to metrics, enabling rich filtering and aggregation capabilities for in-depth analysis and troubleshooting.
-4. Pull-Based Model: Prometheus actively pulls metrics from targets, making it easier to monitor environments where targets may be behind firewalls or have limited network access.
-5. Community and Ecosystem: Prometheus boasts a thriving open-source community and a vast ecosystem of exporters and integrations, making it compatible with a wide range of technologies and services.
-6. Cloud-Native Integration: Prometheus is well-suited for cloud-native environments and integrates seamlessly with Kubernetes, allowing you to easily monitor containerized applications and microservices.
-7. Alerting and Visualization: Prometheus seamlessly integrates with Alertmanager for sophisticated alert routing and silencing, reducing [alert fatigue](https://signoz.io/blog/alert-fatigue/). You can also visualize metrics and create informative dashboards using Grafana or other compatible tools.
-8. Cost-Effective: As an open-source project, Prometheus eliminates licensing costs associated with proprietary monitoring solutions.
-
-## Visualizing Metrics from Prometheus in SigNoz
-
-Prometheus provides a web UI that allows you to query and visualize metrics in a graph, but it is very limited. Also, metrics are just one aspect of monitoring your software systems. You need other types of telemetry (logs and traces) too to set up robust performance monitoring. For better visualization and monitoring of your metrics data, it is best to send the metrics out of Prometheus to a monitoring system. A good option to consider is [SigNoz](https://signoz.io/docs/introduction/).
-
-SigNoz is a full-stack open-source application performance management (APM) tool. It is built on [OpenTelemetry](https://signoz.io/opentelemetry/), which allows you to collect data from various data sources, including Prometheus, and frees you from vendor lock-in.
-
-With SigNoz:
-
-- You get out-of-the-box visualization of things like RED metrics and application metrics like p99, p95, and p50 latency.
-- It provides a unified UI that integrates metrics, logs, and traces, facilitating seamless correlation between them to pinpoint performance bottlenecks.
-- You can visualize your trace data with [flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to see the flow of requests. This comes in very handy while debugging performance-related issues.
-- You can create custom dashboards to monitor important components of your application stack like database, host metrics, and infrastructure.
-
-<Figure src="/img/guides/2024/07/what-is-prometheus-for-monitoring-flask_monitoring_dashboard.webp" alt="Monitoring dashboard for a Flask app with Prometheus formatted metrics" caption="Monitoring dashboard for a Flask app with Prometheus formatted metrics" />
-
-
-If you want to collect and visualize metrics from Prometheus in SigNoz, we have created a [guide](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/#what-is-prometheus) that walks you through the process.
-
-## Getting Started with SigNoz
-
-<GetStartedSigNoz />
-
-## Conclusion
-
-This article highlights the use of Prometheus in monitoring, its components, benefits, and how SigNoz can be used to visualize [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/).
-
-Key takeaways:
-
-- Prometheus collects and processes metrics from its targets via an HTTP endpoint.
-- The Prometheus server is responsible for scraping and storing time series data.
-- Prometheus provides several benefits for monitoring which include its open-source nature eliminating licensing costs, an active community, scalability, and more.
-- Metrics can be collected from Prometheus and sent to a monitoring tool like SigNoz for visualization.
+If you prefer to run the platform on your own infrastructure, you can self-host SigNoz. Follow the [SigNoz self-host installation guide](https://signoz.io/docs/install/self-host/) to get started.

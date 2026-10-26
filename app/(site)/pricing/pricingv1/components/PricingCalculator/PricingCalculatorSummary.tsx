@@ -58,7 +58,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
           clickText="Get Started - Free"
           clickLocation="Pricing Calculator"
         >
-          <Button isButton={true} variant={'default'} rounded={'full'} className="w-full">
+          <Button variant={'default'} className="w-full">
             Get Started - Free
             <ArrowRight size={14} className="ml-2" />
           </Button>
@@ -80,7 +80,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
             clickText="Contact Us"
             clickLocation="Pricing Calculator"
           >
-            <Button isButton={true} variant={'secondary'} className="w-full">
+            <Button variant={'secondary'} className="w-full">
               Contact us
             </Button>
           </TrackingLink>

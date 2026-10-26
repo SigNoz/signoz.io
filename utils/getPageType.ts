@@ -25,6 +25,7 @@ export const getPageType = (pathname: string): string => {
     '/llm-observability',
     '/observability-for-ai-native-companies',
     '/cloudwatch-alternative',
+    '/dash0-alternative',
   ]
   if (featurePages.includes(normalizedPath)) return 'Feature Page'
 
@@ -93,8 +94,9 @@ export const getPageType = (pathname: string): string => {
 
   // About and legal pages
   if (normalizedPath === '/about-us') return 'About Page'
-  if (normalizedPath === '/terms-of-service') return 'Terms Page'
-  if (normalizedPath === '/privacy') return 'Privacy Page'
+  if (normalizedPath === '/legal/terms-of-service') return 'Terms Page'
+  if (normalizedPath === '/legal/privacy') return 'Privacy Page'
+  if (normalizedPath === '/legal' || normalizedPath.startsWith('/legal/')) return 'Legal Page'
 
   // Enterprise pages
   if (normalizedPath === '/enterprise') return 'Enterprise Page'

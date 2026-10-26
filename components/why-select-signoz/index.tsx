@@ -42,8 +42,8 @@ const WhySelectSignoz = ({
                   Built for scale
                 </p>
                 <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
-                  Our powerful ingestion engine has a proven track record of handling 10TB+ data
-                  ingestion per day.
+                  Our powerful ingestion engine has a proven track record of handling 2PB+ data
+                  ingestion per month.
                 </p>
               </div>
               <div>
