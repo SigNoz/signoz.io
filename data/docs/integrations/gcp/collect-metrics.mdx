@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-10-19
 title: Collect GCP Cloud Monitoring Metrics with OpenTelemetry
 description: Configure the googlecloudmonitoring receiver to scrape Cloud Monitoring metrics from one or more GCP projects and view them in SigNoz dashboards.
 doc_type: howto
@@ -11,7 +11,7 @@ GCP stores service metrics in **Cloud Monitoring** and exposes them through the 
 ## Prerequisites
 
 - The [Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/) (on Cloud Run or the compute of your choice).
-- The `signoz-integration` service account has `roles/monitoring.viewer` on every project you list here. If not, revisit [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
+- The `signoz-integration-collector` service account has `roles/monitoring.viewer` on every project you list here. If not, revisit [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
 - The Cloud Monitoring API is enabled in each monitored project.
 
 ## How the receiver works
@@ -79,9 +79,15 @@ service:
 
 Add one block for every project in **Projects to Monitor** whose metrics you want, and list each block in the pipeline's `receivers`.
 
+<Admonition type="warning">
+**Check each project's <a href="https://docs.cloud.google.com/monitoring/settings" target="_blank" rel="noopener noreferrer nofollow">metrics scope</a>.** In Cloud Monitoring, a project can be set up to see the metrics of other projects. The receiver then gets those metrics too. For example, if project A's metrics scope includes project B, the receiver for project A returns metrics for both A and B. If you also add a receiver for project B, B's metrics reach SigNoz twice.
+
+To check, open **Monitoring** > **Settings** in the GCP Console, select the project, and open the **Metric Scope** tab. If project A's metrics scope includes other projects, either use only the receiver for project A, or don't add receivers for those other projects. Each metric keeps its `project_id` label, so you can still tell the projects apart in SigNoz.
+</Admonition>
+
 ## Step 4: Apply the configuration
 
-The Collector reads its config from the `signoz-collector-config` secret, so apply changes by adding a new secret version and redeploying:
+The Collector reads its config from the `signoz-integration-collector-config` secret, so apply changes by adding a new secret version and redeploying:
 
 1. Update `otel-collector-config.yaml`.
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
@@ -104,6 +110,7 @@ The Monitoring API bills **$0.01 per 1,000 read calls** after the first 1 millio
 
 ## Next steps
 
+- [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/) to send Cloud Logging logs to the Collector through Pub/Sub.
 - Configure a supported service for the exact metric list it needs: [Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) or [Memorystore for Redis](https://signoz.io/docs/integrations/gcp/memorystore-redis/).
 
 ## Get Help

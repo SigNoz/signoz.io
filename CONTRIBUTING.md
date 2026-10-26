@@ -12,6 +12,7 @@ Use this file as the stable entrypoint for contributing to `signoz-web`.
 - [Review docs PRs](contributing/docs-review.md)
 - [Change site code](contributing/site-code.md)
 - [Publish or update a blog post](contributing/blog-workflow.md)
+- [Add or update a legal page](contributing/legal-pages.md)
 - [Work with CMS-migrated content](contributing/cms-content.md) (blogs, guides, comparisons, FAQs, case studies, opentelemetry)
 - [Follow the shared repo workflow](contributing/repo-workflow.md)
 - [Use contributor templates](contributing/templates/)
