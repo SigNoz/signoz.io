@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import { registerHeadlessComponents } from '@probo/cookie-banner/headless'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { getProboSettings } from '@/utils/consent/provider'
+import { getProboSettings, PROBO_PROXY_PATH } from '@/utils/consent/provider'
 import { discardExpiredProboVisitor } from '@/utils/consent/providers/probo'
 
 type BannerState = 'loading' | 'banner' | 'panel' | 'privacy_choices' | 'hidden'
@@ -159,7 +159,7 @@ export default function ProboBanner() {
     <probo-cookie-banner-root
       ref={rootRef}
       banner-id={bannerId}
-      base-url={`${apiUrl.replace(/\/$/, '')}/api/cookie-banner/v1/`}
+      base-url={`${window.location.origin}${PROBO_PROXY_PATH}`}
       gcm-enabled="false"
       lang="en"
     >

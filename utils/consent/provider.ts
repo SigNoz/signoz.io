@@ -10,3 +10,5 @@ export const getProboSettings = () => ({
   bannerId: process.env.NEXT_PUBLIC_PROBO_BANNER_ID ?? '',
   apiUrl: process.env.NEXT_PUBLIC_PROBO_API_URL ?? '',
 })
+
+export const PROBO_PROXY_PATH = '/api/site-preferences/'
