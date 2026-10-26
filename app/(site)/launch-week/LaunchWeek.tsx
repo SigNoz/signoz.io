@@ -54,10 +54,9 @@ const LaunchWeek: React.FC = () => {
 
             <div className="z-10 px-6 py-10 font-mono text-base font-medium leading-8 text-signoz_vanilla-400">
               <p className="mb-0 max-w-5xl">
-                Join us for a week of launches that go deeper on core observability workflows. Get
-                live walkthroughs
-                <br className="hidden lg:block" /> from the engineers who built them, see what’s
-                new, and ask questions along the way.
+                Missed the Launch Week sessions? Catch up on our top launches from last quarter.
+                Watch the walkthroughs
+                <br className="hidden lg:block" /> from our engineers, or read the blogs.
               </p>
             </div>
 

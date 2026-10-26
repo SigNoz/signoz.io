@@ -1,5 +1,6 @@
 ---
-date: 2026-08-11
+published_date: 2026-08-11
+updated_date: 2026-10-21
 title: Slack Alerts - Configure a Slack Notification Channel
 description: Learn how to send SigNoz alerts to Slack. Set up an Incoming Webhook, create the notification channel, test it, and mention Slack user groups.
 doc_type: howto
@@ -67,6 +68,38 @@ An app Incoming Webhook is bound to the channel that was selected when the Slack
   alt="New Slack notification channel form in SigNoz with name, webhook URL, and recipient fields."
   caption="Create a new Slack notification channel."
 />
+
+## Customize the Message
+
+Beyond the title and description, a Slack channel can set the rest of what Slack calls an attachment. Every box below is optional, and all of them accept <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a>, so they can read values off the alert.
+
+| Option | What Slack does with it |
+| --- | --- |
+| **Title link** | Turns the title into a link. Use it to point at a dashboard or a runbook. |
+| **Color** | The bar down the left of the message. `good`, `warning`, `danger`, or a hex value such as `#439FE0`. A template lets you colour by status. |
+| **Pretext** | A line above the attachment, outside the coloured block. |
+| **Fallback text** | Plain text shown wherever the attachment cannot render, such as a push notification on a phone. |
+| **Footer** | A small line under the message, usually where the alert came from. |
+
+### Fields
+
+Fields are a small table inside the attachment. Each one has a **title**, which Slack shows in bold, and a **value** under it.
+
+**Short** controls the layout. With it on, Slack places the field in a narrow column and can sit two of them side by side. With it off, the field takes the full width of the attachment. Use short for things like a severity or an environment, and leave it off for anything long.
+
+### Actions
+
+Actions are buttons Slack renders under the message. There are two kinds.
+
+A **link button** needs only **text** and a **URL**. Slack shows the text and opens the URL when someone clicks it. This is the one most alerts want: a link to the runbook, the dashboard or the trace.
+
+A **callback button** is handled by a Slack app rather than opening a link. It uses **name** and **value** so the app can tell which button was pressed, and it needs an app configured to receive Slack's interactivity payload. Without one, the button does nothing.
+
+Either kind can set **style**, which is `default`, `primary` or `danger` and decides the button's colour, and **confirm**, which is the text of a prompt Slack shows before the action runs. Leave confirm empty for no prompt.
+
+<Admonition type="info">
+Slack renders at most five actions per attachment. For the full rules, see <a href="https://docs.slack.dev/messaging/formatting-message-text" target="_blank" rel="noopener noreferrer nofollow">Slack: formatting message text</a>.
+</Admonition>
 
 ## Validate
 
