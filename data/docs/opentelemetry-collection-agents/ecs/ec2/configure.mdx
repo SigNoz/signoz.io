@@ -1,258 +1,431 @@
 ---
-date: 2026-10-06
-title: ECS EC2 Collection Agent - Configure
-description: View metrics and logs for your ECS infrastructure
+date: 2026-10-26
+title: ECS EC2 - Configure
+description: Configure the OpenTelemetry Collector of the ECS EC2 Collection Agent through Foundry to send host metrics, container metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
-This guide covers configuring your daemon service after installation, verifying data flow, and setting up application data collection.
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/) provides a working config: one collector task on every container instance collects host metrics, container metrics, container and host logs, and data from instrumented applications. This page explains what each component in that config does and how to customize it through Foundry's `casting.yaml`.
 
 ## Prerequisites
 
-Before configuring, ensure you have:
-- Completed the [installation steps](/docs/opentelemetry-collection-agents/ecs/ec2/install/)
-- Daemon service running on your ECS cluster
-- Access to SigNoz Cloud or self-hosted instance
+- ECS EC2 Collection Agent installed with Foundry and Terraform (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/))
+- SigNoz Cloud account or self-hosted SigNoz instance
+- The AWS CLI with access to your ECS cluster, and shell access to a container instance
+- The `casting.yaml` and `foundryctl` you installed with
 
-## Verify Data Collection
+## Apply Changes
 
-Log into your SigNoz instance and check that ECS infrastructure metrics and logs are being received.
+For each change:
 
-To visualize ECS data, import pre-built dashboards:
+1. Add the section's snippet to `casting.yaml`. Foundry already generates the default receivers and processors, so add only what you change.
 
-- [instance-metrics.json](https://github.com/SigNoz/dashboards/blob/main/ecs-infra-metrics/instance-metrics.json)
-- [hostmetrics.json](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json)
+2. Run this from the directory that contains `casting.yaml` to apply the change:
 
-Import these in the **Dashboards** section of SigNoz.
+   ```bash
+   foundryctl cast -f casting.yaml
+   ```
 
-## Send Data from Applications
+   Foundry updates the collector's config, and the collector restarts with it on every instance.
 
-<div>
-In this section, we will see how to send data from applications deployed in ECS to
-SigNoz Cloud using Daemon Service we created in the previous section.
-</div>
-<br/>
+3. Run this on the machine where you use the AWS CLI to check that the collector tasks restart:
 
-### Step 1: Add OpenTelemetry Instrumentation to your Application
+   ```bash
+   aws ecs describe-services --region <aws-region> --cluster <ecs-cluster-arn> \
+     --services signoz-collector-agent \
+     --query 'services[0].deployments[].[status,rolloutState,runningCount]' --output table
+   ```
 
-To add OpenTelemetry instrumentation to your application, you can follow the
-docs [here](https://signoz.io/docs/instrumentation/).
+   **Verify these values:**
 
-<Admonition>
-This step include adding the [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/)
-as well as the initialization code to your application codebase and rebuilding the application
-container image.
-</Admonition>
+   - `<aws-region>`: The `foundry.signoz.io/ecs-region` value in `casting.yaml`.
+   - `<ecs-cluster-arn>`: The `foundry.signoz.io/ecs-cluster-arn` value in `casting.yaml`.
 
-### Step 2: Add Entrypoint to your Application Container
+   Then read the collector's logs on a container instance, as [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#view-the-collectors-logs) shows, to confirm there are no configuration errors.
 
-We need to add an entrypoint to the application container to set the
-`OTEL_EXPORTER_OTLP_ENDPOINT` environment variable to the endpoint of the
-daemon service. Such that the application container can send data to the
-daemon container running in the same host.
+4. In SigNoz, confirm data in [Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/host-monitoring/) for host and container metrics, [Logs](https://signoz.io/docs/logs-management/overview/) for container and host logs, and [Traces](https://signoz.io/docs/instrumentation/overview/) for application traces.
 
-The AWS entrypoints below read the instance IP from IMDSv2. AWS recommends an
-IMDSv2 hop limit of `2` for containers. Account or launch settings can change the
-default, so run this command for each container instance in your cluster:
+## Send Data from Applications to the Collector
 
-```bash
-aws ec2 modify-instance-metadata-options \
-  --instance-id <instance-id> \
-  --http-put-response-hop-limit 2 \
-  --http-endpoint enabled
+Host metrics, container metrics, and container and host logs flow as soon as the collector is running.
+
+### Where and how to send data from your application
+
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then point it at the collector on its instance. The address depends on the task's network mode:
+
+| Network mode | Collector address | Instances |
+|---|---|---|
+| `host` | `http://localhost:4318` | EC2 and external |
+| `bridge` | `http://172.17.0.1:4318` | EC2 and external |
+| `awsvpc` | `http://<instance-private-ip>:4318` | EC2 only |
+
+For the `host` network mode, add this to the application's container definition:
+
+```json
+{
+  "environment": [
+    { "name": "OTEL_EXPORTER_OTLP_PROTOCOL", "value": "http/protobuf" },
+    { "name": "OTEL_EXPORTER_OTLP_ENDPOINT", "value": "http://localhost:4318" },
+    { "name": "OTEL_SERVICE_NAME", "value": "<service-name>" }
+  ]
+}
 ```
 
 **Verify these values:**
 
-- `<instance-id>`: The Amazon EC2 instance ID (`i-...`) of each container instance. Find it on the **Instances** page of the <a href="https://console.aws.amazon.com/ec2/home#Instances:" target="_blank" rel="noopener noreferrer nofollow">EC2 console</a>.
+- `<service-name>`: The name your application shows under in SigNoz. It becomes `service.name`.
 
-<Tabs entityName="launch-type">
-<TabItem value="ec2" label="EC2" default>
-**Method 1: Updating entrypoint in task definition**
-
-We need to obtain the endpoint or IP address of the instance on which the task
-is running. We can do this by querying the metadata service of the instance.
-For EC2, the metadata service is available at `169.254.169.254` and needs an IMDSv2 session token.
-
-The `entryPoint` will look like:
+For the `bridge` network mode, add this instead. `172.17.0.1` is the instance's address on <a href="https://docs.docker.com/engine/network/drivers/bridge/#configure-the-default-bridge-network" target="_blank" rel="noopener noreferrer nofollow">Docker's default bridge network</a>, unless the instance's Docker uses a different bridge address:
 
 ```json
 {
-       
-      "entryPoint": [
-        "sh",
-        "-c",
-        "TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token -H \"X-aws-ec2-metadata-token-ttl-seconds: 21600\"); export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/local-ipv4):4318\"; <Application Startup Commands>"
-      ],
-			"command": [],
-			
+  "environment": [
+    { "name": "OTEL_EXPORTER_OTLP_PROTOCOL", "value": "http/protobuf" },
+    { "name": "OTEL_EXPORTER_OTLP_ENDPOINT", "value": "http://172.17.0.1:4318" },
+    { "name": "OTEL_SERVICE_NAME", "value": "<service-name>" }
+  ]
 }
 ```
 
-- Replace `<Application Startup Commands>` with the commands to start your application.
-- The entrypoint sets OTLP/HTTP on port `4318`. To export over gRPC, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and use port `4317`.
-</TabItem>
-<TabItem value="external" label="External">
-**Method 1: Updating entrypoint in task definition**
+**Verify these values:**
 
-We need to obtain the endpoint or IP address of the instance on which the task
-is running. This can be done by multiple ways depending on the network mode and cloud provider.
+- `<service-name>`: The name your application shows under in SigNoz. It becomes `service.name`.
 
-The `entryPoint` will look like the following based on your network mode and cloud provider:
+Use port `4317` with `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` for OTLP over gRPC.
 
-- Using default networking mode i.e. **Bridge**:
-    
-    ```json
-    {
-           
-          "entryPoint": [
-            "sh",
-            "-c",
-            "export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://172.17.0.1:4318\"; <Application Startup Commands>"
-          ],
-    			"command": [],
-    			
-    }
-    ```
-    
-- Using **Bridge** mode with custom docker network
-    
-    If you are using custom docker networking, you would have to use `ExtraHosts` in your task definition. 
-    
-    ```json
-    {
-        
-        "extraHosts": [
-          {
-            "hostname": "signoz-collector",
-            "ipAddress": "host-gateway"
-          }
-          
-        ]
-    }
-    ```
-    
-    And the `entryPoint` will look like:
-    
-    ```json
-    {
-           
-          "entryPoint": [
-            "sh",
-            "-c",
-            "export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://signoz-collector:4318\"; <Application Startup Commands>"
-          ],
-    			"command": [],
-    			
-    }
-    ```
-    
-- If network mode is not **Bridge**, and AWS EC2 instance:
-    
-    ```json
-    {
-           
-          "entryPoint": [
-            "sh",
-            "-c",
-            "TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token -H \"X-aws-ec2-metadata-token-ttl-seconds: 21600\"); export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/local-ipv4):4318\"; <Application Startup Commands>"
-          ],
-    			"command": [],
-    			
-    }
-    ```
-    
-- If network mode is not **Bridge**, and GCP instance:
-    
-    ```json
-    {
-           
-          "entryPoint": [
-            "sh",
-            "-c",
-            'export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT="http://$(curl "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/ip?recursive=true&alt=text" -H "Metadata-Flavor: Google"):4318"; <Application Startup Commands>'
-          ],
-    			"command": [],
-    			
-    }
-    ```
-
-**NOTES:**
-- Replace `<Application Startup Commands>` with the commands to start your application.
-- The entrypoint sets OTLP/HTTP on port `4318`. To export over gRPC, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and use port `4317`.
-- For more information about the metadata server, refer https://www.baeldung.com/linux/cloud-ip-meaning
-</TabItem>
-</Tabs>
-
-### 3. Add Service Name of your Application
-
-To add the service name of your application, you need to set the
-`OTEL_RESOURCE_ATTRIBUTES` environment variable of the application container
-to `service.name=<your-service-name>`.
-
-In your task definition, you can add the following lines.
-
-```yaml
-
-    ContainerDefinitions:
-        - Name: <your-container-name>
-          
-          Environment:
-            - Name: OTEL_RESOURCE_ATTRIBUTES
-              Value: service.name=<your-service-name>
-          
-
-```
-
-In case of JSON task definition, you can add the following lines.
+In the `awsvpc` network mode, the task has its own network address, so it reads the instance's private IP from the EC2 instance metadata service in the container's `entryPoint`:
 
 ```json
-
-    "containerDefinitions": [
-        {
-            "name": "<your-container-name>",
-            
-            "environment": [
-                {
-                    "name": "OTEL_RESOURCE_ATTRIBUTES",
-                    "value": "service.name=<your-service-name>"
-                }
-            ],
-            
-        }
-    ],
-
-
+{
+  "entryPoint": [
+    "sh",
+    "-c",
+    "TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token -H \"X-aws-ec2-metadata-token-ttl-seconds: 21600\"); export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/local-ipv4):4318\"; <application-start-command>"
+  ],
+  "command": [],
+  "environment": [
+    { "name": "OTEL_SERVICE_NAME", "value": "<service-name>" }
+  ]
+}
 ```
 
-### 4. Add ECS Task Attributes from your Application
+**Verify these values:**
 
-The daemon collector runs in its own ECS task, so it cannot tell which task your
-telemetry came from. To add the ECS task of your application to its telemetry,
-enable the ECS resource detector in your OpenTelemetry SDK. The detector adds
-attributes such as `aws.ecs.task.family` and `aws.ecs.task.arn` to traces,
-metrics, and OTLP logs.
+- `<application-start-command>`: The command that starts your application. The image needs `sh` and `curl`.
+- `<service-name>`: The name your application shows under in SigNoz. It becomes `service.name`.
 
-- Go: pass `resource.WithFromEnv()` and `resource.WithDetectors(ecs.NewResourceDetector())` to `resource.New()`. Then pass the result to each provider with `WithResource(res)`. The detector is in <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/detectors/aws/ecs" target="_blank" rel="noopener noreferrer nofollow">`go.opentelemetry.io/contrib/detectors/aws/ecs`</a>.
-- Node.js: set the `resourceDetectors` option of `NodeSDK` to `[envDetector, awsEcsDetector]`. `awsEcsDetector` is in <a href="https://www.npmjs.com/package/@opentelemetry/resource-detector-aws" target="_blank" rel="noopener noreferrer nofollow">`@opentelemetry/resource-detector-aws`</a>.
-- Python: pass `OTELResourceDetector()` and `AwsEcsResourceDetector()` to `get_aggregated_resources()`. Then pass the result as `resource=` to `TracerProvider`, `MeterProvider`, and `LoggerProvider`. `AwsEcsResourceDetector` is in <a href="https://pypi.org/project/opentelemetry-sdk-extension-aws/" target="_blank" rel="noopener noreferrer nofollow">`opentelemetry-sdk-extension-aws`</a>.
-- Java agent: set `OTEL_RESOURCE_PROVIDERS_AWS_ENABLED=true` in the container environment. See the <a href="https://opentelemetry.io/docs/zero-code/java/agent/configuration/" target="_blank" rel="noopener noreferrer nofollow">Java agent configuration</a>.
+This works unless the instance's ECS agent blocks the metadata service for `awsvpc` tasks, which it does when `ECS_AWSVPC_BLOCK_IMDS=true` is set, as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html#task-iam-role-considerations" target="_blank" rel="noopener noreferrer nofollow">Amazon EC2 instances additional configuration</a> describes.
 
-The environment detectors in the Go, Node.js, and Python setups keep the
-`service.name` from step 3. Each application container reads its own ECS task
-metadata, so the attributes match the task it runs in. Logs that the collector
-reads from container output with `filelog` do not get these attributes.
+In the instance's <a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html" target="_blank" rel="noopener noreferrer nofollow">security group</a>, allow inbound TCP 4317 and 4318 only from the <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking-awsvpc.html" target="_blank" rel="noopener noreferrer nofollow">task's security group</a>. Keep the collector task's other ports closed: 13133 for the collector's health check and 2772 for the AppConfig agent.
 
-To make sure that the detector works, open a trace of your service in SigNoz.
-Its resource attributes show `aws.ecs.task.arn`.
+Redeploy the application and send it some traffic. Within a minute it shows under **Services** in SigNoz, and its traces carry the instance's `host.name`.
 
-<Admonition type="warning">
-If the `ecs` detector in your daemon configuration does not have the
-`resource_attributes` overrides from the [installation template](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/),
-add them. If you do not, the collector fills each ECS task attribute that your
-application does not send with the values of its own task.
-</Admonition>
+## Export to SigNoz
+
+The OTLP/HTTP exporter sends the telemetry the collector gathers to SigNoz.
+
+Foundry generates this by default: the `otlphttp/signoz` exporter sends every pipeline to `SIGNOZ_INGESTION_ENDPOINT`.
+
+## Collect Host Metrics
+
+Use the [`hostmetrics`](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from each container instance.
+
+Foundry collects host metrics by default, every 60s. In `casting.yaml`, add this to collect them every 30s and enable `system.cpu.utilization`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                collection_interval: 30s
+                scrapers:
+                  cpu:
+                    metrics:
+                      system.cpu.utilization:
+                        enabled: true
+```
+
+`scrapers` is a map, so the scrapers and metrics you add join Foundry's. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Collect Container Metrics
+
+Use the `docker_stats` receiver to collect CPU, memory, network, and block I/O metrics of every container on each container instance.
+
+Foundry collects container metrics by default, every 60s. In `casting.yaml`, add this to collect them every 30s and enable `container.uptime`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              docker_stats:
+                collection_interval: 30s
+                metrics:
+                  container.uptime:
+                    enabled: true
+```
+
+`metrics` is a map, so the metrics you add join Foundry's. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Collect Container Logs
+
+Use the `filelog` receiver to tail the logs of containers that use the `json-file` log driver on each container instance.
+
+Foundry collects container logs by default. To attribute them to their ECS task, set the `json-file` log driver with the `labels` option in each application container's definition:
+
+```json
+{
+  "logConfiguration": {
+    "logDriver": "json-file",
+    "options": {
+      "max-size": "10m",
+      "max-file": "3",
+      "labels": "com.amazonaws.ecs.task-definition-family,com.amazonaws.ecs.container-name,com.amazonaws.ecs.task-arn,com.amazonaws.ecs.cluster"
+    }
+  }
+}
+```
+
+Redeploy the application. Each log record then carries `service.name`, set to the task family, plus `aws.ecs.container.name`, `aws.ecs.task.arn`, and `aws.ecs.cluster.name`.
+
+### Disable Logs Collection
+
+Stop collecting container logs when you only need host logs and the logs your applications send over OTLP. Foundry collects container logs by default. In `casting.yaml`, add this to remove the `filelog` receiver from the `logs` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc, filelog/host]
+```
+
+Lists replace, so the `logs` pipeline is restated with Foundry's other receivers. Host logs and logs that applications send over OTLP keep flowing. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Collect Host Logs
+
+Use the `filelog/host` receiver to tail the container instance's system logs and the ECS agent logs.
+
+Foundry collects `/var/log/messages`, `/var/log/secure`, and `/var/log/ecs/*.log` by default, under `service.name` `ecs-host`. On Amazon Linux 2023, which logs to the <a href="https://docs.aws.amazon.com/linux/al2023/ug/journald.html" target="_blank" rel="noopener noreferrer nofollow">systemd journal</a>, `/var/log/messages` and `/var/log/secure` do not exist. In `casting.yaml`, add this to also collect `/var/log/cloud-init.log`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/host:
+                include:
+                  - /hostfs/var/log/messages
+                  - /hostfs/var/log/secure
+                  - /hostfs/var/log/ecs/*.log
+                  - /hostfs/var/log/cloud-init.log
+```
+
+Lists replace, so `include` is restated with Foundry's default paths, each under `/hostfs`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Resource Detection
+
+The [`resourcedetection` processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and cloud resource attributes, so you can filter and group by instance in SigNoz.
+
+Foundry runs the `env` and `ec2` detectors by default, and the External casting runs `env` and `system`. The `env` detector adds the collector's `OTEL_RESOURCE_ATTRIBUTES` to every signal. In `casting.yaml`, add this to also add the cluster ARN:
+
+```yaml
+spec:
+  collector:
+    spec:
+      env:
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>,aws.ecs.cluster.arn=<ecs-cluster-arn>
+```
+
+**Verify these values:**
+
+- `<DEPLOYMENT_ENVIRONMENT>`: The deployment environment you set at install, for example `production`.
+- `<ecs-cluster-arn>`: The cluster ARN in the `foundry.signoz.io/ecs-cluster-arn` annotation.
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Tune Batch and Memory Limiter
+
+Adjust the `batch` processor for throughput and the `memory_limiter` processor for stability based on your workload. See [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices) for detailed guidance.
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">batch processor</a> batches spans, metrics, and logs before export. That reduces connections and improves compression. It supports both size-based and time-based batching.
+
+Foundry's defaults are `send_batch_size: 1000`, `send_batch_max_size: 2048`, `timeout: 10s`, and a fixed `limit_mib: 4000`. In `casting.yaml`, add this to change the batch sizes and size the memory limiter as a share of the instance's memory:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              batch:
+                send_batch_size: 15000
+                send_batch_max_size: 20000
+              memory_limiter:
+                limit_mib: null
+                spike_limit_mib: null
+                limit_percentage: 80
+                spike_limit_percentage: 25
+```
+
+Keys you leave out keep Foundry's defaults. Foundry sets only a soft memory reservation on the collector container, so the percentages are a share of the instance's memory. To bound the collector, set a hard memory limit with the patch in [Resource Requests and Limits](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#resource-requests-and-limits), and the percentages then apply to that limit.
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+### Resource Requests and Limits
+
+Foundry reserves `cpu: 256` and `memoryReservation: 512` for the collector container by default. In `casting.yaml`, add a patch that raises the reservations and sets a hard memory limit:
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/collector.tf.json
+      operations:
+        - op: replace
+          path: /locals/containers_collector_agent/1/cpu
+          value: 512
+        - op: replace
+          path: /locals/containers_collector_agent/1/memoryReservation
+          value: 1024
+        - op: add
+          path: /locals/containers_collector_agent/1/memory
+          value: 2048
+```
+
+`memory` must be greater than `memoryReservation`, as the <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters_ec2.html" target="_blank" rel="noopener noreferrer nofollow">task definition parameters</a> describe. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Add Custom Processors to Pipelines
+
+A processor transforms or enriches telemetry once a pipeline lists it under `processors`.
+
+Foundry's pipelines are `traces`, `metrics` and `logs`. In `casting.yaml`, add this to define a processor and add it to the `traces` pipeline:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              attributes/team:
+                actions:
+                  - key: team
+                    value: platform
+                    action: insert
+            service:
+              pipelines:
+                traces:
+                  processors: [memory_limiter, resourcedetection, attributes/team, batch]
+```
+
+Lists replace, so `processors` is restated with Foundry's defaults (`memory_limiter`, `resourcedetection`, `batch`), with yours before `batch`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Exposing Ports for Custom Receivers
+
+A receiver that listens on a port needs that port reachable from your applications. The following example adds the `statsd` receiver on UDP port 8125.
+
+In `casting.yaml`, add the `statsd` receiver, list it in the `metrics` pipeline, and map the port on every instance:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              statsd:
+                endpoint: 0.0.0.0:8125
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, docker_stats, hostmetrics, statsd]
+  patches:
+    - target: collectionagent/collector/agent/collector.tf.json
+      operations:
+        - op: add
+          path: /locals/containers_collector_agent/1/portMappings/-
+          value: {containerPort: 8125, hostPort: 8125, protocol: udp}
+```
+
+Lists replace, so the `metrics` pipeline is restated; applications reach port 8125 at the [address for their network mode](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#where-and-how-to-send-data-from-your-application). Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## Disable Metrics Collection
+
+Turn off host and container metrics when you only need the telemetry your applications send. Foundry collects both by default. In `casting.yaml`, add this to remove the `docker_stats` and `hostmetrics` receivers:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              docker_stats: null
+              hostmetrics: null
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+Lists replace, so the `metrics` pipeline is restated with Foundry's two OTLP receivers, and OTLP metrics from your applications keep flowing. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#apply-changes).
+
+## View the Collector's Logs
+
+Read the collector's output after a change, or when data stops arriving in SigNoz, to find configuration errors. The output stays on each container instance.
+
+Run this on a container instance to read the collector's output from the last 5 minutes:
+
+```bash
+docker logs --since 5m $(docker ps -aq --filter label=com.amazonaws.ecs.container-name=signoz-collector-agent | head -n 1)
+```
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The application cannot reach the collector
+
+After you point an application at the collector, as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#send-data-from-applications-to-the-collector) shows, its OTLP exporter logs connection errors or timeouts for port 4318 or 4317. Run this on the container instance that runs the application to check that the collector accepts OTLP over HTTP:
+
+```bash
+curl -sS -o /dev/null -w '%{http_code}\n' -X POST -H 'Content-Type: application/json' -d '{}' http://localhost:4318/v1/traces
+```
+
+It prints `200` when the collector is listening.
+
+**Cause:** the endpoint does not match the task's network mode. In the `bridge` and `awsvpc` network modes, `localhost` is the application's own container or task, not the instance.
+
+**Fix:** set the address for the task's network mode from [Where and how to send data from your application](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#where-and-how-to-send-data-from-your-application), including the metadata service and security group settings for `awsvpc` tasks. Then redeploy the application.
+
+After the fix, the application shows under **Services** in SigNoz within a minute of traffic.
+
+</details>
 
 ## Next Steps
 
+- [Monitoring ECS EC2 using OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
