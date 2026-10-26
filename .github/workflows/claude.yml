@@ -213,6 +213,10 @@ jobs:
         # --ignore-scripts: PR code must not run install hooks with secrets.
         run: yarn install --prefer-offline --no-audit --ignore-scripts
 
+      - name: Restore lockfile
+        # yarn install rewrites a drifted yarn.lock, which blocks the action's PR checkout.
+        run: git checkout -- yarn.lock
+
       - name: Claude automated PR review
         if: github.event_name == 'pull_request'
         uses: anthropics/claude-code-action@v1
