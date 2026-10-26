@@ -46,7 +46,7 @@ const trustBadges = [
   },
   {
     text: 'Privacy',
-    url: 'https://www.signoz.io/privacy',
+    url: 'https://signoz.io/legal/privacy/',
   },
   {
     text: 'Security',

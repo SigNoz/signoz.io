@@ -1,0 +1,287 @@
+---
+date: 2026-10-21
+title: FastAPI Native OpenTelemetry - Send Telemetry to SigNoz
+description: Send traces, HTTP metrics, and error logs from FastAPI to SigNoz with the built-in OpenTelemetry support. No instrumentation packages or agent needed.
+doc_type: howto
+---
+
+## Overview
+
+FastAPI 0.142.0 and newer have built-in OpenTelemetry support that records request traces, HTTP metrics, and validation and error logs with no extra packages. This guide sends that telemetry to SigNoz through environment variables, which needs FastAPI 0.143.0 or newer.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Python 3.10 or newer
+- A FastAPI app on FastAPI 0.143.0 or newer
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+Tested with Python 3.12, FastAPI 0.157.0, and OpenTelemetry Python SDK 1.45.1.
+
+## Send telemetry to SigNoz
+
+### Step 1. Install FastAPI with the OpenTelemetry packages
+
+```bash
+pip install "fastapi[standard]"
+```
+
+The `standard` extra installs the OpenTelemetry SDK, the OTLP/HTTP exporter, and the `fastapi` command that the next step uses.
+
+### Step 2. Set environment variables and run
+
+`FASTAPI_OTEL_AUTO_CONFIGURE=true` tells FastAPI to create the exporters from the `OTEL_*` environment variables. Without it, FastAPI sends nothing.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the variables in the shell that starts your app, then run it:
+
+```bash
+export FASTAPI_OTEL_AUTO_CONFIGURE=true
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
+
+fastapi run main.py
+```
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+Add these variables to the container spec in your deployment manifest:
+
+```yaml
+env:
+  - name: FASTAPI_OTEL_AUTO_CONFIGURE
+    value: "true"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+  - name: OTEL_SERVICE_NAME
+    value: "<service-name>"
+  - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: "delta"
+```
+
+To send a test request from your workstation, forward a local port to the deployment. Replace `<deployment-name>` with the name of your deployment:
+
+```bash
+kubectl port-forward deploy/<deployment-name> 8000:8000
+```
+
+Then run the `curl` commands below in another terminal.
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root. It expects a `requirements.txt` that lists `fastapi[standard]`:
+
+```dockerfile:Dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY main.py .
+
+CMD ["fastapi", "run", "main.py", "--port", "8000"]
+```
+
+Build the image and pass the variables when you run it:
+
+```bash
+docker build -t fastapi-app .
+
+docker run \
+  -e FASTAPI_OTEL_AUTO_CONFIGURE=true \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta" \
+  -p 8000:8000 \
+  fastapi-app
+```
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set the variables in PowerShell, then run your app:
+
+```powershell
+$env:FASTAPI_OTEL_AUTO_CONFIGURE = "true"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = "delta"
+
+fastapi run main.py
+```
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: The name that SigNoz shows for your service, for example `orders-api`.
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: `delta` reduces metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
+
+Send a few requests, for example `curl http://localhost:8000/`.
+
+To create a log, add this temporary route to `main.py` and restart or redeploy the app:
+
+```python:main.py
+@app.get("/otel-check/{number}")
+async def otel_check(number: int):
+    return {"number": number}
+```
+
+```bash
+curl http://localhost:8000/otel-check/abc
+```
+
+FastAPI returns HTTP 422 and logs a `Request validation failed` warning. Remove the route afterward.
+
+## Validate
+
+1. In **Services**, find the name that you set in `OTEL_SERVICE_NAME`.
+2. In **Traces**, open a `GET /otel-check/{number}` span and check for child spans such as `fastapi.dependencies`.
+3. In **Metrics** > **Summary**, filter by `service.name = '<service-name>'` and look for `http.server.request.duration.bucket` and `http.server.active_requests`. Metrics export every 60 seconds.
+4. In **Logs**, filter by the same service and look for `Request validation failed`.
+
+<Figure
+  src="/img/docs/instrumentation/python/fastapi-native-trace.webp"
+  alt="SigNoz trace detail for a GET /items/{item_id} request with fastapi.dependencies, fastapi.endpoint, and fastapi.serialization child spans and the http.route attribute"
+  caption="A FastAPI request trace with its operation spans"
+/>
+
+<Figure
+  src="/img/docs/instrumentation/python/fastapi-native-metrics.webp"
+  alt="SigNoz Metrics Summary filtered by service.name listing http.server.request.duration bucket, count, max, min, and sum series and http.server.active_requests"
+  caption="FastAPI HTTP metrics in the Metrics Summary"
+/>
+
+<details>
+<ToggleHeading>
+
+## What FastAPI records
+
+</ToggleHeading>
+
+FastAPI uses the instrumentation scope `fastapi` for all three signals.
+
+### Metrics
+
+| Metric | Type | Attributes |
+|---|---|---|
+| `http.server.request.duration` | Histogram, seconds | `http.request.method`, `http.route`, `http.response.status_code`, `error.type`, `network.protocol.version`, `url.scheme` |
+| `http.server.active_requests` | UpDownCounter | `http.request.method`, `url.scheme` |
+
+SigNoz stores the histogram as `http.server.request.duration.bucket`, `.count`, `.sum`, `.min`, and `.max`. `http.server.active_requests` stays cumulative when you set delta temporality, because the OpenTelemetry SDK exports UpDownCounters as cumulative.
+
+### Traces
+
+FastAPI records one server span per request, named after the method and the route. With operation spans on (the default), FastAPI adds the child spans `fastapi.dependencies`, `fastapi.endpoint`, and `fastapi.serialization`.
+
+### Logs
+
+- `Request validation failed`: a warning for each request that fails validation (HTTP 422).
+- `Unhandled exception in FastAPI request`: an error with `exception.type`, `exception.message`, and `exception.stacktrace`, linked to the request trace.
+
+To turn off a signal, exclude routes, or pass your own providers, see the <a href="https://fastapi.tiangolo.com/advanced/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">FastAPI OpenTelemetry settings</a>.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Use with opentelemetry-instrument
+
+</ToggleHeading>
+
+If you already run your app with `opentelemetry-instrument`, as in [Python instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/), the `opentelemetry-instrumentation-fastapi` package handles FastAPI. FastAPI detects it and turns off its own traces, metrics, and logs, so SigNoz receives no duplicate data. The instrumentation package records different metrics:
+
+| | FastAPI native | `opentelemetry-instrumentation-fastapi` |
+|---|---|---|
+| Duration metric | `http.server.request.duration` (seconds) | `http.server.duration` (milliseconds) |
+| Attributes | `http.request.method`, `http.route`, `http.response.status_code` | `http.method`, `http.target`, `http.status_code` |
+| Child spans | `fastapi.dependencies`, `fastapi.endpoint`, `fastapi.serialization` | `http send` |
+| Error logs | Yes | No |
+
+To keep `opentelemetry-instrument` for your other libraries and use the FastAPI native telemetry, turn off the FastAPI instrumentation package:
+
+```bash
+export OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=fastapi
+```
+
+FastAPI then sends its telemetry through the exporters that `opentelemetry-instrument` sets up. Do not set `FASTAPI_OTEL_AUTO_CONFIGURE=true` in this setup. If you set it, FastAPI adds a second exporter and SigNoz receives every span, metric, and log twice.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+Still no data? See [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+### No data after an upgrade from FastAPI 0.142
+
+- Likely cause: from FastAPI 0.143.0, automatic exporter setup is opt-in. Without `FASTAPI_OTEL_AUTO_CONFIGURE=true`, FastAPI sends nothing and prints no warning.
+- Fix: set `FASTAPI_OTEL_AUTO_CONFIGURE=true` and restart the app.
+- Verify: the service shows on the **Services** tab after a few requests.
+
+### `FastAPI automatic telemetry configuration failed`
+
+- Likely cause: `OTEL_EXPORTER_OTLP_PROTOCOL` is set to `grpc`. Automatic setup supports OTLP/HTTP (`http/protobuf`) only. The app starts but sends no telemetry.
+- Fix: remove `OTEL_EXPORTER_OTLP_PROTOCOL`, or set it to `http/protobuf`.
+- Verify: the error line no longer appears when the app starts.
+
+### Every span and log appears twice
+
+- Likely cause: the app runs with `opentelemetry-instrument` and `FASTAPI_OTEL_AUTO_CONFIGURE=true`. Both set up an exporter.
+- Fix: remove `FASTAPI_OTEL_AUTO_CONFIGURE`. See [Use with opentelemetry-instrument](https://signoz.io/docs/instrumentation/python/fastapi-native-opentelemetry/#use-with-opentelemetry-instrument).
+- Verify: one `GET` span for each request.
+
+### `http.server.request.duration` is missing, but `http.server.duration` appears
+
+- Likely cause: the app runs with `opentelemetry-instrument`, so `opentelemetry-instrumentation-fastapi` records the metrics instead of FastAPI.
+- Fix: set `OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=fastapi`, as shown in [Use with opentelemetry-instrument](https://signoz.io/docs/instrumentation/python/fastapi-native-opentelemetry/#use-with-opentelemetry-instrument).
+- Verify: `http.server.request.duration` appears in the **Metrics** tab after a minute of traffic.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+To send telemetry through an OpenTelemetry Collector instead of directly to SigNoz Cloud, set `OTEL_EXPORTER_OTLP_ENDPOINT` to the OTLP/HTTP endpoint of your Collector, for example `http://localhost:4318`, and remove the `OTEL_EXPORTER_OTLP_HEADERS` variable.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for the steps.
+
+</details>
+
+## Next steps
+
+- [Instrument the rest of your Python app](https://signoz.io/docs/instrumentation/opentelemetry-python/) to trace database calls and outgoing HTTP requests.
+- [Explore your traces in SigNoz](https://signoz.io/docs/userguide/traces/) to follow a slow request through its dependency and endpoint spans.
+- [Set up alerts](https://signoz.io/docs/alerts/) on `http.server.request.duration` or on the error logs.
+
+## Get Help
+
+<GetHelp />

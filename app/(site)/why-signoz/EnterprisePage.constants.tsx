@@ -88,8 +88,8 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
     ),
   },
   {
-    icon: <div className="text-4xl font-bold text-signoz_cherry-500">10 TB+/Day</div>,
-    title: <div className="min-h-14">Daily Ingest - Single Deployment</div>,
+    icon: <div className="text-4xl font-bold text-signoz_cherry-500">2 PB+/Month</div>,
+    title: <div className="min-h-14">Monthly Ingest - Single Deployment</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         ClickHouse core handles high-cardinality Kubernetes and AI workloads at all scale. 30%
