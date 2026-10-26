@@ -9,7 +9,7 @@ doc_type: howto
 SigNoz v0.141.0 puts license management behind fine-grained access control and adds a `/api/v4/licenses` API. Viewing the license key now requires the `license:read` permission, a database migration grants that permission to admin roles automatically, and the `/api/v3/licenses` endpoints are deprecated. If you use SigNoz only through the UI as an admin, nothing changes. If you read the license key from the API or from a non-admin account, review the changes below.
 
 <Admonition type="info" title="Viewing the license key now requires license:read">
-The license key on **Settings > General** and **Settings > My Settings** is now gated by the `license:read` permission. Migration 120 grants it to admin roles on startup, so admins keep access. Users on the signoz-editor and signoz-viewer roles (or custom roles without the grant) see a "not authorized" message in place of the key, and the Billing usage section does not load. To restore access for a custom role, add the `license:read` relation to it. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
+The license key on **Settings > Workspace** and **Settings > Account** is now gated by the `license:read` permission. Migration 120 grants it to admin roles on startup, so admins keep access. Users on the signoz-editor and signoz-viewer roles (or custom roles without the grant) see a "not authorized" message in place of the key, and the Billing usage section does not load. To restore access for a custom role, add the `license:read` relation to it. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
 </Admonition>
 
 <Admonition type="info" title="The v3 license endpoints are deprecated">
@@ -59,8 +59,21 @@ For Docker or binary deployments, follow the [standard upgrade guide](https://si
 
 1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
 2. SigNoz reports v0.141.0 under **Settings**.
-3. Open **Settings > General** as an admin and confirm the masked license key and its copy button are visible.
+3. Open **Settings > Workspace** as an admin and confirm the masked license key and its copy button are visible.
 4. Open **Settings > Roles**, open the `signoz-admin` role, and confirm the **Licenses** resource card shows the `create`, `list`, `read`, `update`, and `delete` relations.
+
+<figure align="center">
+  <img src="/img/docs/iam/workspace-license-key-row.webp" alt="SigNoz License Key row on Settings > Workspace with the masked key and its copy button" />
+  <figcaption>
+    <i>Masked license key on Settings > Workspace</i>
+  </figcaption>
+</figure>
+
+<Figure
+  src="/img/docs/iam/admin-role-licenses-card.webp"
+  alt="Licenses resource card on the signoz-admin role page showing Create, Delete, List, Read, and Update granted for All"
+  caption="Licenses relations on the signoz-admin role"
+/>
 
 ## What changes for API callers
 
