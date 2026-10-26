@@ -29,15 +29,15 @@ SigNoz saves the rule as a PromQL rule. The rest of the form behaves the same as
 | Use PromQL when | Reason |
 |---|---|
 | You need explicit control over label matching in a join | `on (...)` selects the matching labels, and `group_left (label)` includes a label from the right side in a many-to-one join. |
-| You already have a Prometheus alerting rule | The expression works as written, apart from the quoting rules below. |
+| You already have a Prometheus alerting rule | The expression works as written, apart from the rules below. |
 | You need forecasting with `predict_linear` | Query Builder does not expose an equivalent forecasting function. |
 
-The Query Builder covers most alerts, including alerts that combine several metrics in a formula. It also converts the threshold unit for you and reports missing data per group. Use PromQL for the cases above.
+The Query Builder covers most alerts, including alerts that combine several metrics in a formula. Use PromQL for the cases above.
 
 ## Rules that apply to every query here
 
 - **Quote any name that contains a dot, and put the metric name first inside the braces.** `rate({"http.server.request.duration.count"}[5m])` returns data. `rate(http_server_request_duration_count[5m])` returns nothing, because SigNoz stores the original dotted name. See the [PromQL UTF-8 syntax guide](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
-- **PromQL reads only metrics stored with cumulative or unspecified temporality.** A delta metric returns no series, and the rule stays in no-data. SigNoz span metrics such as `signoz_calls_total` and `signoz_latency.bucket` are delta in a default setup, so alert on those with the Query Builder instead. Open the metric in [**Metrics**](https://signoz.io/docs/metrics-management/metrics-explorer/) to read its temporality.
+- **PromQL reads only metrics stored with cumulative or unspecified temporality.** A query on a delta metric returns no series. SigNoz span metrics such as `signoz_calls_total` and `signoz_latency.bucket` are delta in a default setup, so alert on those with the Query Builder instead. Open the metric in [**Metrics**](https://signoz.io/docs/metrics-management/metrics-explorer/) to read its temporality.
 - **Histogram parts use dot suffixes.** `.bucket`, `.count`, and `.sum`, not `_bucket`, `_count`, and `_sum`.
 - **Regex matchers are fully anchored.** `=~"5.."` matches a three-character value that starts with `5`. For a substring match, write `=~".*5.*"`.
 - Rule evaluation runs the query at fixed 60-second steps across the alert evaluation window. A range selector such as `[5m]` is a separate lookback: at each step, the function reads the preceding five minutes of samples.
@@ -54,7 +54,9 @@ absent_over_time({"http.server.request.duration.count", "service.name"="checkout
 
 Threshold **above 0**, match type **at least once**. The gap you accept is the range in the selector, not the evaluation window, so change `[10m]` to change how long a silence you tolerate.
 
-Do not use bare `absent()` here. The rule runs the query at 60-second steps, and `absent()` returns a sample only at steps where the selector was empty. One missed scrape produces a one-sample series, and every match type then sees a series where the condition holds throughout.
+A new rule can fire on its first evaluation. The evaluation window can start before the service sent its first sample, and **at least once** needs only one step in the window where the selector matched nothing. Create the rule after the service has reported for one full evaluation window.
+
+Do not use bare `absent()` here. At each step, SigNoz looks back 5 minutes for the latest sample, so `absent()` returns `1` only after 5 minutes of silence. You cannot set that gap in the query. `absent_over_time()` takes the gap from its range.
 
 Keep every label matcher an equality match. Both functions copy only equality matchers into their output, so a regex matcher leaves the alert with no service name in the message.
 
@@ -85,6 +87,8 @@ sum by ("service.name") (
 ```
 
 Set the threshold to **above 1** for a 1% error budget, and set the y-axis unit to **Percent (0 - 100)**. Both sides group by `service.name` alone, so `/` pairs each numerator series with its own denominator. Add an `on (...)` clause only when the two sides carry different labels, to name the labels that have to match.
+
+A service with no 5xx series has no numerator, so the query returns nothing for it. If no service has a 5xx series, the whole query returns no series. Leave **Alert when data stops coming** off for this rule. Otherwise it can fire while every service is healthy.
 
 One failed request out of three puts a service at 33%, so a quiet service crosses any threshold you set. Filter those series out with a floor on the denominator:
 
@@ -142,9 +146,9 @@ Both metrics report CPU in cores, so the ratio is the fraction of the node in us
 max by ("k8s.namespace.name", "k8s.pod.name") ({"k8s.pod.memory_limit_utilization"})
 ```
 
-The metric is already a ratio, so a threshold of `0.9` means 90% of the total container limits in the pod. Values above `1` do occur, so do not treat `1` as a ceiling. The receiver drops the metric for any pod where a container declares no memory limit.
+The metric is already a ratio, so a threshold of `0.9` means 90% of the total container limits in the pod. Values above `1` do occur, so do not treat `1` as a ceiling. The receiver drops the metric for any pod where a container declares no memory limit. The `kubeletstats` receiver does not emit this metric by default, so enable `k8s.pod.memory_limit_utilization` in its `metrics` section.
 
-For per-container granularity, swap in `k8s.container.memory_limit_utilization` and add `k8s.container.name` to the `by (...)` clause.
+For per-container granularity, swap in `k8s.container.memory_limit_utilization` and add `k8s.container.name` to the `by (...)` clause. This metric is also off by default.
 
 ### Memory use will cross the limit in four hours
 
@@ -152,7 +156,7 @@ For per-container granularity, swap in `k8s.container.memory_limit_utilization` 
 predict_linear({"process.memory.usage", "service.name"="checkout"}[6h], 4 * 3600)
 ```
 
-`predict_linear` fits a straight line over the last six hours and projects it forward by the second argument, in seconds. Set the threshold to the container memory limit in bytes and the y-axis unit to **Bytes (B)**.
+`predict_linear` fits a straight line over the last six hours and projects it forward by the second argument, in seconds. `process.memory.usage` measures one process, so this works when the container runs a single process. Set the threshold to the container memory limit in bytes and the y-axis unit to **Bytes (B)**.
 
 Two samples in the range are enough for a fit. The query starts projecting minutes after a fresh install, and those early fits swing wildly. Six hours is the history you want, not a warm-up the query enforces. Use match type **all the times** so one wild projection does not page anyone.
 
@@ -161,12 +165,14 @@ Two samples in the range are enough for a fit. The query starts projecting minut
 ### Kafka consumer group lag
 
 ```promql
-max by (topic, partition, "deployment.environment") (kafka_log_end_offset)
-- on (topic, partition, "deployment.environment") group_right ()
-max by (group, topic, partition, "deployment.environment") (kafka_consumer_committed_offset)
+max by (topic, partition) ({"kafka.partition.current_offset"})
+- on (topic, partition) group_right ()
+max by (group, topic, partition) ({"kafka.consumer_group.offset"})
 ```
 
-`group_right ()` allows many rows on the right side for each matched key, which is what happens when several consumer groups read one partition. Leave plain label names unquoted and quote the dotted ones, in the same clause. Threshold **above 1000**, match type **all the times**.
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkametricsreceiver" target="_blank" rel="noopener noreferrer nofollow">Kafka metrics receiver</a> emits both metrics. `group_right ()` allows many rows on the right side for each matched key, which is what happens when several consumer groups read one partition. Threshold **above 1000**, match type **all the times**.
+
+The same receiver also emits `kafka.consumer_group.lag` with the `group`, `topic`, and `partition` labels. Alert on it directly when you do not need the join.
 
 ### Log processor queue near capacity
 
@@ -187,9 +193,9 @@ For the Collector's own exporter queues, alert on `otelcol_exporter_queue_size` 
 | Setting | Recommendation |
 |---|---|
 | Match type | **At least once** for spikes such as an error ratio. **All the times** for sustained conditions such as saturation or a rate that collapsed. |
-| Evaluation window | How long the condition has to hold. The rule runs the query at 60-second steps across the window, so a 5-minute window yields about five results. Each one computes its own `[5m]` lookback, so the window and the selector range are independent. |
-| Alert when data stops coming | On for anything that means "a thing stopped". The time period next to it counts in minutes, so a value of `15` waits 15 evaluations at a `1m` frequency. |
-| Threshold value | Keep the number in the threshold field, not in the query. A comparison such as `> 0.9` inside the query filters series instead, and the alert message then has no threshold to report. |
+| Evaluation window | The time range the match type reads. The rule runs the query at 60-second steps across the window, so a 5-minute window has six evaluation steps, because it includes both ends. Each one computes its own `[5m]` lookback, so the window and the selector range are independent. |
+| Alert when data stops coming | On for anything that means "a thing stopped". The time period next to it counts in minutes from the last result that had data, so a value of `15` waits 15 evaluations at a `1m` frequency. A rule that has never returned data fires on its first evaluation. |
+| Threshold value | Keep the number in the threshold field, not in the query. A comparison such as `> 0.9` inside the query removes every series below 0.9 before SigNoz applies the threshold, so the chart hides them too. |
 | Y-axis unit | Match the raw unit the query produces: seconds for OpenTelemetry duration histograms, a 0 to 1 ratio for Kubernetes utilization metrics, bytes for memory. |
 | Rate thresholds | `rate()` and `irate()` return a per-second value. A threshold of `1` on a request rate means one request per second, not one request per window. |
 | Notification grouping | Group by the same labels the query returns. Grouping by a label the query dropped merges every series into one notification. |
@@ -215,7 +221,7 @@ Work through these in order:
 
 ### The alert fires once for every pod that restarts
 
-A new pod is a new series, and two noisy points are enough to satisfy a match type of **at least once**. Switch to **all the times** so the condition has to hold across the whole window. Then group by a label that survives the restart, such as `k8s.deployment.name`, instead of `k8s.pod.name`.
+A new pod is a new series, and one noisy point is enough to satisfy a match type of **at least once**. Switch to **all the times** so the condition has to hold across the whole window. Then group by a label that survives the restart, such as `k8s.deployment.name`, instead of `k8s.pod.name`.
 </details>
 
 ## Next steps
