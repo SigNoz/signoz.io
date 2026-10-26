@@ -1,5 +1,5 @@
 ---
-date: 2026-09-16
+date: 2026-10-08
 description: Learn how to create, edit, filter, and manage dashboards and panels in SigNoz, including list filters, row actions, tags, sections, and the panel editor.
 title: Manage Dashboards in SigNoz
 doc_type: howto
@@ -345,7 +345,7 @@ The new section renders immediately with its title and an add-panel prompt, even
 
 Each section header has a **...** (three-dot) menu on its right with four entries:
 
-- **Add panel**: open the **New Panel** dialog with this section pre-selected as the target. See [Add a Panel to a Dashboard](#add-a-panel-to-a-dashboard).
+- **Add panel**: open the **New panel** drawer with this section pre-selected as the target. See [Add a Panel to a Dashboard](#add-a-panel-to-a-dashboard).
 - **Rename section**: rename the section.
 - **Clone section**: duplicate the section and its panels.
 - **Delete section**: delete the section and the panels it contains.
@@ -581,36 +581,36 @@ You can also delete the dashboard you are viewing from its [options menu](#dashb
 
 ## Add a Panel to a Dashboard
 
-SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, and Histogram. To add a panel to a dashboard, follow the steps below:
+To add a panel to a dashboard, follow the steps below:
 
 1. From the sidebar, choose **Dashboards**.
 2. Find the dashboard to which you want to add a new panel.
 3. Select **New Panel** in the dashboard toolbar. To place the panel in a specific section, you can instead open that section's **...** (three-dot) menu and select **Add panel**, which pre-selects the section for you.
-4. Under **Select panel type**, choose a panel type.
+4. In the **New panel** drawer, choose a panel type. **Time Series** is selected by default. To find a type, search by name, or select a category such as **Compare & rank** to jump to it. See [Panel Types](https://signoz.io/docs/dashboards/panel-types/) for what each type shows. If you pick **Text**, follow the [Text panel](https://signoz.io/docs/dashboards/panel-types/text/) guide instead, because a Text panel has no query.
 
 <Figure
   src="/img/docs/userguide/manage-panels/new-panel-dialog-v2.webp"
-  alt="New Panel dialog showing the seven panel types and the Add panel to section picker"
-  caption="Choose a panel type, pick the target section, then select Add Panel."
+  alt="New panel drawer showing panel types grouped by category, with the add button at the bottom"
+  caption="Choose a panel type, then select the add button at the bottom of the drawer."
 />
 
-5. Under **Add panel to**, choose the section to place the panel in. The dropdown lists every section on the dashboard.
+5. _(Optional)_ To place the panel in a different section, select the arrow next to the add button. Under **Add to section**, choose **Dashboard (root)** or a section. To put the panel in a new section, select **New section** and enter a name.
 
 <Figure
   src="/img/docs/userguide/manage-panels/new-panel-section-picker.webp"
-  alt="The Add panel to dropdown listing the dashboard's sections"
-  caption="The Add panel to dropdown lists every section on the dashboard."
+  alt="The Add to section menu listing Dashboard (root), the dashboard's sections, and New section"
+  caption="The Add to section menu lists the dashboard root and every section."
 />
 
-6. Select **Add Panel** to open the panel editor.
+6. Select the add button to open the panel editor. The button names the target, for example **Add to Checkout**. On a dashboard without sections, it reads **Add panel**.
 7. Populate the following fields in the config pane on the right:
     1. Under **Panel Details**, set the **Title**. Enter a descriptive name for your panel.
     2. Under **Panel Details**, set the **Description**. Enter a brief and meaningful description of your new panel.
-    3. _(Optional)_ Under **Display options** → **Visualization**, set **Panel time preference**. Use the drop-down list to specify the time range for which you want to view data. The time range you specify here overrides the global value.
-    4. _(Optional)_ Under **Display options** → **Formatting & Units**, set the **Y Axis Unit**. Specify the unit of measurement for the y-axis.
+    3. _(Optional)_ Under **Display options** → **Visualization**, set **Time range**. **Global Time** follows the dashboard time picker. Choose a fixed range to override it for this panel.
+    4. _(Optional)_ Under **Display options** → **Formatting & Units**, set the **Unit** for the values.
 
 <Admonition type="info">
-The **Display options** sections vary by panel type. A Histogram panel, for example, shows **Histogram / Buckets** instead of **Axes** and **Formatting & Units**. See [Panel Types](https://signoz.io/docs/dashboards/panel-types/) for the options each type offers.
+The **Display options** sections vary by panel type. A Histogram panel, for example, shows **Buckets** instead of **Axes** and **Formatting & Units**. See [Panel Types](https://signoz.io/docs/dashboards/panel-types/) for the options each type offers.
 </Admonition>
 
 8. To specify the data displayed on your panel, you can use:
@@ -648,9 +648,17 @@ The full-page panel editor keeps your in-progress work as you move around:
 - **The Save button reflects state.** **Save** is enabled when there are unsaved changes and disabled when there are none, including after a refresh or after switching from the View modal to the full editor.
 - **A custom time range is preserved.** A time range picked in the editor's time picker is kept when you navigate back to the dashboard.
 - **Variables seed on direct load.** Opening the editor from a pasted link or a hard refresh seeds all variable values into the query preview.
-- **Visualization-type switches carry settings forward.** Changing the panel type (for example Time Series to Table) carries over axes soft min/max, log scale, time preference, stacking, fill spans, legend position and mode, and chart appearance instead of resetting them to defaults.
+- **Visualization-type switches carry settings forward.** Changing the panel type (for example Time Series to Table) carries over the y-axis range, log scale, time preference, stacking, fill spans, legend position and mode, and chart appearance instead of resetting them to defaults.
 
 The **Switch to Edit Mode** button in a panel's View modal appears only when you have edit permission on an unlocked dashboard.
+
+### Track unsaved changes in the config pane
+
+The config pane on the right of the panel editor marks what you have changed since the last save, so you can review and undo your edits one field at a time:
+
+- A dot appears on a section header (for example **Chart appearance** or **Thresholds**) whenever any field inside that section differs from the last saved state.
+- A **Reset** link appears next to an individual field when its value differs from the last saved state. Select it to revert that one field without touching the rest of the panel.
+- If you try to leave the editor with unsaved changes, SigNoz asks you to confirm before discarding them.
 
 ## Next Steps
 

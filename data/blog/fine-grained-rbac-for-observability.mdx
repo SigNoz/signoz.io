@@ -1,0 +1,259 @@
+---
+title: "Introducing the most granular RBAC in observability for humans & agents"
+date: 2026-10-16
+tags: [Product, Security, AI]
+authors: [avishek_kataria]
+description: "SigNoz has built the most granular RBAC in observability: access scoped to a single dashboard, separate telemetry access, and the same guardrails for AI agents."
+image: /img/blog/2026/10/fine-grained-rbac-for-observability.webp
+keywords: [fine-grained RBAC, observability access control, role-based access control, AI agent security, OpenFGA, telemetry access, SigNoz Cloud]
+related_articles:
+  - '/blog/new-infrastructure-monitoring-experience'
+  - '/blog/new-trace-detail-view'
+  - '/blog/signoz-mcp-observability-workflows'
+---
+<h2 className="!mb-2">TL;DR</h2>
+
+- SigNoz Cloud’s fine-grained RBAC lets you scope role-based permissions down to individual objects within a resource, like a specific dashboard.
+- Access to resources and access to the underlying telemetry are managed separately. If you don’t have access to the telemetry data, you can’t see that data through a dashboard built on top of it.
+- The access model works the same for humans and agents, so you can set fine-grained guardrails for your agents too.
+
+<Figure
+  src="/img/blog/2026/10/fine-grained-rbac-for-observability.webp"
+  alt="Introducing fine-grained RBAC in SigNoz Cloud"
+  caption="Fine-grained access control for humans and agents in SigNoz Cloud"
+/>
+
+As SigNoz Cloud started getting adopted by larger engineering teams and agents started becoming primary users, we realized we need to rethink our access control model for how teams and software development are evolving. Our current model will have limitations in the future.
+
+Vikrant, the product engineer behind our new access control model, gets very obsessed with the problems he is solving. This time, he pretty much disappeared for a few days, full-on monk mode, silent on Slack 😅.
+
+He started reading up on different access control models and systems, then looked into how other observability platforms handle access. He was not very pleased with access control across the observability space. Every platform had some gaps.
+
+## Why most access models in observability fall short
+
+1. **Access isn't as granular as observability data demands.**
+
+   When most observability platforms say they have granular access, they usually mean access to a whole collection of resources, like all dashboards. The atomic unit of access is usually the resource group, not individual objects within it, like a particular dashboard.
+
+   A few, like Datadog, let you manage access to individual objects, but usually through a separate mechanism that's hard to manage at scale. And in reality, every team works on a specific set of services or applications. They should have access to that set of objects only.
+
+2. **Resources and data are tightly connected.**
+
+   A dashboard is a set of queries over telemetry data. If someone shouldn’t have access to a service’s data, they shouldn’t be able to see that data through a dashboard built on top of it. Access to a resource and access to the underlying telemetry need to be separate decisions.
+
+3. **Sharing is easy, but hard to govern.**
+
+   In many platforms, if you can edit a resource, you can share and give access to someone else. However, this can create a chain of access that no one is actively tracking. That access can stay in place for a long time, until someone notices it.
+
+   This matters, because logs and traces may look like routine system data, but they can contain confidential information and reveal your architecture.
+
+## Agents add a new layer to access models
+
+Agents are becoming primary users of observability platforms. They debug incidents, build dashboards, change alerts, and monitor service health, mostly through MCP. On SigNoz, agentic operations via MCP have already overtaken regular operations on the platform.
+
+Until now, connecting an agent meant giving it an API key tied to a person's account. That key works like the person's own access token, so every agent gets everything that person can do.
+
+Agents need the same fine-grained model,
+
+- Give agents their own identity. Agents need their own service accounts, not a borrowed human key, so you can manage their access separately.
+- Scope what an agent can update. An agent that manages alerts for the checkout team should only be able to update checkout alerts.
+- Scope what an agent can read. There could be compliance and security rules you need to follow. You should be able to set boundaries on what data an agent can access, something like payment service logs.
+
+Agents move fast and at scale. They read everything they can reach and can make many changes in a single run. So the real question is how much surface area you give them.
+
+> Access control is the protocol to set the guardrails for your agents and agentic workflows.
+
+## SigNoz Cloud Access Control Model
+
+When Vikrant started building the model, there was a single objective in his mind:
+DOES A SUBJECT (S1) have RELATION (READ) WITH OBJECT (LOGS:CHECKOUT)?
+
+<Figure
+  src="/img/blog/2026/10/rbac-authorization-check.webp"
+  alt="Authorization check between a subject, relation, and object"
+  caption="An access check asks whether a subject has a relation with an object"
+/>
+
+In Vikrant’s research, the model that best fit was ReBAC (relationship-based access control). This is the approach popularized by Google’s Zanzibar, the system behind permissions across Google’s products.
+
+The easiest way to understand this is Google Drive. You can share a whole folder, and everyone with access can access any file in it. But you can also share a single file inside the folder. And for each object, you can specify edit, view, or comment access.
+
+Observability has a similar shape. Teams own services. Each service has its logs, traces, dashboards, alerts, and overall telemetry data. Then there are platform teams that need access to a broader set of dashboards, logs, or other resources.
+
+So the access model needs to be granular down to individual resources, while also supporting groups of resources.
+
+This is what we have built. To implement it, under the hood, SigNoz Cloud uses OpenFGA, an open-source CNCF project that implements the Zanzibar model, behind our own policy language.
+
+<Figure
+  src="/img/blog/2026/10/rbac-role-model.webp"
+  alt="A role connecting subjects to relations on individual objects"
+  caption="A role connects subjects to relations on individual objects"
+/>
+
+A role is not a single user, and it is also not just a list of permissions. It's a set of relationships between objects, relations, and users (humans or agents).
+
+Each role is a combination of specific relations and objects, like update access on a specific alert. A user or service account, i.e., an agent, can hold multiple roles.
+
+In the above diagram, Role A holds three pairs - `{r1, o1}`, `{r2, o2}`, and `{r3, o3}`. Each pair defines what action the role can take on which object. For example, these pairs could be:
+
+- `{r1, o1}` - read the checkout latency dashboard
+- `{r2, o2}` - update alerts on checkout errors
+- `{r3, o3}` - read logs from the checkout service’s ingestion key
+
+## SigNoz Cloud Access Control Model Terminology
+
+| Term | Description |
+| --- | --- |
+| Subject (also called a principal) | Whoever is making the request. It could be either a human or an agent, i.e., `abc@xyz.com` or `service-account`. |
+| Resource | A domain entity in SigNoz, e.g. dashboards, alerts, or pipelines. |
+| Object | A specific instance of a resource, i.e. an individual resource. For example, a specific dashboard with the ID `0198a868-c04a-747f-af6b-ae42d3ef23ee` |
+| Relation | The type of action, e.g. create, read, list, update, or delete. |
+| Transaction | A relation applied to an object, e.g. update a specific dashboard. |
+| Role | A set of transactions, e.g. `update<>dashboardA+read<>AlertB`. |
+| Selector | How a role selects which objects it covers, e.g. a `specific-ID` or `*` for all. |
+
+## Define the relation and transaction for every resource
+
+Now, in SigNoz Cloud, if you go to Roles, you will see the option to create a new role.
+
+When you start creating a new role, you’ll get a list of all the resource groups. This includes dashboards, alerts, API keys, logs, metrics, licenses, and more.
+
+For any resource group, you have the flexibility to give any of the following transaction access:
+
+- create
+- delete
+- list
+- read
+- update
+- attach (assign a role to a user or service account)
+- detach (unassign a role from a user or service account)
+
+We have ensured every relation is different. If you grant a user update access, it does not stack delete access into it.
+
+And it doesn’t stop there. For each resource group and transaction, you can also choose which resources you want to give access to:
+
+- all
+- none
+- only selected
+
+<Figure
+  src="/img/blog/2026/10/create-role-dashboard-access.gif"
+  alt="Creating a role with granular access to a specific dashboard"
+  caption="An animated illustration of creating a role with granular access to a specific dashboard"
+/>
+
+This gives you full control over the level of access each role gets - what a user can do and which specific resources they can do it on.
+
+For the full list of relations each resource supports, see the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
+
+## Access scoped down to individual resources
+
+As we mentioned above, for each resource group, you have an option called **Only selected**.
+
+Using **Only selected**, for each resource and transaction mapping, you can pick the specific resources you want to give access to. It can be a single dashboard or alert.
+
+We’re one of the few platforms that treat individual resources as the atomic unit of access, rather than resource groups.
+
+So now, every access check comes down to one question we were solving for:
+DOES A SUBJECT (S1) have RELATION (READ) WITH OBJECT (LOGS:CHECKOUT)?
+
+## Separate access for underlying telemetry
+
+To ensure high-grade control and security, we’ve kept access to your underlying telemetry separate from resource access.
+
+Underlying telemetry can hold a lot of confidential and business data. You don’t want it floating around freely just because someone got regular read or update access to a resource.
+
+Let’s say, in a traditional system, you give a user access to a dashboard that is querying payment logs. That user can then go and view the payment logs, including confidential or business data they shouldn’t be seeing.
+
+Access to underlying telemetry is scoped by the ID of the ingestion key your data is sent with.
+
+<Figure
+  src="/img/blog/2026/10/scope-telemetry-by-ingestion-key.gif"
+  alt="Scoping read access to metrics from a single ingestion key"
+  caption="An animated illustration of scoping read access to metrics from a single ingestion key"
+/>
+
+To set it up:
+
+1. Get the ID of the ingestion key.
+2. Go to the role and open logs or metrics.
+3. Choose **Only selected**.
+4. In the screen that opens, click the selector wizard and add the key there.
+
+To learn more about how telemetry access works, see the [Telemetry Access Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/telemetry/).
+
+## Access control works the same for your AI agents
+
+The same model applies to your AI agents. With agents, access control is also about setting guardrails on what they can access and what operations they can perform.
+
+Until now, agents used to connect using a user’s API key, most often an admin’s. The agent used to get all the access the user had.
+
+Now, each agent gets its own identity through a service account.
+
+<Figure
+  src="/img/blog/2026/10/assign-role-to-agent.gif"
+  alt="Assigning a role to a service account"
+  caption="An animated illustration of assigning a role to a service account"
+/>
+
+To give your AI assistant or production agent access:
+
+1. Create a service account for the agent.
+2. Assign it a role, the same way you would for a user.
+3. Create a key for the service account, for example an MCP key.
+4. Use that key to connect the agent. Every request it makes is authorized against that service account’s role.
+
+Let’s say you want an AI assistant to read one specific dashboard only. Create a role with read access to just that dashboard, assign it to the assistant’s service account, and create an MCP key for it.
+
+If the assistant also needs to run those queries, give the role access to the underlying telemetry based on the ingestion key.
+
+## Manage access as code
+
+At SigNoz, we make every part of observability programmable.
+
+We've followed the same approach for access control. Each role has a JSON view with its transaction groups, covering the relations granted and the resources and individual objects picked through selectors.
+
+```json
+[
+  {
+    "objectGroup": {
+      "resource": { "kind": "dashboard", "type": "metaresource" },
+      "selectors": ["<dashboard-id>"]
+    },
+    "relation": "update"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "logs", "type": "telemetryresource" },
+      "selectors": ["builder_query/signoz.workspace.key.id/<ingestion-key-id>"]
+    },
+    "relation": "read"
+  }
+]
+```
+
+You can switch to JSON mode to create or edit a role directly. SigNoz validates it as you type. This makes it easy to copy a setup from one role to another.
+
+You can also make bulk changes or ask an agent to draft or edit the JSON for you.
+
+## SigNoz Cloud RBAC Philosophy
+
+Our philosophy while building access control was to be bold about authorization errors.
+
+SigNoz Cloud doesn’t hide buttons or quietly remove parts of the product when you lack access. If you can’t create a dashboard, you’ll still see the create button, along with an error that tells you exactly which transaction you’re missing. Copy that message and request it from whoever manages access in your organization.
+
+If a user has access to a resource, it does not mean they can share that access with someone else. In SigNoz Cloud, access is granted through roles and managed from one place. You do not end up with a chain of untracked access.
+
+> You cannot really request access that you don’t know exists in the first place. - Vikrant
+
+## Watch a demo of how to manage dashboard access for a role
+
+<YouTube id="KkWlSdQbsTo" mute="false" />
+
+## Getting Started with SigNoz
+
+SigNoz Cloud is OpenTelemetry-native and brings logs, traces, and metrics into one observability platform, with deep querying and investigation workflows across all three. [**Start a free trial**](https://signoz.io/teams/).
+
+If you prefer to keep data in your own environment, SigNoz is also available as a [**self-hosted Enterprise edition**](https://signoz.io/contact-us/) and as the open-source [**Community edition**](https://signoz.io/docs/install/self-host/).
+
+Note - Fine-grained RBAC is currently available for enterprise plans only.
