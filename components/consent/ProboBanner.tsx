@@ -170,18 +170,18 @@ export default function ProboBanner() {
             <div
               role="dialog"
               aria-modal="false"
-              aria-labelledby="consent-banner-title"
-              aria-describedby="consent-banner-description"
+              aria-labelledby="site-prefs-title"
+              aria-describedby="site-prefs-description"
               className="fixed bottom-4 left-4 right-4 z-[2147483000] rounded-md border border-[var(--l2-border)] bg-[var(--popover)] p-5 shadow-[0_12px_32px_color-mix(in_srgb,var(--bg-base-black)_45%,transparent)] sm:right-auto sm:w-[440px]"
             >
               <h2
-                id="consent-banner-title"
+                id="site-prefs-title"
                 className="text-[15px] font-medium text-[var(--l1-foreground)]"
               >
                 {texts.banner_title}
               </h2>
               <p
-                id="consent-banner-description"
+                id="site-prefs-description"
                 className="mt-2 text-[13px] leading-[1.55] text-[var(--l2-foreground)]"
               >
                 {withPlaceholder(
@@ -215,13 +215,13 @@ export default function ProboBanner() {
               <div
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="consent-panel-title"
+                aria-labelledby="site-prefs-panel-title"
                 onKeyDown={onPanelKeyDown}
                 className="flex max-h-[100dvh] w-full flex-col border border-[var(--l2-border)] bg-[var(--popover)] shadow-[0_12px_32px_color-mix(in_srgb,var(--bg-base-black)_45%,transparent)] sm:max-h-[85vh] sm:max-w-[560px] sm:rounded-md"
               >
                 <div className="flex items-center justify-between gap-4 border-b border-[var(--l2-border)] px-5 py-4">
                   <h2
-                    id="consent-panel-title"
+                    id="site-prefs-panel-title"
                     className="text-[15px] font-medium text-[var(--l1-foreground)]"
                   >
                     {texts.panel_title}
