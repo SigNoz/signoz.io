@@ -1,6 +1,6 @@
 ---
-date: 2026-10-15
-title: 'Metric Types and Aggregation: Learn How Reduce To Works'
+date: 2026-10-26
+title: 'Metric Types and Aggregation: Temporal, Spatial, Reduce To'
 description: Learn how metric types, temporal and spatial aggregation, and Reduce To turn time series into values for SigNoz Number and Table panels.
 doc_type: explanation
 ---
@@ -134,7 +134,7 @@ Gauge metrics do not support Rate or Increase temporal aggregation. To compute c
 2. Clone it as query **B** and add a **Time Shift** function to **B**, with the shift value in seconds (for example, `3600` for a 1-hour comparison).
 3. Add a formula **A − B** to calculate the difference between the current and shifted values.
 
-See the <a href="https://signoz.io/docs/userguide/query-builder-v5/#functions-for-extended-data-analysis" target="_blank" rel="noopener noreferrer nofollow">Time Shift function documentation</a> for details.
+See the [Time Shift function documentation](https://signoz.io/docs/querying/functions-extended-analysis/#time-shift-functions) for details.
 </Admonition>
 
 For each interval, the aggregated value is calculated based on the temporal aggregation function specified in the query. The result of this step is a single aggregated value for each interval within the time series. The number of time series remains the same after temporal aggregation.
@@ -346,7 +346,7 @@ A Histogram metric works the same way in SigNoz's Metrics Explorer: P95 spatial 
 
 Temporal aggregation first produces one point per interval for each input series. Spatial aggregation combines the series within each group, still leaving one point per interval. Reduce To then combines those interval points within each result group over the panel's selected time range. If your query uses functions, those functions run before Reduce To.
 
-Choose **Latest** for the last returned point, **Sum** to add the points, **Avg** for their arithmetic mean, or **Min** and **Max** for the smallest and largest points. Avg gives each returned, non-NaN point equal weight, even when the intervals contain different numbers of raw measurements. An average of interval averages can therefore differ from the average of all the original measurements.
+Choose **Latest of values in timeframe** for the last returned point, **Sum of values in timeframe** to add the points, **Average of values in timeframe** for their arithmetic mean, or **Min of values in timeframe** and **Max of values in timeframe** for the smallest and largest points. The average gives each returned, non-NaN point equal weight, even when the intervals contain different numbers of raw measurements. An average of interval averages can therefore differ from the average of all the original measurements.
 
 ### Example: the same query in a Number or Table panel
 
@@ -364,10 +364,10 @@ For a Table panel, use spatial **Sum** grouped by `service.name`. Each service k
 
 | Reduce To | Number, no grouping | Table, checkout | Table, payments |
 | --- | --- | --- | --- |
-| Latest | 90 | 30 | 60 |
-| Sum | 180 | 60 | 120 |
-| Avg | 60 | 20 | 40 |
-| Min | 30 | 10 | 20 |
-| Max | 90 | 30 | 60 |
+| Latest of values in timeframe | 90 | 30 | 60 |
+| Sum of values in timeframe | 180 | 60 | 120 |
+| Average of values in timeframe | 60 | 20 | 40 |
+| Min of values in timeframe | 30 | 10 | 20 |
+| Max of values in timeframe | 90 | 30 | 60 |
 
-For example, **Avg** in the Number panel is `(30 + 60 + 90) / 3 = 60`. **Sum** is `180 MiB` across those interval points, while **Latest** is the most recent combined memory usage, `90 MiB`. Choose the reduction that answers your question, since summing memory measurements over time does not describe current memory usage.
+For example, the average in the Number panel is `(30 + 60 + 90) / 3 = 60`. The sum is `180` across those interval points, while the latest value is the most recent combined memory usage, `90 MiB`. Choose the reduction that answers your question, since summing memory measurements over time does not describe current memory usage.

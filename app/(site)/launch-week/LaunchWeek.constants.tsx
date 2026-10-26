@@ -55,6 +55,9 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Thursday - October 15',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/j3k51i73',
+    watchUrl:
+      'https://www.linkedin.com/events/json-nativelogs-fasterqueries-w7515463825773461504/theater/',
+    blogUrl: 'https://signoz.io/blog/introducing-json-native-logs/',
   },
   {
     title: 'Fine-grained RBAC',
@@ -64,5 +67,8 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     date: 'Friday - October 16',
     time: '9:00 AM PT',
     registrationUrl: 'https://luma.com/9zyc50cx',
+    watchUrl:
+      'https://www.linkedin.com/events/mostgranularrbacinobservability7515584612438384640/theater/',
+    blogUrl: 'https://signoz.io/blog/fine-grained-rbac-for-observability/',
   },
 ] as const

@@ -1,7 +1,7 @@
 ---
-date: 2026-10-12
-title: AWS One-Click Integrations
-description: Monitor your AWS infrastructure with SigNoz's One-Click AWS Integration. Automatically discover and collect metrics and logs from services like EC2, Lambda, RDS, and more.
+date: 2026-10-19
+title: AWS One-Click Integration - Collect AWS Metrics and Logs
+description: Connect AWS accounts to SigNoz with the One-Click AWS Integration to collect metrics and logs from EC2, Lambda, RDS, and more across your regions.
 doc_type: explanation
 tags: [SigNoz Cloud]
 
@@ -85,12 +85,20 @@ To expand monitoring to new regions or services:
 2. Select the additional regions or services you wish to monitor.
 3. The agent will automatically update the configuration to include these new resources.
 
+You turn on log and metric collection per service, and the setting applies to every region that you enable for the AWS account. You cannot enable one service in one region and a different service in another region. [S3 Sync](https://signoz.io/docs/integrations/aws/s3-sync/) is the exception: you select each bucket together with its region.
+
 <Figure
   src="/img/docs/integrations/one-click-aws/aws-integration-multi-region.webp"
   alt="Adding Multi-Region Support"
   caption="Select additional regions to monitor"
   className="box-shadowed-image"
 />
+
+### Stopping Collection for a Service
+
+In SigNoz, go to **Integrations** > **Amazon Web Services**, open the service, and turn off **Log Collection**, **Metric Collection**, or both. The change applies to all enabled regions, and the agent removes the collection resources for that service.
+
+Do not delete a regional telemetry CloudFormation stack by hand to stop collection. The agent recreates the resources to match the configuration in SigNoz.
 
 ### Adding Multiple Accounts
 
@@ -99,6 +107,16 @@ You can connect multiple AWS accounts to a single SigNoz workspace:
 1. In the AWS Integrations page, click **Add Account**.
 2. Follow the same CloudFormation deployment steps for the new account.
 3. Data from all accounts will be aggregated in your dashboards, taggable by `account_id`.
+
+Each integration covers one AWS account, so you manage one integration for each account. If you connect a parent account, SigNoz does not set up its child accounts. If you provision through infrastructure as code, use the SigNoz cloud integration APIs to configure the integration for each account.
+
+### Updating the Agent
+
+The agent does not update automatically. To move it to a newer version:
+
+1. In the AWS Console, open the base `signoz-integration` CloudFormation stack.
+2. Update the `SigNozIntegrationAgentVersion` parameter to the version you want.
+3. Create and execute a change set. CloudFormation updates the agent's ECS service and Lambda function as required.
 
 ### Uninstallation
 
@@ -110,10 +128,12 @@ To remove the integration:
 
 ## Architecture
 
-The integration deploys an **AWS Integration Agent** in your chosen region. This agent:
+The integration deploys one **AWS Integration Agent** per AWS account, in the region you choose. The agent reads its configuration from SigNoz and manages the regional collection pipelines. It:
 - Scans for selected services across enabled regions.
 - Configures CloudWatch Metric Streams to push metrics to SigNoz.
 - Sets up CloudWatch Log Subscription Filters to forward logs via Kinesis Firehose.
+
+When you enable more regions, the agent adds collection pipelines in those regions. It does not add more agents.
 
 <Figure
   src="/img/docs/integrations/one-click-aws/aws-integration-cloudformation-output.webp"
