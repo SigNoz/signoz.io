@@ -16,7 +16,7 @@ export const HERO_METRICS: CustomerMetric[] = [
     label: 'savings on your Datadog bill',
   },
   {
-    value: '2 PB+/month',
+    value: '2 PB+\n/month',
     label: 'monthly ingest for one deployment',
   },
   {
