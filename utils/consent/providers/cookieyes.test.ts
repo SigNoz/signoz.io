@@ -1,19 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import {
-  UNDECIDED_CONSENT,
-  consentFromCategoryList,
-  hasExplicitChoice,
-  parseConsentCookie,
-} from './parse'
+import { UNDECIDED_CONSENT } from '../parse'
+import { consentFromCategoryList, parseCookieYesCookie } from './cookieyes'
 
 const cookie = (values: Record<string, string>) =>
   Object.entries({ consentid: 'abc', lastRenewedDate: '1755692567000', ...values })
     .map(([key, value]) => `${key}:${value}`)
     .join(',')
 
-describe('parseConsentCookie', () => {
+describe('parseCookieYesCookie', () => {
   it('treats a missing cookie as undecided with everything denied', () => {
-    expect(parseConsentCookie(undefined)).toEqual({
+    expect(parseCookieYesCookie(undefined)).toEqual({
       status: 'undecided',
       categories: { functional: false, analytics: false, performance: false, advertisement: false },
     })
@@ -29,7 +25,7 @@ describe('parseConsentCookie', () => {
       performance: 'no',
       advertisement: 'no',
     })
-    expect(parseConsentCookie(raw).status).toBe('undecided')
+    expect(parseCookieYesCookie(raw).status).toBe('undecided')
   })
 
   it('reads an explicit reject as decided with everything denied', () => {
@@ -42,7 +38,7 @@ describe('parseConsentCookie', () => {
       performance: 'no',
       advertisement: 'no',
     })
-    expect(parseConsentCookie(raw)).toEqual({
+    expect(parseCookieYesCookie(raw)).toEqual({
       status: 'decided',
       categories: { functional: false, analytics: false, performance: false, advertisement: false },
     })
@@ -58,7 +54,7 @@ describe('parseConsentCookie', () => {
       performance: 'no',
       advertisement: 'no',
     })
-    expect(parseConsentCookie(encodeURIComponent(raw)).categories).toEqual({
+    expect(parseCookieYesCookie(encodeURIComponent(raw)).categories).toEqual({
       functional: true,
       analytics: true,
       performance: false,
@@ -76,7 +72,7 @@ describe('parseConsentCookie', () => {
       performance: 'yes',
       advertisement: 'yes',
     })
-    expect(parseConsentCookie(raw)).toEqual(UNDECIDED_CONSENT)
+    expect(parseCookieYesCookie(raw)).toEqual(UNDECIDED_CONSENT)
   })
 })
 
@@ -88,13 +84,5 @@ describe('consentFromCategoryList', () => {
       performance: false,
       advertisement: false,
     })
-  })
-})
-
-describe('hasExplicitChoice', () => {
-  it('is true only after the visitor acted in the banner', () => {
-    expect(hasExplicitChoice(cookie({ action: 'yes', analytics: 'no' }))).toBe(true)
-    expect(hasExplicitChoice(cookie({ action: '', analytics: 'yes' }))).toBe(false)
-    expect(hasExplicitChoice(undefined)).toBe(false)
   })
 })
