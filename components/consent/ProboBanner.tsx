@@ -107,14 +107,14 @@ export default function ProboBanner() {
   }, [])
 
   useEffect(() => {
-    if (state !== 'panel') return
+    if (state !== 'panel' || !config) return
     const { style } = document.documentElement
     const previous = style.overflow
     style.overflow = 'hidden'
     return () => {
       style.overflow = previous
     }
-  }, [state])
+  }, [state, config])
 
   if (!bannerId || !apiUrl) return null
 
@@ -163,105 +163,110 @@ export default function ProboBanner() {
       gcm-enabled="false"
       lang="en"
     >
-      <probo-banner>
-        <div
-          role="dialog"
-          aria-modal="false"
-          aria-labelledby="consent-banner-title"
-          aria-describedby="consent-banner-description"
-          className="fixed bottom-4 left-4 right-4 z-[2147483000] rounded-md border border-[var(--l2-border)] bg-[var(--popover)] p-5 shadow-[0_12px_32px_color-mix(in_srgb,var(--bg-base-black)_45%,transparent)] sm:right-auto sm:w-[440px]"
-        >
-          <h2
-            id="consent-banner-title"
-            className="text-[15px] font-medium text-[var(--l1-foreground)]"
-          >
-            {texts.banner_title}
-          </h2>
-          <p
-            id="consent-banner-description"
-            className="mt-2 text-[13px] leading-[1.55] text-[var(--l2-foreground)]"
-          >
-            {withPlaceholder(
-              texts.banner_description ?? '',
-              'cookie_policy_link',
-              <a className="content-link" href={config?.cookie_policy_url}>
-                {texts.cookie_policy_link_text}
-              </a>
-            )}
-          </p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <probo-accept-button className={ACTION_WRAPPER}>
-              <Button size="sm">{texts.button_accept_all}</Button>
-            </probo-accept-button>
-            <probo-reject-button className={ACTION_WRAPPER}>
-              <Button size="sm" variant="secondary">
-                {texts.button_reject_all}
-              </Button>
-            </probo-reject-button>
-            <probo-customize-button className={ACTION_WRAPPER}>
-              <Button size="sm" variant="secondary">
-                {texts.button_customize}
-              </Button>
-            </probo-customize-button>
-          </div>
-        </div>
-      </probo-banner>
-
-      <probo-preference-panel>
-        <div className="fixed inset-0 z-[2147483001] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="consent-panel-title"
-            onKeyDown={onPanelKeyDown}
-            className="flex max-h-[100dvh] w-full flex-col border border-[var(--l2-border)] bg-[var(--popover)] shadow-[0_12px_32px_color-mix(in_srgb,var(--bg-base-black)_45%,transparent)] sm:max-h-[85vh] sm:max-w-[560px] sm:rounded-md"
-          >
-            <div className="flex items-center justify-between gap-4 border-b border-[var(--l2-border)] px-5 py-4">
+      {/* Without a config (wrong origin, Probo unreachable) there is nothing to show or choose. */}
+      {config ? (
+        <>
+          <probo-banner>
+            <div
+              role="dialog"
+              aria-modal="false"
+              aria-labelledby="consent-banner-title"
+              aria-describedby="consent-banner-description"
+              className="fixed bottom-4 left-4 right-4 z-[2147483000] rounded-md border border-[var(--l2-border)] bg-[var(--popover)] p-5 shadow-[0_12px_32px_color-mix(in_srgb,var(--bg-base-black)_45%,transparent)] sm:right-auto sm:w-[440px]"
+            >
               <h2
-                id="consent-panel-title"
+                id="consent-banner-title"
                 className="text-[15px] font-medium text-[var(--l1-foreground)]"
               >
-                {texts.panel_title}
+                {texts.banner_title}
               </h2>
-              <button
-                type="button"
-                aria-label={texts.aria_close}
-                onClick={closePanel}
-                className="rounded p-1 text-[var(--l2-foreground)] hover:text-[var(--l1-foreground)]"
+              <p
+                id="consent-banner-description"
+                className="mt-2 text-[13px] leading-[1.55] text-[var(--l2-foreground)]"
               >
-                <X size={16} aria-hidden />
-              </button>
-            </div>
-            <div className="overflow-y-auto px-5 pt-4">
-              <p className="text-[13px] leading-[1.55] text-[var(--l2-foreground)]">
                 {withPlaceholder(
-                  texts.panel_description ?? '',
-                  'necessary_category',
-                  necessaryName
+                  texts.banner_description ?? '',
+                  'cookie_policy_link',
+                  <a className="content-link" href={config?.cookie_policy_url}>
+                    {texts.cookie_policy_link_text}
+                  </a>
                 )}
               </p>
-              <probo-category-list className="mt-4 block [&>probo-category]:block">
-                <template dangerouslySetInnerHTML={{ __html: CATEGORY_TEMPLATE }} />
-              </probo-category-list>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <probo-accept-button className={ACTION_WRAPPER}>
+                  <Button size="sm">{texts.button_accept_all}</Button>
+                </probo-accept-button>
+                <probo-reject-button className={ACTION_WRAPPER}>
+                  <Button size="sm" variant="secondary">
+                    {texts.button_reject_all}
+                  </Button>
+                </probo-reject-button>
+                <probo-customize-button className={ACTION_WRAPPER}>
+                  <Button size="sm" variant="secondary">
+                    {texts.button_customize}
+                  </Button>
+                </probo-customize-button>
+              </div>
             </div>
-            <div className="flex flex-col-reverse gap-2 border-t border-[var(--l2-border)] px-5 py-4 sm:flex-row sm:justify-end">
-              <probo-reject-button className={ACTION_WRAPPER}>
-                <Button size="sm" variant="secondary">
-                  {texts.button_reject_all}
-                </Button>
-              </probo-reject-button>
-              <probo-save-button className={ACTION_WRAPPER}>
-                <Button size="sm" variant="secondary">
-                  {texts.button_save}
-                </Button>
-              </probo-save-button>
-              <probo-accept-button className={ACTION_WRAPPER}>
-                <Button size="sm">{texts.button_accept_all}</Button>
-              </probo-accept-button>
+          </probo-banner>
+
+          <probo-preference-panel>
+            <div className="fixed inset-0 z-[2147483001] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="consent-panel-title"
+                onKeyDown={onPanelKeyDown}
+                className="flex max-h-[100dvh] w-full flex-col border border-[var(--l2-border)] bg-[var(--popover)] shadow-[0_12px_32px_color-mix(in_srgb,var(--bg-base-black)_45%,transparent)] sm:max-h-[85vh] sm:max-w-[560px] sm:rounded-md"
+              >
+                <div className="flex items-center justify-between gap-4 border-b border-[var(--l2-border)] px-5 py-4">
+                  <h2
+                    id="consent-panel-title"
+                    className="text-[15px] font-medium text-[var(--l1-foreground)]"
+                  >
+                    {texts.panel_title}
+                  </h2>
+                  <button
+                    type="button"
+                    aria-label={texts.aria_close}
+                    onClick={closePanel}
+                    className="rounded p-1 text-[var(--l2-foreground)] hover:text-[var(--l1-foreground)]"
+                  >
+                    <X size={16} aria-hidden />
+                  </button>
+                </div>
+                <div className="overflow-y-auto px-5 pt-4">
+                  <p className="text-[13px] leading-[1.55] text-[var(--l2-foreground)]">
+                    {withPlaceholder(
+                      texts.panel_description ?? '',
+                      'necessary_category',
+                      necessaryName
+                    )}
+                  </p>
+                  <probo-category-list className="mt-4 block [&>probo-category]:block">
+                    <template dangerouslySetInnerHTML={{ __html: CATEGORY_TEMPLATE }} />
+                  </probo-category-list>
+                </div>
+                <div className="flex flex-col-reverse gap-2 border-t border-[var(--l2-border)] px-5 py-4 sm:flex-row sm:justify-end">
+                  <probo-reject-button className={ACTION_WRAPPER}>
+                    <Button size="sm" variant="secondary">
+                      {texts.button_reject_all}
+                    </Button>
+                  </probo-reject-button>
+                  <probo-save-button className={ACTION_WRAPPER}>
+                    <Button size="sm" variant="secondary">
+                      {texts.button_save}
+                    </Button>
+                  </probo-save-button>
+                  <probo-accept-button className={ACTION_WRAPPER}>
+                    <Button size="sm">{texts.button_accept_all}</Button>
+                  </probo-accept-button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </probo-preference-panel>
+          </probo-preference-panel>
+        </>
+      ) : null}
     </probo-cookie-banner-root>
   )
 }
