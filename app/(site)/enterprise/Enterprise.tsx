@@ -368,8 +368,8 @@ export default function Enterprise() {
                 <div className="flex flex-row items-start gap-4">
                   <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
                   <div className="font-normal">
-                    Our powerful ingestion engine has a proven track record of handling 10TB+ data
-                    ingestion per day.
+                    Our powerful ingestion engine has a proven track record of handling 2PB+ data
+                    ingestion per month.
                   </div>
                 </div>
 
