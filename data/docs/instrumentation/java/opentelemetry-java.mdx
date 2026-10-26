@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-10-26
 
 title: Java & Spring Boot OpenTelemetry Setup Guide
 description: Learn how to instrument Java and Spring Boot apps with the OpenTelemetry Java agent. Auto-instrument JDBC, HTTP clients, and queues for real-time tracing.
@@ -166,7 +166,7 @@ metadata:
   name: java-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4318
+    endpoint: http://<collector-service>:4318
   propagators:
     - tracecontext
     - baggage
@@ -178,6 +178,8 @@ spec:
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
 ```
+
+Replace `<collector-service>` with the address of the collector Service that receives the application's telemetry. If you installed the Collection Agent with the OpenTelemetry Operator guide, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector) for its Service.
 
 <KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
