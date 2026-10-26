@@ -1,0 +1,361 @@
+---
+date: 2026-10-22
+title: Hono OpenTelemetry Instrumentation - Send Traces and Metrics
+description: Instrument a Hono app on Node.js or Bun with the @hono/otel middleware and the OpenTelemetry SDK. Send route-level traces and HTTP metrics to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+This guide shows you how to instrument a <a href="https://hono.dev" target="_blank" rel="noopener noreferrer nofollow">Hono</a> application with OpenTelemetry and send traces and metrics to SigNoz. The <a href="https://github.com/honojs/middleware/tree/main/packages/otel" target="_blank" rel="noopener noreferrer nofollow">`@hono/otel`</a> middleware creates one span for each request, named by route, and records HTTP request metrics. The [OpenTelemetry Node.js SDK](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/) exports the data and traces the calls that your routes make, such as `fetch` requests and database queries. The main path runs Hono on Node.js. For Bun, see [Instrument Hono on Bun](https://signoz.io/docs/instrumentation/javascript/opentelemetry-hono/#instrument-hono-on-bun).
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Node.js 22.15 or newer. The current OpenTelemetry SDK packages need this version.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- A Hono app on Node.js. To create one, run `npm create hono@latest my-app -- --template nodejs`.
+
+Tested with Node.js v22.23.2, Hono 4.13.13, `@hono/otel` 1.2.0, and `@opentelemetry/sdk-node` 0.300.0.
+
+## Send telemetry from a Hono app
+
+### Step 1. Install the packages
+
+Run this command in the root of your project:
+
+```bash
+npm install @hono/otel \
+  @opentelemetry/api \
+  @opentelemetry/sdk-node \
+  @opentelemetry/auto-instrumentations-node \
+  @opentelemetry/instrumentation
+```
+
+### Step 2. Create the instrumentation file
+
+Create `src/instrumentation.ts`. This file starts the OpenTelemetry SDK before your app loads:
+
+```ts:src/instrumentation.ts defaultCollapsed
+import { register } from 'node:module'
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
+
+// Lets OpenTelemetry patch modules that the ESM app imports
+register('@opentelemetry/instrumentation/hook.mjs', import.meta.url)
+
+const sdk = new NodeSDK({
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      // @hono/otel creates the server span, so skip the duplicate HTTP server span
+      '@opentelemetry/instrumentation-http': {
+        disableIncomingRequestInstrumentation: true,
+      },
+    }),
+  ],
+})
+
+sdk.start()
+
+process.on('SIGTERM', () => {
+  sdk.shutdown().finally(() => process.exit(0))
+})
+```
+
+The file does three things:
+
+- The `register()` call adds the OpenTelemetry loader hook. The Hono Node.js template is an ECMAScript module (ESM) app, and without the hook the SDK cannot trace outgoing `node:http` calls.
+- `disableIncomingRequestInstrumentation` stops the HTTP instrumentation from creating a second server span for each request. Outgoing HTTP calls are still traced.
+- The `SIGTERM` handler sends the remaining data to SigNoz before the app stops.
+
+The SDK reads the endpoint, the ingestion key, and the service name from environment variables, which you set in Step 4.
+
+### Step 3. Add the middleware to your app
+
+Add `httpInstrumentationMiddleware()` before your routes in `src/index.ts`:
+
+```ts:src/index.ts {3,7}
+import { serve } from '@hono/node-server'
+import { Hono } from 'hono'
+import { httpInstrumentationMiddleware } from '@hono/otel'
+
+const app = new Hono()
+
+app.use(httpInstrumentationMiddleware())
+
+app.get('/', (c) => {
+  return c.text('Hello Hono!')
+})
+
+serve({
+  fetch: app.fetch,
+  port: 3000
+}, (info) => {
+  console.log(`Server is running on http://localhost:${info.port}`)
+})
+```
+
+Then update the `dev` and `start` scripts in `package.json`, so that Node.js loads the instrumentation file first:
+
+```json:package.json
+"scripts": {
+  "dev": "tsx watch --import ./src/instrumentation.ts src/index.ts",
+  "build": "tsc",
+  "start": "node --import ./dist/instrumentation.js dist/index.js"
+}
+```
+
+### Step 4. Set environment variables and run
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the variables in the shell that starts your app, then build and run it:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=<environment>"
+
+npm run build
+npm start
+```
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+Add these variables to the container spec in your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+  - name: OTEL_SERVICE_NAME
+    value: "<service-name>"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "deployment.environment.name=<environment>"
+```
+
+Build the container image with the `Dockerfile` from the Docker tab. To send a test request from your workstation, forward a local port to the deployment. Replace `<deployment-name>` with the name of your deployment:
+
+```bash
+kubectl port-forward deploy/<deployment-name> 3000:3000
+```
+
+Then run `curl http://localhost:3000/` in another terminal.
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile:Dockerfile
+FROM node:22-slim
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+CMD ["node", "--import", "./dist/instrumentation.js", "dist/index.js"]
+```
+
+Create a `.dockerignore` file next to it, so that the build does not copy your local `node_modules` and `dist` folders:
+
+```text:.dockerignore
+node_modules
+dist
+```
+
+Build the image and pass the variables when you run it:
+
+```bash
+docker build -t hono-app .
+
+docker run \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=<environment>" \
+  -p 3000:3000 \
+  hono-app
+```
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set the variables in PowerShell, then build and run your app:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment.name=<environment>"
+
+npm run build
+npm start
+```
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: The name that SigNoz shows for your service, for example `hono-app`.
+- `<environment>`: The deployment environment, for example `production`.
+
+Send a few requests to your app, for example `curl http://localhost:3000/`. For local development, `npm run dev` with the same variables also sends data.
+
+<details>
+<ToggleHeading>
+
+## Instrument Hono on Bun
+
+</ToggleHeading>
+
+On Bun, the same middleware creates the request spans and the HTTP metrics. Bun does not need the loader hook. Bun's built-in `fetch` is not traced, so calls that your routes make with `fetch` do not get their own spans.
+
+Install the packages:
+
+```bash
+bun add @hono/otel @opentelemetry/api @opentelemetry/sdk-node
+```
+
+Create `src/instrumentation.ts`:
+
+```ts:src/instrumentation.ts
+import { NodeSDK } from '@opentelemetry/sdk-node'
+
+const sdk = new NodeSDK()
+
+sdk.start()
+
+process.on('SIGTERM', () => {
+  sdk.shutdown().finally(() => process.exit(0))
+})
+```
+
+Add the middleware to `src/index.ts`:
+
+```ts:src/index.ts {2,6}
+import { Hono } from 'hono'
+import { httpInstrumentationMiddleware } from '@hono/otel'
+
+const app = new Hono()
+
+app.use(httpInstrumentationMiddleware())
+
+app.get('/', (c) => {
+  return c.text('Hello Hono!')
+})
+
+export default app
+```
+
+Set the same environment variables as in Step 4, then start the app with the instrumentation file preloaded:
+
+```bash
+bun --preload ./src/instrumentation.ts src/index.ts
+```
+
+Tested with Bun v1.4.3.
+
+</details>
+
+## Validate
+
+After you run your instrumented application, make sure that traces and metrics reach SigNoz:
+
+1. Send a few requests to your app.
+2. Open the **Services** tab and find the service name that you set in `OTEL_SERVICE_NAME`. Each operation has the route name, for example `GET /users/:id`.
+3. Wait about a minute for the first metric export, then search for `http.server.request.duration` in the **Metrics Explorer**.
+
+<Figure
+  src="/img/docs/instrumentation/hono/hono-traces.webp"
+  alt="SigNoz Traces Explorer list view filtered to a Hono service, with request spans named GET / and status code 200"
+  caption="Hono request spans in the Traces Explorer"
+/>
+
+<Figure
+  src="/img/docs/instrumentation/hono/hono-metrics.webp"
+  alt="SigNoz Metrics Explorer summary for a Hono service listing http.server.request.duration.bucket and Node.js runtime metrics"
+  caption="Hono HTTP and runtime metrics in the Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Limitations
+
+</ToggleHeading>
+
+- `@hono/otel` creates one span for the whole request. Individual Hono middleware do not get their own spans.
+- `@hono/otel` sends only two HTTP metrics: `http.server.request.duration` and `http.server.active_requests`.
+- On Cloudflare Workers, the OpenTelemetry Node.js SDK does not run. To trace a Hono app on Workers, see [Cloudflare Workers OpenTelemetry](https://signoz.io/docs/instrumentation/opentelemetry-cloudflare/).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+Still no data? See [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+### Each request has two server spans
+
+- Likely cause: the HTTP instrumentation creates a server span named `GET`, without a route, and the Hono span is its child.
+- Fix: set `disableIncomingRequestInstrumentation: true` for `@opentelemetry/instrumentation-http`, as shown in Step 2. Do not use `ignoreIncomingRequestHook` for this. It stops tracing for the whole request, so the Hono span is not sent.
+- Verify: each request shows one span named by route, for example `GET /`.
+
+### Outgoing HTTP calls have no spans
+
+- Likely cause: the `register('@opentelemetry/instrumentation/hook.mjs', import.meta.url)` call is missing. In an ESM app, the SDK cannot patch `node:http` without the loader hook.
+- Fix: add the `register()` call to `src/instrumentation.ts`, as shown in Step 2, and restart the app.
+- Verify: a request to a route that calls another service shows a `GET` client span under the Hono span.
+
+### No data at all
+
+- Likely cause: the app does not load the instrumentation file, or the ingestion key is wrong. The app prints no error by default.
+- Fix: make sure that the start command includes `--import ./dist/instrumentation.js`. Then set `OTEL_LOG_LEVEL=info` and restart the app. An invalid key prints `Export failed with non-retryable error: OTLPExporterError: Unauthorized`. Correct `OTEL_EXPORTER_OTLP_HEADERS`.
+- Verify: the error no longer appears, and the service shows on the **Services** tab.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+To send telemetry through an OpenTelemetry Collector instead of directly to SigNoz Cloud, set `OTEL_EXPORTER_OTLP_ENDPOINT` to the OTLP/HTTP endpoint of your Collector, for example `http://localhost:4318`, and remove the `OTEL_EXPORTER_OTLP_HEADERS` variable.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for the steps.
+
+</details>
+
+## Next steps
+
+- [Choose which libraries get traced](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/) to cut spans that you do not need.
+- [Add custom spans and attributes](https://signoz.io/docs/instrumentation/javascript/nodejs-manual-instrumentation/) to trace the work inside your routes.
+- [Send logs from your Node.js app](https://signoz.io/docs/logs-management/send-logs/nodejs-logs/) and correlate them with traces.
+- [Set up alerts for your Hono service](https://signoz.io/docs/alerts/) on error rate or latency.
+
+## Get Help
+
+<GetHelp />

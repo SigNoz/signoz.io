@@ -2,7 +2,7 @@ import siteMetadata from '@/data/siteMetadata'
 import {
   ALTERNATIVES_SITEMAP_ROUTES,
   CMS_SITEMAP_SECTIONS,
-  CORPORATE_SITEMAP_ROUTES,
+  getCorporateSitemapRoutes,
   PRODUCT_SITEMAP_ROUTES,
   routeLabel,
   routeUrl,
@@ -58,7 +58,7 @@ export async function buildLlmsFullMarkdown(): Promise<string> {
 
   const company = [
     link('Company pages sitemap (markdown)', `${siteMetadata.siteUrl}/corporate/sitemap.md`),
-    routeLinks(CORPORATE_SITEMAP_ROUTES),
+    routeLinks(getCorporateSitemapRoutes()),
   ].join('\n')
 
   return [

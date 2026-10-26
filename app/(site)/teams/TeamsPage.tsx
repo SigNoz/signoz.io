@@ -320,7 +320,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
         <p className="text-center text-xs text-signoz_vanilla-100/50">
           By signing up, you agree to our{' '}
           <a
-            href="https://signoz.io/terms-of-service/"
+            href="https://signoz.io/legal/terms-of-service/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-signoz_robin-500 hover:underline"
@@ -329,7 +329,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
           </a>{' '}
           and{' '}
           <a
-            href="https://signoz.io/privacy/"
+            href="https://signoz.io/legal/privacy/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-signoz_robin-500 hover:underline"
