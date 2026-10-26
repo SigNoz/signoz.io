@@ -75,8 +75,8 @@ When a new `.log.gz` file is added to the specified S3 buckets, then:
     - Check AWS CloudWatch logs for the Lambda function (signoz-forwarder) to identify any errors.
     - Ensure that the `.log.gz` files are correctly formatted and compressed.
 - **`signoz-forwarder` Lambda Missing**:
-    - The Lambda function should exist in each region a bucket is configured under. If it is missing, check the `signoz-integration-telemetry-collection` CloudFormation stack in that region for failed events.
-    - Confirm that the bucket name is entered under the region where the bucket actually lives in AWS. If it is under the wrong region, move it to the correct region's field in the SigNoz UI.
+    - SigNoz creates the Lambda function only in a region that has at least one bucket that exists in that region. It skips a bucket entered under the wrong region. Move the bucket name to the field of the region where the bucket lives in AWS.
+    - Check the `signoz-integration-telemetry-collection` CloudFormation stack in that region for failed events.
 - **Permission Issues**:
     - Verify that the IAM roles created by the CloudFormation Template have the necessary permissions to access the S3 buckets and invoke the Lambda function.
     - Review the Integration Agent's access to AWS credentials and permissions.
@@ -86,7 +86,7 @@ When a new `.log.gz` file is added to the specified S3 buckets, then:
 To verify that your logs are being synced correctly:
 
 1.  Navigate to **Logs** → **Logs Explorer** in the SigNoz UI.
-2.  Filter by `service.name = signoz-forwarder`. Logs from all synced buckets and regions share this service name. To narrow results, filter by the `cloud.bucket.name` or `cloud.account.region` resource attributes.
+2.  Filter by `service.name = 'signoz-forwarder'`. Logs from all synced buckets and regions share this service name. To narrow the results, add a filter on the `cloud.bucket.name` or `cloud.account.region` resource attribute.
 3.  Confirm that new logs appear as files are added to your S3 bucket.
 
 ## Next Steps
