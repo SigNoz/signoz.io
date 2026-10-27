@@ -144,6 +144,16 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/guides/how-do-i-add-alerts-to-prometheus/',
+          destination: '/guides/what-is-a-prometheus-rule/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-the-alert-lifecycle-of-prometheus/',
+          destination: '/guides/what-is-a-prometheus-rule/',
+          permanent: true,
+        },
+        {
           source: '/guides/how-to-specify-custom-http-headers-in-prometheus/',
           destination: '/guides/what-is-prometheus-target/',
           permanent: true,
