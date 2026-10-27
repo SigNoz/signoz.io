@@ -135,7 +135,7 @@ When several alerts fire together, they are grouped into a **single issue** whos
 
 ## Issue lifecycle and transitions
 
-When an alert resolves, SigNoz **transitions the issue to a "done" status**; when a resolved alert fires again within the reopen window, SigNoz **reopens** it (moves it back out of "done").
+When an alert resolves, SigNoz **transitions the issue to a "done" status**; when a resolved alert fires again within the reopen window, SigNoz **reopens** it (moves it back out of "done"), unless the issue has the [Won't-fix resolution](#wont-fix-resolution).
 
 Transitions are matched by Jira's **status category** (`new` / `indeterminate` / `done`), not by hardcoded status names, so this works across any custom workflow:
 
@@ -147,14 +147,14 @@ Transitions are matched by Jira's **status category** (`new` / `indeterminate` /
 
 The **Reopen window** controls how long after resolution a re-firing alert reopens the *same* issue:
 
-- If a resolved alert fires again **within** this window, the same issue is reopened.
+- If a resolved alert fires again **within** this window, the same issue is reopened, unless it has the [Won't-fix resolution](#wont-fix-resolution).
 - **After** the window, a re-fire opens a **new** issue instead.
 
 Enter it as a duration using the units `m` (minutes), `h` (hours), `d` (days), `w` (weeks), or `y` (years), e.g. `30m`, `72h`, or `3d`. The **minimum is 1m** and the **default is 3d**.
 
 ### Won't-fix resolution
 
-Use the **Won't-fix resolution** field in **Advanced Options** to keep issues closed when your team resolves them as "won't fix". Enter the name of a resolution from your Jira site, such as `Won't Do`. Resolution names differ between Jira sites, so check yours in Jira.
+Use the **Won't-fix resolution** field in **Advanced Options** to keep issues closed when your team resolves them as "won't fix". Enter a value of the issue's **Resolution** field, such as `Won't Do`, not a status or transition name. Resolution names differ between Jira sites. A Jira admin can find them under **Jira settings > Work items > Resolutions** (see <a href="https://support.atlassian.com/jira-cloud-administration/docs/add-edit-or-delete-resolutions/" target="_blank" rel="noopener noreferrer nofollow">Add, edit, or delete resolutions</a>).
 
 - If an issue has this resolution, a re-firing alert opens a **new issue** and leaves the old one closed. The **Reopen window** does not apply to that issue.
 - If the field is empty, a re-firing alert reopens the last issue within the **Reopen window**.
