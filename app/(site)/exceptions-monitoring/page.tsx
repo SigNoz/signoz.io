@@ -1,5 +1,5 @@
 import React from 'react'
-import Exceptions from './Exceptions'
+import ExceptionsPage from './ExceptionsPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -22,6 +22,6 @@ export const metadata: Metadata = {
   },
 }
 
-export default function ExceptionsPage() {
-  return <Exceptions />
+export default function Page() {
+  return <ExceptionsPage />
 }

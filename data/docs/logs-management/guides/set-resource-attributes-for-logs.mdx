@@ -1,11 +1,13 @@
 ---
-date: 2026-08-25
+date: 2026-09-13
 title: Guide to add Resource Attributes
 description: Learn how to add resource attributes to your logs to enable better filtering, grouping, and correlation of logs in SigNoz.
 doc_type: howto
 ---
 
 Resource attributes provide contextual information about the source of your logs, such as service name, environment, hostname, and deployment details. These attributes enable better filtering, grouping, and correlation of logs in SigNoz. You can set resource attributes at different levels in your observability stack.
+
+This guide covers logs. For the same options across traces, logs, and metrics, and for attributes on a single span, metric, or log record, see [Set Custom Attributes in OpenTelemetry Traces, Logs, Metrics](https://signoz.io/docs/ingestion/set-custom-attributes/).
 
 ## Setting Resource Attributes at the Collector Level
 
@@ -46,7 +48,8 @@ The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/b
 ```yaml
 processors:
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
     system:
       hostname_sources: ['os']
     timeout: 5s
@@ -59,7 +62,7 @@ service:
       exporters: [otlp]
 ```
 
-This processor automatically adds resource attributes by detecting information from the environment, host system, Docker containers, and Kubernetes nodes. The `timeout` parameter controls how long the processor waits for detection to complete.
+This processor adds resource attributes that it detects from the environment, host system, and Docker containers. On Kubernetes, add the `k8snode` detector, which needs the `K8S_NODE_NAME` environment variable and RBAC read access to nodes. On Collector v0.154.0 and newer, use `k8s_api` to avoid a deprecation warning. The `timeout` parameter controls how long the processor waits for detection to complete.
 
 ## Setting Resource Attributes at the SDK Level
 
@@ -297,6 +300,7 @@ This approach ensures that all logs from your Kubernetes applications include co
 
 ## Related Guides
 
+- [Set Custom Attributes in OpenTelemetry Traces, Logs, Metrics](https://signoz.io/docs/ingestion/set-custom-attributes/) - Set attributes and resource attributes across every signal
 - [Remove Resource Attributes](https://signoz.io/docs/logs-management/guides/remove-resource-attributes/) - Remove unwanted resource attributes from your logs
 - [Tagging Logs from Multiple Applications](https://signoz.io/docs/userguide/collect_logs_from_file/#tagging-logs-from-multiple-applications) - Tag logs per application when multiple `filelog` receivers share one collector
 

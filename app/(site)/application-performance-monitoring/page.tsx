@@ -1,5 +1,5 @@
 import React from 'react'
-import Apm from './apm'
+import ApmPage from './ApmPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -22,6 +22,6 @@ export const metadata: Metadata = {
   },
 }
 
-export default function apmPage() {
-  return <Apm />
+export default function Page() {
+  return <ApmPage />
 }

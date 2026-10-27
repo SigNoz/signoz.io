@@ -1,7 +1,7 @@
 ---
-date: 2026-08-27
+date: 2026-10-12
 title: Collecting Tomcat Access and Garbage Collector Logs
-description: Collect Tomcat access logs and garbage collector logs with OpenTelemetry Collector and send them to SigNoz.
+description: Collect Tomcat access logs and garbage collector logs with the OpenTelemetry Collector filelog receiver, and search and analyze them in SigNoz.
 doc_type: howto
 hide_table_of_contents: true
 ---
@@ -89,7 +89,7 @@ Check the SigNoz UI for the exported logs.
 #### Scenario 1: SigNoz Running on the Same Host
 
 ##### 1. Modify Docker Compose File
-Update <a href="https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose.yaml" target="_blank" rel="noopener noreferrer nofollow">`docker-compose-minimal.yaml`</a> to mount your log files:
+Update `docker-compose-minimal.yaml` to mount your log files:
 
 ```yaml:/deploy/docker/docker-compose-minimal.yaml 
 otel-collector:
@@ -101,7 +101,7 @@ otel-collector:
 ```
 
 ##### 2. Add Filelog Receiver
-Update <a href="https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml" target="_blank" rel="noopener noreferrer nofollow">`otel-collector-config.yaml`</a> to include the filelog receiver:
+Update `otel-collector-config.yaml` to include the filelog receiver:
 
 ```yaml:/deploy/docker/otel-collector-config.yaml
 receivers:
@@ -120,7 +120,7 @@ receivers:
 ##### 3. Update Pipelines Configuration
 Modify the pipeline to include the filelog receiver:
 
-```yaml::/deploy/docker/otel-collector-config.yaml
+```yaml:/deploy/docker/otel-collector-config.yaml
 service:
   pipelines:
     logs:

@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 450" font-family="'Inter', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="135%">
+      <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arrAmber" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#fdcb6e"/>
+    </marker>
+    <marker id="arrGreen" markerWidth="8" markerHeight="8" refX="5" refY="2.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L5,2.5 L0,5 Z" fill="#00b894"/>
+    </marker>
+    <marker id="arrPurple" markerWidth="8" markerHeight="8" refX="5" refY="2.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L5,2.5 L0,5 Z" fill="#a29bfe"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="450" fill="url(#bgGrad)" rx="14"/>
+
+  <text x="500" y="40" text-anchor="middle" fill="#f5f6fa" font-size="19" font-weight="700">
+    One trace ID crosses both boundaries: in-process and service to service
+  </text>
+
+  <!-- process boundary divider -->
+  <line x1="500" y1="66" x2="500" y2="300" stroke="#636e72" stroke-width="1.5" stroke-dasharray="4 5"/>
+
+  <!-- ===== LEFT: service A ===== -->
+  <text x="250" y="70" text-anchor="middle" fill="#8d95a5" font-size="12" font-weight="600" letter-spacing="0.5">SERVICE A &#183; checkout</text>
+
+  <g filter="url(#shadow)">
+    <rect x="60" y="84" width="380" height="200" rx="10" fill="#20222e"/>
+    <rect x="60" y="84" width="6" height="200" rx="3" fill="#00b894"/>
+  </g>
+
+  <rect x="86" y="104" width="336" height="32" rx="7" fill="#2f3242"/>
+  <text x="102" y="125" fill="#f5f6fa" font-size="14" font-weight="600">POST /checkout</text>
+
+  <rect x="106" y="150" width="316" height="32" rx="7" fill="#2f3242"/>
+  <text x="122" y="171" fill="#f5f6fa" font-size="14" font-weight="600">validate-cart</text>
+
+  <rect x="126" y="196" width="296" height="32" rx="7" fill="#2f3242"/>
+  <text x="142" y="217" fill="#f5f6fa" font-size="14" font-weight="600">charge-card</text>
+
+  <!-- in-process parent-child connectors -->
+  <g fill="none" stroke="#00b894" stroke-width="1.6">
+    <path d="M96,136 L96,166 L104,166" marker-end="url(#arrGreen)"/>
+    <path d="M116,182 L116,212 L124,212" marker-end="url(#arrGreen)"/>
+  </g>
+
+  <text x="86" y="258" fill="#00b894" font-size="12" font-weight="600">in-process context</text>
+  <text x="86" y="274" fill="#9aa3b2" font-size="12">the runtime carries the parent span, no header involved</text>
+
+  <!-- ===== RIGHT: service B ===== -->
+  <text x="750" y="70" text-anchor="middle" fill="#8d95a5" font-size="12" font-weight="600" letter-spacing="0.5">SERVICE B &#183; payments</text>
+
+  <g filter="url(#shadow)">
+    <rect x="560" y="84" width="380" height="200" rx="10" fill="#20222e"/>
+    <rect x="560" y="84" width="6" height="200" rx="3" fill="#a29bfe"/>
+  </g>
+
+  <rect x="586" y="104" width="336" height="32" rx="7" fill="#2f3242"/>
+  <text x="602" y="125" fill="#f5f6fa" font-size="14" font-weight="600">POST /charge</text>
+
+  <rect x="606" y="150" width="316" height="32" rx="7" fill="#2f3242"/>
+  <text x="622" y="171" fill="#f5f6fa" font-size="14" font-weight="600">capture-payment</text>
+
+  <g fill="none" stroke="#a29bfe" stroke-width="1.6">
+    <path d="M596,136 L596,166 L604,166" marker-end="url(#arrPurple)"/>
+  </g>
+
+  <text x="586" y="258" fill="#a29bfe" font-size="12" font-weight="600">extracted context</text>
+  <text x="586" y="274" fill="#9aa3b2" font-size="12">POST /charge becomes a child of charge-card</text>
+
+  <!-- ===== the wire ===== -->
+  <path d="M442,212 C492,212 508,124 558,124" fill="none" stroke="#fdcb6e" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrAmber)"/>
+
+  <text x="448" y="234" fill="#fdcb6e" font-size="12" font-weight="700">inject</text>
+  <text x="552" y="104" text-anchor="end" fill="#fdcb6e" font-size="12" font-weight="700">extract</text>
+
+  <!-- process boundary label -->
+  <g transform="rotate(-90 500 183)">
+    <rect x="404" y="173" width="192" height="20" rx="4" fill="#1a1a2e" fill-opacity="0.92"/>
+    <text x="500" y="187" text-anchor="middle" fill="#8d95a5" font-size="12">process boundary &#183; HTTP</text>
+  </g>
+
+  <!-- ===== traceparent on the wire ===== -->
+  <text x="500" y="330" text-anchor="middle" fill="#8d95a5" font-size="12" font-weight="600" letter-spacing="0.5">WHAT THE PROPAGATOR PUTS ON THE WIRE</text>
+
+  <rect x="188" y="344" width="624" height="38" rx="8" fill="#1a1a2e" stroke="#fdcb6e" stroke-opacity="0.45"/>
+  <text x="500" y="369" text-anchor="middle" fill="#fdcb6e" font-size="14" font-family="'SFMono-Regular', Consolas, monospace">traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01</text>
+
+  <text x="483" y="404" text-anchor="middle" fill="#9aa3b2" font-size="11">trace-id shared by every span</text>
+  <text x="483" y="392" text-anchor="middle" fill="#636e72" font-size="11">&#9650;</text>
+  <text x="693" y="404" text-anchor="middle" fill="#9aa3b2" font-size="11">span ID of charge-card, the new parent</text>
+  <text x="693" y="392" text-anchor="middle" fill="#636e72" font-size="11">&#9650;</text>
+
+  <text x="500" y="430" text-anchor="middle" fill="#636e72" font-size="12" font-style="italic">break either boundary and SigNoz shows two short traces instead of one request</text>
+</svg>

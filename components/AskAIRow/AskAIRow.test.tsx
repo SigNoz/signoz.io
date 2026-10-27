@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import AskAIRow from './AskAIRow'
-import { buildAgentPrompt } from '../OpenInAI/OpenInAI.utils'
+import { buildAgentPrompt, buildExplainPrompt } from '../OpenInAI/OpenInAI.utils'
 
 const mockLogEvent = vi.fn()
 vi.mock('@/hooks/useLogEvent', () => ({
@@ -106,5 +106,13 @@ describe('buildAgentPrompt', () => {
 
     expect(prompt).toContain('Read https://signoz.io/ ')
     expect(prompt).not.toContain('signoz.io.md')
+  })
+})
+
+describe('buildExplainPrompt', () => {
+  it('points at the markdown twin and asks for a plain-language summary', () => {
+    const prompt = buildExplainPrompt('https://signoz.io/legal/privacy/')
+    expect(prompt).toContain('https://signoz.io/legal/privacy.md')
+    expect(prompt).toContain('plain-language summary')
   })
 })

@@ -32,7 +32,6 @@ export default function BlogLayout({
         authors={authors}
         toc={toc}
         contentType="blog"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in Ruby
 description: Learn how to add manual OpenTelemetry instrumentation in Ruby. Create custom spans, attach business attributes, and record errors for better debugging in SigNoz.
 
@@ -45,7 +45,99 @@ Tips:
 - Start spans with descriptive names that match business steps (`checkout`, `fetch-user`, etc.).
 - The `in_span` block automatically ends the span when the block completes.
 
-## Step 2. Add attributes and events
+## Step 2. Propagate context
+
+Ruby keeps the active span in a context store the runtime manages, so `in_span` links child spans for you inside a single call chain. Two things break that chain: a new thread, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+`in_span` activates the span for the duration of its block. `start_span` creates a span without activating it, so nothing nested inside becomes its child:
+
+```ruby:in_process.rb
+# validate_inventory's spans become children of process-order
+tracer.in_span('process-order') do |span|
+  validate_inventory(order_id)
+end
+
+# validate_inventory's spans do NOT become children of process-order
+span = tracer.start_span('process-order')
+validate_inventory(order_id)
+span.finish
+```
+
+A new thread starts with an empty context. Capture the current context before you spawn and activate it inside the thread:
+
+```ruby:threads.rb
+tracer.in_span('process-batch') do
+  context = OpenTelemetry::Context.current
+
+  items.map do |item|
+    Thread.new do
+      OpenTelemetry::Context.with_current(context) do
+        # Spans started here attach to process-batch
+        handle_item(item)
+      end
+    end
+  end.each(&:join)
+end
+```
+
+### Across a service boundary
+
+The Rails, Sinatra, `net/http`, and Sidekiq instrumentation gems inject and extract for you. Write the calls yourself for any hop they do not cover.
+
+```ruby:propagate.rb defaultCollapsed
+# Outgoing: inject writes traceparent into the carrier
+def charge_card(payload)
+  tracer.in_span('charge-card') do
+    carrier = {}
+    OpenTelemetry.propagation.inject(carrier)
+
+    # carrier is now { 'traceparent' => '00-<trace-id>-<span-id>-01' }
+    HTTP.headers(carrier).post('https://payments.internal/charge', json: payload)
+  end
+end
+
+# Incoming: extract returns a context to activate before the entry span
+def handle_charge(request)
+  context = OpenTelemetry.propagation.extract(request.headers)
+
+  OpenTelemetry::Context.with_current(context) do
+    tracer.in_span('handle-charge', kind: :server) do |span|
+      # handle-charge is now a child of charge-card in the caller's trace
+      capture_payment(request)
+    end
+  end
+end
+```
+
+For a queue, put the carrier on the message and read it back in the consumer:
+
+```ruby:queue.rb
+# Publisher
+carrier = {}
+OpenTelemetry.propagation.inject(carrier)
+queue.publish(payload, headers: carrier)
+
+# Consumer
+context = OpenTelemetry.propagation.extract(message.headers)
+OpenTelemetry::Context.with_current(context) do
+  tracer.in_span('process-message', kind: :consumer) { handle(message) }
+end
+```
+
+<Admonition type="warning">
+`inject` and `extract` take the carrier as the first argument. The context is an optional keyword defaulting to `OpenTelemetry::Context.current`, which is why the calls above pass only the carrier.
+
+The default getter is also case-sensitive. It looks for the literal lowercase key `traceparent`. Rails and Sinatra hand you a case-insensitive header object, but a plain `Hash` built from raw headers does not. A carrier that holds `Traceparent` extracts nothing and raises no error. When you build the carrier yourself, downcase the keys:
+
+```ruby
+carrier = raw_headers.transform_keys(&:downcase)
+context = OpenTelemetry.propagation.extract(carrier)
+```
+</Admonition>
+
+## Step 3. Add attributes and events
 
 Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
 
@@ -72,7 +164,7 @@ end
 - Keep attribute keys consistent (use semantic conventions when possible).
 - Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
 
-## Step 3. Record errors
+## Step 4. Record errors
 
 Flag failures on the span so they are easy to query in SigNoz.
 
@@ -115,7 +207,7 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 ### Why don't I see my custom spans in SigNoz?
 
-- Confirm the OpenTelemetry initializer runs before your application handlers.
+- Make sure that the OpenTelemetry initializer runs before your application handlers.
 - Check sampler configuration. Using a low sampling rate in development may drop most manual spans.
 - Verify traffic hits the functions where you inserted spans.
 
@@ -123,6 +215,13 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 - Ensure you use `in_span` blocks or properly manage span context for nested spans.
 - When calling external services or databases, the instrumentation must propagate context.
+
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `OpenTelemetry.propagation.inject` and that the outgoing request carries a `traceparent` header.
+- Make sure that the receiver wraps the entry span in `OpenTelemetry::Context.with_current(context)` using the context that `extract` returned.
+- Check the header case. The default getter is case-sensitive, so a carrier holding `Traceparent` rather than `traceparent` extracts nothing and reports no error.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
 
 ### Why don't attributes or events appear on the span?
 
@@ -136,3 +235,4 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 - [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Ruby application
 - Explore the <a href="https://opentelemetry.io/ecosystem/registry/?language=ruby&component=instrumentation" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Ruby instrumentation registry</a> for additional library instrumentations
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages

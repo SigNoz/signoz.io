@@ -9,6 +9,8 @@ import { ArrowUpRight, Grid2X2, List, Search } from 'lucide-react'
 import { cn } from 'app/lib/utils'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
+import { buttonVariants } from '@/components/ui/Button'
+
 import {
   customerStoryFilters,
   type CustomerStory,
@@ -351,7 +353,7 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
         {filteredStories.length > initialStoryCount ? (
           <div className="mt-10 flex justify-center">
             <button
-              className="rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] px-5 py-2.5 text-sm font-medium text-[var(--l1-foreground)] transition-colors hover:bg-[var(--l3-background)]"
+              className={buttonVariants({ variant: 'secondary' })}
               onClick={() => {
                 trackClick(
                   'Customer Story List',

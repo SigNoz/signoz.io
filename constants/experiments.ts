@@ -112,7 +112,8 @@ export const EXPERIMENTS = {
       VARIANT: 'new-homepage-hero',
     },
     flagName: 'homepage-hero-redesign',
-    defaultVariant: 'existing-homepage-hero',
+    concluded: true,
+    defaultVariant: 'new-homepage-hero',
   },
   // Add more experiments here as needed
 } as const

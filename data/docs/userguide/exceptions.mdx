@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-08-25
 title: Errors and Exceptions - Record, View, and Group Them
 description: Learn how SigNoz collects and groups exceptions from your traces, links each one to its request, and how to record exceptions in your code.
 doc_type: howto
@@ -9,7 +9,7 @@ doc_type: howto
 
 SigNoz reads exceptions from the traces that your services already send. Your instrumentation records each exception as an `exception` span event. SigNoz collects these events into the **Exceptions** view. The view groups them by service, exception type, and exception message.
 
-Every exception carries the span ID and the trace ID of its request. You can therefore move from a row in the list to the flame graph of that request. Nothing appears until your services send traces. If your services are not instrumented, [instrument them first](https://signoz.io/docs/instrumentation/overview/).
+Every exception carries the span ID and the trace ID of its request. You can therefore move from a row in the list to the <Tooltip text="flame graph" content="A visualization of a trace that shows each span as a horizontal bar positioned by start time and sized by duration, making the critical path and the slowest child operations obvious." link="https://signoz.io/docs/glossary/#flamegraph" /> of that request. Nothing appears until your services send traces. If your services are not instrumented, [instrument them first](https://signoz.io/docs/instrumentation/overview/).
 
 With the Exceptions view you can:
 
@@ -86,7 +86,7 @@ Instrumentation libraries record an exception event when the exception escapes t
 
 Record an exception yourself when it marks a failed operation that no library captured. An example is an error that you catch at a request boundary and turn into a 500 response. OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">no longer recommends</a> a record of an exception that you catch and recover from inside the span. These exceptions add noise to the Exceptions view and to your alerts.
 
-To record an exception, get the current span from the tracer. Then call `recordException()` or the equivalent for your language. This call adds the span event, but it does not change the span status. Set the status to error separately when the exception means that the operation failed.
+To record an exception, get the current span from the tracer. Then call `recordException()` or the equivalent for your language. This call adds the span event, but it does not change the <Tooltip text="span status" content="The outcome of the operation a span represents: Unset, Ok, or Error." link="https://signoz.io/docs/glossary/#span-status" />. Set the status to error separately when the exception means that the operation failed.
 
 The Java, Go, Python, JavaScript, and Ruby examples read the span that is current in a request handler. These examples must run inside an active span. Outside an active span, these APIs return a no-op span (`undefined` in JavaScript). The exception then goes nowhere. The .NET and PHP examples create their own span, so these two run alone when you configure a tracer provider.
 

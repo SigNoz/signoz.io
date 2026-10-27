@@ -1,0 +1,362 @@
+---
+date: 2026-09-23
+title: Deploying SigNoz with Flux CD - GitOps on Kubernetes
+description: Learn how to deploy SigNoz on Kubernetes with Flux CD. Define the Helm release in Git, and let Flux install and upgrade the stack for you.
+doc_type: howto
+tags: [Self-Host]
+---
+
+<HostingDecision />
+
+This guide explains how to deploy SigNoz on Kubernetes with <a href="https://fluxcd.io/" target="_blank" rel="noopener noreferrer nofollow">Flux CD</a>. You commit the SigNoz Helm release to Git. Flux reads the commit and applies it to the cluster.
+
+<Admonition type="info" title="Why Flux CD?" defaultCollapsed="true">
+Flux CD is a GitOps tool. GitOps means that Git holds the desired state of the cluster, and a controller makes the cluster match it. This approach gives you:
+
+- A record of every change to the SigNoz installation, in Git history
+- Upgrades and rollbacks through a commit, not a local `helm` command
+- Automatic correction when someone edits the live resources by hand
+</Admonition>
+
+## Prerequisites
+
+<CommonPrerequisites />
+- Flux CD 2.3 or later installed in the cluster. Run `flux bootstrap` first. See the <a href="https://fluxcd.io/flux/installation/bootstrap/" target="_blank" rel="noopener noreferrer nofollow">Flux bootstrap documentation</a>.
+- The `flux` CLI on your machine, version 2.3 or later.
+- Write access to the Git repository that Flux reconciles.
+
+The `flux bootstrap` command creates a `GitRepository` named `flux-system` in the `flux-system` namespace. The steps below reference that source.
+
+## Repository layout
+
+This guide uses two directories. One holds the Helm repository definitions that every application shares. The other holds the SigNoz release itself.
+
+```text
+clusters/
+└── demo/
+    ├── flux-system/               # created by flux bootstrap
+    └── infrastructure/
+        ├── kustomization.yaml
+        ├── sources.yaml
+        └── signoz.yaml
+infrastructure/
+├── sources/
+│   └── signoz.yaml
+└── signoz/
+    ├── kustomization.yaml
+    ├── namespace.yaml
+    └── helmrelease.yaml
+```
+
+Replace `demo` with the name of your cluster directory.
+
+## Installation steps
+
+### Add the SigNoz Helm repository
+
+The `HelmRepository` resource tells Flux where to download the SigNoz chart. Put it in the `flux-system` namespace so that every cluster and every release can use it.
+
+```yaml:infrastructure/sources/signoz.yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: signoz
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://charts.signoz.io
+```
+
+### Create the HelmRelease
+
+The `HelmRelease` resource describes the SigNoz installation. Flux installs the chart and keeps the release at the version you pin here.
+
+First, create the namespace:
+
+```yaml:infrastructure/signoz/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: signoz
+```
+
+Then create the release:
+
+```yaml:infrastructure/signoz/helmrelease.yaml defaultCollapsed
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: signoz
+  namespace: signoz
+spec:
+  interval: 1h
+  timeout: 15m
+  chart:
+    spec:
+      chart: signoz
+      version: "0.142.1"
+      sourceRef:
+        kind: HelmRepository
+        name: signoz
+        namespace: flux-system
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  rollback:
+    cleanupOnFail: true
+```
+
+**Verify these values:**
+
+- `version`: The SigNoz chart version. Find the current version in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+- `sourceRef.namespace`: The namespace of the `HelmRepository` that you created above. The `HelmRelease` runs in `signoz`, so it must name `flux-system` here.
+
+Flux serves the `helm.toolkit.fluxcd.io/v2` API from version 2.3. An older cluster rejects this manifest. On Flux 2.0 to 2.2, upgrade Flux first.
+
+The SigNoz chart installs several components, and ClickHouse takes time to start. The `timeout: 15m` value gives the first install enough room.
+
+Add both files to a Kustomize file so that Flux applies them together:
+
+```yaml:infrastructure/signoz/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - helmrelease.yaml
+```
+
+### Point Flux at the directories
+
+Flux needs one `Kustomization` for the Helm repository definitions, and one for SigNoz. The SigNoz `Kustomization` depends on the first one, because the chart cannot download until the `HelmRepository` exists.
+
+```yaml:clusters/demo/infrastructure/sources.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: sources
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 2m
+  path: ./infrastructure/sources
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+```
+
+```yaml:clusters/demo/infrastructure/signoz.yaml
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: signoz
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./infrastructure/signoz
+  prune: true
+  wait: true
+  timeout: 15m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: sources
+```
+
+List both files in the cluster directory:
+
+```yaml:clusters/demo/infrastructure/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - sources.yaml
+  - signoz.yaml
+```
+
+### Commit and reconcile
+
+Commit the files and push them to the branch that Flux reconciles:
+
+```bash
+git add clusters infrastructure
+git commit -m "Add SigNoz"
+git push
+```
+
+Flux picks up the commit at the next interval. To apply it at once, run:
+
+```bash
+flux reconcile kustomization flux-system --with-source
+```
+
+The first install downloads the container images for SigNoz, ClickHouse, and ZooKeeper. On a slow connection this takes several minutes.
+
+## Validate
+
+Make sure that every Flux resource reports `READY  True`:
+
+```bash
+flux get all -A
+```
+
+```text
+NAMESPACE  	NAME                 	REVISION       	SUSPENDED	READY	MESSAGE
+flux-system	helmrepository/signoz	sha256:4f5322fd	False    	True 	stored artifact: revision 'sha256:4f5322fd'
+
+NAMESPACE  	NAME                   	REVISION	SUSPENDED	READY	MESSAGE
+flux-system	helmchart/signoz-signoz	0.142.1 	False    	True 	pulled 'signoz' chart with version '0.142.1'
+
+NAMESPACE	NAME              	REVISION	SUSPENDED	READY	MESSAGE
+signoz   	helmrelease/signoz	0.142.1 	False    	True 	Helm install succeeded for release signoz/signoz.v1
+```
+
+Flux creates the `HelmChart` resource in the namespace of the `HelmRepository`, not in the namespace of the release. Use `flux get all -A` to see all three resources.
+
+Make sure that the pods run:
+
+```bash
+kubectl get pods -n signoz
+```
+
+```text
+NAME                                          READY   STATUS      RESTARTS   AGE
+chi-signoz-clickhouse-cluster-0-0-0           1/1     Running     0          3m
+signoz-0                                      1/1     Running     0          3m
+signoz-clickhouse-operator-5c76779b95-2t845   2/2     Running     0          3m
+signoz-otel-collector-5dffd768fc-dc6rb        1/1     Running     0          3m
+signoz-telemetrystore-migrator-lx48v          0/1     Completed   0          3m
+signoz-zookeeper-0                            1/1     Running     0          3m
+```
+
+The `signoz-telemetrystore-migrator` pod runs the schema migration once and then reports `Completed`. Kubernetes removes the pod later, so the list does not always show it.
+
+Open the SigNoz UI on your machine:
+
+```bash
+kubectl port-forward -n signoz svc/signoz 8080:8080
+```
+
+Go to `http://localhost:8080`. SigNoz asks you to create an admin account on the first visit.
+
+To make sure that the API answers, run:
+
+```bash
+curl http://localhost:8080/api/v1/health
+```
+
+```json
+{ "status": "ok" }
+```
+
+## Customize the installation
+
+Add a `values` block under the existing `spec:` in the `HelmRelease`. Do not replace the file. Flux passes the values to Helm on the next reconcile.
+
+```yaml:infrastructure/signoz/helmrelease.yaml
+spec:
+  values:
+    clickhouse:
+      persistence:
+        size: 100Gi
+    signoz:
+      ingress:
+        enabled: true
+        className: nginx
+        hosts:
+          - host: signoz.example.com
+            paths:
+              - path: /
+                pathType: Prefix
+                port: 8080
+```
+
+The chart creates the Ingress for you. Do not write a separate Ingress manifest.
+
+For the full list of values, see the <a href="https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml" target="_blank" rel="noopener noreferrer nofollow">chart values file</a>.
+
+<Admonition type="tip" title="Keep passwords out of Git" defaultCollapsed="true">
+Use `valuesFrom` to read a value from a Kubernetes Secret. The `targetPath` field names the chart value to fill.
+
+```yaml
+spec:
+  valuesFrom:
+    - kind: Secret
+      name: signoz-clickhouse-credentials
+      valuesKey: password
+      targetPath: clickhouse.password
+```
+
+Store the Secret itself with a tool such as <a href="https://fluxcd.io/flux/guides/mozilla-sops/" target="_blank" rel="noopener noreferrer nofollow">SOPS</a>, and add a `decryption` block to the Flux `Kustomization` for SigNoz.
+</Admonition>
+
+## Upgrade SigNoz
+
+To move to a new chart version, edit `version` in the `HelmRelease`, then commit and push:
+
+```yaml
+  chart:
+    spec:
+      chart: signoz
+      version: "<new-chart-version>"
+```
+
+Replace `<new-chart-version>` with the version you want, for example `0.142.1`. Find the published versions in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+
+Flux runs a Helm upgrade at the next reconcile. To roll back, revert the commit. The `upgrade.cleanupOnFail` setting in the `HelmRelease` makes Flux delete the resources that a failed upgrade created, before it retries.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### flux install reports that the deployments are not ready
+
+The `flux install` and `flux bootstrap` commands wait five minutes for the controllers to start. On a slow connection the container images take longer, and the command prints:
+
+```text
+✗ helm-controller: deployment not ready
+✗ install failed
+```
+
+The installation continues in the cluster. Wait for the controllers, then run `flux check`:
+
+```bash
+kubectl -n flux-system wait --for=condition=Available deployment --all --timeout=20m
+flux check
+```
+
+### The HelmRelease stays at "Running 'install' action"
+
+Flux reports this message while Helm waits for the pods. Look at the pods to find the cause:
+
+```bash
+kubectl get pods -n signoz
+kubectl describe pod -n signoz <pod-name>
+```
+
+If a pod stays in `Pending`, the cluster does not have enough CPU, memory, or storage. SigNoz needs 4 CPU cores and 8 GB of memory at a minimum. The cluster also needs a default StorageClass for the persistent volumes.
+
+### flux get all -n signoz does not list the chart
+
+Flux creates the `HelmChart` resource in the namespace of the `HelmRepository`. This guide puts the `HelmRepository` in `flux-system`, so the chart appears there:
+
+```bash
+flux get sources chart -n flux-system
+```
+
+### The SigNoz Kustomization never starts
+
+The SigNoz `Kustomization` waits for the `sources` `Kustomization` through `dependsOn`. If `sources` fails, SigNoz never runs. Make sure that it succeeded first:
+
+```bash
+flux get kustomizations -n flux-system
+```
+
+</details>
+
+## Next Steps
+
+<K8sNextSteps />

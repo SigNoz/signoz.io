@@ -63,7 +63,7 @@ const BottomCTA: React.FC = () => {
       </h2>
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-          <Button asChild variant="default" rounded="full" className="!w-fit items-center gap-2">
+          <Button asChild variant="default" className="!w-fit items-center gap-2">
             <TrackingLink
               href="/teams/"
               clickType="Primary CTA"
@@ -75,7 +75,7 @@ const BottomCTA: React.FC = () => {
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
-          <Button asChild variant="secondary" rounded="full" className="!w-fit items-center gap-2">
+          <Button asChild variant="secondary" className="!w-fit items-center gap-2">
             <TrackingLink
               href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
               clickType="Secondary CTA"
@@ -97,7 +97,7 @@ const KubernetesMonitoringPage: React.FC = () => {
   return (
     <FeaturePageLayout showProductNav={false} fullWidth>
       <Header />
-      <div className="relative mx-auto max-w-8xl">
+      <div className="relative mx-auto max-w-8xl xl:max-[1728px]:max-w-[80dvw]">
         <SectionLayout variant="bordered" className="!px-0">
           <FeatureSections />
           <Divider />

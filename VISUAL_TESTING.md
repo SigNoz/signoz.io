@@ -27,24 +27,35 @@ browse a story; it is not part of the snapshot diff.
 
 ## How it runs
 
+Visual testing is opt-in per PR, driven by two labels:
+
+| Label                   | Who adds it | Meaning                                                              |
+| ----------------------- | ----------- | -------------------------------------------------------------------- |
+| `run-visual-testing`    | You         | Run Chromatic on this PR.                                            |
+| `update-visual-testing` | CI          | This PR's snapshots become the new `main` baseline when it merges.   |
+
 Two workflows:
 
-| Workflow                               | Trigger                                                        | What it does                                                                                                                              |
-| -------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `.github/workflows/chromatic-pr.yml`   | Every PR to `main`                                             | Builds and publishes the Storybook, diffs against the `main` baseline, posts the **Storybook Publish** and **UI Tests** checks on the PR. |
-| `.github/workflows/chromatic-main.yml` | PR merged to `main` **with the `update-visual-testing` label** | Republishes from the merge commit and auto-accepts the result as the new baseline.                                                        |
+| Workflow                               | Trigger                                                                          | What it does                                                                                                                              |
+| -------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/chromatic-pr.yml`   | PR to `main` carrying the `run-visual-testing` label                             | Builds and publishes the Storybook, diffs against the `main` baseline, posts the **Storybook Publish** and **UI Tests** checks on the PR. |
+| `.github/workflows/chromatic-main.yml` | PR merged to `main` with the `update-visual-testing` label, or manual dispatch   | Republishes from the merge commit and auto-accepts the result as the new baseline.                                                        |
 
 Day to day:
 
-1. Open a PR that touches components, stories, or CSS.
+1. Open a PR that touches components, stories, or CSS, and add the
+   `run-visual-testing` label. Nothing runs without it - the workflow does not
+   even start, so an unlabelled PR costs no CI at all.
 2. Open the **UI Tests** check and review each diff - accept intended changes, deny regressions.
 3. Use the **Storybook Publish** check link to browse that commit's Storybook.
-4. When merging a PR whose visual changes should become the new baseline, add the
-   `update-visual-testing` label before merge.
+4. On a clean run the workflow swaps your label for `update-visual-testing` and
+   removes `run-visual-testing`. Merge as normal; the baseline moves on merge.
+   A PR with unreviewed diffs goes red and is *not* labelled - review the diffs
+   and push again, or re-add `run-visual-testing` to re-run.
 
-`onlyChanged: true` (TurboSnap) is enabled, so a PR that touches no story or its
-dependencies publishes the Storybook but snapshots nothing. Docs-only PRs cost no
-snapshots.
+`onlyChanged: true` (TurboSnap) is enabled, so even a labelled PR that touches no
+story or its dependencies publishes the Storybook but snapshots nothing.
+
 
 ## The snapshot budget
 
@@ -126,10 +137,20 @@ loaded when the snapshot was taken.
 
 ## Baseline management
 
-The baseline is whatever was last accepted on `main`. It moves only through
+The baseline is whatever was last accepted on `main`. It moves through
 `chromatic-main.yml`, which requires the `update-visual-testing` label on the merged
 PR. If a baseline drifts wrong - for example a regression was accepted by mistake -
 fix the component and merge with the label to reset it.
+
+`chromatic-main.yml` also has a `workflow_dispatch` trigger, which rebuilds and
+re-accepts the baseline from the current tip of `main`:
+
+```bash
+gh workflow run chromatic-main.yml --ref main
+```
+
+Use it to seed the very first baseline, after merging a PR, or to recover
+when the baseline no longer reflects `main`.
 
 Avoid accepting diffs you do not understand. An accepted regression becomes the
 reference every later PR is compared against.
@@ -143,8 +164,8 @@ reference every later PR is compared against.
 | `.storybook/preview-head.html`         | Fonts and panel styling                                          |
 | `.storybook/manager.ts`                | Storybook UI theme                                               |
 | `chromatic.config.json`                | Project id, TurboSnap, build dir                                 |
-| `.github/workflows/chromatic-pr.yml`   | Per-PR build and diff                                            |
-| `.github/workflows/chromatic-main.yml` | Baseline update on labelled merge                                |
+| `.github/workflows/chromatic-pr.yml`   | Per-PR build and diff, gated on `run-visual-testing`              |
+| `.github/workflows/chromatic-main.yml` | Baseline update on labelled merge, or manual dispatch            |
 
 Local commands:
 

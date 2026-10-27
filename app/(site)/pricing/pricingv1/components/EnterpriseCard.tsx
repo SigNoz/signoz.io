@@ -34,10 +34,7 @@ export default function EnterpriseCard() {
             clickText="Contact Us"
             clickLocation="Enterprise Pricing Card Bottom"
           >
-            <Button
-              variant="legacySecondary"
-              className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
-            >
+            <Button variant="secondary" size="lg" className="mb-4 w-full">
               Contact Us <ArrowRight size={14} />
             </Button>
           </TrackingLink>
@@ -121,10 +118,7 @@ export default function EnterpriseCard() {
               clickText="Contact Us"
               clickLocation="Enterprise Pricing Card Top"
             >
-              <Button
-                variant="legacySecondary"
-                className="mb-3 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
-              >
+              <Button variant="secondary" size="lg" className="mb-3 w-full">
                 Contact Us <ArrowRight size={14} />
               </Button>
             </TrackingLink>

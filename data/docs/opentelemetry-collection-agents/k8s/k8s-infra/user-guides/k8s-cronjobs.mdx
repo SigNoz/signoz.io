@@ -1,5 +1,5 @@
 ---
-date: 2026-05-27
+date: 2026-10-15
 title: Monitor Kubernetes CronJobs
 description: Monitor Kubernetes CronJobs in SigNoz with the k8s-infra OpenTelemetry collection agent using CronJob pod logs and Job metrics.
 doc_type: howto
@@ -90,7 +90,7 @@ Want to see this CronJob in a single pre-built view? Skip to [Visualize with the
 
 ## Default telemetry from `k8s-infra`
 
-No extra CronJob-specific Helm values are required for the default monitoring flow. If `k8s-infra` is already installed with metrics and logs collection enabled, it automatically collects CronJob pod logs and Kubernetes Job metrics when the CronJob runs.
+No extra CronJob-specific Helm values are required for the default monitoring flow. If `k8s-infra` is already installed with metrics and logs collection enabled, it automatically collects CronJob pod logs and Kubernetes Job metrics when the CronJob runs. K8s Infra installed with Foundry collects the same logs and metrics by default, with no change to `casting.yaml`.
 
 ### Default logs
 
@@ -129,7 +129,7 @@ Open **Logs Explorer** and filter with these resource attributes:
 - `k8s.namespace.name = batch-jobs`
 - `k8s.cronjob.name = reporting-demo`
 
-Replace `<your-cluster-name>` with the `clusterName` you set when you installed `k8s-infra`.
+Replace `<your-cluster-name>` with the `clusterName` you set when you installed `k8s-infra`, or with `K8S_CLUSTER_NAME` from your Foundry `casting.yaml`.
 
 You should see log lines from every run of the CronJob.
 
@@ -151,7 +151,7 @@ Filter with:
 - `k8s.cluster.name = <your-cluster-name>`
 - `k8s.namespace.name = batch-jobs`
 
-Replace `<your-cluster-name>` with the `clusterName` you set when you installed `k8s-infra`.
+Replace `<your-cluster-name>` with the `clusterName` you set when you installed `k8s-infra`, or with `K8S_CLUSTER_NAME` from your Foundry `casting.yaml`.
 
 Group by `k8s.job.name` to see each CronJob execution separately.
 
@@ -178,6 +178,9 @@ Prefer namespace-based filters for CronJobs. Pod names and Job names change on e
 
 ### Only collect logs from your CronJob namespace
 
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
 If you keep CronJobs in a dedicated namespace, enable a whitelist for that namespace:
 
 ```yaml:override-values.yaml
@@ -200,7 +203,37 @@ Verify these values:
 - `<release-name>`: Your existing `k8s-infra` Helm release name
 - `<namespace>`: The namespace where `k8s-infra` is installed
 
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+If you keep CronJobs in a dedicated namespace, add this to the agent's document in `casting.yaml` to collect container logs from that namespace only:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/k8s:
+                include:
+                  - /var/log/pods/batch-jobs_*/*/*.log
+```
+
+Lists replace, so `include` holds only the `batch-jobs` namespace. Then run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+</TabItem>
+</Tabs>
+
 ### Exclude noisy namespaces from log collection
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
 If shared cluster namespaces create too much log noise, exclude them:
 
@@ -225,6 +258,35 @@ Verify these values:
 - `<release-name>`: Your existing `k8s-infra` Helm release name
 - `<namespace>`: The namespace where `k8s-infra` is installed
 
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+Foundry excludes `kube-system` by default. To exclude another namespace, such as `default`, add this to the agent's document in `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/k8s:
+                exclude:
+                  - /var/log/pods/signoz_signoz-collector-*/*/*.log
+                  - /var/log/pods/kube-system_*/*/*.log
+                  - /var/log/pods/default_*/*/*.log
+```
+
+Lists replace, so restate Foundry's two default exclusions (the first two entries) before your own. The first one skips the collectors' own logs and follows `<namespace>_<metadata.name>-collector-*`. Then run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+</TabItem>
+</Tabs>
+
 </details>
 
 <details>
@@ -233,6 +295,9 @@ Verify these values:
 </ToggleHeading>
 
 ### I can see logs, but I do not see Job metrics
+
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
 
 Verify that the cluster-level `k8s-infra` collector deployment is running. The Job metrics in this guide came from the cluster-level collector, not from the node-level daemon.
 
@@ -243,7 +308,21 @@ kubectl get deployments -n <k8s-infra-namespace>
 kubectl get pods -n <k8s-infra-namespace>
 ```
 
-You should see a running deployment such as `k8s-infra-k8s-cluster-otel-agent` with pods in `Running` status. If the deployment is missing, re-install `k8s-infra` by following [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+You should see a running deployment such as `my-release-k8s-infra-otel-deployment` with pods in `Running` status. If the deployment is missing, re-install `k8s-infra` by following [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+The Job metrics come from the deployment collector, `signoz-collector-deployment`, not from the agent on each node. Run this on the machine where you use `kubectl` to check that it is running:
+
+```bash
+kubectl get deployment signoz-collector-deployment -n signoz
+```
+
+`READY` shows `1/1` when it runs. `signoz` is `metadata.name`, which is also the namespace unless the `foundry.signoz.io/kubernetes-namespace` annotation sets another. If the deployment is missing, check that `casting.yaml` has the deployment collector's document (`collector.kind: deployment`), then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+</TabItem>
+</Tabs>
 
 ### I can see Job metrics, but I do not see CronJob logs
 
@@ -252,6 +331,8 @@ Check these points:
 - `presets.logsCollection.enabled` is still enabled in your `k8s-infra` values
 - Your namespace is not excluded by a `logsCollection.blacklist` rule
 - The CronJob container writes logs to standard output or standard error
+
+For a Foundry install, check the agent's document in `casting.yaml` instead of the first two points: the `logs` pipeline still lists `filelog/k8s`, no `exclude` entry under `filelog/k8s` matches your namespace, and `include`, if you set it, covers your namespace.
 
 ### My Job names keep changing on every run
 

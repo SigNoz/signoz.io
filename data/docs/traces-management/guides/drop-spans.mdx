@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-10-19
 title: Control Traces Volume
 description: Drop spans at the application or collector level using head sampling, tail sampling, or the OTel Collector filter processor with OTTL conditions.
 doc_type: howto
@@ -19,7 +19,7 @@ You can control span volume at two stages:
 
 ## At the application
 
-Dropping spans at the application is HEAD sampling. The sampling decision happens at the start of the trace.
+Dropping spans at the application is <Tooltip text="HEAD sampling" content="Deciding whether to keep a trace at its start, before any spans complete, typically a fixed percentage of traces." link="https://signoz.io/docs/glossary/#head-sampling" />. The sampling decision happens at the start of the trace.
 
 ### TraceIdRatioBased sampler
 
@@ -49,6 +49,8 @@ OTEL_PYTHON_EXCLUDED_URLS="https://example.com/exclude"
 ```
 
 See your instrumentation library's documentation for the equivalent option.
+
+Use instrumentation-level exclusions when your application exports from the SDK straight to SigNoz with no Collector. For Node.js, you can also drop per-middleware Express spans and `net`/`dns` connection spans. See [Filter Noisy HTTP Endpoints in Node.js](https://signoz.io/docs/instrumentation/javascript/nodejs-exclude-http-endpoints/).
 
 ## At the collector
 

@@ -2,13 +2,16 @@ import { getDocsRouteTree, type DocsRouteTreeItem } from '@/utils/docs/agentDisc
 import siteMetadata from '@/data/siteMetadata'
 import { agentResponse } from '@/utils/agentResponseHeaders'
 
+// Agents read this file out of context, so every link is an absolute URL to
+// the page's markdown version (e.g. https://signoz.io/docs/install.md).
+// Fragments are kept on the markdown URL (e.g. /docs/page.md#section).
 const formatSitemapRoute = (route: string): string => {
-  // Preserve fragment/query routes as-is (e.g. /docs/page#section).
-  if (route.includes('#') || route.includes('?')) {
-    return route
-  }
+  const [pathWithQuery, fragment] = route.split('#')
+  const pathname = pathWithQuery.split('?')[0].replace(/\/+$/, '')
+  const docsPath = pathname === '/docs' || pathname === '' ? '/docs/introduction' : pathname
+  const markdownUrl = `${siteMetadata.siteUrl}${docsPath}.md`
 
-  return route.endsWith('/') ? route : `${route}/`
+  return fragment ? `${markdownUrl}#${fragment}` : markdownUrl
 }
 
 const renderTree = (items: DocsRouteTreeItem[], indent = ''): string => {
@@ -30,6 +33,8 @@ export async function GET() {
     '# SigNoz Docs Sitemap',
     '',
     `Canonical docs base: ${siteMetadata.siteUrl}/docs/`,
+    '',
+    'Every link below points to the markdown version of the page. Drop the `.md` suffix for the HTML page.',
     '',
     renderTree(tree),
     '',

@@ -1,22 +1,45 @@
 ---
 date: 2026-08-25
 title: Understanding Metrics Billing and Reducing Costs
-description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
+description: How SigNoz bills metrics per sample ingested, why cardinality is the primary cost driver, and the strategies that actually reduce your metrics bill.
 doc_type: explanation
 ---
 
 ## Overview
 
-Metrics billing is based on **cardinality** - the number of unique time series created by your metrics. Understanding how attributes affect cardinality is key to managing costs effectively.
+Metrics are billed **per sample ingested, at $0.10 per million samples** (at one-month retention; longer retention raises the rate, see [Pricing](https://signoz.io/pricing/)). A sample is one float value at one timestamp in one time series. There is no charge per time series, per unique metric, or per label. The [glossary](https://signoz.io/docs/glossary/) defines every term used on this page.
+
+Cardinality is still the primary cost driver, and the reason is arithmetic rather than pricing:
+
+```
+total samples = active time series × export frequency
+```
+
+Every <Tooltip text="active series" content="A time series that is currently receiving data points." link="https://signoz.io/docs/glossary/#active-series" /> emits one sample per export interval, whether or not its value changed. So one series exporting every 30 seconds produces about 86,400 samples per month (about \$0.0086). At the more common 60-second interval, about 43,200, or half that. Scale it up and 100,000 active series at a 30-second interval is roughly 8.6 billion samples per month, about \$864.
+
+That gives you exactly two levers: **reduce the number of active series**, or **export less often**. When this page says "reduce cardinality", it means reduce the series count so that fewer samples arrive on each interval.
+
+Two consequences worth knowing up front:
+
+- **Churn is free.** A series replaced by a new one (a rollout giving each replacement pod a new `k8s.pod.uid`) sends the same number of samples. SigNoz does not bill per series, so churn adds no cost.
+- **Dropping labels alone saves nothing.** The same samples still arrive. Attributes have to be *aggregated away* so that the series collapse. See [Volume control](https://signoz.io/docs/metrics-management/volume-control/).
+
+<Tooltip text="Histograms" content="A metric that aggregates many observations client-side into buckets, plus a count and optional sum, min, and max." link="https://signoz.io/docs/glossary/#histogram" /> and summaries are the exceptions to "one data point, one sample". A classic histogram data point costs one sample per bucket (including the `+Inf` bucket), plus `.count`, which is always present, plus `.sum`, `.min`, and `.max` only when the SDK emits them. A summary data point costs one sample per quantile, plus `.count` and `.sum`.
 
 ## How Attributes Affect Billing
 
-There are two types of attributes that affect your metrics differently:
+Attributes affect the series count in one of two ways:
 
-1. **Identifying attributes** - These create new time series and contribute to cost. For example, adding a new `host.name` creates a new series.
-2. **Non-identifying/descriptive attributes** - These enrich existing metrics without creating new series. Examples include host family or EC2 tags.
+1. **Identifying attributes**: their values split otherwise-identical label sets into more series, so they multiply samples. If a metric has one label set and you add `http.route`, you get one series per route that actually appears, up to 10 series for 10 distinct routes, and that many data points per export interval instead of one. `http.route`, `http.response.status_code`, and `host.name` are all identifying.
+2. **Non-identifying attributes**: their value is already determined by attributes present on the series, so they create zero new series and zero new samples. `host.type` is non-identifying when `host.id` is already there, because each host has exactly one type.
 
-You can add as many non-identifying attributes as needed without additional cost, but each new identifying attribute with unique values increases your bill, often exponentially.
+Resource attributes are not treated specially: they are part of series identity exactly like data point attributes, and they can be identifying or non-identifying in the same way. EC2 tags added by the AWS resource detector are a common example. They become part of series identity, but since each instance already has its own series, they add no series and no cost.
+
+You can add as many non-identifying attributes as you like at no additional cost; metrics are not billed by label count or label size. Each new identifying attribute, however, multiplies your series count by its number of distinct values.
+
+<Admonition type="info">
+OpenTelemetry does not yet publish a canonical list of identifying attributes, though the project is moving toward distinguishing them. Until then, the practical test is the one above: would this attribute's values split an existing label set into more series?
+</Admonition>
 
 ## Common Cost Drivers
 
