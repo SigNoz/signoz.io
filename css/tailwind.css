@@ -70,6 +70,18 @@
   }
 }
 
+/* Mobile variant: starts visible — at opacity 0 the hero can't be the LCP element. */
+@keyframes hero-copy-in-mobile {
+  0% {
+    opacity: 0.45;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @layer utilities {
   /* Section rules that fade toward their ends; pairs with border-* utilities. */
   .rule-fade-x {
@@ -98,6 +110,13 @@
   .hero-copy-in {
     animation: hero-copy-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
     animation-delay: var(--hero-copy-delay, 0s);
+  }
+
+  @media (max-width: 767.98px) {
+    .hero-copy-in {
+      animation: hero-copy-in-mobile 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: 0s;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

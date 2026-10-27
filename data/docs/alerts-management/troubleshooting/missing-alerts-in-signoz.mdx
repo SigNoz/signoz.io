@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-10-12
 title: Missing Alerts in SigNoz
 description: Diagnose why alerts are not firing in SigNoz, covering evaluation pattern misconfiguration, threshold issues, and missing data points.
 doc_type: howto
@@ -72,6 +72,20 @@ Evaluation: All the time for 5 minutes
    alert_evaluation_window: 2m
    ```
 
+
+### Delayed Data Arrival
+
+**Problem:** An alert fires later than the spike that you see on a chart.
+
+**Cause:** A rule can only evaluate data that SigNoz has already ingested. By default, each evaluation window also ends 2 minutes before the evaluation time. Data that arrives late reaches the rule on a later evaluation.
+
+**How to check:** Zoom into a narrower time range on the chart. A long time range uses a coarser aggregation interval, so the apparent spike time can differ from the real data point.
+
+**Solutions:**
+
+- Reduce the delay at the source. Check collector backpressure, batching settings, and network latency between your collector and SigNoz.
+- Use an evaluation window that is longer than your usual ingestion delay. Late records then fall inside a later evaluation window.
+- If data stops arriving, see [Missing Data Points](#missing-data-points).
 
 ### Incorrect Threshold Values
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-09-30
+date: 2026-10-27
 doc_type: howto
 title: 'Jira Cloud: Create and Manage Issues from Alerts'
 description: Set up Jira Cloud as a notification channel in SigNoz to open, update, and resolve Jira issues automatically as alerts fire and resolve.
@@ -19,7 +19,7 @@ Before configuring Jira Cloud as a notification channel in SigNoz, ensure that y
 - **Permissions**: the account needs permission to **create** issues in the project (and to **transition** them, if you use resolve/reopen).
 
 <Admonition>
-Only **Jira Cloud** is supported. **Jira Server / Data Center are not supported**: Jira Cloud API tokens and the rich v3 (Atlassian Document Format) API used here are Cloud-only. SigNoz no longer enforces the `atlassian.net` URL format, so the **Site URL** can point at a proxy or relay in front of Jira Cloud, but a genuine Jira Server / Data Center endpoint still won't work.
+Only **Jira Cloud** is supported. **Jira Server / Data Center are not supported**: Jira Cloud API tokens and the rich v3 (Atlassian Document Format) API used here are Cloud-only. The **Site URL** can point at a proxy or relay, but the endpoint behind it must be Jira Cloud.
 </Admonition>
 
 ## Use a service account (recommended)
@@ -241,7 +241,7 @@ If you encounter issues:
 - **401 / 403 with a service account** → confirm you used the service account's `…@serviceaccount.atlassian.com` email, added the account to the project, and gave the token the `read:jira-work` and `write:jira-work` scopes.
 - **400 on create** → a field required by that project's issue type is missing, or the project / issue type / priority is invalid. Check the project's create screen.
 - **"can't find transition"** → only relevant when a transition-name override is set and doesn't match the workflow. Clear the override to fall back to auto-detection.
-- **Invalid Site URL** → the Site URL must be non-empty. It no longer has to be an `atlassian.net` URL, but the endpoint behind it must still serve Jira Cloud's v3 API.
+- **Invalid Site URL** → the Site URL must be non-empty, and the endpoint behind it must serve the Jira Cloud v3 API.
 - **Invalid Reopen window** → use a duration like `30m`, `72h`, or `3d` (minimum `1m`).
 - **Test the setup**: use the **Test** button in SigNoz to create an issue end-to-end. If it fails, the error identifies the misconfigured field.
 

@@ -1,0 +1,87 @@
+---
+date: 2026-10-22
+title: Caddy Dashboard - Monitor Requests, Latency, Upstreams
+description: Monitor Caddy in SigNoz with a ready-made dashboard for request rate, status codes, latency, errors, bandwidth, upstream health, and config reloads.
+doc_type: explanation
+---
+
+This dashboard shows how Caddy handles traffic as a web server and reverse proxy. You can track request rate and status codes, request duration and time to first byte, handler errors, bandwidth, the health of reverse proxy upstreams, and config reloads.
+
+The data comes from the metrics that Caddy v2.11.3 and newer push over OTLP when the `metrics` global option has `otlp`.
+
+<Admonition type="note">
+Set up Caddy and send its metrics to SigNoz before you import this dashboard. Follow the [Monitor Caddy with OpenTelemetry](https://signoz.io/docs/integrations/opentelemetry-caddy/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/caddy-dashboard.webp"
+  alt="Caddy dashboard in SigNoz showing request rate, 5xx percentage, requests in flight, unhealthy upstreams, and request rates by handler, status code, and method"
+  caption="Caddy dashboard: Overview and Traffic sections"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/caddy/caddy-dashboard.json"
+  dashboardName="Caddy"
+/>
+
+## Dashboard Coverage
+
+- Read the request rate and the share of 5xx responses.
+- Break traffic down by route handler, status code, and HTTP method.
+- Track request duration percentiles and time to first byte for each Caddy server.
+- Find handler errors, such as an upstream that does not respond.
+- Watch request and response bandwidth and payload sizes.
+- Catch unhealthy reverse proxy upstreams and failed config reloads.
+
+## Metrics Included
+
+Caddy records request metrics once for each route that a request matches, and labels them with the first handler of the route. To count each request once, the request panels read one route that sees every request, set by the `route` variable. Requests per Second by Handler is the exception: it shows every route so that you can pick one.
+
+### Overview
+
+- **Request Rate**: `caddy_http_requests_total`
+- **5xx Responses (%)**: `caddy_http_request_duration_seconds.count`, 5xx codes divided by all codes
+- **Requests In Flight**: `caddy_http_requests_in_flight`
+- **Unhealthy Upstreams**: `caddy_reverse_proxy_upstreams_healthy`, the number of upstreams that report `0`
+
+### Traffic
+
+- **Requests per Second by Handler**: `caddy_http_requests_total` by `server` and `handler`, for every route. Use it to find the route that sees every request.
+- **Requests per Second by Status Code**: `caddy_http_request_duration_seconds.count` by `code`
+- **Requests per Second by Method**: `caddy_http_request_duration_seconds.count` by `method`
+- **Requests In Flight by Server**: `caddy_http_requests_in_flight` by `server`
+
+### Latency
+
+- **Request Duration (p50, p95, p99)**: `caddy_http_request_duration_seconds`
+- **p95 Request Duration by Server**: `caddy_http_request_duration_seconds` by `server`
+- **p95 Request Duration by Status Code**: `caddy_http_request_duration_seconds` by `code`
+- **p95 Time to First Byte by Server**: `caddy_http_response_duration_seconds` by `server`
+
+### Errors
+
+- **4xx and 5xx Responses per Second**: `caddy_http_request_duration_seconds.count` by `code`
+- **Middleware Errors per Second by Server**: `caddy_http_request_errors_total` by `server`
+
+### Bandwidth
+
+- **Request Bandwidth by Server**: `caddy_http_request_size_bytes.sum`
+- **Response Bandwidth by Server**: `caddy_http_response_size_bytes.sum`
+- **p95 Request Size by Server**: `caddy_http_request_size_bytes`
+- **p95 Response Size by Server**: `caddy_http_response_size_bytes`
+
+### Upstreams and Configuration
+
+- **Upstream Health**: `caddy_reverse_proxy_upstreams_healthy` by `upstream`. Caddy reports `0` only when `reverse_proxy` has active or passive health checks.
+- **Last Config Reload Successful**: `caddy_config_last_reload_successful`
+
+## Dashboard Variables
+
+- **route**: The first handler of the route that sees every request. The default is `tracing`, which fits the [setup guide](https://signoz.io/docs/integrations/opentelemetry-caddy/). Without `tracing`, pick the handler of your first route that has no matcher. The request, latency, error, and bandwidth panels use it. Requests per Second by Handler does not.
+- **service_name**: The `service.name` of your Caddy services, from `OTEL_SERVICE_NAME`. Every panel uses it.
+
+## Next Steps
+
+- [Set up Caddy](https://signoz.io/docs/integrations/opentelemetry-caddy/) to send traces, metrics, and access logs to SigNoz.
+- [Create metric-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on the 5xx percentage or on unhealthy upstreams.
+- [Go Runtime Metrics](https://signoz.io/docs/dashboards/dashboard-templates/go-runtime-metrics/) covers the `go_*` metrics that Caddy also sends.

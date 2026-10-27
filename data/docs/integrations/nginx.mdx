@@ -1,44 +1,47 @@
 ---
-date: 2026-06-23
-
-title: Nginx Logs
-description: Monitor NGINX logs in SigNoz for querying, aggregation, and troubleshooting.
+date: 2026-10-06
+title: NGINX Logs - Collect and Parse with OpenTelemetry
+description: Collect NGINX access and error logs with the OpenTelemetry Collector, parse them into structured fields, and search them in SigNoz.
+doc_type: howto
 ---
 
-## Overview
-
-This integration helps you to monitor Nginx server logs for better querying and aggregation.
+This guide shows you how to send NGINX access and error logs to SigNoz with the OpenTelemetry Collector. The Collector tails the log files and parses each line into fields such as `status`, `request_path`, and severity, so you can filter and aggregate them in SigNoz.
 
 ## Prerequisites
 
-Before you begin, ensure you have:
+- NGINX writing access and error logs to files, such as `/var/log/nginx/access.log` and `/var/log/nginx/error.log`
+- The OpenTelemetry Collector on the same host, sending data to SigNoz ([VM install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/))
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
-1. An Nginx server is running version newer than 1.0.0
+## Send logs to SigNoz
 
-2. An OpenTelemetry (OTEL) Collector with access to the Nginx server
-   - [Install the OTEL Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)(v0.88.0 or newer) if not done already
-   - Ensure you can provide config files to the collector and set environment variables
-   - The collector must be able to read the Nginx server log files
+### Step 1. Let the Collector read the log files
 
-## Collecting Nginx Logs
+The nginx.org packages create the log files with mode `640`, owned by the `nginx` user and the `adm` group. The Collector service runs as the `otelcol-contrib` user, so add that user to the `adm` group:
 
-### Step 1: Create the Collector Config File
+```bash
+sudo usermod -aG adm otelcol-contrib
+```
 
-Create a file named `nginx-logs-collection-config.yaml` with the following content:
+If you run the Collector binary manually, add the user that runs it to the `adm` group instead. Without this step, the Collector logs `permission denied` for each file.
 
-```yaml minimap defaultCollapsed
+### Step 2. Add the log receivers
+
+Add these two receivers to `/etc/otelcol-contrib/config.yaml`, under the existing `receivers` section. They read the access and error logs and parse each line:
+
+```yaml:/etc/otelcol-contrib/config.yaml minimap defaultCollapsed
 receivers:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
   filelog/nginx-access-logs:
-    include: ["${env:NGINX_ACCESS_LOG_FILE}"]
+    include: [/var/log/nginx/access.log]
     operators:
-      # Parse the default nginx access log format. Nginx defaults to the "combined" log format
+      # Parses the "combined" log format, and the nginx.org "main" format that appends "$http_x_forwarded_for":
       # $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"
-      # For more details, see https://nginx.org/en/docs/http/ngx_http_log_module.html
       - type: regex_parser
-        if: body matches '^(?P<remote_addr>[0-9\\.]+) - (?P<remote_user>[^\\s]+) \\[(?P<ts>.+)\\] "(?P<request_method>\\w+?) (?P<request_path>.+?)" (?P<status>[0-9]+) (?P<body_bytes_sent>[0-9]+) "(?P<http_referrer>.+?)" "(?P<http_user_agent>.+?)"$'
+        if: body matches '^(?P<remote_addr>[0-9a-fA-F\\.:]+) - (?P<remote_user>[^\\s]+) \\[(?P<ts>.+)\\] "(?P<request_method>\\w+?) (?P<request_path>.+?) (?P<protocol>HTTP/[0-9.]+)" (?P<status>[0-9]+) (?P<body_bytes_sent>[0-9]+) "(?P<http_referrer>[^"]*)" "(?P<http_user_agent>[^"]*)"( "(?P<http_x_forwarded_for>[^"]*)")?$'
         parse_from: body
         parse_to: attributes
-        regex: '^(?P<remote_addr>[0-9\.]+) - (?P<remote_user>[^\s]+) \[(?P<ts>.+)\] "(?P<request_method>\w+?) (?P<request_path>.+?)" (?P<status>[0-9]+) (?P<body_bytes_sent>[0-9]+) "(?P<http_referrer>.+?)" "(?P<http_user_agent>.+?)"$'
+        regex: '^(?P<remote_addr>[0-9a-fA-F\.:]+) - (?P<remote_user>[^\s]+) \[(?P<ts>.+)\] "(?P<request_method>\w+?) (?P<request_path>.+?) (?P<protocol>HTTP/[0-9.]+)" (?P<status>[0-9]+) (?P<body_bytes_sent>[0-9]+) "(?P<http_referrer>[^"]*)" "(?P<http_user_agent>[^"]*)"( "(?P<http_x_forwarded_for>[^"]*)")?$'
         timestamp:
           parse_from: attributes.ts
           layout: "02/Jan/2006:15:04:05 -0700"
@@ -48,9 +51,7 @@ receivers:
           overwrite_text: true
           mapping:
             debug: "1xx"
-            info:
-              - "2xx"
-              - "3xx"
+            info: ["2xx", "3xx"]
             warn: "4xx"
             error: "5xx"
       - type: remove
@@ -60,12 +61,12 @@ receivers:
         field: attributes.source
         value: nginx
 
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
   filelog/nginx-error-logs:
-    include: ["${env:NGINX_ERROR_LOG_FILE}"]
+    include: [/var/log/nginx/error.log]
     operators:
-      # Parse the default nginx error log format.
+      # Parses the default error log format:
       # YYYY/MM/DD HH:MM:SS [LEVEL] PID#TID: *CID MESSAGE
-      # For more details, see https://github.com/phusion/nginx/blob/master/src/core/ngx_log.c
       - type: regex_parser
         if: body matches '^(?P<ts>.+?) \\[(?P<log_level>\\w+)\\] (?P<pid>\\d+)#(?P<tid>\\d+). \\*(?P<cid>\\d+) (?P<message>.+)$'
         parse_from: body
@@ -80,14 +81,9 @@ receivers:
           overwrite_text: true
           mapping:
             debug: "debug"
-            info:
-              - "info"
-              - "notice"
+            info: ["info", "notice"]
             warn: "warn"
-            error:
-              - "error"
-              - "crit"
-              - "alert"
+            error: ["error", "crit", "alert"]
             fatal: "emerg"
       - type: remove
         if: attributes.ts != nil
@@ -99,120 +95,144 @@ receivers:
       - type: add
         field: attributes.source
         value: nginx
+```
 
-processors:
-  batch:
-    send_batch_size: 10000
-    send_batch_max_size: 11000
-    timeout: 10s
+If your log files live elsewhere, update the `include` paths.
 
-exporters:
-  # export to SigNoz cloud
-  otlp/nginx-logs:
-    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
-    tls:
-      insecure: false
-    headers:
-      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+<Admonition type="info" title="Using a custom log format?">
+These regexes match the default `combined` and nginx.org `main` formats. If you set a custom `log_format`, adjust the `regex` and `if` lines of `filelog/nginx-access-logs` to match it. Lines that do not match reach SigNoz unparsed.
+</Admonition>
 
-  # export to local collector
-  # otlp/nginx-logs:
-  #   endpoint: "localhost:4317"
-  #   tls:
-  #     insecure: true
+### Step 3. Add a logs pipeline
 
+Add a `logs/nginx` pipeline under the existing `service.pipelines` section. It reuses the processors and exporter from the [VM install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) config:
+
+```yaml:/etc/otelcol-contrib/config.yaml
 service:
   pipelines:
     logs/nginx:
       receivers: [filelog/nginx-access-logs, filelog/nginx-error-logs]
-      processors: [batch]
-      exporters: [otlp/nginx-logs]
+      processors: [batch, resourcedetection]
+      exporters: [otlphttp]
 ```
 
-**Note:** If you are using a [custom Nginx log format](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/#setting-up-the-access-log), adjust the regex used
-for parsing logs in the receivers named `filelog/nginx-access-logs` and `filelog/nginx-error-logs` in the collector config.
+### Step 4. Restart the Collector
 
-### Step 2: Set Environment Variables
-
-Set the following environment variables:
+Restart the Collector so it picks up the new group membership and configuration:
 
 ```bash
-
-# path of Nginx access log file. must be accessible by the otel collector
-# typically found at /usr/local/var/log/nginx/access.log on macOS
-export NGINX_ACCESS_LOG_FILE=/var/log/nginx/access.log
-
-# path of Nginx error log file. must be accessible by the otel collector
-# typically found at /usr/local/var/log/nginx/error.log on macOS
-export NGINX_ERROR_LOG_FILE=/var/log/nginx/error.log
-
-# region specific SigNoz cloud ingestion endpoint
-export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
-
-# your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+sudo systemctl restart otelcol-contrib
 ```
 
-You can find more details about ingestion keys and Regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+The Collector reads only lines written after it starts, so send a few requests to NGINX to produce new log lines.
 
-### Step 3: Use the Collector Config File
+## Validate
 
-Add the following flag to your collector run command:
+1. Send a few requests to NGINX, for example `curl http://localhost/`.
+2. Open SigNoz and navigate to **Logs** > **Explorer**.
+3. Filter by `source = nginx`.
+4. Click a log line to see its parsed attributes, such as `status`, `request_method`, and `request_path`.
+
+<Figure
+    src="/img/docs/integrations/nginx/nginx-logs-explorer.webp"
+    alt="SigNoz Logs Explorer filtered by source nginx, with an access log line expanded to show its parsed attributes"
+    caption="NGINX access and error logs in the Logs Explorer, with parsed attributes"
+/>
+
+Severity follows the response status for access logs: `2xx` and `3xx` are `INFO`, `4xx` is `WARN`, and `5xx` is `ERROR`. Error log lines keep the NGINX level.
+
+## Connect the NGINX integration (Optional)
+
+The **Integrations** page in SigNoz tracks whether NGINX logs are arriving.
+
+1. Open **Integrations** and search for `nginx`.
+
+<Figure
+    src="/img/docs/integrations/nginx/nginx-integration-search.webp"
+    alt="SigNoz Integrations page filtered by nginx, listing the Nginx integration as Not Installed"
+    caption="The Nginx integration on the Integrations page"
+/>
+
+2. Open **Nginx**, click **Connect Nginx**, and then click **I have already configured**.
+
+<Figure
+    src="/img/docs/integrations/nginx/nginx-integration-connect.webp"
+    alt="Connect Nginx dialog with Show Configuration Steps and I have already configured buttons"
+    caption="Connect the integration after you configure the Collector"
+/>
+
+3. Send a few requests to NGINX. Once logs arrive, the page shows **This integration is working properly**.
+
+<Figure
+    src="/img/docs/integrations/nginx/nginx-integration-connected.webp"
+    alt="Nginx integration page showing This integration is working properly"
+    caption="The integration confirms that NGINX logs are arriving"
+/>
+
+To stop tracking, click **Remove from SigNoz**. This does not change your Collector configuration.
+
+## Data collected
+
+The **Data Collected** tab of the integration lists the parsed log attributes.
+
+<Figure
+    src="/img/docs/integrations/nginx/nginx-integration-data-collected-tab.webp"
+    alt="Data Collected tab of the Nginx integration listing log attributes"
+    caption="Log attributes of the Nginx integration"
+/>
+
+The configuration in this guide also adds `protocol` and `http_x_forwarded_for`, which the tab does not list yet.
+
+| Name | Path | Type |
+| --- | --- | --- |
+| Timestamp | `timestamp` | timestamp |
+| Severity Text | `severity_text` | string |
+| Severity Number | `severity_number` | number |
+| Body Bytes Sent | `attributes.body_bytes_sent` | string |
+| Referrer | `attributes.http_referrer` | string |
+| User Agent | `attributes.http_user_agent` | string |
+| Request Method | `attributes.request_method` | string |
+| Request Path | `attributes.request_path` | string |
+| Protocol | `attributes.protocol` | string |
+| Response Status Code | `attributes.status` | string |
+| Remote Address | `attributes.remote_addr` | string |
+| Forwarded For | `attributes.http_x_forwarded_for` | string |
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+Check the Collector logs first:
 
 ```bash
---config nginx-logs-collection-config.yaml
+sudo journalctl -u otelcol-contrib -f
 ```
 
-**Note:** The collector can use multiple config files by specifying multiple `--config` flags in the collector run command.
+### Why do the logs show `open /var/log/nginx/access.log: permission denied`?
 
-## Connect Nginx
+The `otelcol-contrib` user cannot read the NGINX log files. Add it to the `adm` group as shown in Step 1, then restart the Collector. Group changes apply only after the restart.
 
-Once you're done with setting up Nginx for collecting logs, head over to the intergrations tab in SigNoz and search for the Nginx integration.
+### Why do NGINX logs arrive without parsed attributes?
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/nginx/nginx-integration-search.webp" alt="Search for Nginx in Integrations tab"/>
-    <figcaption><i>Search for Nginx in Integrations tab</i></figcaption>
-</figure>
+Your `log_format` does not match the access log regex. Compare a line from `access.log` with the format in the receiver comment, then adjust the `regex` and `if` lines.
 
-Click on the `Connect Nginx` Button, and select **I have already configured**, this will start listening for data from your Nginx server.
-To stop this, you can select the `Remove from SigNoz` button.
+### Why are older log lines missing?
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/nginx/nginx-integration-connect.webp" alt="Connect Nginx"/>
-    <figcaption><i>Connect Nginx</i></figcaption>
-</figure>
+The `filelog` receiver starts at the end of each file by default. To also send existing lines once, add `start_at: beginning` to both receivers.
 
-&nbsp;
+For more help with missing data, see [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/nginx/nginx-integration-listening.webp" alt="Listening for data from Nginx"/>
-    <figcaption><i>Listening for data from Nginx</i></figcaption>
-</figure>
+</details>
 
-## Data Collected
+## Next steps
 
-When you switch to the **Data Collected** tab of your Nginx Integrations, it shows you details about the different log attributes that you
-can monitor for Nginx. The tables below gives you a list of the different log attributes available.
+- [Create log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on `5xx` responses
+- [Trace NGINX requests](https://signoz.io/docs/instrumentation/opentelemetry-nginx/) with the native OpenTelemetry module
+- [Collect NGINX metrics](https://signoz.io/docs/metrics-management/nginx-metrics/) with the same Collector
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/nginx/nginx-integration-data-collected.webp" alt="Log attributes for Nginx"/>
-    <figcaption><i>Log attributes details for Nginx</i></figcaption>
-</figure>
+## Get Help
 
-### Nginx log attributes
-- **Name**: The name of the log attribute.
-- **Path**: The specific location or attribute within a log entry where the corresponding data can be found.
-- **Type**: The data type of the log attribute.
-
-| Name                 | Path                        | Type      |
-|----------------------|-----------------------------|-----------|
-| Timestamp            | timestamp                   | timestamp |
-| Severity Text        | severity_text               | string    |
-| Severity Number      | severity_number             | number    |
-| Body Bytes Sent      | attributes.body_bytes_sent  | string    |
-| Referrer             | attributes.http_referrer    | string    |
-| User Agent           | attributes.http_user_agent  | string    |
-| Request Method       | attributes.request_method   | string    |
-| Request Path         | attributes.request_path     | string    |
-| Response Status Code | attributes.status           | string    |
-| Remote Address       | attributes.remote_addr      | string    |
+<GetHelp />
