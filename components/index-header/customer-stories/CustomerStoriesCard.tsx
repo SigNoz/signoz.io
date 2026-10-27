@@ -10,15 +10,40 @@ import styles from './customer-stories.module.css'
 import { buttonVariants } from '@/components/ui/Button'
 import { cn } from 'app/lib/utils'
 
-export default function CustomerStoriesCard() {
+interface CustomerStoriesCardProps {
+  /** Analytics attribution, so placements outside the homepage hero are distinguishable. */
+  clickLocation?: string
+  openSides?: boolean
+  carouselSpeed?: number
+  swapEvery?: number
+}
+
+export default function CustomerStoriesCard({
+  clickLocation = 'Hero Customer Stories',
+  openSides = false,
+  carouselSpeed,
+  swapEvery,
+}: CustomerStoriesCardProps = {}) {
   const half = Math.ceil(CUSTOMER_STORY_QUOTES.length / 2)
 
   return (
-    <section className={styles.root} aria-label="Customers and testimonials">
-      <CustomerCarousel />
+    <section
+      className={cn(styles.root, openSides && styles.rootOpenSides)}
+      aria-label="Customers and testimonials"
+    >
+      <CustomerCarousel clickLocation={clickLocation} speed={carouselSpeed} />
       <div className={styles.voices}>
-        <TestimonialSwapPanel quotes={CUSTOMER_STORY_QUOTES.slice(0, half)} />
-        <TestimonialSwapPanel quotes={CUSTOMER_STORY_QUOTES.slice(half)} staggerMs={1500} />
+        <TestimonialSwapPanel
+          quotes={CUSTOMER_STORY_QUOTES.slice(0, half)}
+          clickLocation={clickLocation}
+          swapEvery={swapEvery}
+        />
+        <TestimonialSwapPanel
+          quotes={CUSTOMER_STORY_QUOTES.slice(half)}
+          staggerMs={1500}
+          clickLocation={clickLocation}
+          swapEvery={swapEvery}
+        />
         <aside className={cn(styles.voice, styles.voiceCta)}>
           <p className={styles.voiceCtaTitle}>{CUSTOMER_STORIES_CTA.title}</p>
           <TrackingLink
@@ -26,14 +51,17 @@ export default function CustomerStoriesCard() {
             clickType="Secondary CTA"
             clickName="Customer Stories Link"
             clickText={CUSTOMER_STORIES_CTA.buttonLabel}
-            clickLocation="Hero Customer Stories"
+            clickLocation={clickLocation}
             className={cn(styles.voiceCtaLink, 'no-underline')}
             aria-label={CUSTOMER_STORIES_CTA.buttonLabel}
           >
             <span className="sr-only">{CUSTOMER_STORIES_CTA.buttonLabel}</span>
           </TrackingLink>
           <span
-            className={cn(buttonVariants({ variant: 'tactileSecondary' }), styles.voiceCtaButton)}
+            className={cn(
+              buttonVariants({ variant: 'secondary', size: 'sm' }),
+              styles.voiceCtaButton
+            )}
             aria-hidden="true"
           >
             {CUSTOMER_STORIES_CTA.buttonLabel}

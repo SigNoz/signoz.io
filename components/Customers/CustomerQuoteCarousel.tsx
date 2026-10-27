@@ -10,6 +10,7 @@ import { cn } from 'app/lib/utils'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
 import type { QuoteSlide } from './Customers.types'
+import { buttonVariants } from '@/components/ui/Button'
 
 const AUTOPLAY_INTERVAL_MS = 6000
 const WORD_STAGGER_MS = 35
@@ -157,7 +158,7 @@ export default function CustomerQuoteCarousel({ quotes }: CustomerQuoteCarouselP
               </figcaption>
 
               <Link
-                className="group mt-8 inline-flex h-9 items-center gap-2 rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] px-4 text-sm font-medium text-[var(--l1-foreground)] transition-colors hover:bg-[var(--l3-background)]"
+                className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'group mt-8')}
                 href={quote.href}
                 onClick={() =>
                   trackClick('Customer Quote Source Link', quote.sourceLabel, index, {

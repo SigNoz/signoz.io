@@ -13,7 +13,7 @@ This guide walks the three points where telemetry gets lost between your applica
 2. [Is your telemetry being exported?](#step-2-is-your-telemetry-being-exported) Enable diagnostic logging and read the exporter errors.
 3. [Is your telemetry reaching SigNoz?](#step-3-is-your-telemetry-reaching-signoz) Verify connectivity and the ingestion endpoint or Collector.
 
-The steps apply to both SigNoz Cloud and self-hosted SigNoz. Where the two differ, the difference is called out.
+The steps apply to both SigNoz Cloud and Self-Hosted SigNoz. Where the two differ, the difference is called out.
 
 <Admonition type="tip">
 Already have an error message in your application or Collector logs? Match it in [Quick debug](#quick-debug) instead of working through the steps.
@@ -218,13 +218,13 @@ curl -v https://ingest.<region>.signoz.cloud:443
 `<region>` is the region shown under **Settings → Ingestion** in the SigNoz UI. SigNoz Cloud serves both OTLP/gRPC and OTLP/HTTP on port `443`. See the [ingestion overview](https://signoz.io/docs/ingestion/signoz-cloud/overview/).
 
 </TabItem>
-<TabItem value="self-hosted" label="Self-hosted SigNoz">
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
 
 ```bash
 curl -v http://<signoz-host>:4318
 ```
 
-Self-hosted SigNoz listens on `4317` for OTLP/gRPC and `4318` for OTLP/HTTP, and requires no ingestion key by default. `<signoz-host>` is the host or Service DNS name of your SigNoz OTLP endpoint. See [self-hosted ingestion](https://signoz.io/docs/ingestion/self-hosted/overview/).
+Self-Hosted SigNoz listens on `4317` for OTLP/gRPC and `4318` for OTLP/HTTP, and requires no ingestion key by default. `<signoz-host>` is the host or Service DNS name of your SigNoz OTLP endpoint. See [self-hosted ingestion](https://signoz.io/docs/ingestion/self-hosted/overview/).
 
 </TabItem>
 </Tabs>
@@ -297,9 +297,9 @@ Configuring a receiver or exporter is not enough on its own: the Collector runs 
 The Collector's two sides use **different ports**, which is where most setups go wrong:
 
 - **Receivers** (`otlp`) are the ports the Collector *listens on* for data from your application: `4317` for OTLP/gRPC and `4318` for OTLP/HTTP. Point your app's `OTEL_EXPORTER_OTLP_ENDPOINT` at these, for example `http://<collector-host>:4318`.
-- **Exporters** (`otlphttp`) are where the Collector *sends* data onward: `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud, or `http://<signoz-host>:4318` for self-hosted SigNoz.
+- **Exporters** (`otlphttp`) are where the Collector *sends* data onward: `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud, or `http://<signoz-host>:4318` for Self-Hosted SigNoz.
 
-Port `443` appears only on the exporter side for SigNoz Cloud. Ports `4317` and `4318` are used by the receiver side and by self-hosted SigNoz.
+Port `443` appears only on the exporter side for SigNoz Cloud. Ports `4317` and `4318` are used by the receiver side and by Self-Hosted SigNoz.
 
 Restart the Collector and check its logs.
 
@@ -338,7 +338,7 @@ kubectl get endpoints otel-collector -n observability
 ```
 
 <Admonition type="warning">
-Watch for port and protocol mismatches when talking to a **Collector or self-hosted SigNoz**: OTLP/gRPC uses port `4317` and OTLP/HTTP uses port `4318`. If your SDK is configured for HTTP but points at `4317`, or the reverse, exports fail silently or with connection errors. Prefer OTLP/HTTP on `4318` unless you specifically need gRPC.
+Watch for port and protocol mismatches when talking to a **Collector or Self-Hosted SigNoz**: OTLP/gRPC uses port `4317` and OTLP/HTTP uses port `4318`. If your SDK is configured for HTTP but points at `4317`, or the reverse, exports fail silently or with connection errors. Prefer OTLP/HTTP on `4318` unless you specifically need gRPC.
 
 **SigNoz Cloud is different:** it uses **port `443` for both** OTLP/gRPC and OTLP/HTTP, so the endpoint is always `https://ingest.<region>.signoz.cloud:443`. Do not use `4317` or `4318` for SigNoz Cloud.
 </Admonition>
@@ -374,7 +374,7 @@ No error message yet? Enable diagnostic logging with `OTEL_LOG_LEVEL=debug`, res
 
 - Set the key as `signoz-ingestion-key=<your-ingestion-key>` in the OTLP headers for a direct export, or under the `otlphttp` exporter `headers` for a Collector.
 - Confirm the key has not expired or been revoked under **Settings → Ingestion**. See [ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- Self-hosted SigNoz needs no ingestion key by default. A `401` there points at a proxy, load balancer, or gateway in front of SigNoz.
+- Self-Hosted SigNoz needs no ingestion key by default. A `401` there points at a proxy, load balancer, or gateway in front of SigNoz.
 
 </TabItem>
 <TabItem value="notfound" label="404 Not Found">
@@ -382,7 +382,7 @@ No error message yet? Enable diagnostic logging with `OTEL_LOG_LEVEL=debug`, res
 **`404 Not Found`.** The URL is wrong. The usual causes are a trailing slash (`.../v1/logs/` instead of `.../v1/logs`), the wrong signal path, or the wrong port.
 
 - SigNoz Cloud: `https://ingest.<region>.signoz.cloud:443`, never `4317` or `4318`.
-- Self-hosted SigNoz: `http://<signoz-host>:4318` for OTLP/HTTP.
+- Self-Hosted SigNoz: `http://<signoz-host>:4318` for OTLP/HTTP.
 
 See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
@@ -400,7 +400,7 @@ See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-clo
 **Exports succeed, but nothing appears in SigNoz.** There is no error in your logs, yet the UI stays empty.
 
 - On SigNoz Cloud this is almost always a wrong region: data sent to a region that does not match your account never shows up, even with a valid-looking key. Confirm `<region>` under **Settings → Ingestion** or in the [region and endpoint table](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- On self-hosted SigNoz, confirm you are querying the same instance you are exporting to.
+- On Self-Hosted SigNoz, confirm you are querying the same instance you are exporting to.
 - On either deployment, widen the time range in the UI. Recently sent data can fall outside a narrow window.
 
 </TabItem>
@@ -409,7 +409,7 @@ See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-clo
 **Data arrives, then drops off or goes missing.** Telemetry showed up and then stopped, or only part of it arrives.
 
 - On SigNoz Cloud, your ingestion key may have hit its rate or volume limit and is being throttled. Review [ingestion key limits](https://signoz.io/docs/ingestion/signoz-cloud/keys/) and set up [meter alerts](https://signoz.io/docs/cost-meter/alerts/) to catch this before data drops.
-- On self-hosted SigNoz, check the resource limits and disk capacity of your SigNoz and ClickHouse instances.
+- On Self-Hosted SigNoz, check the resource limits and disk capacity of your SigNoz and ClickHouse instances.
 
 </TabItem>
 </Tabs>
@@ -430,7 +430,7 @@ See [ingestion considerations](https://signoz.io/docs/ingestion/signoz-cloud/ove
 SigNoz ingests data **only in OTLP**, over gRPC or HTTP. The port depends on where you send it:
 
 - **SigNoz Cloud** accepts OTLP/gRPC and OTLP/HTTP on port `443`, so the endpoint is always `https://ingest.<region>.signoz.cloud:443`, sent with the `signoz-ingestion-key` header. Find your region and key under **Settings → Ingestion**.
-- **Self-hosted SigNoz and OpenTelemetry Collectors** use the default ports `4317` (gRPC) and `4318` (HTTP), and need no ingestion key by default.
+- **Self-Hosted SigNoz and OpenTelemetry Collectors** use the default ports `4317` (gRPC) and `4318` (HTTP), and need no ingestion key by default.
 
 Anything that is not OTLP, such as Prometheus scrape output, StatsD packets, or Jaeger and Zipkin spans, must be converted to OTLP by an OpenTelemetry Collector first.
 

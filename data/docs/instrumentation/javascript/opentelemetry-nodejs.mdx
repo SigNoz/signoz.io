@@ -1,13 +1,13 @@
 ---
-date: 2026-08-27
-title: Node.js OpenTelemetry Instrumentation Guide
+date: 2026-10-26
+title: Node.js OpenTelemetry Tracing - Send Traces to SigNoz
 description: Learn how to instrument your Node.js or NestJS app with OpenTelemetry. Use auto or manual instrumentation to send traces to SigNoz for faster debugging.
 doc_type: howto
 ---
 
 This guide shows you how to instrument your Node.js or NestJS application with OpenTelemetry and send traces to SigNoz. You can use either zero-code automatic instrumentation or code-level setup depending on your needs.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -15,7 +15,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 - <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/upgrade-to-2.x.md#-nodejs-supported-versions" target="_blank" rel="noopener noreferrer nofollow">Node.js 20.6.0+</a>
 - If you're on Node 18, use <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/upgrade-to-2.x.md#-nodejs-supported-versions" target="_blank" rel="noopener noreferrer nofollow">18.19.0+</a>. Node 18 reached <a href="https://nodejs.org/en/about/eol" target="_blank" rel="noopener noreferrer nofollow">end of life on March 27, 2025</a>.
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- A SigNoz Cloud account or Self-Hosted SigNoz instance
 
 ## Send traces to SigNoz
 
@@ -68,6 +68,10 @@ npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
 ```bash
 node app.js
 ```
+
+<Admonition type="info" title="Running your app with PM2?">
+In PM2 cluster mode, `NODE_OPTIONS` does not take effect, and PM2 restarts can drop buffered spans. Follow [Node.js with PM2](https://signoz.io/docs/instrumentation/javascript/opentelemetry-pm2/) instead.
+</Admonition>
 
 <Admonition type="tip">
 Need to enable or disable instrumentation for specific libraries? Check out our guide on [selective instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/).
@@ -156,13 +160,15 @@ metadata:
   name: nodejs-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4318
+    endpoint: http://<collector-service>:4318
   propagators:
     - tracecontext
     - baggage
   nodejs:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
 ```
+
+Replace `<collector-service>` with the address of the collector Service that receives the application's telemetry. If you installed the Collection Agent with the OpenTelemetry Operator guide, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector) for its Service.
 
 Deploy this resource to your cluster.
 
@@ -575,4 +581,8 @@ See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetr
 - [Exclude HTTP Endpoints](https://signoz.io/docs/instrumentation/javascript/nodejs-exclude-http-endpoints/)
 - [Selective Instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/)
 - [Manual Instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-manual-instrumentation/)
+- [Run your app with PM2](https://signoz.io/docs/instrumentation/javascript/opentelemetry-pm2/) in fork or cluster mode
+- Running on Bun instead of Node.js? See the [Bun and ElysiaJS OpenTelemetry guide](https://signoz.io/docs/instrumentation/opentelemetry-bun/).
+- [Instrument a Hono app](https://signoz.io/docs/instrumentation/javascript/opentelemetry-hono/) to get spans and HTTP metrics named by route
+- Use the [OpenTelemetry Injector](https://signoz.io/docs/instrumentation/opentelemetry-injector/) to start this agent with no change to the application, when one Linux host runs several services
 - For a framework-specific walkthrough, see our guide on [instrumenting NestJS applications](https://signoz.io/blog/opentelemetry-nestjs/), which builds on the base setup above.

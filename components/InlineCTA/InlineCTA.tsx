@@ -1,5 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 interface InlineCTAProps {
   message: string
@@ -24,7 +26,7 @@ export default function InlineCTA({
         clickText={ctaText}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--accent-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--base-white)] no-underline transition-colors hover:bg-[var(--accent-primary-hover)] hover:text-[var(--base-white)]"
+        className={cn(buttonVariants({ variant: 'default' }), 'shrink-0')}
       >
         {ctaText}
         <ArrowRight size={14} />

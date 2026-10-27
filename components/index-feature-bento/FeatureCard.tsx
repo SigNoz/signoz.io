@@ -7,7 +7,6 @@ import { ArrowUpRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
 import type { BentoFeature } from './FeatureBentoData'
-import { FeatureVisual } from './FeatureBentoVisuals'
 import { featureBentoAssets } from './featureBentoAssets'
 
 const SPOT_SIZE = 340
@@ -93,9 +92,7 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
               />
             )}
           </>
-        ) : (
-          <FeatureVisual visual={feature.visual} />
-        )}
+        ) : null}
       </div>
 
       {feature.href && (

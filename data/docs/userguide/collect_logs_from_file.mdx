@@ -1,11 +1,11 @@
 ---
-date: 2026-07-17
+date: 2026-10-15
 title: Collecting Application Logs from Log File
 description: Learn how to configure the OpenTelemetry Collector to read logs from a file and push them to SigNoz.
 doc_type: howto
 ---
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
 header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
@@ -101,7 +101,7 @@ sudo systemctl restart otel-collector
 
 <TabItem value="k8s" label="Kubernetes">
 
-The [SigNoz Kubernetes Infra Chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) automatically collects logs from all pods by default. This is managed via the [presets.logsCollection.enabled](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#3-container-log-collection) property, which configures a `filelog` receiver to ingest logs from the standard Kubernetes log path (`/var/log/pods/*`).
+The [SigNoz Kubernetes Infra Chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) automatically collects logs from all pods by default. This is managed via the [presets.logsCollection.enabled](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#collect-container-logs) property, which configures a `filelog` receiver to ingest logs from the standard Kubernetes log path (`/var/log/pods/*`).
 
 **Recommendation:** For the best experience, configure your applications to log to `stdout` and `stderr`. This ensures they are automatically captured by the standard Kubernetes logging infrastructure without additional configuration.
 

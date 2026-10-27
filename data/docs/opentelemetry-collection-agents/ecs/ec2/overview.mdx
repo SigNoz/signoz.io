@@ -1,60 +1,41 @@
 ---
-date: 2025-11-20
-
-title: ECS EC2 Collection Agent - Overview
-description: View metrics and logs for your ECS infrastructure
+date: 2026-10-26
+title: ECS EC2 - Overview
+description: Learn how the ECS EC2 Collection Agent runs an OpenTelemetry Collector on each ECS instance to send host metrics, container metrics, logs, and traces to SigNoz.
+doc_type: explanation
 ---
 
-## What is ECS Daemon Service Collection?
+The ECS EC2 Collection Agent runs one OpenTelemetry Collector task on every container instance of an Amazon ECS cluster, as an ECS daemon service, on EC2 container instances and on external instances registered through ECS Anywhere. It collects host metrics, container metrics, container and host logs, and telemetry from your applications.
 
-This documentation explains how to collect metrics and logs from your Amazon ECS (Elastic Container Service) infrastructure using a daemon service approach. The daemon service runs a container on each node of your ECS cluster to collect infrastructure metrics and logs, then forwards them to SigNoz for monitoring and analysis.
+The ECS EC2 Collection Agent primarily performs the following:
 
-## How It Works
+- Collects host metrics and per-container metrics from each container instance.
+- Tails the logs of the containers on each container instance.
+- Collects the host logs and the ECS agent logs of each container instance.
+- Receives OTLP traces, metrics, and logs from your applications and forwards them to SigNoz.
 
-The daemon service approach involves deploying a specialized container that:
+## How it works
 
-1. **Runs as a daemon**: The service deploys one container per ECS cluster node
-2. **Collects infrastructure data**: Gathers metrics and logs from the host instance and Docker containers
-3. **Acts as a gateway**: Receives OpenTelemetry Protocol (OTLP) telemetry data from your applications
-4. **Forwards to SigNoz**: Sends all collected data to your SigNoz instance for visualization and analysis
+### Agent (daemon service)
 
-## Architecture Overview
+The agent runs as the `signoz-collector-agent` ECS daemon service, so one collector task runs on every container instance in your cluster. It collects instance-level and container-level data:
 
-```
-ECS Cluster Nodes
-├── Your Application Containers
-├── Daemon Service Container (OpenTelemetry Collector)
-│   ├── Collects host metrics
-│   ├── Collects container logs  
-│   ├── Receives OTLP data from apps
-│   └── Forwards data to SigNoz
-```
+- **Host metrics:** CPU, memory, disk, filesystem, and network of each container instance via `hostmetrics`.
+- **Container metrics:** CPU, memory, network, and block I/O of every container via `docker_stats`, with its ECS cluster, task, and task family as resource attributes.
+- **Container logs:** the stdout and stderr of containers that use the `json-file` log driver, via `filelog`. Containers set up as [Collect Container Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/#collect-container-logs) shows carry their task family as `service.name`.
+- **Host logs:** the ECS agent logs, and the container instance's system logs in `/var/log/messages` and `/var/log/secure`, via `filelog/host`. Amazon Linux 2023 writes its system logs to the systemd journal instead, so on it only the ECS agent logs are collected by default.
+- **OTLP:** traces, metrics, and logs from your applications over OTLP/gRPC (4317) and OTLP/HTTP (4318).
+- **Resource attributes:** host and cloud resource attributes via the `resourcedetection` processor.
 
-## Prerequisites
+## Known Limitations
 
-Before setting up the daemon service, ensure you have:
-
-- **ECS Cluster**: An active ECS cluster with at least one task definition
-- **Launch Type**: Your ECS cluster must use either **EC2** or **External** launch type
-- **SigNoz Instance**: Either SigNoz Cloud account or self-hosted SigNoz installation
-- **AWS CLI**: Configured with appropriate permissions for ECS and CloudFormation operations
-- **IAM Permissions**: Access to create CloudFormation stacks, ECS services, and Parameter Store resources
-
-> **Note for Fargate Users**: If you're using Fargate launch type, this daemon service approach won't work. Instead, check out the [ECS Sidecar documentation](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/) for Fargate-compatible collection methods.
-
-## What Data Gets Collected?
-
-- **Infrastructure metrics** (CPU, memory, network, disk, container resource usage)
-- **Container and system logs** (application, system, Docker daemon logs)
-- **Application telemetry** (traces, custom metrics, OTLP-compatible data)
-
-
-## Launch Type
-
-- **EC2**: Fully supported; collects host metrics/logs with host network access.
-- **External**: Supported for hybrid/external resources; may need extra network setup.
+- **Containers that log to CloudWatch Logs or FireLens:** their logs leave the instance, so they are not collected. Use the `json-file` log driver, or send logs over OTLP.
+- **No task attributes on application data:** telemetry your applications send over OTLP carries no ECS task attributes unless the application's SDK adds them.
+- **EC2 and external instances only:** <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_definition_parameters.html#sd-schedulingstrategy" target="_blank" rel="noopener noreferrer nofollow">Fargate does not run daemon services</a>, so Fargate tasks in the same cluster are not collected. Add the [ECS Serverless Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/) to their task definitions.
 
 ## Next Steps
 
-- [Install daemon service in your ECS Cluster](/docs/opentelemetry-collection-agents/ecs/ec2/install/)
-- [Configure daemon service in your ECS Cluster](/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
+- [Install the ECS EC2 Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
+- [Configure the ECS EC2 Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
+- [Monitoring ECS EC2 using OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started/)
+- [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)

@@ -1,222 +1,1051 @@
 ---
-date: 2026-08-03
+date: 2026-10-26
 title: VM Collection Agent - Configure
-description: Configure the OpenTelemetry Collector binary on your virtual machine to send telemetry data to SigNoz.
+description: Configure the OpenTelemetry Collector that runs as the VM Collection Agent to customize the host metrics, logs, and application data it sends to SigNoz.
 doc_type: howto
 ---
 
-This guide walks you through configuring the OpenTelemetry Collector binary on your virtual machine to send telemetry data to SigNoz. Add or merge each snippet below into your existing collector config and enable the new receivers or processors in the relevant pipelines.
-
-<KeyPointCallout title="Validate your changes" defaultCollapsed="true">
-After editing the config, validate before applying. Run the collector with `--dry-run` to catch misconfigurations without starting it. See the [Validate](#validate) section below.
-</KeyPointCallout>
+The [install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) provides a working config: one agent on each host collects host metrics and data from instrumented applications, and on Linux the warnings and errors in the systemd journal. This page explains how to customize it.
 
 ## Prerequisites
 
-- OpenTelemetry Collector binary installed (see [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/))
+- The VM Collection Agent installed as the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) shows
 - SigNoz Cloud account or self-hosted SigNoz instance
-- Access to create and edit the OpenTelemetry Collector configuration file (see your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) for where it lives and how to apply changes)
-
-## Resource Detection
-
-The [resource detection processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) adds host and cloud metadata to your telemetry so you can filter and group by environment, hostname, or cloud provider in SigNoz.
-
-Use the following configuration on a VM. On **AWS**, **GCP**, or **Azure**, add the corresponding cloud detector **before** the `system` detector.
-
-```yaml:config.yaml {11}
-processors:
-  resourcedetection:
-    # Allow using OTEL_RESOURCE_ATTRIBUTES env var, env detector adds custom labels.
-    detectors: [env, system]
-service:
-  pipelines:
-    traces:
-      processors: [resourcedetection]
-    metrics:
-      processors: [resourcedetection]
-    logs:
-      processors: [resourcedetection]
-```
-
-### Cloud-specific detectors
-
-- **AWS EC2:** Use `detectors: [env, ec2, system]` so the collector detects `cloud.provider`, `cloud.region`, `host.id`, and related attributes.
-- **GCP:** Use `detectors: [env, gcp, system]` for GCP VM metadata.
-- **Azure:** Use `detectors: [env, azure, system]` for Azure VM metadata.
-
-## Send data from applications to collector on VM
-
-Configure the OTLP receiver so instrumented applications on the VM can send traces, metrics, and logs to the collector.
-
-```yaml:config.yaml {12} defaultCollapsed
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-
-service:
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp]
-    logs:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp]
-```
-
-### Where and how to send data from your application
-
-Set your app’s OTLP endpoint to the collector (gRPC `4317`, HTTP `4318`). 
-
-```bash
-# Same VM
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
-# Different host
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://<VM_HOST_OR_IP>:4317"
-# Set the service name
-export OTEL_RESOURCE_ATTRIBUTES="service.name=my-app"
-```
-
-See [Instrumentation](https://signoz.io/docs/instrumentation/) for language-specific setup.
-
-## Collect host metrics from the VM
-
-Use the [hostmetrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver to scrape CPU, memory, disk, filesystem, load, and network metrics from the VM.
-
-```yaml:config.yaml {20} defaultCollapsed
-receivers:
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
-
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp, hostmetrics]
-```
-
-You can enable only the scrapers you need or tune `collection_interval`.
-
-## Collect logs from files on the VM
-
-Use the [filelog](https://signoz.io/docs/userguide/collect_logs_from_file/) receiver to tail log files on the VM and send them as log records to SigNoz (application or system log files).
-
-**Example: single log file**
-
-```yaml:config.yaml {11}
-receivers:
-  filelog:
-    include: [/path/to/your/application.log] # <-- Replace with your log file path
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-
-service:
-  pipelines:
-    logs:
-      receivers: [filelog]
-```
-
-**Example: multiple files with glob**
-
-```yaml:config.yaml {12}
-receivers:
-  filelog:
-    include:
-      - /path/to/your/application-logs/*.log
-    start_at: end
-    include_file_name: true
-    include_file_path: true
-
-service:
-  pipelines:
-    logs:
-      receivers: [filelog]
-```
-
-**Example: JSON log files**
-
-```yaml:config.yaml {12}
-receivers:
-  filelog:
-    include: [/path/to/your/application-logs/*.json]
-    start_at: end
-    operators:
-      - type: json_parser
-        parse_from: body
-
-service:
-  pipelines:
-    logs:
-      receivers: [filelog]
-```
-
-<Admonition type="info">
-Ensure the user running the collector has read access to the log paths. On Linux, you may need to add the user to a group that can read `/var/log` or adjust file permissions.
-</Admonition>
-
-## Collect syslogs
-
-To collect system logs (e.g. via rsyslog) on the VM using the OpenTelemetry Collector’s **syslog** receiver, see [Collecting Syslogs via OpenTelemetry Collector](https://signoz.io/docs/userguide/collecting_syslogs/).
-
-## Collect systemd (journald) logs
-
-To collect logs from systemd’s journal on Linux using the **journald** receiver, see [Collecting systemd logs (journald)](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/).
-
-## Collect Windows Event logs
-
-To stream Windows Event logs (Application, Security, System channels) to SigNoz using the **Windows Event Log** receiver, see [Windows Events log to SigNoz](https://signoz.io/docs/logs-management/send-logs/windows-events-log/).
-
-## Forward from Fluent Bit, Fluentd, or Logstash
-
-- If you already use any of the following log forwarders on your VM, you can forward logs to the OpenTelemetry Collector and then to SigNoz:
-  - [Fluent Bit to SigNoz](https://signoz.io/docs/userguide/fluentbit_to_signoz/)
-  - [Fluentd to SigNoz](https://signoz.io/docs/userguide/fluentd_to_signoz/)
-  - [Logstash to SigNoz](https://signoz.io/docs/userguide/logstash_to_signoz/)
-
-## Validate
-
-Dry run the collector to validate your config before applying changes. The binary path and config path depend on your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
-
-Example for DEB/RPM (binary at `/usr/bin/otelcol-contrib`, config at `/etc/otelcol-contrib/config.yaml`):
-
-```bash
-/usr/bin/otelcol-contrib --config /etc/otelcol-contrib/config.yaml --dry-run
-```
-
-For manual tarball installs, use `./otelcol-contrib` (or `.\otelcol-contrib.exe` on Windows) and the path to your config file.
-
-If the config is valid, the command exits without errors. Then apply the changes and restart the collector. Confirm data in [Traces](https://signoz.io/docs/traces-management/guides/overview/), [Metrics](https://signoz.io/docs/metrics-management/overview/), or [Logs](https://signoz.io/docs/logs-management/overview/) (and [Infrastructure](https://signoz.io/docs/infrastructure-monitoring/overview/) for host metrics) depending on what you enabled.
+- A shell on the host (with `sudo` on Linux), or PowerShell on Windows (as Administrator for the MSI)
+- On Linux, the `casting.yaml` and `foundryctl` you installed with; on macOS and Windows, the `config.yaml` you created
 
 ## Apply Changes
 
-After editing the config:
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
 
-1. Copy the configuration to the path used by your [installation method](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) (e.g. systemd unit `Environment` or the path passed to `--config`).
-2. Restart or start the collector as described in the install guide.
-3. View collector logs to confirm there are no configuration errors.
+1. Add the section's snippet to `casting.yaml`. Foundry already generates the default receivers and processors, so add only what you change. If `casting.yaml` already has a `collector/agent/agent.yaml` block, as the install guide's does, add the snippet's lines inside that block.
 
+2. Run this from the directory that contains `casting.yaml` to apply the change:
+
+   ```bash
+   sudo foundryctl cast -f casting.yaml
+   ```
+
+   Foundry reinstalls the agent's files and restarts it.
+
+3. [View the agent's logs](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=linux#view-the-collectors-logs) to confirm there are no configuration errors.
+
+4. In SigNoz, confirm the data in **[Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)** for host metrics, **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** for logs, and **[Trace Explorer](https://signoz.io/docs/userguide/traces/)** for application traces.
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+1. Add the section's snippet to `config.yaml`, merged into the keys the file already has.
+
+2. From the directory that contains `config.yaml`, stop the agent with this, then run [Step 4 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=macos#step-4-run-the-collector) again:
+
+   ```bash
+   kill "$(cat otel-pid)"
+   ```
+
+3. [View the agent's logs](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#view-the-collectors-logs) to confirm there are no configuration errors.
+
+4. In SigNoz, confirm the data in **[Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)** for host metrics, **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** for logs, and **[Trace Explorer](https://signoz.io/docs/userguide/traces/)** for application traces.
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+1. Add the section's snippet to `config.yaml`, merged into the keys the file already has. With the MSI, the file is `C:\Program Files\OpenTelemetry Collector\config.yaml`; when you run the agent manually, it is the `config.yaml` next to `otelcol-contrib.exe`.
+
+2. Restart the agent. With the MSI, run this in PowerShell as Administrator:
+
+   ```powershell
+   Restart-Service otelcol-contrib
+   ```
+
+   When you run it manually, stop the agent with this, then run [Step 4 of the manual install](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows&windows-method=manual#step-4-run-the-collector-1) again:
+
+   ```powershell
+   Stop-Process -Id (Get-Content otel-pid)
+   ```
+
+3. [View the agent's logs](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#view-the-collectors-logs) to confirm there are no configuration errors.
+
+4. In SigNoz, confirm the data in **[Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)** for host metrics, **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** for logs, and **[Trace Explorer](https://signoz.io/docs/userguide/traces/)** for application traces.
+
+</TabItem>
+</Tabs>
+
+## Send Data from Applications to Collector on VM
+
+Host metrics, and on Linux the warnings and errors in the systemd journal, flow as soon as the agent is running.
+
+### Where and how to send data from your application
+
+To send traces, metrics, and logs from an application, instrument it with OpenTelemetry ([language guides](https://signoz.io/docs/instrumentation/)), then point it at the agent. For an application on the same host, set these in its environment, for example in the shell that starts it:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_SERVICE_NAME="<service-name>"
+```
+
+**Verify these values:**
+
+- `<service-name>`: The name your application shows under in SigNoz.
+
+From another host, use the agent host's address in place of `localhost`, with port `4318` open to it. For OTLP over gRPC, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and port `4317`. On Windows, set the same variables in the application's environment.
+
+Restart the application and send it some traffic. Within a minute it shows under **Services** in SigNoz.
+
+## Collect Host Metrics
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To collect host metrics every 30s, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                collection_interval: 30s
+```
+
+To stop a scraper, set it to `null` under `scrapers`, for example `paging: null`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To collect host metrics every 30s, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 30s
+```
+
+To stop a scraper, remove it from `scrapers`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To collect host metrics every 30s, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 30s
+```
+
+To stop a scraper, remove it from `scrapers`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+### Exclude filesystem mounts
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To stop reporting the filesystem mounted at `/mnt/backup`, add this to `casting.yaml`:
+
+```yaml defaultCollapsed
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                scrapers:
+                  filesystem:
+                    exclude_mount_points:
+                      mount_points:
+                        - /dev/*
+                        - /proc/*
+                        - /sys/*
+                        - /run/credentials/*
+                        - /run/k3s/containerd/*
+                        - /var/lib/docker/*
+                        - /var/lib/containers/storage/*
+                        - /var/lib/kubelet/*
+                        - /snap/*
+                        - ^/mnt/backup$
+```
+
+Lists replace, so restate the agent's default entries, the ones above `^/mnt/backup$`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To stop reporting the filesystem mounted at `/Volumes/Backup`, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    scrapers:
+      filesystem:
+        exclude_mount_points:
+          match_type: regexp
+          mount_points:
+            - /dev/*
+            - ^/System/Volumes/(Preboot|VM|Update|xarts|iSCPreboot|Hardware)$
+            - ^/Volumes/Backup$
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To stop reporting the `D:` drive, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    scrapers:
+      filesystem:
+        exclude_mount_points:
+          match_type: regexp
+          mount_points:
+            - ^D:$
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+## Collect Host Logs
+
+On Linux, to also collect journal entries at priority info, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              journald:
+                priority: info
+```
+
+`priority` merges into the agent's `journald` receiver, so its other settings stay. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+To collect the journal of only some systemd units, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              journald:
+                units:
+                  - nginx.service
+                  - postgresql.service
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+### Disable Logs Collection
+
+On Linux, to stop collecting the journal, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              journald: null
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc]
+```
+
+Lists replace, so the `logs` pipeline is restated with the agent's two OTLP receivers. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+## Collect Application Log Files
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To collect the log files that an application writes, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              filelog/app:
+                include:
+                  - /var/log/myapp/*.log
+                include_file_path: true
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc, journald, filelog/app]
+```
+
+Lists replace, so the `logs` pipeline restates the agent's receivers with the new one. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To collect the log files that an application writes, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  filelog/app:
+    include:
+      - /var/log/myapp/*.log
+    include_file_path: true
+service:
+  pipelines:
+    logs:
+      receivers: [otlp/http, otlp/grpc, filelog/app]
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To collect the log files that an application writes, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  filelog/app:
+    include:
+      - C:\myapp\logs\*.log
+    include_file_path: true
+service:
+  pipelines:
+    logs:
+      receivers: [otlp/http, otlp/grpc, filelog/app]
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+For JSON parsing and more `filelog` options, see [Collect Logs from a File](https://signoz.io/docs/userguide/collect_logs_from_file/).
+
+### Other log sources
+
+To receive [syslog](https://signoz.io/docs/userguide/collecting_syslogs/), or logs forwarded from [Fluent Bit](https://signoz.io/docs/userguide/fluentbit_to_signoz/), [Fluentd](https://signoz.io/docs/userguide/fluentd_to_signoz/), or [Logstash](https://signoz.io/docs/userguide/logstash_to_signoz/), take the receiver from its guide, add it the same way, and list it in the `logs` pipeline. On Linux, the agent can listen only on ports 1024 and above. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+## Resource Detection
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To detect only host attributes on a host outside AWS, GCP, and Azure, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              resourcedetection:
+                detectors: [env, system]
+```
+
+Lists replace, so `detectors` holds only the detectors you list. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To detect only host attributes on a host outside AWS, GCP, and Azure, add this to `config.yaml`:
+
+```yaml:config.yaml
+processors:
+  resourcedetection:
+    detectors: [env, system]
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To detect only host attributes on a host outside AWS, GCP, and Azure, add this to `config.yaml`:
+
+```yaml:config.yaml
+processors:
+  resourcedetection:
+    detectors: [env, system]
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+### Custom resource attributes
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To add `team=backend` to all telemetry, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      env:
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<your-environment>,team=backend
+```
+
+**Verify these values:**
+
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To add `team=backend` to all telemetry, set this in place of the `OTEL_RESOURCE_ATTRIBUTES` line of [Step 4 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=macos#step-4-run-the-collector):
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=<your-environment>,team=backend"
+```
+
+**Verify these values:**
+
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To add `team=backend` to all telemetry with the MSI, use this line for `OTEL_RESOURCE_ATTRIBUTES` in [Step 3 of the MSI install](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows#step-3-set-the-environment-and-restart):
+
+```powershell
+'OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>,team=backend'
+```
+
+**Verify these values:**
+
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+When you run the agent manually, set this in place of the `OTEL_RESOURCE_ATTRIBUTES` line of [Step 4 of the manual install](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows&windows-method=manual#step-4-run-the-collector-1):
+
+```powershell
+$env:OTEL_RESOURCE_ATTRIBUTES = 'deployment.environment=<your-environment>,team=backend'
+```
+
+**Verify these values:**
+
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+## Scrape Prometheus Metrics
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To scrape a Prometheus endpoint every 60s, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              prometheus:
+                config:
+                  scrape_configs:
+                    - job_name: my-app
+                      scrape_interval: 60s
+                      static_configs:
+                        - targets: [localhost:9090]
+            service:
+              pipelines:
+                metrics:
+                  receivers: [otlp/http, otlp/grpc, hostmetrics, prometheus]
+```
+
+Lists replace, so the `metrics` pipeline is restated with the agent's default receivers. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To scrape a Prometheus endpoint every 60s, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: my-app
+          scrape_interval: 60s
+          static_configs:
+            - targets: [localhost:9090]
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp/http, otlp/grpc, hostmetrics, prometheus]
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To scrape a Prometheus endpoint every 60s, add this to `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: my-app
+          scrape_interval: 60s
+          static_configs:
+            - targets: [localhost:9090]
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp/http, otlp/grpc, hostmetrics, prometheus]
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+## Tune Batch and Memory Limiter
+
+For sizing guidance, see [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices).
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To send larger batches, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              batch:
+                send_batch_size: 2000
+                send_batch_max_size: 4000
+```
+
+The agent's defaults are `send_batch_size: 1000`, `send_batch_max_size: 2048`, and `timeout: 10s`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To send larger batches, add this to `config.yaml`:
+
+```yaml:config.yaml
+processors:
+  batch:
+    send_batch_size: 2000
+    send_batch_max_size: 4000
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To send larger batches, add this to `config.yaml`:
+
+```yaml:config.yaml
+processors:
+  batch:
+    send_batch_size: 2000
+    send_batch_max_size: 4000
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+### Memory limit
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To cap the agent's memory at 1 GiB, add this patch to `casting.yaml`:
+
+```yaml
+spec:
+  patches:
+    - target: collectionagent/collector/agent/signoz-collector-agent.service
+      operations:
+        - op: add
+          path: /Service/MemoryMax
+          value: 1G
+```
+
+The agent's `memory_limiter` processor uses a fixed `limit_mib: 4000`, so size it to the cap with percentages, in the same document:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              memory_limiter:
+                limit_mib: null
+                spike_limit_mib: null
+                limit_percentage: 80
+                spike_limit_percentage: 25
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To size the `memory_limiter` processor by the Mac's memory, replace its settings in `config.yaml` with this:
+
+```yaml:config.yaml
+processors:
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To size the `memory_limiter` processor by the host's memory, replace its settings in `config.yaml` with this:
+
+```yaml:config.yaml
+processors:
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+```
+
+Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+## Add Custom Processors to Pipelines
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To add a processor to the `traces` pipeline, add this to `casting.yaml`:
+
+```yaml
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            processors:
+              attributes/team:
+                actions:
+                  - key: team
+                    value: platform
+                    action: insert
+            service:
+              pipelines:
+                traces:
+                  processors: [memory_limiter, resourcedetection, attributes/team, batch]
+```
+
+Lists replace, so restate the agent's processors `memory_limiter`, `resourcedetection`, and `batch`, with yours before `batch`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To add a processor to the `traces` pipeline, add this to `config.yaml`:
+
+```yaml:config.yaml
+processors:
+  attributes/team:
+    actions:
+      - key: team
+        value: platform
+        action: insert
+service:
+  pipelines:
+    traces:
+      processors: [memory_limiter, resourcedetection, attributes/team, batch]
+```
+
+List yours before `batch`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To add a processor to the `traces` pipeline, add this to `config.yaml`:
+
+```yaml:config.yaml
+processors:
+  attributes/team:
+    actions:
+      - key: team
+        value: platform
+        action: insert
+service:
+  pipelines:
+    traces:
+      processors: [memory_limiter, resourcedetection, attributes/team, batch]
+```
+
+List yours before `batch`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+## Common Deployment Scenarios
+
+### Run on the same host as self-hosted SigNoz
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To run the agent on the host that runs self-hosted SigNoz, add this to `casting.yaml`:
+
+```yaml defaultCollapsed
+spec:
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: http://localhost:4318
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              otlp/grpc:
+                protocols:
+                  grpc:
+                    endpoint: 0.0.0.0:14317
+              otlp/http:
+                protocols:
+                  http:
+                    endpoint: 0.0.0.0:14318
+            extensions:
+              health_check:
+                endpoint: 0.0.0.0:13134
+            service:
+              telemetry:
+                metrics:
+                  readers:
+                    - pull:
+                        exporter:
+                          prometheus:
+                            host: localhost
+                            port: 8889
+```
+
+The agent then receives OTLP on `14317` and `14318`, so applications on the host send to `localhost:14318`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To run the agent on the Mac that runs self-hosted SigNoz, add this to `config.yaml`, and set `SIGNOZ_INGESTION_ENDPOINT` to `http://localhost:4318` in [Step 4 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=macos#step-4-run-the-collector):
+
+```yaml:config.yaml defaultCollapsed
+receivers:
+  otlp/grpc:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14317
+  otlp/http:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:14318
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13134
+service:
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
+```
+
+The agent then receives OTLP on `14317` and `14318`, so applications on the Mac send to `localhost:14318`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=macos#apply-changes).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+To run the agent on the host that runs self-hosted SigNoz, add this to `config.yaml`, and set `SIGNOZ_INGESTION_ENDPOINT` to `http://localhost:4318` in the agent's environment ([Step 3 of the MSI install](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows#step-3-set-the-environment-and-restart), or [Step 4 of the manual install](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows&windows-method=manual#step-4-run-the-collector-1)):
+
+```yaml:config.yaml defaultCollapsed
+receivers:
+  otlp/grpc:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14317
+  otlp/http:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:14318
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13134
+service:
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: localhost
+                port: 8889
+```
+
+The agent then receives OTLP on `14317` and `14318`, so applications on the host send to `localhost:14318`. Then [apply the change](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/?os=windows#apply-changes).
+
+</TabItem>
+</Tabs>
+
+## Migrate to Foundry
+
+If you run the agent on Linux as the `otelcol-contrib` package, or as an `otelcol-contrib` process you set up yourself, with your own `config.yaml`, move it to Foundry so that `casting.yaml` holds its whole setup and every change follows [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes).
+
+1. To describe the agent in Foundry, [install foundryctl](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/#step-1-install-foundryctl), [download the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/#step-2-download-the-opentelemetry-collector), and [create casting.yaml](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/#step-3-create-castingyaml) as the install guide shows. On a host that runs self-hosted SigNoz, also add the change in [Run on the same host as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#run-on-the-same-host-as-self-hosted-signoz).
+
+2. To keep your `config.yaml` customizations, add them to `casting.yaml` under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml`, and your environment variables under `spec.collector.spec.env`. For example, for host metrics every 30s and a `team` resource attribute:
+
+   ```yaml
+   spec:
+     collector:
+       spec:
+         env:
+           OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<your-environment>,team=backend
+         config:
+           data:
+             collector/agent/agent.yaml: |
+               receivers:
+                 hostmetrics:
+                   collection_interval: 30s
+   ```
+
+   **Verify these values:**
+
+   - `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+   Foundry merges the `collector/agent/agent.yaml` block over its own config. When you move your settings over:
+
+   - Restate a whole list to change it, such as a pipeline's `receivers` or an exclude list. A list you set replaces Foundry's.
+   - Use Foundry's names: `otlp/grpc` and `otlp/http` for your `otlp` receiver's gRPC and HTTP protocols, and `otlphttp/signoz` for your `otlphttp` exporter.
+   - Keep `journald` in the `logs` pipeline's `receivers`.
+   - Set your exporter's endpoint and key as `SIGNOZ_INGESTION_ENDPOINT` and `SIGNOZ_INGESTION_KEY` under `spec.collector.spec.env`, not as values in `agent.yaml`. The install guide's `agent.yaml` block reads the key from there.
+
+3. To free the host ports the Foundry agent binds, remove the old collector. For the package on Debian and Ubuntu, run this on the host:
+
+   ```bash
+   sudo apt-get remove otelcol-contrib
+   ```
+
+   On RHEL and Fedora (`yum` on older releases):
+
+   ```bash
+   sudo dnf remove otelcol-contrib
+   ```
+
+   For an `otelcol-contrib` process you set up yourself, stop it.
+
+4. To start the agent with Foundry, run this from the directory that contains `casting.yaml`:
+
+   ```bash
+   sudo foundryctl cast -f casting.yaml
+   ```
+
+   Then verify the Collection Agent as [Step 5 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/#step-5-verify-the-collection-agent) shows.
+
+## Upgrade the Collection Agent
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+To replace the collector binary:
+
+1. Stop the agent. Run this on the host:
+
+   ```bash
+   sudo systemctl stop signoz-collector-agent
+   ```
+
+2. Download the binary as [Step 2 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/#step-2-download-the-opentelemetry-collector) shows, with the version the install guide names.
+
+3. Start the agent. Run this from the directory that contains `casting.yaml`:
+
+   ```bash
+   sudo foundryctl cast -f casting.yaml
+   ```
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+To replace the collector binary, from the directory that contains `config.yaml`:
+
+1. Stop the agent:
+
+   ```bash
+   kill "$(cat otel-pid)"
+   ```
+
+2. Download and extract the new tarball as [Steps 1 and 2 of the install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=macos#step-1-download-the-tarball) show, with the version the install guide names. `config.yaml` stays as it is.
+
+3. Start the agent as [Step 4](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=macos#step-4-run-the-collector) shows.
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+With the MSI, run these in PowerShell as Administrator:
+
+1. Save your config, because the MSI replaces `config.yaml` and removes the service's environment when it upgrades:
+
+   ```powershell
+   Copy-Item 'C:\Program Files\OpenTelemetry Collector\config.yaml' "$env:TEMP\otelcol-config.yaml"
+   ```
+
+2. Install the new MSI as [Step 1 of the MSI install](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows#step-1-install-the-msi) shows, with the version the install guide names.
+
+3. Put your config back:
+
+   ```powershell
+   Copy-Item "$env:TEMP\otelcol-config.yaml" 'C:\Program Files\OpenTelemetry Collector\config.yaml'
+   ```
+
+   Then run [Step 3](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows#step-3-set-the-environment-and-restart) again.
+
+When you run the agent manually, from the folder that contains `config.yaml`:
+
+1. Stop the agent:
+
+   ```powershell
+   Stop-Process -Id (Get-Content otel-pid)
+   ```
+
+2. Download and extract the new tarball as [Steps 1 and 2 of the manual install](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows&windows-method=manual#step-1-download-the-tarball-1) show, with the version the install guide names. `config.yaml` stays as it is.
+
+3. Start the agent as [Step 4](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/?os=windows&windows-method=manual#step-4-run-the-collector-1) shows.
+
+</TabItem>
+</Tabs>
+
+## View the Collector's Logs
+
+<Tabs entityName="os">
+<TabItem value="linux" label="Linux" default>
+
+The agent writes its own logs to the systemd journal. To follow them, run this on the host:
+
+```bash
+sudo journalctl -u signoz-collector-agent -f
+```
+
+</TabItem>
+<TabItem value="macos" label="macOS">
+
+The agent writes its own logs to `otelcol-output.log`, in the directory you started it from. To follow them, run this there:
+
+```bash
+tail -f otelcol-output.log
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+With the MSI, the service writes its logs to the Application event log under the `otelcol-contrib` source, which Event Viewer shows under **Windows Logs** > **Application**. To list the latest, run this in PowerShell:
+
+```powershell
+Get-WinEvent -ProviderName otelcol-contrib -MaxEvents 50 | Select-Object TimeCreated, LevelDisplayName, Message
+```
+
+When you run the agent manually, it writes its logs to `otelcol-output.log`, in the folder you started it from. To follow them, run this there:
+
+```powershell
+Get-Content otelcol-output.log -Wait -Tail 50
+```
+
+</TabItem>
+</Tabs>
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Metrics or logs stop after adding a receiver
+
+After a change that adds a receiver to the `metrics` or `logs` pipeline, host metrics or host logs stop arriving in SigNoz.
+
+**Cause:** the pipeline's `receivers` list no longer names `hostmetrics` or, on Linux, `journald`. In `casting.yaml`, a list replaces Foundry's whole list.
+
+**Fix:** list every receiver the pipeline still needs, as [Scrape Prometheus Metrics](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#scrape-prometheus-metrics) and [Collect Application Log Files](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#collect-application-log-files) show, then apply the change as [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes) shows.
+
+After the fix, host metrics and host logs arrive in SigNoz again.
+
+### A custom processor has no effect
+
+After a change that adds a processor, its attribute or transformation is missing from the data in SigNoz.
+
+**Cause:** the processor is defined under `processors` but not listed in a pipeline's `processors`.
+
+**Fix:** list it before `batch` as [Add Custom Processors to Pipelines](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#add-custom-processors-to-pipelines) shows, then apply the change as [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes) shows.
+
+After the fix, the attribute or transformation appears on the signal in SigNoz Explorer.
+
+### A service's logs do not arrive
+
+On Linux, a service's log lines appear in `journalctl -u` for the service's unit, but not in the SigNoz Logs Explorer.
+
+**Cause:** the agent collects journal entries at priority warning and above, and the service writes its lines at a lower priority. Plain standard output and standard error are stored at priority info.
+
+**Fix:** collect entries at priority info as [Collect Host Logs](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#collect-host-logs) shows, then apply the change as [Apply Changes](https://signoz.io/docs/opentelemetry-collection-agents/vm/configure/#apply-changes) shows.
+
+After the fix, new log lines from the service arrive in SigNoz.
+
+</details>
 
 ## Next Steps
 

@@ -187,8 +187,8 @@ function Footer({ inDocsShell = false }: FooterProps) {
                 <FooterPillLink href="https://newsletter.signoz.io/" newTab>
                   Newsletter
                 </FooterPillLink>
-                <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2025/" newTab>
-                  KubeCon, Atlanta 2025
+                <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2026/" newTab>
+                  KubeCon, Salt Lake City 2026
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
               </div>
@@ -222,8 +222,9 @@ function Footer({ inDocsShell = false }: FooterProps) {
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
                 <FooterPillLink href="/about-us/">About</FooterPillLink>
-                <FooterPillLink href="/terms-of-service/">Terms</FooterPillLink>
-                <FooterPillLink href="/privacy/">Privacy</FooterPillLink>
+                <FooterPillLink href="/legal/">Legal</FooterPillLink>
+                <FooterPillLink href="/legal/terms-of-service/">Terms</FooterPillLink>
+                <FooterPillLink href="/legal/privacy/">Privacy</FooterPillLink>
                 <FooterPillLink href="https://trust.signoz.io/" newTab>
                   Security & Compliance
                 </FooterPillLink>

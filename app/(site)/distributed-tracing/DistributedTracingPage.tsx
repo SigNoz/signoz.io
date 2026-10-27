@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { MonitorDown, Shovel } from 'lucide-react'
-import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@signozhq/ui/badge'
@@ -80,23 +79,16 @@ const LogProcessingSection: React.FC = () => {
         className="pb-3"
       />
 
-      <Button
-        variant="ghost"
-        rounded="full"
-        size={null}
-        className="flex w-fit items-center justify-center gap-2 text-xs hover:bg-transparent"
-        asChild
+      <TrackingLink
+        className="flex w-fit items-center justify-center gap-2 text-xs"
+        href="/docs/instrumentation/"
+        clickType="Inline Link"
+        clickName="Distributed Tracing View Instrumentation Guides Link"
+        clickLocation="Distributed Tracing Supported Sources Tab"
+        clickText="VIEW ALL INSTRUMENTATION GUIDES"
       >
-        <TrackingLink
-          href="/docs/instrumentation/"
-          clickType="Inline Link"
-          clickName="Distributed Tracing View Instrumentation Guides Link"
-          clickLocation="Distributed Tracing Supported Sources Tab"
-          clickText="VIEW ALL INSTRUMENTATION GUIDES"
-        >
-          VIEW ALL INSTRUMENTATION GUIDES
-        </TrackingLink>
-      </Button>
+        VIEW ALL INSTRUMENTATION GUIDES
+      </TrackingLink>
     </div>
   )
 
@@ -138,23 +130,16 @@ const LogProcessingSection: React.FC = () => {
         </div>
       </div>
 
-      <Button
-        variant="ghost"
-        rounded="full"
-        size={null}
-        className="justify-start text-xs hover:bg-transparent"
-        asChild
+      <TrackingLink
+        className="justify-start text-xs"
+        href="/docs/instrumentation/"
+        clickType="Inline Link"
+        clickName="Distributed Tracing View Methods Guides Link"
+        clickLocation="Distributed Tracing Collection Methods Tab"
+        clickText="VIEW ALL INSTRUMENTATION GUIDES"
       >
-        <TrackingLink
-          href="/docs/instrumentation/"
-          clickType="Inline Link"
-          clickName="Distributed Tracing View Methods Guides Link"
-          clickLocation="Distributed Tracing Collection Methods Tab"
-          clickText="VIEW ALL INSTRUMENTATION GUIDES"
-        >
-          VIEW ALL INSTRUMENTATION GUIDES
-        </TrackingLink>
-      </Button>
+        VIEW ALL INSTRUMENTATION GUIDES
+      </TrackingLink>
     </div>
   )
 

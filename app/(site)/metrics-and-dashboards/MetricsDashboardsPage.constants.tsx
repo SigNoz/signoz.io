@@ -3,7 +3,6 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 import fastIconUrl from '@/public/img/log-management/fast.svg?url'
 import blocksIconUrl from '@/public/img/features/metrics/blocks.svg?url'
 import signalsIconUrl from '@/public/img/log-management/signals.svg?url'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import { SplitSectionPanel } from '@/shared/components/molecules/FeaturePages/SplitSection/SplitSection.types'
 import { ButtonGroupButton } from '@/shared/components/molecules/FeaturePages/ButtonGroup/ButtonGroup.types'
@@ -14,7 +13,6 @@ export const METRICS_DASHBOARDS_HEADER_BUTTONS: ButtonGroupButton[] = [
     href: '/teams/',
     variant: 'default' as const,
     icon: <ArrowRight size={14} />,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Metrics Dashboards Hero Get Started',
@@ -27,7 +25,6 @@ export const METRICS_DASHBOARDS_HEADER_BUTTONS: ButtonGroupButton[] = [
     href: '/docs/introduction/',
     variant: 'secondary' as const,
     icon: <BookOpen size={14} />,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Metrics Dashboards Hero Docs',
@@ -236,7 +233,6 @@ export const GET_STARTED_BUTTONS: ButtonGroupButton[] = [
     href: '/teams/',
     variant: 'default' as const,
     icon: <ArrowRight size={14} />,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Metrics Dashboards Banner Get Started',
@@ -249,7 +245,6 @@ export const GET_STARTED_BUTTONS: ButtonGroupButton[] = [
     href: '/docs/introduction/',
     variant: 'secondary' as const,
     icon: <BookOpen size={14} />,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Metrics Dashboards Banner Docs',

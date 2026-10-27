@@ -6,6 +6,8 @@ import MonthlyEstimateMobile from '@/components/Monthly-estimate/MonthlyEstimate
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { useState } from 'react'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const EnterprisePricing = () => {
   const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
@@ -46,7 +48,7 @@ const EnterprisePricing = () => {
 
                   <Link
                     href="/blog/introducing-ingest-guard-feature/"
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-signoz_ink-300 px-4 py-2 text-sm font-medium text-white no-underline hover:bg-signoz_ink-200"
+                    className={cn(buttonVariants({ variant: 'secondary' }), 'mt-4')}
                     prefetch={false}
                   >
                     Learn more <ArrowRight size={16} />

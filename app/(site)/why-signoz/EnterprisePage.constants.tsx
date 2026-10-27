@@ -79,9 +79,8 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
         needle in the haystack - faster
         <Button
           variant="secondary"
-          to="/blog/cost-effective-datadog-alternative/"
+          href="/blog/cost-effective-datadog-alternative/"
           className="mt-4 block w-fit"
-          rounded="full"
         >
           Learn more
         </Button>
@@ -89,17 +88,16 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
     ),
   },
   {
-    icon: <div className="text-4xl font-bold text-signoz_cherry-500">10 TB+/Day</div>,
-    title: <div className="min-h-14">Daily Ingest - Single Deployment</div>,
+    icon: <div className="text-4xl font-bold text-signoz_cherry-500">2 PB+/Month</div>,
+    title: <div className="min-h-14">Monthly Ingest - Single Deployment</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
         ClickHouse core handles high-cardinality Kubernetes and AI workloads at all scale. 30%
         higher throughput. Guaranteed
         <Button
           variant="secondary"
-          to="/blog/optimizing-log-processing-at-scale/"
+          href="/blog/optimizing-log-processing-at-scale/"
           className="mt-4 block w-fit"
-          rounded="full"
         >
           Learn more
         </Button>
@@ -113,7 +111,7 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
       <div className="flex min-h-36 flex-col items-start justify-between">
         Seed-stage startups to public companies. Self-hosted, cloud, or BYOC. Your choice. With
         Enterprise-Grade Observability.
-        <Button variant="secondary" to="/customers/" className="mt-4 block w-fit" rounded="full">
+        <Button variant="secondary" href="/customers/" className="mt-4 block w-fit">
           Learn more
         </Button>
       </div>
@@ -149,9 +147,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),
@@ -173,9 +169,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),
@@ -218,9 +212,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),
@@ -242,9 +234,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),
@@ -319,9 +309,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),
@@ -344,9 +332,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </>
     ),
@@ -372,9 +358,7 @@ export const GETTING_STARTED_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),
@@ -393,9 +377,7 @@ export const GETTING_STARTED_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),
@@ -414,9 +396,7 @@ export const GETTING_STARTED_CARDS = [
           clickLocation="Why SigNoz Page"
           clickText="Learn more"
         >
-          <Button variant="secondary" rounded="full" isButton>
-            Learn more
-          </Button>
+          <Button variant="secondary">Learn more</Button>
         </TrackingLink>
       </div>
     ),

@@ -50,8 +50,9 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                 clickLocation="Data Protection Section"
               >
                 <Button
-                  variant="legacyPrimary"
-                  className="flex-center text-xs sm:text-sm"
+                  variant="default"
+                  size="sm"
+                  className="w-full"
                   id="btn-use-signoz-cloud-homepage"
                 >
                   Use SigNoz Cloud <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -66,8 +67,9 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                 clickLocation="Data Protection Section"
               >
                 <Button
-                  variant="legacySecondary"
-                  className="flex-center text-xs sm:text-sm"
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
                   id="btn-self-host-signoz-homepage"
                 >
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -83,8 +85,9 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                 clickLocation="Data Protection Section"
               >
                 <Button
-                  variant="legacySecondary"
-                  className="flex-center text-xs sm:text-sm"
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
                   id="btn-on-prem-signoz-homepage"
                 >
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />

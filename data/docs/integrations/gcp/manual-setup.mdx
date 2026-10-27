@@ -1,7 +1,7 @@
 ---
-date: 2026-08-03
+date: 2026-10-19
 title: GCP Manual Setup - Configure the OpenTelemetry Collector
-description: Set up the SigNoz GCP integration manually in four steps. Create a service account, connect your account, deploy a Collector, and stream metrics.
+description: Set up the SigNoz GCP integration manually in five steps. Create a service account, connect your account, deploy a Collector, and stream metrics and logs.
 doc_type: explanation
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
@@ -12,7 +12,7 @@ Step-by-step walkthrough for setting up the [GCP integration](https://signoz.io/
 
 <DocCard
     title="1. Create a service account"
-    description="Enable the required APIs and create a GCP service account with least-privilege IAM roles for metrics."
+    description="Enable the required APIs and create a GCP service account with least-privilege IAM roles for metrics and logs."
     href="https://signoz.io/docs/integrations/gcp/create-service-account/"
 />
 
@@ -34,6 +34,12 @@ Step-by-step walkthrough for setting up the [GCP integration](https://signoz.io/
     href="https://signoz.io/docs/integrations/gcp/collect-metrics/"
 />
 
+<DocCard
+    title="5. Collect logs"
+    description="Create a Pub/Sub topic, a push subscription, and a log sink per project to send Cloud Logging logs to the Collector."
+    href="https://signoz.io/docs/integrations/gcp/collect-logs/"
+/>
+
 </DocCardContainer>
 
 ## Connection fields
@@ -43,9 +49,9 @@ Step 2 asks for four values. Keep them handy, since later steps refer back to th
 | Field | What it means |
 | --- | --- |
 | **Account Name** | A label to identify this integration in SigNoz, for example `production`. |
-| **Deployment Project ID** | The project where you deploy the Collector. |
+| **Deployment Project ID** | The project where you deploy the Collector and, for logs, the Pub/Sub topic. |
 | **Deployment Region** | The region the Cloud Run Collector runs in. |
-| **Projects to Monitor** | The project IDs whose metrics you want in SigNoz. |
+| **Projects to Monitor** | The project IDs whose metrics and logs you want in SigNoz. |
 
 <Admonition type="info">
 Throughout these guides, `<deployment-project-id>`, `<deployment-region>`, and `<monitored-project-id>` refer to the values you enter here.

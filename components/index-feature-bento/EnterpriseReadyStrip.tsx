@@ -29,7 +29,7 @@ export default function EnterpriseReadyStrip() {
               Built secure, from day one.
             </h3>
             <TrackingLink
-              className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'mt-6 no-underline')}
+              className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'mt-6')}
               clickLocation="Homepage Enterprise Ready Strip"
               clickName="Trust Center Link"
               clickText="Trust Center"

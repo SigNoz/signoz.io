@@ -1,0 +1,107 @@
+---
+date: 2026-09-29
+title: AI Observability Explorer - Query LLM & AI Trace Data
+description: Explore LLM and AI trace data in SigNoz with the AI Observability Explorer. Query AI traces and spans, chart them over time, and export table results.
+doc_type: howto
+---
+
+Use the **Explorer** tab of [AI Observability](https://signoz.io/docs/ai-observability/) to query your LLM and agent traces when the **Overview** dashboard does not answer your question. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
+
+To open the tab, select **More** > **AI Observability** in the side navigation, then select the **Explorer** tab.
+
+## Run a query
+
+The Explorer adds trace fields. Each trace field holds a total for the whole trace. You can use them in the filter, in aggregations, and in **Order by**. The Trace Explorer does not have these fields.
+
+| Field | Value for the trace |
+| --- | --- |
+| `trace.llm_call_count` | Number of LLM calls |
+| `trace.tool_call_count` | Number of tool calls |
+| `trace.distinct_tool_count` | Number of different tools called |
+| `trace.input_tokens` | Sum of input tokens |
+| `trace.output_tokens` | Sum of output tokens |
+| `trace.total_tokens` | Sum of input and output tokens |
+| `trace.estimated_total_cost` | Sum of the estimated cost of all LLM calls |
+| `trace.max_llm_duration_nano` | Duration of the slowest LLM call, in nanoseconds |
+
+1. Type a filter in the filter bar, for example `trace.total_tokens > 1000`.
+2. Select **Run Query**, or press Cmd+Enter (Ctrl+Enter on Windows and Linux).
+
+The filter bar suggests only keys and values from GenAI spans that match your current filters. For the filter syntax and the aggregation options, see [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
+
+To run the query again at an interval, turn on auto-refresh in the time picker.
+
+## Views
+
+All views use the same query. The Explorer opens in **Trace View**. Column changes are saved in your browser only.
+
+`trace.*` totals depend on the view:
+
+- **Trace View** adds up every span of the trace, even spans outside the selected time range.
+- **List View**, **Time Series**, and **Table** count only spans inside the selected time range. For example, `trace.total_tokens` adds up only the tokens of those spans.
+
+### Trace View
+
+**Trace View** shows one row for each AI trace, which is a trace with at least one LLM, tool, or agent span. Each row shows totals such as tokens, cost, and call counts. By default, the table shows the trace fields that exist in your data. Trace View columns and **Order by** show these fields without the `trace.` prefix.
+
+Select a row to open the trace in [Trace Details](https://signoz.io/docs/userguide/span-details/). To open it in a new tab, hold Cmd (Ctrl on Windows and Linux) and select the row. To show only the LLM spans of the trace, select the **LLM** [quick filter](https://signoz.io/docs/userguide/span-details/#quick-filters) in Trace Details.
+
+<Figure
+  src="/img/docs/ai/ai-observability/explorer-trace-view.webp"
+  alt="AI Observability Explorer in Trace View, with the quick filters panel on the left and one row for each AI trace"
+  caption="Trace View in the AI Observability Explorer"
+/>
+
+Use the two controls above the table:
+
+- **Order by**: sort the traces by a trace field, in ascending or descending order. The default is `last_activity_time (desc)`. You can sort by fields that the table does not show as columns, such as `last_activity_time`.
+- **Options**: open the **Edit columns** drawer to show, hide, or reorder columns.
+
+The `trace_id` column always shows, but you can drag it to a new position.
+
+<Figure
+  src="/img/docs/ai/ai-observability/explorer-edit-columns.webp"
+  alt="Edit columns drawer in Trace View, with a search box and the list of added fields"
+  caption="The Edit columns drawer opens from Options"
+/>
+
+### List View
+
+**List View** shows one row for each span, with the newest spans at the top. Select a row to open the trace of that span. The default columns are `timestamp`, `service.name`, `name`, `duration_nano`, `http_method`, and `response_status_code`.
+
+Drag a column header to reorder the column. Drag its edge to resize the column. To remove the column, open its header menu and select **Remove column**. The `timestamp` column stays first.
+
+### Time Series
+
+**Time Series** shows the query results as a chart over time. The Y-axis shows milliseconds when every query aggregates span duration, and a plain number otherwise. To change the unit, use the **Y-axis unit** selector above the chart. To export the chart data, select the download icon at the top right of the chart. To see exact cost values, use the **Table** view.
+
+<Figure
+  src="/img/docs/ai/ai-observability/explorer-time-series.webp"
+  alt="Time Series view in the AI Observability Explorer, charting sum of gen_ai.usage.input_tokens grouped by gen_ai.request.model"
+  caption="Input tokens by model in the Time Series view"
+/>
+
+### Table
+
+**Table** shows the aggregated results of the query in a grid. To download the results, select the download icon. Choose **csv** or **jsonl**. Select **Export**.
+
+## Common tasks
+
+| Task | Steps |
+| --- | --- |
+| Find the most expensive traces | In **Trace View**, set **Order by** to `estimated_total_cost (desc)`. |
+| Find failed tool calls | In **List View**, run the filter `gen_ai.tool.name EXISTS AND has_error = true`. |
+| Chart token usage by model | In **Time Series**, set the aggregation to `sum(gen_ai.usage.input_tokens)` and group by `gen_ai.request.model`. |
+| Compare cost by model | In **Table**, set the aggregation to `sum(signoz.gen_ai.usage.tokens.cost)` and group by `gen_ai.request.model`. |
+
+## Next steps
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [Trace Details](https://signoz.io/docs/userguide/span-details/): inspect the spans of one trace.
+- [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/): set the price for each model.
+- [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map other attribute names to the GenAI names.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+
+## Get Help
+
+<GetHelp />

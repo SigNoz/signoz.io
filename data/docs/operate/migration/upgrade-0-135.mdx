@@ -1,8 +1,8 @@
 ---
-date: 2026-09-22
+date: 2026-10-27
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
-description: Upgrade self-hosted SigNoz to v0.135.0. Dashboards convert to the V2 schema automatically, and the retired V1 dashboard APIs need script and Terraform changes.
+description: Upgrade Self-Hosted SigNoz to v0.135.0. Dashboards convert to the V2 schema automatically, and the retired V1 dashboard APIs need script and Terraform changes.
 doc_type: howto
 ---
 
@@ -37,7 +37,7 @@ For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues
 | Manage dashboards with the Terraform provider | [Upgrade the provider and migrate resources](#migrate-terraform-managed-dashboards) |
 | Use the SigNoz MCP server with an AI assistant | [Upgrade it to v0.10.0](#upgrade-the-signoz-mcp-server) |
 
-## Upgrade self-hosted SigNoz
+## Upgrade Self-Hosted SigNoz
 
 ### Step 1: Back up your data
 
@@ -81,14 +81,26 @@ helm -n signoz upgrade signoz signoz/signoz
 1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
 2. SigNoz reports v0.135.0 under **Settings**.
 3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
-4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience. Open the row's dialog to copy the dashboard ID and share it with support.
+4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience. To fix one, see [Recover a legacy dashboard](#recover-a-legacy-dashboard).
 
 ## What changes after migration
 
 - **Automatic conversion.** Existing dashboards, inbuilt dashboards, and templates convert to the new schema when the server starts. SVG dashboard icons stored as percent-encoded inline data URIs are preserved during conversion.
-- **Dashboards that can't be converted stay on the legacy format.** A dashboard whose stored data cannot be converted is logged and left in the V1 format instead of blocking startup. It is listed and flagged as **Legacy**, and cannot be opened in the new experience. Copy the dashboard ID from the row's dialog and share it with support.
+- **Dashboards that can't be converted stay on the legacy format.** A dashboard whose stored data cannot be converted is logged and left in the V1 format instead of blocking startup. It is listed and flagged as **Legacy**, and cannot be opened in the new experience. See [Recover a legacy dashboard](#recover-a-legacy-dashboard).
 - **Saved list-filter URLs no longer apply filters.** The dashboards list page now filters with a query expression. The old URL parameters (`search`, `createdBy`, `updated`, and `tags`) no longer apply filters, so bookmarks or shared links using them open the list unfiltered. See [Find and filter dashboards](https://signoz.io/docs/userguide/manage-dashboards/#find-and-filter-dashboards).
 - **Layouts are validated on write.** Programmatic creates and updates must satisfy the grid rules. See [Dashboard layout constraints](https://signoz.io/docs/userguide/manage-dashboards/#dashboard-layout-constraints).
+
+## Recover a legacy dashboard
+
+From v0.136.0, Editors and Admins can re-run the migration for a dashboard flagged **Legacy**:
+
+1. Open **Dashboards** and click the row flagged **Legacy**.
+2. In the dialog, click **Retry migration**.
+3. Wait for the **Dashboard migrated to the new experience** message. The list refreshes, and you can open the dashboard.
+
+If the retry fails, or you have the Viewer role, copy the **Dashboard ID** from the same dialog, then click **Contact Support** and share the ID.
+
+To retry through the API, see [Retry a dashboard migration](https://signoz.io/docs/dashboards/dashboards-v2-api/#retry-a-dashboard-migration).
 
 ## Migrate API scripts to the V2 Dashboards APIs
 

@@ -1,6 +1,9 @@
+export type ButtonGroupVariant = 'default' | 'secondary'
+
 export interface ButtonGroupButtonBase {
   text: string
-  variant: 'default' | 'secondary' | 'ghost'
+  variant: ButtonGroupVariant
+  size?: 'default' | 'sm' | 'lg'
   icon?: React.ReactNode
   className?: string
   tracking?: {
