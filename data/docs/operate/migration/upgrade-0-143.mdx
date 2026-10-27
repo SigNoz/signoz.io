@@ -1,8 +1,8 @@
 ---
-date: 2026-09-23
+date: 2026-10-27
 title: Upgrade SigNoz to v0.143.0 with OTel Collector v0.144.11
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
-description: Upgrade Self-Hosted SigNoz to v0.143.0. Add two AI observability trace processors to your collector and plan for every user to sign in again once.
+description: Upgrade Self-Hosted SigNoz to v0.143.0. Add AI observability trace processors, plan for one re-login, and move off the deleted V1 dashboard APIs.
 doc_type: howto
 ---
 
@@ -12,6 +12,10 @@ SigNoz v0.143.0 prepares the OTel collector for AI observability and moves login
 **Sessions**
 
 The default session provider is now opaque tokens. JWT stays available by setting the provider and a secret.
+
+**Dashboards API**
+
+The V1 dashboard CRUD and lock routes, which returned `501` since v0.135.0, are deleted. The V1 public dashboard routes and `/api/v2/metrics/dashboards` are deleted too. Calls to them get the SigNoz web app's HTML page with HTTP `200` instead of JSON. See [V1 dashboard routes are deleted](#v1-dashboard-routes-are-deleted).
 
 **AI Observability**
 
@@ -73,6 +77,7 @@ Users sign in again once after the switch. See [Keep the JWT session provider](#
 | Run the default collector config | Nothing beyond the upgrade. Sign in again afterwards |
 | Override the collector config or its traces pipeline | [Add the two processors](#add-the-ai-observability-processors-to-a-custom-collector-config) before or with the upgrade |
 | Pin the collector image below v0.144.11 | Move it to v0.144.11, or stay on SigNoz v0.142.x until you can |
+| Call `/api/v1/dashboards`, `/api/v1/public/dashboards/{id}`, or `/api/v2/metrics/dashboards` from scripts or integrations | Move to the V2 or V3 routes before you upgrade, because these routes are deleted and return HTML instead of JSON. See [V1 dashboard routes are deleted](#v1-dashboard-routes-are-deleted) |
 | Set `SIGNOZ_TOKENIZER_JWT_SECRET` or `SIGNOZ_JWT_SECRET` today | Your sessions move to opaque and the secret is ignored. To stay on JWT, add `SIGNOZ_TOKENIZER_PROVIDER=jwt` before you upgrade. See [Keep the JWT session provider](#keep-the-jwt-session-provider) |
 
 ## Upgrade Self-Hosted SigNoz
@@ -226,6 +231,14 @@ jwt::secret must be set when provider is jwt, without a JWT secret, user session
 ```
 
 If you still use `SIGNOZ_JWT_SECRET`, rename it to `SIGNOZ_TOKENIZER_JWT_SECRET`. See [Configure the JWT Secret](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/) for details.
+
+## V1 dashboard routes are deleted
+
+v0.143.0 finishes the dashboard V1 API shutdown that began in v0.135.0. The routes are now deleted rather than returning `501`. A call gets the SigNoz web app's HTML page with HTTP `200` instead of JSON, so a script may fail with a JSON parse error. This affects API consumers, automation scripts, and MCP integrations only. There are no UI changes.
+
+- **V1 dashboard CRUD and lock routes are deleted.** The six routes (`GET`/`POST /api/v1/dashboards`, `GET`/`PUT`/`DELETE /api/v1/dashboards/{id}`, and `PUT /api/v1/dashboards/{id}/lock`) returned `501 Not Implemented` from v0.135.0. They are deleted in v0.143.0. Move to the matching `/api/v2/dashboards` routes. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/#migrating-from-the-v1-dashboard-apis) for the full mapping.
+- **V1 public dashboard routes are removed with no prior `501`.** `GET /api/v1/public/dashboards/{id}` and `GET /api/v1/public/dashboards/{id}/widgets/{idx}/query_range` were still functional before this release and are now deleted. Use `GET /api/v2/public/dashboards/{id}` and `GET /api/v2/public/dashboards/{id}/panels/{key}/query_range`. The share-config route `/api/v1/dashboards/{id}/public` is unaffected.
+- **The V2 Metrics Explorer dashboards route is removed.** `GET /api/v2/metrics/dashboards`, which returned the dashboards associated with a metric name, is deleted. Use `GET /api/v3/metrics/dashboards`.
 
 ## Getting help
 

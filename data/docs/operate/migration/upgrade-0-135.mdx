@@ -1,5 +1,5 @@
 ---
-date: 2026-07-29
+date: 2026-10-27
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: Upgrade Self-Hosted SigNoz to v0.135.0. Dashboards convert to the V2 schema automatically, and the retired V1 dashboard APIs need script and Terraform changes.
@@ -81,14 +81,26 @@ helm -n signoz upgrade signoz signoz/signoz
 1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
 2. SigNoz reports v0.135.0 under **Settings**.
 3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
-4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience. Open the row's dialog to copy the dashboard ID and share it with support.
+4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience. To fix one, see [Recover a legacy dashboard](#recover-a-legacy-dashboard).
 
 ## What changes after migration
 
 - **Automatic conversion.** Existing dashboards, inbuilt dashboards, and templates convert to the new schema when the server starts. SVG dashboard icons stored as percent-encoded inline data URIs are preserved during conversion.
-- **Dashboards that can't be converted stay on the legacy format.** A dashboard whose stored data cannot be converted is logged and left in the V1 format instead of blocking startup. It is listed and flagged as **Legacy**, and cannot be opened in the new experience. Copy the dashboard ID from the row's dialog and share it with support.
+- **Dashboards that can't be converted stay on the legacy format.** A dashboard whose stored data cannot be converted is logged and left in the V1 format instead of blocking startup. It is listed and flagged as **Legacy**, and cannot be opened in the new experience. See [Recover a legacy dashboard](#recover-a-legacy-dashboard).
 - **Saved list-filter URLs no longer apply filters.** The dashboards list page now filters with a query expression. The old URL parameters (`search`, `createdBy`, `updated`, and `tags`) no longer apply filters, so bookmarks or shared links using them open the list unfiltered. See [Find and filter dashboards](https://signoz.io/docs/userguide/manage-dashboards/#find-and-filter-dashboards).
 - **Layouts are validated on write.** Programmatic creates and updates must satisfy the grid rules. See [Dashboard layout constraints](https://signoz.io/docs/userguide/manage-dashboards/#dashboard-layout-constraints).
+
+## Recover a legacy dashboard
+
+From v0.136.0, Editors and Admins can re-run the migration for a dashboard flagged **Legacy**:
+
+1. Open **Dashboards** and click the row flagged **Legacy**.
+2. In the dialog, click **Retry migration**.
+3. Wait for the **Dashboard migrated to the new experience** message. The list refreshes, and you can open the dashboard.
+
+If the retry fails, or you have the Viewer role, copy the **Dashboard ID** from the same dialog, then click **Contact Support** and share the ID.
+
+To retry through the API, see [Retry a dashboard migration](https://signoz.io/docs/dashboards/dashboards-v2-api/#retry-a-dashboard-migration).
 
 ## Migrate API scripts to the V2 Dashboards APIs
 
@@ -103,7 +115,7 @@ The V1 dashboard endpoints are retired in v0.135.0. They respond with `501 Not I
 | `DELETE /api/v1/dashboards/{id}` | `DELETE /api/v2/dashboards/{id}` |
 | `PUT /api/v1/dashboards/{id}/lock` | `PUT /api/v2/dashboards/{id}/lock`, `DELETE /api/v2/dashboards/{id}/lock` |
 
-The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/dashboards/{id}`) are not affected and keep working.
+In v0.135.0 the public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/dashboards/{id}`) are not affected and keep working. This changed later: `/api/v1/public/dashboards/{id}` (and its widget query sub-path) is removed in v0.143.0. See the [v0.143.0 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-143/#v1-dashboard-routes-are-deleted) for the public-route migration. The share-config route `/api/v1/dashboards/{id}/public` still works.
 
 One compatibility shim remains, on create only: `POST /api/v2/dashboards` still accepts a V1 payload (a body carrying `version` and no `schemaVersion`) and converts it to V2, so import flows and existing create automation keep working during the rollout window. This shim will be removed in a few releases (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>). `PUT /api/v2/dashboards/{id}` does **not** accept V1 payloads; it requires `schemaVersion: "v6"`.
 
