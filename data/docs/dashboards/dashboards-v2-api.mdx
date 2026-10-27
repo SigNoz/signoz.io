@@ -17,9 +17,9 @@ SigNoz **Dashboards** run on a redesigned, Perses-compatible schema. Your existi
 - If you have Terraform-managed dashboards or scripts calling the Dashboards APIs directly, migrate them to the V2 schema and endpoints. See the [v0.135.0 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-135/) for the migration path.
 
 <Admonition type="warning" title="The V1 dashboard APIs are removed">
-The six V1 dashboard CRUD and lock endpoints under `/api/v1/dashboards` are gone. From v0.135.0 to v0.142.x they returned HTTP `501 Not Implemented` with the error code `dashboard_deprecated`. As of **v0.143.0** the routes are deleted, so a call now returns HTTP `404 Not Found`. Move any direct API calls to the [V2 endpoints](#migrating-from-the-v1-dashboard-apis) below.
+The six V1 dashboard CRUD and lock endpoints under `/api/v1/dashboards` are gone. From v0.135.0 to v0.142.x they returned HTTP `501 Not Implemented` with the error code `dashboard_deprecated`. As of **v0.143.0** the routes are deleted. A call now gets the SigNoz web app's HTML page with HTTP `200` instead of JSON, so a script may fail with a JSON parse error. Move any direct API calls to the [V2 endpoints](#migrating-from-the-v1-dashboard-apis) below.
 
-The public dashboard sharing routes changed too. `GET /api/v1/public/dashboards/{id}` and `GET /api/v1/public/dashboards/{id}/widgets/{idx}/query_range` are removed in v0.143.0 and return `404`; use `GET /api/v2/public/dashboards/{id}` and `GET /api/v2/public/dashboards/{id}/panels/{key}/query_range` instead. The share-config route `/api/v1/dashboards/{id}/public` (used to enable or disable public sharing on a dashboard) is unaffected and keeps working.
+The public dashboard sharing routes changed too. `GET /api/v1/public/dashboards/{id}` and `GET /api/v1/public/dashboards/{id}/widgets/{idx}/query_range` are deleted in v0.143.0 with no prior `501` window, and calls get the same HTML page. Use `GET /api/v2/public/dashboards/{id}` and `GET /api/v2/public/dashboards/{id}/panels/{key}/query_range` instead. The share-config route `/api/v1/dashboards/{id}/public` (used to enable or disable public sharing on a dashboard) is unaffected and keeps working.
 </Admonition>
 
 ### If you have scripts that use the Dashboards API directly
@@ -147,7 +147,7 @@ The call needs the Editor or Admin role. A dashboard that is already on the V2 s
 
 ### Migrating from the V1 dashboard APIs
 
-The six V1 dashboard CRUD and lock endpoints returned `501 Not Implemented` from v0.135.0 through v0.142.x. In v0.143.0 the routes are deleted, and calls return `404 Not Found`. Move each call to its V2 equivalent:
+The six V1 dashboard CRUD and lock endpoints returned `501 Not Implemented` from v0.135.0 through v0.142.x. In v0.143.0 the routes are deleted, and calls get the SigNoz web app's HTML page with HTTP `200` instead of JSON. Move each call to its V2 equivalent:
 
 | V1 endpoint (removed) | V2 endpoint | Action |
 | --- | --- | --- |
@@ -160,7 +160,7 @@ The six V1 dashboard CRUD and lock endpoints returned `501 Not Implemented` from
 | `GET /api/v1/public/dashboards/{id}` | `GET /api/v2/public/dashboards/{id}` | Fetch a shared public dashboard |
 | `GET /api/v1/public/dashboards/{id}/widgets/{idx}/query_range` | `GET /api/v2/public/dashboards/{id}/panels/{key}/query_range` | Query a panel on a shared public dashboard |
 
-The public sharing routes were removed in v0.143.0 without a prior `501` window, so their first signal is a `404`. The payload also changes shape, from flat V1 JSON to the Perses `spec` tree described above. Self-hosted users upgrading to v0.135.0 should follow the [upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-135/), which also covers Terraform provider and MCP server migration.
+The payload also changes shape, from flat V1 JSON to the Perses `spec` tree described above. Self-hosted users upgrading to v0.135.0 should follow the [upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-135/), which also covers Terraform provider and MCP server migration.
 
 ### The `image` field
 
