@@ -124,6 +124,37 @@ export const expandTabsInHast = (tree: HastRoot): HastRoot => {
   return tree
 }
 
+// The rendered DOM only holds the glossary definition in a data attribute on the
+// trigger (the card mounts on open), so surface it inline in brackets after the term.
+export const appendGlossaryDefinitionsInHast = (tree: HastRoot): HastRoot => {
+  const visit = (node: HastParentNode) => {
+    const children = node.children || []
+
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i]
+      if (!isElement(child)) {
+        continue
+      }
+
+      const definition = getProperty(child, ['data-glossary-definition', 'dataGlossaryDefinition'])
+      if (typeof definition === 'string' && definition.trim()) {
+        // cleanForDocsUi strips <button>s as UI chrome; demote so the term text survives
+        if (child.tagName === 'button') {
+          child.tagName = 'span'
+          child.properties = {}
+        }
+        children.splice(i + 1, 0, { type: 'text', value: ` (${definition.trim()})` })
+        i++
+      }
+
+      visit(child)
+    }
+  }
+
+  visit(tree)
+  return tree
+}
+
 const cloneAndCleanArticle = (articleEl: HTMLElement): HTMLElement => {
   const clone = articleEl.cloneNode(true) as HTMLElement
   clone.querySelectorAll('[data-markdown-ignore]').forEach((el) => el.remove())
@@ -149,7 +180,9 @@ export async function buildCopyMarkdownFromRendered(
   const { fromDom } = await import('hast-util-from-dom')
 
   const cleanedArticle = cloneAndCleanArticle(articleEl)
-  const hast = expandTabsInHast(fromDom(cleanedArticle) as HastRoot)
+  const hast = appendGlossaryDefinitionsInHast(
+    expandTabsInHast(fromDom(cleanedArticle) as HastRoot)
+  )
   const bodyMarkdown = await hastToMarkdown(hast as any, { cleanForDocsUi: true })
   return normalizeWhitespace(buildCopyMarkdownDocument(bodyMarkdown, options))
 }

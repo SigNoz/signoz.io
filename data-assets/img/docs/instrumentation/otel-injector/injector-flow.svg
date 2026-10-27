@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" width="1000" height="420" font-family="'Inter', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <marker id="arrGray" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#636e72"/>
+    </marker>
+    <marker id="arrBlue" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#74b9ff"/>
+    </marker>
+    <marker id="arrGreen" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,4 L0,8 L2,4 z" fill="#00b894"/>
+    </marker>
+    <linearGradient id="signoz-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="glow-o" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#F97316" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes pulse-signoz {
+        0%,100% { filter: url(#glow-o); }
+        50%      { filter: none; }
+      }
+      .signoz-box { animation: pulse-signoz 3s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="420" fill="url(#bgGrad)" rx="14"/>
+
+  <text x="500" y="38" text-anchor="middle" fill="#f5f6fa" font-size="19" font-weight="700">The injector sets environment variables, and the agent does the rest</text>
+
+  <!-- process boundary: x=205 y=62 w=555 h=116, right=760, bottom=178 -->
+  <rect x="205" y="62" width="555" height="116" rx="10" fill="#16182099" stroke="#636e72" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="217" y="80" fill="#9aa3b2" font-size="11">Inside the new process</text>
+
+  <!-- process start: x=20 y=90 w=145 h=72, right=165 -->
+  <rect x="20" y="90" width="145" height="72" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="92" y="120" text-anchor="middle" fill="#dfe6e9" font-size="13">Your service starts</text>
+  <text x="92" y="140" text-anchor="middle" fill="#9aa3b2" font-size="11">java, node, python</text>
+
+  <!-- injector: x=216 y=90 w=230 h=72, right=446 -->
+  <rect x="216" y="90" width="230" height="72" rx="8" fill="#20222e" stroke="#74b9ff" stroke-width="1.5"/>
+  <text x="331" y="120" text-anchor="middle" fill="#74b9ff" font-size="13" font-weight="600">libotelinject.so</text>
+  <text x="331" y="140" text-anchor="middle" fill="#9aa3b2" font-size="11">loaded via /etc/ld.so.preload</text>
+
+  <!-- agent: x=510 y=90 w=234 h=72, right=744 -->
+  <rect x="510" y="90" width="234" height="72" rx="8" fill="#20222e" stroke="#a29bfe" stroke-width="1.5"/>
+  <text x="627" y="120" text-anchor="middle" fill="#a29bfe" font-size="13" font-weight="600">OpenTelemetry agent</text>
+  <text x="627" y="140" text-anchor="middle" fill="#9aa3b2" font-size="11">starts with your application</text>
+
+  <!-- SigNoz: x=880 y=90 w=100 h=72, right=980 -->
+  <rect x="880" y="90" width="100" height="72" rx="8" fill="url(#signoz-grad)" class="signoz-box"/>
+  <text x="930" y="132" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="700">SigNoz</text>
+
+  <!-- exec -->
+  <path d="M169,126 L 208,126" fill="none" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrGray)"/>
+  <text x="188" y="114" text-anchor="middle" fill="#9aa3b2" font-size="10">exec</text>
+
+  <!-- setenv -->
+  <path d="M450,126 L 502,126" fill="none" stroke="#74b9ff" stroke-width="1.5" marker-end="url(#arrBlue)"/>
+  <text x="476" y="114" text-anchor="middle" fill="#9aa3b2" font-size="10">setenv()</text>
+
+  <!-- OTLP -->
+  <path d="M748,126 L 872,126" fill="none" stroke="#00b894" stroke-width="1.5" marker-end="url(#arrGreen)"/>
+  <text x="810" y="114" text-anchor="middle" fill="#9aa3b2" font-size="10">OTLP over HTTP</text>
+  <text x="810" y="148" text-anchor="middle" fill="#636e72" font-size="10">traces, metrics, logs</text>
+
+  <!-- config files: y=228 h=56, bottom=284 -->
+  <rect x="150" y="228" width="210" height="56" rx="8" fill="#191b26" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="255" y="252" text-anchor="middle" fill="#dfe6e9" font-size="12">injector.conf + conf.d/</text>
+  <text x="255" y="270" text-anchor="middle" fill="#9aa3b2" font-size="10">where each agent lives</text>
+
+  <rect x="390" y="228" width="210" height="56" rx="8" fill="#191b26" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="495" y="252" text-anchor="middle" fill="#dfe6e9" font-size="12">default_env.conf</text>
+  <text x="495" y="270" text-anchor="middle" fill="#9aa3b2" font-size="10">your SigNoz endpoint and key</text>
+
+  <path d="M280,224 L 280,170" fill="none" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrGray)"/>
+  <path d="M470,224 L 400,170" fill="none" stroke="#636e72" stroke-width="1.5" marker-end="url(#arrGray)"/>
+
+  <!-- runtime chips -->
+  <text x="500" y="308" text-anchor="middle" fill="#9aa3b2" font-size="11">The injector sets the variable that each runtime reads at startup:</text>
+
+  <rect x="22" y="320" width="230" height="50" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="137" y="341" text-anchor="middle" fill="#dfe6e9" font-size="12">Java</text>
+  <text x="137" y="359" text-anchor="middle" fill="#74b9ff" font-size="10">JAVA_TOOL_OPTIONS</text>
+
+  <rect x="264" y="320" width="230" height="50" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="379" y="341" text-anchor="middle" fill="#dfe6e9" font-size="12">Node.js</text>
+  <text x="379" y="359" text-anchor="middle" fill="#74b9ff" font-size="10">NODE_OPTIONS</text>
+
+  <rect x="506" y="320" width="230" height="50" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="621" y="341" text-anchor="middle" fill="#dfe6e9" font-size="12">Python</text>
+  <text x="621" y="359" text-anchor="middle" fill="#74b9ff" font-size="10">PYTHONPATH</text>
+
+  <rect x="748" y="320" width="230" height="50" rx="8" fill="#20222e" stroke="#2f3342" stroke-width="1.5"/>
+  <text x="863" y="341" text-anchor="middle" fill="#dfe6e9" font-size="12">.NET</text>
+  <text x="863" y="359" text-anchor="middle" fill="#74b9ff" font-size="10">CORECLR_*</text>
+
+  <text x="500" y="398" text-anchor="middle" fill="#9aa3b2" font-size="12">The injector opens no network connection. Each agent exports its own data.</text>
+
+  <!-- flowing events -->
+  <circle r="3.5" fill="#636e72" opacity="0.9">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="0s" path="M169,126 L 206,126"/>
+  </circle>
+  <circle r="3.5" fill="#74b9ff" opacity="0.9">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="1.2s" path="M450,126 L 500,126"/>
+  </circle>
+  <circle r="3.5" fill="#00b894" opacity="0.9">
+    <animateMotion dur="1.8s" repeatCount="indefinite" begin="2.4s" path="M748,126 L 870,126"/>
+  </circle>
+</svg>

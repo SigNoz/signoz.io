@@ -225,3 +225,44 @@ test('MCPInstallButton stub renders child text with client context', async () =>
   assert.match(html, /Add to Cursor \(US\)/)
   assert.match(html, /cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install/)
 })
+
+test('Tooltip stub renders the linked term with its definition in brackets', async () => {
+  const doc = createDoc(
+    '<Tooltip text="spans" content="A span represents a single unit of work in a trace." link="https://signoz.io/docs/glossary/#span" />'
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Tooltip, {
+      text: 'spans',
+      content: 'A span represents a single unit of work in a trace.',
+      link: 'https://signoz.io/docs/glossary/#span',
+    })
+  )
+
+  assert.match(html, /<a href="https:\/\/signoz\.io\/docs\/glossary\/#span">spans<\/a>/)
+  assert.match(html, /\(A span represents a single unit of work in a trace\.\)/)
+})
+
+test('Tooltip stub renders the plain term with its definition in brackets', async () => {
+  const doc = createDoc(
+    '<Tooltip text="metrics" content="A metric is a measurement collected over time." />'
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Tooltip, {
+      text: 'metrics',
+      content: 'A metric is a measurement collected over time.',
+    })
+  )
+
+  assert.match(html, /metrics/)
+  assert.match(html, /\(A metric is a measurement collected over time\.\)/)
+})
+
+test('Tooltip stub keeps the term alone when no definition exists', async () => {
+  const doc = createDoc('<Tooltip text="metrics" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(React.createElement(components.Tooltip, { text: 'metrics' }))
+
+  assert.equal(html, '<span>metrics</span>')
+})

@@ -1,0 +1,72 @@
+---
+published_date: 2026-09-17
+title: "SGLang Dashboard: Monitor Token Throughput and Latency"
+description: Monitor a self-hosted SGLang inference server in SigNoz. Track tokens per second, time to first token, queue depth, and KV cache usage.
+doc_type: explanation
+---
+
+Use this dashboard to watch a self-hosted SGLang inference server. It answers four questions. How many tokens per second does the GPU produce? How long do requests wait for their first token? How deep is the waiting queue? How much of the key-value cache is in use?
+
+SGLang exposes its own `sglang:*` metrics in Prometheus format on the same port as its API. The OpenTelemetry Collector scrapes that endpoint and forwards the metrics to SigNoz, so this dashboard needs no instrumentation inside your application. It reads the server, not the code that calls it.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [SGLang Monitoring and Observability](https://signoz.io/docs/sglang-observability/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/sglang-dashboard.webp"
+  alt="SGLang Dashboard"
+  caption="SGLang Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/sglang/sglang-dashboard.json"
+  dashboardName="SGLang"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Answer "how many tokens per second"**: Read the decode rate straight off the gauge SGLang publishes, without deriving it from counters.
+- **Separate prefill cost from decode cost**: Compare prompt tokens against generated tokens, since the two scale differently and prompts are the cheaper half to shrink.
+- **Tell a slow first token from a slow stream**: Time to first token and inter-token latency fail for different reasons and need different fixes.
+- **See saturation before users do**: A waiting queue above zero means the server is at capacity, and time to first token climbs next.
+- **Judge whether the cache is earning its memory**: Prefix cache hit rate and KV pool usage together show whether shared prompts are paying off and how close the scheduler is to retracting requests.
+
+## Metrics Included
+
+### Token Throughput
+
+- **Generation Throughput (tokens/s)**: `sglang:gen_throughput`, the gauge SGLang publishes as a token/s rate. The panel does not apply `rate()` on top of it. The engine samples it at its log interval, so it reads 0 while the server sits idle.
+- **Prompt vs Generation Token Rate (tokens/s)**: `sglang:prompt_tokens_total` and `sglang:generation_tokens_total` as per-second rates. The decode series is the same quantity as the panel above, smoothed by the rate window.
+
+### Latency
+
+All three panels read the `.bucket` series, because the Collector splits each Prometheus histogram into `.bucket`, `.count`, and `.sum`.
+
+- **Time to First Token (p50 / p95 / p99)**: `sglang:time_to_first_token_seconds.bucket`. What users feel as responsiveness.
+- **Inter-Token Latency (p50 / p95 / p99)**: `sglang:inter_token_latency_seconds.bucket`. The gap between consecutive output tokens during decode. SGLang v0.5.x uses this name for what other servers call time per output token.
+- **End-to-End Request Latency (p50 / p95 / p99)**: `sglang:e2e_request_latency_seconds.bucket`. Queueing plus prefill plus decode. Long outputs make this large even when the other two are healthy.
+
+### Load and Cache
+
+- **Running vs Queued Requests**: `sglang:num_running_reqs` against `sglang:num_queue_reqs`.
+- **KV Cache Pool Usage**: `sglang:token_usage`, the fraction of the key-value cache token pool in use. As this approaches 1 the scheduler retracts and re-runs requests, which surfaces as latency spikes.
+- **Prefix Cache Hit Rate**: `sglang:cache_hit_rate`, the fraction of prompt tokens served from the radix prefix cache.
+
+## Dashboard Variables
+
+Use this filter variable:
+
+- **model_name**: Filter every panel to one model. A single SGLang server can host several models, and each metric carries the `model_name` label.
+
+<Admonition type="info" title="Filters applied for you">
+  The scheduler gauge panels filter on `tp_rank = '0'`, and the queue panel also filters on `priority = ''`. Without the first filter, `--enable-metrics-for-all-schedulers` multiplies every value by the tensor-parallel degree. Without the second, `--enable-priority-scheduling` counts each request twice, because SGLang adds a per-priority breakdown next to the total. Both filters are safe on servers that run without either option.
+</Admonition>
+
+## Related Dashboards
+
+- [Ollama](https://signoz.io/docs/dashboards/dashboard-templates/ollama-dashboard/)
+- [Vercel AI SDK](https://signoz.io/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard/)
+- [NVIDIA DCGM Metrics](https://signoz.io/docs/metrics-management/nvidia-dcgm-metrics/)

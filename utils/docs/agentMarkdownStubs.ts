@@ -450,19 +450,26 @@ const createKnownComponentStubs = (
     )
   },
   ToggleHeading: (props) => React.createElement('div', null, props.children),
-  // Hovering means nothing in plain text, so keep the term inline as a link to its
-  // definition. Must stay inline (not a block) or the surrounding sentence splits apart.
+  // Hovering means nothing in plain text, so keep the term inline followed by its
+  // definition in brackets. Must stay inline (not a block) or the sentence splits apart.
   Tooltip: (props) => {
     const text = getStringProp(props, 'text')
     const link = getStringProp(props, 'link')
+    const content = getStringProp(props, 'content')
 
     if (!text) {
       return React.createElement(React.Fragment, null)
     }
 
-    return link
+    const term = link
       ? React.createElement('a', { href: link }, text)
       : React.createElement('span', null, text)
+
+    if (!content) {
+      return term
+    }
+
+    return React.createElement(React.Fragment, null, term, ` (${content})`)
   },
   TroubleshootingWizard: createTroubleshootingWizardStub(),
   RegionTable: () => {

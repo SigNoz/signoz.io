@@ -18,7 +18,6 @@ import {
 import ArticleMetaDetailsCard from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
 import TrackingLink from '@/components/TrackingLink'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
-import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 import { useScrollSpy } from '@/hooks/useScrollSpy'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
@@ -52,7 +51,6 @@ interface LayoutProps {
   children: ReactNode
   toc: TocItemProps[]
   contentType?: 'blog' | 'guide' | 'comparison' | 'customer-story' | 'faq'
-  showNewsletter?: boolean
   showRelatedArticles?: boolean
   authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
   breadcrumbs?: BreadcrumbCrumb[]
@@ -65,7 +63,6 @@ export default function ArticleLayout({
   children,
   toc,
   contentType = 'blog',
-  showNewsletter = true,
   showRelatedArticles = true,
   authorDirectory = {},
   breadcrumbs,
@@ -109,7 +106,7 @@ export default function ArticleLayout({
     <main id={MAIN_CONTENT_ID} ref={mainRef}>
       <SectionContainer>
         <div className="mx-auto flex h-full w-full max-w-ot-hub items-start justify-center gap-4 overflow-clip px-3 pt-8 max-lg:flex-col max-lg:gap-3 md:px-6 md:pt-12 lg:px-8">
-          <div className="mx-auto box-border w-full min-w-0 max-w-[780px] flex-auto md:px-0 lg:px-4">
+          <div className="mx-auto box-border w-full min-w-0 max-w-[780px] flex-auto pb-16 md:px-0 lg:px-4">
             {hasToc && <div className="mb-4 lg:hidden" />}
 
             {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
@@ -184,13 +181,6 @@ export default function ArticleLayout({
                   </div>
                 </div>
               )}
-
-            {/* Newsletter Section */}
-            {showNewsletter && (
-              <div className="mb-16 mt-8">
-                <NewsletterSubscription />
-              </div>
-            )}
           </div>
 
           {/* Right sidebar - Desktop only */}

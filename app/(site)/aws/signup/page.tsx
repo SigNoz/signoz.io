@@ -119,7 +119,7 @@ const AWSSignupContent = () => {
           Your AWS Marketplace subscription has been successfully connected to your SigNoz Cloud
           account.
         </p>
-        <Button to="/" variant="default" rounded="default">
+        <Button href="/" variant="default">
           Home
         </Button>
       </div>
@@ -150,9 +150,8 @@ const AWSSignupContent = () => {
                 their license key.
               </p>
               <Button
-                to="/teams/"
+                href="/teams/"
                 variant="secondary"
-                rounded="default"
                 className="h-auto max-w-full whitespace-normal py-2"
                 onClick={() => {
                   logEvent({
@@ -220,13 +219,7 @@ const AWSSignupContent = () => {
                 </div>
               )}
 
-              <Button
-                variant="default"
-                rounded="default"
-                onClick={handleActivate}
-                disabled={loading}
-                isButton
-              >
+              <Button variant="default" onClick={handleActivate} disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -273,9 +266,8 @@ const Instructions = () => {
               that you want to bill through AWS Marketplace, proceed to step 2.
             </p>
             <Button
-              to="/teams/"
+              href="/teams/"
               variant="default"
-              rounded="default"
               onClick={() => {
                 logEvent({
                   eventName: 'Website Click',
@@ -340,10 +332,10 @@ const Instructions = () => {
 
       <div className="border-t border-signoz_slate-500 pt-6">
         <p className="m-0 text-sm text-signoz_vanilla-100/70">
-          Need help? Reach out to
-          <Button
+          Need help? Reach out to{' '}
+          <a
             href="mailto:cloud-support@signoz.io"
-            className="text-signoz_robin-500 hover:text-signoz_robin-400"
+            className="content-link"
             onClick={() => {
               logEvent({
                 eventName: 'Website Click',
@@ -358,11 +350,9 @@ const Instructions = () => {
               })
             }}
           >
-            <span className="flex items-center gap-1">
-              cloud-support@signoz.io
-              <Mail className="h-3 w-3 text-signoz_robin-500" />
-            </span>
-          </Button>
+            cloud-support@signoz.io
+            <Mail className="ml-1 inline h-3 w-3 align-[-1px]" aria-hidden="true" />
+          </a>
         </p>
       </div>
     </div>

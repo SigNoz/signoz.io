@@ -1,13 +1,11 @@
 import { Atom, Coins, DatabaseZap } from 'lucide-react'
 import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 export const LOG_MANAGEMENT_HEADER_BUTTONS = [
   {
     text: 'Get Started - Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Log Management Hero Start Trial',
@@ -19,7 +17,6 @@ export const LOG_MANAGEMENT_HEADER_BUTTONS = [
     text: 'Read Documentation',
     href: '/docs/introduction/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Log Management Hero Docs',

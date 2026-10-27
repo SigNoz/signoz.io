@@ -1,12 +1,10 @@
 import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 export const EXTERNAL_APIS_HEADER_BUTTONS = [
   {
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'External APIs Hero Start Trial',
@@ -18,7 +16,6 @@ export const EXTERNAL_APIS_HEADER_BUTTONS = [
     text: 'Read Documentation',
     href: '/docs/external-api-monitoring/overview/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'External APIs Hero Docs',
@@ -100,7 +97,6 @@ export const READY_TO_MONITOR_EXTERNAL_APIS_BUTTONS = [
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'External APIs Banner Start Trial',
@@ -112,7 +108,6 @@ export const READY_TO_MONITOR_EXTERNAL_APIS_BUTTONS = [
     text: 'Read Documentation',
     href: '/docs/external-api-monitoring/overview/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'External APIs Banner Docs',

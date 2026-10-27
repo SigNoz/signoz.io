@@ -2,7 +2,9 @@
 
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
-import TrackingButton from '@/components/TrackingButton'
+import TrackingLink from '@/components/TrackingLink'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const SECTION_NAME = 'Docs CTA Card'
 
@@ -38,17 +40,17 @@ export default function DocsCtaCard({
           </React.Fragment>
         ))}
       </p>
-      <TrackingButton
+      <TrackingLink
         href={buttonHref}
         clickType="Primary CTA"
         clickName={`${buttonText} Button`}
         clickLocation={SECTION_NAME}
         clickText={buttonText}
-        className="flex h-8 w-fit items-center gap-2 rounded-full bg-[var(--primary-background)] pl-4 pr-3.5 text-[13px] font-medium tracking-tight !text-[var(--primary-foreground)] !no-underline transition-colors hover:bg-[var(--primary-background-hover)] hover:!text-[var(--primary-foreground)]"
+        className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'w-fit')}
       >
         {buttonText}
         <ArrowRight size={12} />
-      </TrackingButton>
+      </TrackingLink>
     </div>
   )
 }

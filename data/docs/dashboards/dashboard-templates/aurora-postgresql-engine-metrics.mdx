@@ -1,0 +1,105 @@
+---
+date: 2026-09-09
+title: Aurora PostgreSQL Engine Metrics Dashboard - Track Backends
+description: Monitor Aurora PostgreSQL engine internals in SigNoz including backends, transactions, locks, row and block activity, background writer, and checkpoints.
+doc_type: explanation
+---
+
+Use this dashboard to monitor what the PostgreSQL engine reports about itself on an Aurora cluster: backends and databases, transactions and locks, row and block activity, background writer and checkpoints, and table and index usage.
+
+The OpenTelemetry Collector `postgresql` receiver connects to the database and reads the `pg_stat_*` views directly. This is the query-level view that CloudWatch cannot provide.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow [Step 3 of Monitor Amazon Aurora](https://signoz.io/docs/integrations/aws-rds-aurora/#step-3-collect-engine-metrics), which covers the monitoring role and the receiver configuration.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aurora-postgresql-engine-metrics.webp"
+  alt="Amazon Aurora PostgreSQL Engine Metrics Dashboard"
+  caption="Amazon Aurora PostgreSQL Engine Metrics Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/aurora/postgresql/db-metrics.json"
+  dashboardName="Amazon Aurora PostgreSQL Engine Metrics"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Track connection pressure**: Compare backends per database against the configured `max_connections`, which moves with the ACU range on Serverless v2.
+- **Find rollback and lock problems**: Read rollbacks against commits, deadlocks per database, and locks grouped by mode.
+- **Catch autovacuum falling behind**: Watch dead tuples accumulate against live tuples per table.
+- **Judge cache efficiency**: Split block reads into buffer cache hits and storage misses.
+- **Check the background writer**: See whether the background writer, the checkpointer, or the backends are doing the writing.
+- **Review table and index growth**: Track size per table and per index, and find indexes that are never scanned.
+
+## Metrics Included
+
+### Connections & Databases
+
+- **Backends by Database**: Backend processes per database (`postgresql.backends`). Counts autovacuum and parallel workers alongside client sessions.
+- **Maximum Connections**: Configured `max_connections` (`postgresql.connection.max`).
+- **Database Count**: User databases on the instance (`postgresql.database.count`).
+- **Database Size**: Disk used per database (`postgresql.db_size`).
+
+### Transactions & Locks
+
+- **Commits**: Transactions committed per interval, per database (`postgresql.commits`).
+- **Rollbacks**: Transactions rolled back per interval (`postgresql.rollbacks`).
+- **Deadlocks**: Deadlocks detected per interval, per database (`postgresql.deadlocks`).
+- **Locks by Mode**: Locks held, grouped by lock mode (`postgresql.database.locks`). AccessExclusiveLock under load means DDL is blocking queries.
+
+### Rows & Blocks
+
+- **Row Operations**: Rows inserted, updated, deleted, and HOT-updated per interval (`postgresql.operations`).
+- **Live and Dead Rows**: Live and dead tuples per table (`postgresql.rows`).
+- **Blocks Read by Source**: Block reads per interval by source (`postgresql.blocks_read`). The `*_read` counters are misses served from storage, `*_hit` are served from cache.
+
+### Background Writer & Checkpoints
+
+- **Buffers Written by Source**: Buffers written by the background writer, checkpointer, and backends (`postgresql.bgwriter.buffers.writes`).
+- **Buffers Allocated**: Buffers allocated per interval (`postgresql.bgwriter.buffers.allocated`).
+- **Checkpoints by Type**: Scheduled and requested checkpoints per interval (`postgresql.bgwriter.checkpoint.count`).
+- **Checkpoint Duration by Type**: Time spent writing and syncing checkpoint files (`postgresql.bgwriter.duration`).
+- **Background Writer Stops**: Times the background writer stopped a cleaning scan for writing too many buffers (`postgresql.bgwriter.maxwritten`).
+
+### Tables & Indexes
+
+- **Table Count**: User tables per database (`postgresql.table.count`).
+- **Vacuum Runs**: Manual vacuum runs per interval, per table (`postgresql.table.vacuum.count`).
+- **Index Scans**: Index scans per interval (`postgresql.index.scans`). Indexes flat at zero over a long window are candidates for removal.
+- **Table Size**: Disk used per table (`postgresql.table.size`).
+- **Index Size**: Disk used per index (`postgresql.index.size`).
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **db_name**: Filter per-database panels (`postgresql.database.name`).
+- **table_name**: Filter per-table panels (`postgresql.table.name`).
+
+## Panels That Read Empty
+
+Some panels stay empty until the matching condition exists, which is expected rather than a misconfiguration:
+
+- **Vacuum Runs** counts manual `VACUUM` only, so a cluster relying on autovacuum reads zero.
+- **Deadlocks** and **Background Writer Stops** read zero on a healthy cluster.
+- **Locks by Mode** shows only the modes held at that moment, so a quiet cluster shows few.
+
+## Limitations
+
+Aurora replicates through its shared storage volume rather than PostgreSQL streaming replication, so `pg_stat_replication` returns no rows and the receiver's replication metrics never populate. No panel here uses them. Use **Aurora Replica Lag** on the [CloudWatch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aurora-postgresql-cloudwatch/) instead.
+
+## Next Steps
+
+- [Add the CloudWatch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aurora-postgresql-cloudwatch/) for cluster capacity, replica lag, and volume growth.
+- [Trace slow queries](https://signoz.io/docs/apm-and-distributed-tracing/database-calls/) back to the application code that ran them.
+- [Set up alerts](https://signoz.io/docs/alerts/) on rollback rate, deadlocks, and dead-row growth.
+
+## Related Dashboards
+
+- [Amazon Aurora PostgreSQL CloudWatch](https://signoz.io/docs/dashboards/dashboard-templates/aurora-postgresql-cloudwatch/)
+- [Amazon Aurora MySQL Engine Metrics](https://signoz.io/docs/dashboards/dashboard-templates/aurora-mysql-engine-metrics/)
+- [PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)

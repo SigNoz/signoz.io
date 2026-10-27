@@ -9,7 +9,7 @@ const FeatureButton: React.FC<{ button: FeatureButtonConfig; className?: string 
 }) => {
   if (button.tracking) {
     return (
-      <Button variant="secondary" rounded="full" className={className} asChild>
+      <Button variant="secondary" className={className} asChild>
         <TrackingLink
           href={button.href}
           clickType={button.tracking.clickType}
@@ -25,7 +25,7 @@ const FeatureButton: React.FC<{ button: FeatureButtonConfig; className?: string 
   }
 
   return (
-    <Button variant="secondary" rounded="full" className={className} to={button.href}>
+    <Button variant="secondary" className={className} href={button.href}>
       {button.text}
       <ArrowRight size={14} />
     </Button>

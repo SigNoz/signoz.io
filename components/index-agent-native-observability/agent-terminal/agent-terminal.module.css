@@ -1,0 +1,62 @@
+.terminal {
+  --agent-t-ok: var(--bg-forest-700);
+  --agent-t-bad: var(--bg-cherry-600);
+  --agent-t-warn: var(--bg-amber-700);
+  --agent-t-info: var(--bg-robin-600);
+  --agent-t-accent: var(--bg-robin-500);
+}
+
+:global([data-theme='default'].dark) .terminal {
+  --agent-t-ok: var(--bg-forest-500);
+  --agent-t-bad: var(--bg-cherry-400);
+  --agent-t-warn: var(--bg-amber-500);
+  --agent-t-info: var(--bg-robin-300);
+}
+
+@keyframes lineIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes caretBlink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.line {
+  animation: lineIn 0.3s ease both;
+}
+
+.caret {
+  animation: caretBlink 1.05s steps(1, end) infinite;
+}
+
+.tabStrip {
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--l2-foreground) 12%, transparent) 0 1px,
+    transparent 1px 7px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    animation: none;
+  }
+
+  .caret {
+    animation: none;
+  }
+}

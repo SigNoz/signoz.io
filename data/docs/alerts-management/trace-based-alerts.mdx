@@ -1,7 +1,7 @@
 ---
-date: 2026-09-11
-title: Trace based alerts
-description: Create trace-based alerts in SigNoz using the Traces Query Builder to monitor span attributes, latency, and error rates.
+date: 2026-10-27
+title: Trace-Based Alerts - Alert on Span Latency and Errors
+description: Create trace-based alerts in SigNoz with the Traces Query Builder or ClickHouse queries to monitor span attributes, latency, and error rates.
 doc_type: reference
 ---
 
@@ -10,7 +10,7 @@ A Trace-based alert in SigNoz allows you to define conditions based on trace dat
 This page covers the configuration options available for Trace-based alerts, from defining the trace query to setting conditions and notification preferences.
 
 <Admonition type="info">
-To alert on AI observability data such as token counts, cost, or latency, use the AI Traces alert type (`alertType: AI_TRACES_BASED_ALERT`). It is a threshold alert built over `gen_ai` spans using the AI Observability Explorer's query, and is currently created through the alerts API rather than the alert builder UI. Its related links and notifications open the AI Observability Explorer instead of the Traces Explorer; everything else on this page applies unchanged.
+To alert on AI observability data such as token counts, cost, or LLM latency, create an AI Traces alert (`alertType: AI_TRACES_BASED_ALERT`) through the [alerts API](https://signoz.io/api-reference/). The alert builder UI does not offer this type yet. Its queries use the `builder_ai_query` query type, and its notifications link to the AI Observability Explorer instead of the Traces Explorer.
 </Admonition>
 
 At the top of the alert creation page, you can set:
@@ -20,7 +20,7 @@ At the top of the alert creation page, you can set:
 
 ## Step 1: Define the Trace Metric
 
-In this step, you use the [Traces Query Builder](https://signoz.io/docs/userguide/query-builder-v5/#logs-and-traces-query-builder)
+In this step, you use the [Traces Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)
 to perform operations on your Traces to define conditions based on traces data. The following fields are available:
 
 - **Filter**: Write a filter expression to search your traces (e.g., `service.name = 'frontend' AND http.status_code >= 500`). Select the span scope (`All Spans`, `Root Spans`, etc.) from the dropdown.
@@ -38,6 +38,10 @@ to perform operations on your Traces to define conditions based on traces data. 
   alt="Using Query Builder to perform operations on your Traces"
   caption="Using Query Builder to perform operations on your Traces"
 />
+
+<Admonition type="info">
+If you click **Create an alert** in the Traces Explorer List or Trace view, the alert opens with a `count()` aggregation and without the sort order of the view. An alert needs an aggregation, and these views have none. Change the aggregation here if you need a different one.
+</Admonition>
 
 
 ## Step 2: Define Alert Conditions

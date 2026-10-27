@@ -13,6 +13,13 @@ export interface OpenInAIProps {
   className?: string
   /** Label for the copy markdown button */
   copyLabel?: string
+  /** `open` lists "Open in …" destinations; `explain` asks AI for a plain-language summary */
+  aiVariant?: 'open' | 'explain'
+}
+
+export interface AIOptionsSection {
+  title: string
+  description: string
 }
 
 export interface AIOption {

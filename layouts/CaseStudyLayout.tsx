@@ -33,7 +33,6 @@ export default function CaseStudyLayout({
         authors={authors}
         toc={toc}
         contentType="customer-story"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

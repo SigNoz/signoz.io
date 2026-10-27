@@ -223,7 +223,7 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
         }}
         aria-label="Open docs search"
         className={cn(
-          'group flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--l3-background)] px-3 py-1 text-xs text-[var(--l2-foreground)] transition',
+          'group flex h-8 shrink-0 items-center gap-1.5 rounded-[3px] bg-transparent px-3 text-xs text-[var(--l2-foreground)] transition',
           'hover:bg-[var(--l3-background-hover)] hover:text-[var(--l1-foreground-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--l3-border)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--l1-background)]'
         )}
       >

@@ -21,7 +21,6 @@ import ComparisonTable from '@/shared/components/molecules/FeaturePages/Comparis
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -29,7 +28,6 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Hero Start Trial',
@@ -41,7 +39,6 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Hero Docs',
@@ -117,12 +114,7 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
                   frameworks, get instant visibility <br className="hidden md:block" /> without
                   writing custom telemetry code.
                 </p>
-                <Button
-                  variant="secondary"
-                  rounded="full"
-                  className="flex w-fit items-center gap-2"
-                  asChild
-                >
+                <Button variant="secondary" className="flex w-fit items-center gap-2" asChild>
                   <TrackingLink
                     href="/docs/llm-observability/"
                     clickType="Secondary CTA"
@@ -218,7 +210,6 @@ const StartMonitoring: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'LLM Observability Bottom CTA Start Trial',
@@ -230,7 +221,6 @@ const StartMonitoring: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'LLM Observability Bottom CTA Docs',

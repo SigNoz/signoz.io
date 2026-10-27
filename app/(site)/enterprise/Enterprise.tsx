@@ -53,12 +53,8 @@ export default function Enterprise() {
                     compliance and support requirements.
                   </div>
 
-                  <Button
-                    variant="legacyPrimary"
-                    id="btn-get-started-homepage-hero"
-                    className="mt-4"
-                  >
-                    <a href="#enterprise-plans" className="flex-center">
+                  <Button asChild variant="default" className="mt-4">
+                    <a href="#enterprise-plans" id="btn-get-started-homepage-hero">
                       Check Enterprise plans
                       <ArrowRight size={14} />
                     </a>
@@ -179,14 +175,8 @@ export default function Enterprise() {
                 <div className="h-2 w-[33%] border !border-l-0 !border-r-0 !border-dashed !border-signoz_slate-300" />
               </div>
 
-              <Button
-                variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
-              >
-                <Link
-                  href="/contact-us/?source=enterprise-page-enterprise-cloud"
-                  className="flex-center"
-                >
+              <Button asChild variant="secondary" className="mt-9 w-full">
+                <Link href="/contact-us/?source=enterprise-page-enterprise-cloud">
                   Contact us
                   <ArrowRight size={14} />
                 </Link>
@@ -223,14 +213,8 @@ export default function Enterprise() {
                 </p>
               </div>
 
-              <Button
-                variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
-              >
-                <Link
-                  href="/contact-us/?source=enterprise-page-enterprise-self-hosted"
-                  className="flex-center"
-                >
+              <Button asChild variant="secondary" className="mt-9 w-full">
+                <Link href="/contact-us/?source=enterprise-page-enterprise-self-hosted">
                   Contact us
                   <ArrowRight size={14} />
                 </Link>
@@ -255,11 +239,8 @@ export default function Enterprise() {
                 self-hosted we provide support for running SigNoz in your infrastrucure.
               </p>
 
-              <Button
-                variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
-              >
-                <Link href="/contact-us/?source=enterprise-page-byoc" className="flex-center">
+              <Button asChild variant="secondary" className="mt-9 w-full">
+                <Link href="/contact-us/?source=enterprise-page-byoc">
                   Contact us
                   <ArrowRight size={14} />
                 </Link>
@@ -387,8 +368,8 @@ export default function Enterprise() {
                 <div className="flex flex-row items-start gap-4">
                   <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
                   <div className="font-normal">
-                    Our powerful ingestion engine has a proven track record of handling 10TB+ data
-                    ingestion per day.
+                    Our powerful ingestion engine has a proven track record of handling 2PB+ data
+                    ingestion per month.
                   </div>
                 </div>
 
@@ -522,11 +503,8 @@ export default function Enterprise() {
                 </div>
               </div>
 
-              <Button
-                variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
-              >
-                <Link href="https://trust.signoz.io/" target="_blank" className="flex-center">
+              <Button asChild variant="secondary" className="mt-9 w-full">
+                <Link href="https://trust.signoz.io/" target="_blank">
                   Visit Trust Center
                   <ArrowRight size={14} />
                 </Link>

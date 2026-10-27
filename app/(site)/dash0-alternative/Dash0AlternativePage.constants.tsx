@@ -1,5 +1,4 @@
 import { Badge } from '@signozhq/ui/badge'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import { ButtonGroupButton } from '@/shared/components/molecules/FeaturePages/ButtonGroup/ButtonGroup.types'
 import { ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 
@@ -51,7 +50,6 @@ export const DASH0_HERO_BUTTONS: ButtonGroupButton[] = [
     text: 'Get Started - Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -722,7 +720,6 @@ export const DASH0_VERDICT_BUTTONS: ButtonGroupButton[] = [
     text: 'Sign up for 30-day free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -745,7 +742,6 @@ export const DASH0_FINAL_CTA_BUTTONS: ButtonGroupButton[] = [
     text: 'Start free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -757,7 +753,6 @@ export const DASH0_FINAL_CTA_BUTTONS: ButtonGroupButton[] = [
     text: 'Request migration support',
     href: '/contact-us/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Contact Us Button',

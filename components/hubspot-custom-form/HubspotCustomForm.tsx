@@ -12,6 +12,8 @@ import HiddenField from './fields/HiddenField'
 import HubspotCustomFormSkeleton from './HubspotCustomFormSkeleton'
 import HubspotCustomFormError from './HubspotCustomFormError'
 import HubspotCustomFormSuccess from './HubspotCustomFormSuccess'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 export type HubspotCustomFormProps = {
   portalId: string
@@ -163,7 +165,7 @@ export default function HubspotCustomForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className={`flex h-[44px] w-full items-center justify-center gap-2 rounded-md text-sm font-semibold transition disabled:opacity-60 ${t.submitButton}`}
+        className={cn(buttonVariants({ variant: 'default', size: 'lg' }), 'w-full')}
       >
         {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {isSubmitting ? 'Submitting\u2026' : resolvedSubmitText}

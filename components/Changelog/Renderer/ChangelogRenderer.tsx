@@ -31,10 +31,10 @@ function renderMedia(media: Media) {
   if (SupportedVideoTypes.includes(media.ext)) {
     return (
       <video
-        autoPlay
         controls
         controlsList="nodownload noplaybackrate"
-        loop
+        preload="metadata"
+        playsInline
         className="my-3 h-auto w-full rounded border border-[var(--l2-border)]"
       >
         <source src={media.url} type={media.mime} />

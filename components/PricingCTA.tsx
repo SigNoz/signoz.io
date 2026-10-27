@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, CheckCircle } from 'lucide-react'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface PricingCTAProps {
   concise?: boolean
@@ -41,11 +42,10 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
                 href="https://signoz.io/pricing/#estimate-your-monthly-bill"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'white' }}
-                className="inline-flex items-center justify-center rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-[var(--base-white)] no-underline transition duration-150 ease-in-out hover:bg-[var(--accent-primary-hover)]"
+                className={buttonVariants({ variant: 'default' })}
                 prefetch={false}
               >
-                Calculate Your Savings with SigNoz Now <ArrowRight size={14} className="ml-1" />
+                Calculate Your Savings with SigNoz Now <ArrowRight size={14} />
               </Link>
             </div>
           </div>
@@ -110,11 +110,10 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
               href="https://signoz.io/pricing/#estimate-your-monthly-bill"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'white' }}
-              className="inline-flex items-center justify-center rounded-md bg-[var(--accent-primary)] px-6 py-2 text-base font-medium text-[var(--base-white)] no-underline transition duration-150 ease-in-out hover:bg-[var(--accent-primary-hover)]"
+              className={buttonVariants({ variant: 'default', size: 'lg' })}
               prefetch={false}
             >
-              Calculate Your Savings with SigNoz Now <ArrowRight size={16} className="ml-2" />
+              Calculate Your Savings with SigNoz Now <ArrowRight size={16} />
             </Link>
           </div>
         </div>
