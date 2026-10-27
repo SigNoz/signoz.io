@@ -1,7 +1,7 @@
 ---
 
 title: "What Is a Prometheus Target? Configuration and Troubleshooting"
-date: 2026-10-26
+date: 2026-10-27
 tags: [prometheus, monitoring]
 authors: [saurabh_patil]
 description: "A Prometheus target is an endpoint Prometheus scrapes for metrics. Learn how to configure targets, add labels, secure endpoints, and fix scrape failures."
@@ -27,20 +27,20 @@ This guide explains how Prometheus discovers targets, how to configure their met
 
 Prometheus needs a list of targets to scrape. You can define this list in two ways:
 
-- **Static configuration:** Add target addresses under `static_configs` in `prometheus.yml`. Use this when you have a small set of targets whose addresses rarely change.
-- **Service discovery:** Prometheus gets target addresses from Kubernetes, DNS, cloud APIs, or YAML/JSON files. With file-based discovery, it watches the files for changes and updates valid target entries without requiring a reload of `prometheus.yml`.
+- **Static configuration:** Here, you add target addresses under `static_configs` in `prometheus.yml`. This is useful when you have a small set of targets whose addresses rarely change.
+- **Service discovery:** In service discovery, prometheus gets target addresses from Kubernetes, DNS, cloud APIs, or YAML/JSON files. If you use files to list your targets, prometheus watches them for changes and updates its target list automatically, without needing to reload `prometheus.yml`.
 
 ## How to configure Prometheus targets
 
-To configure a target, you need an endpoint that exposes metrics and a scrape job that points to it. After adding the job, validate the configuration and reload Prometheus to apply it. If your application already serves metrics, you can [skip to the scrape job configuration](#configure-the-scrape-job) and use its address instead.
+To configure a target, you need an endpoint that exposes metrics and a scrape job that points to it. After adding the job, validate the configuration and reload prometheus to apply it. If your application already serves metrics, you can [skip to the scrape job configuration](#configure-the-scrape-job) and use its address instead.
 
-### Expose a metrics endpoint for your target
+### Set up a metrics endpoint
 
-A target identifies where Prometheus should scrape. The metrics endpoint is the HTTP URL it requests, such as `http://localhost:8000/metrics`. The hostname and port go in `targets`, while `metrics_path` selects the URL path and defaults to `/metrics`.
+Prometheus collects metrics from an HTTP endpoint, such as `http://localhost:8000/metrics`. To configure this endpoint, add `localhost:8000` to `targets` in your scrape configuration. Prometheus uses `/metrics` as the default path, so you only need to set `metrics_path` if your application serves metrics at a different path.
 
-If your application does not expose metrics yet, add a Prometheus client library. This Python example counts completed iterations of a demo task and exposes the counter over HTTP. In a real application, increment the counter after the operation you want to measure completes.
+If your application doesn’t expose metrics yet, you can add a Prometheus client library. The Python example below runs a simple loop and uses a counter to track how many times it completes. In your own application, you’d increment the counter after the operation you want to track finishes.
 
-Create a virtual environment and install the library. These commands use a macOS or Linux shell:
+First, create a virtual environment and install the library. On macOS or Linux, run:
 
 ```bash
 python3 -m venv .venv
@@ -48,9 +48,9 @@ source .venv/bin/activate
 python3 -m pip install prometheus-client
 ```
 
-Save the following as `metrics_demo.py`:
+Save this code as `metrics_demo.py`:
 
-```python
+```python:metrics_demo.py
 import time
 from prometheus_client import Counter, start_http_server
 
@@ -63,27 +63,31 @@ if __name__ == '__main__':
         completed_tasks.inc()
 ```
 
-Run `python3 metrics_demo.py`, then check the endpoint in another terminal:
+Run the script with `python3 metrics_demo.py`. Then, open another terminal and check the metrics endpoint:
 
 ```bash
 curl -fsS http://127.0.0.1:8000/metrics
 ```
 
-In the library's output, look for lines such as these. The counter value increases while the process runs; your value will depend on when you request it.
+You’ll see several metrics in the output. Look for these lines:
 
-```text
+```text:Output
 # HELP demo_tasks_completed_total Total completed demo tasks
 # TYPE demo_tasks_completed_total counter
 demo_tasks_completed_total 5.0
 ```
 
-`HELP` describes the metric, `TYPE` identifies it as a counter, and the final line contains its name and value. Client libraries handle the exposition format for you. The <a href="https://prometheus.github.io/client_python/" target="_blank" rel="noopener noreferrer nofollow">official Python client guide</a> provides more instrumentation examples.
+The counter increases once per second, so you may see a different value depending on when you run `curl`.
+
+The `HELP` line describes the metric, and `TYPE` tells Prometheus it’s a counter. The final line gives the metric’s name and current value. The client library formats this output for you, so you only need to define your metrics and update them in your code.
 
 ### Configure the scrape job
 
-Open `prometheus.yml` and add this job under `scrape_configs`. If that key already exists, append the job to its list rather than adding another `scrape_configs` key:
+Now that the metrics endpoint is running, add a scrape job to `prometheus.yml` so Prometheus knows where to collect the metrics.
 
-```yaml
+Add the following under `scrape_configs` in your `prometheus.yml`. If your configuration already has a `scrape_configs` section, add the job to the existing list rather than creating a second section.
+
+```yaml:prometheus.yml
 scrape_configs:
   - job_name: 'python-demo'
     scrape_interval: 15s
@@ -92,33 +96,45 @@ scrape_configs:
       - targets: ['127.0.0.1:8000']
 ```
 
-This example assumes Prometheus runs directly on the same host as the Python process. If Prometheus runs in a container, `127.0.0.1` refers to the Prometheus container itself, so use an address reachable from Prometheus and configure the application's listening address accordingly. The demo binds to loopback for local use. `scrape_interval: 15s` sets this job's interval explicitly.
+This job tells Prometheus to scrape `http://127.0.0.1:8000/metrics` every 15 seconds.
 
 ### Validate, reload, and check the target
 
-Check the configuration before applying it:
+Before applying the changes, check your configuration for errors:
 
 ```bash
 promtool check config prometheus.yml
 ```
 
-If the check passes, reload Prometheus by sending `SIGHUP` to its process. If you started Prometheus with `--web.enable-lifecycle`, you can instead reload it over HTTP:
+If the check passes, reload Prometheus to pick up the changes. You can do this by sending `SIGHUP` to the Prometheus process. If you started Prometheus with `--web.enable-lifecycle`, you can also reload it with an HTTP request:
 
 ```bash
 curl -fsS -X POST http://localhost:9090/-/reload
 ```
 
-Use your Prometheus address and authentication settings if they differ. The reload endpoint is disabled without that flag. Restarting Prometheus also loads the configuration, but a reload applies changes without stopping the server.
+Restarting Prometheus also applies the changes, but reloading avoids stopping the server.
 
-Open the target health page and query `up{job="python-demo"}`. A value of `1` means the scrape succeeded; `0` means it failed. Then query `demo_tasks_completed_total{job="python-demo"}` to confirm that the demo metric is available.
+After reloading, open the target health page to check whether Prometheus can scrape the endpoint. You can also run this query:
+
+```promql
+up{job="python-demo"}
+```
+
+A value of `1` means the scrape succeeded; `0` means it failed.
+
+Finally, query the counter from the Python example to confirm Prometheus is collecting it:
+
+```promql
+demo_tasks_completed_total{job="python-demo"}
+```
 
 ### Scrape targets that require authentication or custom headers
 
-Some metrics endpoints require a token, an API key, or a tenant header before they return data. Configure these request settings in the target's scrape job. Prometheus supports custom headers directly through `http_headers`.
+Some metrics endpoints require credentials or extra headers with each request. You can configure these in the scrape job so Prometheus sends them when collecting metrics.
 
-For example, this job scrapes an HTTPS endpoint that expects a tenant ID and an API key:
+For example, this job connects to an HTTPS endpoint that requires a tenant ID and an API key. The `http_headers` setting adds both headers to each scrape request:
 
-```yaml
+```yaml:prometheus.yml
 scrape_configs:
   - job_name: 'protected-app'
     scheme: https
@@ -132,25 +148,34 @@ scrape_configs:
       - targets: ['app.example.com:443']
 ```
 
-Replace the example hostname, header names, and tenant ID with those required by your endpoint. Create the API key file at the specified path and make it readable by the Prometheus process. If Prometheus runs in a container, mount the file at that path inside the container. These headers apply to every target in this scrape job; use separate jobs when targets require different credentials.
+Replace the targets, header names, and tenant ID with the values your endpoint expects. Save your API key in the specified file and make sure the Prometheus process can read it. If Prometheus runs in a container, mount the file at that path inside the container.
 
-Use `values` for non-sensitive headers and `files` to read credentials from a separate file. For inline sensitive values, use `secrets`, which hides them on the configuration page, though they remain in the YAML file. Keep credentials out of version control and use HTTPS when sending them.
+These headers are sent to every target in the job. If your targets need different credentials, put them in separate scrape jobs.
 
-For HTTP Basic authentication, use `basic_auth` with `username` and `password_file`. For a bearer token, use `authorization` with `type: Bearer` and `credentials_file`; the file should contain the token without the `Bearer` prefix. Use these authentication settings instead of adding an `Authorization` header under `http_headers`. See the <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#http_config" target="_blank" rel="noopener noreferrer nofollow">Prometheus HTTP configuration reference</a> for the supported options and restrictions.
+Use `values` for non-sensitive headers and `files` to load credentials from a separate file. You can also use `secrets` for sensitive values written directly in the configuration. This hides them on the configuration page, but they remain in the YAML file. Keep credentials out of version control and send them over HTTPS.
 
-Validate and reload the configuration as shown above, then check the target health page. For a `401` or `403` response, verify the credentials, required header names, and permission to access the metrics endpoint.
+For endpoints that use standard authentication methods, use Prometheus’s dedicated settings instead of adding an `Authorization` header under `http_headers`:
+
+- **HTTP Basic authentication:** Use `basic_auth` with `username` and `password_file`.
+- **Bearer tokens:** Use `authorization` with `type: Bearer` and `credentials_file`. The file should contain only the token, without the `Bearer` prefix.
+
+Once you’ve made the changes, validate and reload the configuration, then check the target health page. If the endpoint returns `401` or `403`, check that the credentials are correct, the header names match what it expects, and the credentials grant access to the metrics endpoint.
 
 ### Restrict access to metrics endpoints
 
-Metrics can expose internal service names and operational data. Keep production endpoints on private networks and allow access only from your Prometheus servers using firewall rules or Kubernetes NetworkPolicies. Avoid credentials, personal data, and unbounded values such as user IDs in metric labels.
+Metrics can reveal internal service names and details about your infrastructure. In production, keep metrics endpoints on private networks. Use firewall rules or Kubernetes NetworkPolicies to limit access to your Prometheus servers.
 
-Configure authentication and TLS in the application or exporter, or in a reverse proxy protecting the metrics endpoint. The scrape-job settings above supply credentials to that endpoint; they do not turn on authentication at the endpoint itself. If the endpoint requires mutual TLS, configure `tls_config` with the appropriate `ca_file`, `cert_file`, and `key_file`. Keep certificate verification enabled. See the <a href="https://prometheus.io/docs/operating/security/" target="_blank" rel="noopener noreferrer nofollow">Prometheus security model</a> for endpoint access guidance.
+Keep credentials and personal data out of metric labels. Also avoid values such as user IDs, which can create a large number of time series.
+
+If your endpoint needs authentication or TLS, configure it in the application, exporter, or a reverse proxy in front of it. The scrape-job settings in the previous section tell Prometheus how to authenticate. However, they don’t protect the endpoint itself.
+
+For endpoints that require mutual TLS, use `tls_config` in the scrape job with the appropriate `ca_file`, `cert_file`, and `key_file`. Keep certificate verification enabled.
 
 ### Add target-specific labels
 
-Target labels describe where metrics came from, such as their environment, service, or region. For static targets, add a `labels` map to each group in `static_configs`:
+Labels help you identify which environment, service, or region a target belongs to. For static targets, add them under `labels` in `static_configs`:
 
-```yaml
+```yaml:prometheus.yml
 scrape_configs:
   - job_name: 'api-server'
     static_configs:
@@ -166,13 +191,19 @@ scrape_configs:
           region: 'us-west-2'
 ```
 
-Labels in a group apply to every target in that group's `targets` list. Use separate groups when targets need different label values. After validating and reloading the configuration, inspect the labels on the target health page. Query `up{job="api-server", environment="production"}` to select the production target.
+Each set of labels applies to every target in the same `targets` list. If targets need different label values, put them in separate groups, as shown above.
 
-If a scraped metric already has a label with the same name, the default `honor_labels: false` setting keeps the configured target label and renames the conflicting scraped label with an `exported_` prefix. With `honor_labels: true`, the scraped label wins. Check for collisions before adding labels such as `service` or changing `instance`.
+Validate and reload the configuration, then check the labels on the target health page. You can now select the production target with:
 
-For service-discovered targets, use `relabel_configs` to copy discovery metadata into labels you want to keep. For example, add these rules to an existing Kubernetes pod scrape job:
+```promql
+up{job="api-server", environment="production"}
+```
 
-```yaml
+Before adding a label, check whether your application already exposes one with the same name. By default, Prometheus keeps the configured target label and adds an `exported_` prefix to the conflicting label from the scraped metric. Setting `honor_labels: true` reverses this behavior. The scraped label keeps its value instead.
+
+For targets found through service discovery, you can use `relabel_configs` to turn discovery metadata into labels. For example, add these rules to an existing Kubernetes pod scrape job:
+
+```yaml:prometheus.yml
 relabel_configs:
   - source_labels: [__meta_kubernetes_namespace]
     target_label: namespace
@@ -180,15 +211,15 @@ relabel_configs:
     target_label: pod
 ```
 
-These rules assume the job already uses `kubernetes_sd_configs` with `role: pod` and has the required API permissions and target selection rules. Discovery labels beginning with `__meta_` are temporary; copying their values to ordinary labels makes them available in queries after target relabeling.
+These rules copy the Kubernetes namespace and pod name into `namespace` and `pod` labels, making them available in queries. Labels starting with `__meta_` are temporary and are removed after target relabeling unless you copy their values.
 
 Target relabeling runs before scraping. It differs from `metric_relabel_configs`, which processes scraped samples, and from PromQL's `label_replace()`, which changes query results. Choose stable label values and avoid high-cardinality values such as request IDs. Our [Prometheus labels guide](https://signoz.io/guides/what-are-prometheus-labels/) explains label selection in more detail.
 
 ### Use a hostname as the instance label
 
-By default, `instance` contains the target's host and port. The host can already be a DNS name; it is not always an IP address. To use a readable name while scraping an IP address, supply a hostname label and copy it to `instance`:
+By default, Prometheus sets the `instance` label to the target’s host and port, such as `192.0.2.10:9100` or `worker-01:9100`. If you scrape an IP address but want a readable name in your queries, add a `hostname` label and copy its value to `instance`:
 
-```yaml
+```yaml:prometheus.yml
 scrape_configs:
   - job_name: 'node-exporter'
     static_configs:
@@ -204,11 +235,11 @@ scrape_configs:
         target_label: instance
 ```
 
-Here, Prometheus still scrapes `192.0.2.10:9100` but stores its metrics with `instance="worker-01"` and `hostname="worker-01"`. The rule changes `instance` without changing `__address__`, which determines the network destination. The regex skips empty hostname values. Replace the example IP addresses with your actual targets.
+Prometheus still scrapes `192.0.2.10:9100`, but the collected metrics now have `instance="worker-01"` and `hostname="worker-01"`. The rule changes the label without changing `__address__`, which tells Prometheus where to send the request. The regex skips targets with an empty or missing `hostname` label.
 
-You can also set `instance` directly under `labels` for a static target. Copying a separate hostname label is useful when the same rule needs to work across a changing target inventory. For file-based discovery, put the target-to-hostname mappings in a file such as `/etc/prometheus/targets/nodes.yml`:
+If your target list changes often, you can keep the addresses and hostnames in a separate file and reuse the same rule. For example, save this as `/etc/prometheus/targets/nodes.yml`:
 
-```yaml
+```yaml:nodes.yml
 - targets: ['192.0.2.10:9100']
   labels:
     hostname: 'worker-01'
@@ -217,16 +248,16 @@ You can also set `instance` directly under `labels` for a static target. Copying
     hostname: 'worker-02'
 ```
 
-Replace the job's `static_configs` with the following and keep the `relabel_configs` rule above:
+Then replace `static_configs` in the scrape job with the following, keeping the `relabel_configs` rule from above:
 
 ```yaml
 file_sd_configs:
   - files: ['/etc/prometheus/targets/nodes.yml']
 ```
 
-Prometheus detects changes to the discovery file. The file supplies the hostname mapping; relabeling does not perform reverse DNS lookups.
+Prometheus picks up changes to this file automatically. You still need to supply the hostname for each target. Relabeling doesn’t look up hostnames through reverse DNS.
 
-Keep `instance` unique within each job, especially when several exporters run on one host. Retain a port or another distinguishing value when needed. Changing label values creates new time series for future scrapes; it does not rename historical data. Review dashboards and alerts that match the old instance values. To keep existing selectors working, leave `instance` unchanged and query or group by the separate `hostname` label instead.
+Keep `instance` unique within each job. If you run several exporters on the same host, include a port or another distinguishing value so they don’t share the same instance label. Changing a label value creates new time series for future scrapes, it doesn’t rename historical data. Check any dashboards or alerts that use the old `instance` values before making the change. If you’d rather leave those queries untouched, keep `instance` as it is and use the separate `hostname` label for filtering or grouping.
 
 ## Troubleshooting Prometheus target issues
 
@@ -244,30 +275,30 @@ Start with the target health page and its last scrape error. Test connectivity f
 | Response parsing error | Confirm the endpoint returns a supported exposition format rather than JSON or an HTML login page, and sends the appropriate `Content-Type`. |
 | Scrape succeeds but a counter stays unchanged | Confirm the instrumented operation is running and increments the counter. |
 
-`up = 1` confirms a successful scrape, not the health of every part of the application. An absent `up` series can mean the target is no longer discovered or was dropped; it is different from a failed scrape returning `up = 0`. For response-format details, see the <a href="https://prometheus.io/docs/instrumenting/exposition_formats/" target="_blank" rel="noopener noreferrer nofollow">supported exposition formats</a>.
-
-## FAQs
-
-### What's the difference between a Prometheus target and an exporter?
-
-A target is the endpoint Prometheus scrapes. An exporter is a program that collects metrics from another system and exposes them at an endpoint Prometheus can scrape. Applications with built-in Prometheus instrumentation can be scraped directly without a separate exporter.
-
-### How often does Prometheus scrape targets by default?
-
-The built-in default for `scrape_interval` is one minute. Example configurations often explicitly set it to `15s`. A job inherits the global interval unless it sets its own, so check both the `global` and job-level configuration.
-
-### Can Prometheus automatically discover new targets in a Kubernetes cluster?
-
-Yes. Configure `kubernetes_sd_configs` with the appropriate discovery role and Kubernetes API permissions. Use target relabeling to select the endpoints and ports you want to scrape.
-
-### How many targets can a single Prometheus instance handle?
-
-There is no fixed target limit that fits every deployment. Capacity depends on active time series, samples per scrape, scrape frequency, query load, and CPU, memory, and storage resources. Measure these factors under your own workload to size the instance.
+`up = 1` confirms a successful scrape, not the health of every part of the application. An absent `up` series can mean the target is no longer discovered or was dropped. It is different from a failed scrape returning `up = 0`.
 
 ## Monitor target metrics with SigNoz Cloud
 
-SigNoz Cloud is a managed observability platform for metrics, logs, and traces. You can collect metrics from your existing Prometheus-format endpoints with the OpenTelemetry Collector's Prometheus receiver and send them to SigNoz Cloud. This lets you reuse the metrics your applications already expose.
+SigNoz Cloud is an all in one observability platform for metrics, logs, and traces. You can collect metrics from your existing Prometheus-format endpoints with the [OpenTelemetry Collector's](https://signoz.io/blog/opentelemetry-collector-complete-guide/) Prometheus receiver and send them to SigNoz Cloud. This lets you reuse the metrics your applications already expose.
 
 Follow the [Prometheus metrics integration guide](https://signoz.io/docs/userguide/prometheus-metrics/) to configure the scrape jobs in the Collector and verify that metrics arrive. These settings belong in the Collector's configuration; editing a standalone Prometheus server's `prometheus.yml` does not send data to SigNoz Cloud. Once data arrives, use it to build dashboards and configure metric alerts.
 
 [Start with SigNoz Cloud](https://signoz.io/teams/), or [self-host SigNoz](https://signoz.io/docs/install/self-host/) if you want to run it on your own infrastructure.
+
+## FAQs
+
+#### What’s the difference between a Prometheus target and an exporter?
+
+A target is the endpoint Prometheus scrapes. An exporter collects metrics from another system and exposes them at an endpoint Prometheus can scrape. If your application already exposes Prometheus-compatible metrics, you don’t need a separate exporter.
+
+#### How often does Prometheus scrape targets by default?
+
+Prometheus’s built-in default is one minute, though many example configurations set `scrape_interval` to `15s`. Each job uses the global interval unless it defines its own, so check both settings to see how often your targets are scraped.
+
+#### Can Prometheus automatically discover new targets in a Kubernetes cluster?
+
+Yes. Use `kubernetes_sd_configs` to discover targets through the Kubernetes API. Choose the discovery role that matches what you want to monitor, grant Prometheus the necessary API permissions, and use target relabeling to select the endpoints and ports to scrape.
+
+#### How many targets can a single Prometheus instance handle?
+
+There’s no single limit that applies to every setup. It depends on how many time series your targets produce, how often you scrape them, your query workload, and the CPU, memory, and storage available. Test with your expected workload to work out the capacity you need.
