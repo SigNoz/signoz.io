@@ -180,7 +180,6 @@ The v2 payloads carry the same information with a few shape changes:
 - Timeline responses include `nextCursor` alongside `items` and `total`; it is omitted on the last page. The v1 top-level `labels` map on the timeline response is gone; use `filter_keys` and `filter_values` instead.
 - `currentAvgResolutionTime` and `pastAvgResolutionTime` in the stats response are now numbers (seconds) instead of formatted strings.
 - `relatedTracesLink` and `relatedLogsLink` are omitted when empty instead of always being present.
-- Timeline items and top contributors also carry `relatedAITracesLink`. For AI Traces alerts (`alertType: AI_TRACES_BASED_ALERT`), this field links to the AI Observability Explorer, and `relatedTracesLink` is omitted. Other alert types omit `relatedAITracesLink`.
 
 Full response schemas for every endpoint are in the [SigNoz API Reference](https://signoz.io/api-reference/).
 
@@ -188,3 +187,4 @@ Full response schemas for every endpoint are in the [SigNoz API Reference](https
 
 - `filterExpression` accepts full query-builder expressions (`AND`/`OR`, `=`, `!=`, `IN`, `LIKE`, `EXISTS`, …) instead of the v3 `FilterSet` JSON structure.
 - `filter_keys` and `filter_values` (see [Discovering filter keys and values](#discovering-filter-keys-and-values)) replace the v1 timeline's top-level `labels` map, and support search and narrowing by an existing filter.
+- Timeline items and top contributors carry a new `relatedAITracesLink` field. For AI Traces alerts (`alertType: AI_TRACES_BASED_ALERT`), it links to the [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/), and `relatedTracesLink` is omitted. Other alert types omit `relatedAITracesLink`.
