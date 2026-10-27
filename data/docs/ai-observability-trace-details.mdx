@@ -1,0 +1,53 @@
+---
+date: 2026-10-27
+title: AI Observability Trace Details - Read LLM Message Threads
+description: Inspect AI traces in SigNoz on the Thread tab. Read the LLM message thread, tool calls, and media, then switch to JSON to see the raw message objects.
+doc_type: howto
+---
+
+Use the **Thread** tab in trace details to read one AI trace as a conversation. Instead of reading `gen_ai.*` attributes span by span, the Thread tab rebuilds the input and output messages, tool calls, tool responses, and media across the trace into a single message thread. For the dashboard and query views, see the [AI Observability overview](https://signoz.io/docs/ai-observability/).
+
+## Open the Thread tab
+
+1. Open [AI Observability](https://signoz.io/docs/ai-observability/) from **More** > **AI Observability** in the side navigation, then select the **Explorer** tab.
+2. In **Trace View**, select a trace that has AI spans. For details on the Explorer, see [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/).
+3. Trace details open on the **Overview** tab, which shows the flame graph and waterfall. Select the **Thread** tab to read the message thread.
+
+The **Overview** and **Thread** tabs keep their own browser history. The browser **Back** button and the in-page **Go back** button return to the tab you came from instead of leaving the trace. When you open the Thread tab with no earlier history, **Go back** takes you to the AI Observability Explorer.
+
+## Read the message thread
+
+The Thread tab lists each message in order, with its role, so you can follow the exchange between the user, the model, and any tools:
+
+- **Input and output messages** render as text. The Input and Output sections expand to their full height, so long prompts and completions are not cut off.
+- **Tool calls** show the tool name and the arguments the model sent. **Tool responses** show what the tool returned, next to any text the model produced in the same turn.
+- **Media** such as images render inline when the span carries a usable URI.
+
+## See the raw message objects
+
+Select **JSON** to switch a message from the rendered view to its formatted message object. The JSON view shows the structured message that SigNoz built for the thread, not the raw attribute string stored on the span, so the input and output messages stay readable as objects.
+
+## What renders in the thread
+
+The Thread tab normalizes messages from several instrumentations, so the same conversation reads the same way regardless of the library that produced it:
+
+- **Parallel tool calls from LiteLLM.** When a LiteLLM span records more than one completion (multiple `gen_ai.completion.N` entries), every tool call appears in the thread. Tool call and tool response parts stored in the `tool_calls` and `tool_call_id` fields on `litellm_request` spans also render alongside the text parts. See the [LiteLLM integration guide](https://signoz.io/docs/litellm-observability/).
+- **JSON answers from the Vercel AI SDK.** A JSON object or JSON array that the model returns as its answer (for example `{"answer": 42}`) renders as a text part. SigNoz treats a value as tool calls only when it is a list where every item has a `toolName` field. See the [Vercel AI SDK integration guide](https://signoz.io/docs/vercel-ai-sdk-observability/).
+- **Redacted media.** An image that an instrumentation redacts, such as `__REDACTED__` from <a href="https://github.com/Arize-ai/openinference" target="_blank" rel="noopener noreferrer nofollow">OpenInference</a> or `[OR_REDACTED]` from [OpenRouter](https://signoz.io/docs/openrouter-observability/), renders as a generic media placeholder with a warning label instead of a broken image.
+
+## When a trace has no AI spans
+
+If the trace exists but has no spans from AI-related actions, the Thread tab shows a centered empty state titled **This trace has no spans from AI-related actions**, with a **Learn more** link to the [AI Observability docs](https://signoz.io/docs/ai-observability/). Confirm that your spans carry the GenAI attributes the thread needs. See [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/) for the attributes SigNoz reads, and [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/) if your instrumentation uses other names.
+
+A separate **Span not found** error appears only when the trace itself does not exist (a 404). A trace that exists but has no AI spans shows the empty state above, not this error.
+
+## Next steps
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/): query your LLM and agent traces.
+- [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/): check the attributes each panel and the thread need.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+
+## Get Help
+
+<GetHelp />
