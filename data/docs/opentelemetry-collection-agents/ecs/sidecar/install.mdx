@@ -1,292 +1,322 @@
 ---
-date: 2026-08-03
-title: ECS Serverless Collection Agent - Install
-description: Install and deploy the sidecar container for ECS Serverless infrastructure monitoring
+date: 2026-10-26
+title: ECS Serverless (Fargate) - Install
+description: Install the OpenTelemetry Collector of the ECS Serverless Collection Agent with Foundry and Terraform to send task metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
 
-This guide walks you through installing the sidecar container to collect metrics, traces, and logs from your ECS Serverless infrastructure.
+This guide explains how to install the ECS Serverless Collection Agent in your Amazon ECS tasks on Fargate with Foundry and Terraform. 
 
-## Prerequisites Check
+## Prerequisites
 
-Before starting, verify you have:
+- A task definition for <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html" target="_blank" rel="noopener noreferrer nofollow">AWS Fargate</a> that you manage with Terraform as an <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition" target="_blank" rel="noopener noreferrer nofollow">`aws_ecs_task_definition`</a> resource.
+- <a href="https://developer.hashicorp.com/terraform/install" target="_blank" rel="noopener noreferrer nofollow">Terraform</a> 1.4 or newer and the AWS CLI on the same machine, with AWS credentials that can create SSM parameters and IAM roles.
+- AWS provider 5.x in the Terraform for your task definition, because the module that Foundry generates pins `hashicorp/aws` to `~> 5.0`.
+- A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
-- ECS cluster with any launch type (**Fargate**)
-- AWS CLI configured with appropriate permissions
-- SigNoz Cloud account or self-hosted SigNoz instance
-- Access to AWS Parameter Store and CloudWatch Logs
+## Install the Collection Agent
 
-## Installation Steps
-
-### Step 1: Create SigNoz OtelCollector Config
-
-The OpenTelemetry Collector configuration defines what data to collect and where to send it.
-
-<Figure
-  src="/img/docs/ecs-docs/ecs-otelcol-sidecar-config-ssm.webp"
-  alt="otelcol-sidecar parameter in AWS Parameter Store"
-  caption="OTel Collector config in AWS Parameter Store"
-/>
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-
-1. Navigate to AWS Parameter Store and create a new parameter named `/ecs/signoz/otelcol-sidecar.yaml`.
-2. Copy the following configuration and paste it into the value field of the `/ecs/signoz/otelcol-sidecar.yaml` parameter:
-
-   ```yaml minimap defaultCollapsed
-   extensions:
-     health_check:
-
-   receivers:
-     awsecscontainermetrics:
-       collection_interval: 30s
-     otlp:
-       protocols:
-         grpc:
-           endpoint: 0.0.0.0:4317
-         http:
-           endpoint: 0.0.0.0:4318
-     fluentforward:
-       endpoint: 0.0.0.0:8006
-
-   processors:
-     batch:
-       timeout: 10s
-     filter:
-       metrics:
-         include:
-           match_type: strict
-           metric_names:
-             - ecs.task.memory.reserved
-             - ecs.task.memory.utilized
-             - ecs.task.cpu.reserved
-             - ecs.task.cpu.utilized
-             - ecs.task.network.rate.rx
-             - ecs.task.network.rate.tx
-             - ecs.task.storage.read_bytes
-             - ecs.task.storage.write_bytes
-             - container.duration
-
-   exporters:
-     otlphttp:
-       endpoint: 'https://ingest.{region}.signoz.cloud:443'
-       headers:
-         'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY'
-
-   service:
-     extensions: [health_check]
-     pipelines:
-       traces:
-         receivers: [otlp]
-         processors: [batch]
-         exporters: [otlphttp]
-       metrics:
-         receivers: [otlp]
-         processors: [batch]
-         exporters: [otlphttp]
-       metrics/aws:
-         receivers: [awsecscontainermetrics]
-         processors: [filter]
-         exporters: [otlphttp]
-       logs:
-         receivers: [otlp, fluentforward]
-         processors: [batch]
-         exporters: [otlphttp]
-   ```
-
-3. Update the following placeholders in the YAML configuration:
-   - Replace `SIGNOZ_INGESTION_KEY` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-   - Replace `{region}` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host'>
-
-1. Navigate to AWS Parameter Store and create a new parameter named `/ecs/signoz/otelcol-sidecar.yaml`.
-2. Copy the following configuration and paste it into the value field of the `/ecs/signoz/otelcol-sidecar.yaml` parameter:
-
-   ```yaml minimap defaultCollapsed
-   extensions:
-     health_check:
-
-   receivers:
-     awsecscontainermetrics:
-       collection_interval: 30s
-     otlp:
-       protocols:
-         grpc:
-           endpoint: 0.0.0.0:4317
-         http:
-           endpoint: 0.0.0.0:4318
-     fluentforward:
-       endpoint: 0.0.0.0:8006
-
-   processors:
-     batch:
-       timeout: 10s
-     filter:
-       metrics:
-         include:
-           match_type: strict
-           metric_names:
-             - ecs.task.memory.reserved
-             - ecs.task.memory.utilized
-             - ecs.task.cpu.reserved
-             - ecs.task.cpu.utilized
-             - ecs.task.network.rate.rx
-             - ecs.task.network.rate.tx
-             - ecs.task.storage.read_bytes
-             - ecs.task.storage.write_bytes
-             - container.duration
-
-   exporters:
-     otlphttp:
-       endpoint: 'http://<IP of machine hosting SigNoz>:4318'
-
-   service:
-     extensions: [health_check]
-     pipelines:
-       traces:
-         receivers: [otlp]
-         processors: [batch]
-         exporters: [otlphttp]
-       metrics:
-         receivers: [otlp]
-         processors: [batch]
-         exporters: [otlphttp]
-       metrics/aws:
-         receivers: [awsecscontainermetrics]
-         processors: [filter]
-         exporters: [otlphttp]
-       logs:
-         receivers: [otlp, fluentforward]
-         processors: [batch]
-         exporters: [otlphttp]
-   ```
-
-3. Update `<IP of machine hosting SigNoz>` with the address of your SigNoz OTelCollector in the YAML configuration.
-
-<Admonition>
-Replace `<IP of machine hosting SigNoz>` with the address of [SigNoz OTelCollector](https://signoz.io/docs/setup/docker/troubleshooting/faq/#signoz-otel-collector-address-grid).
-
-After successful setup, feel free to remove the `logging` exporter if it gets too noisy. To do so, simply remove the `logging` exporter from the `exporters` list in the following pipelines: `traces`, `metrics`, `metrics/aws`, and `logs` from the `otelcol-sidecar.yaml` file.
-
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
 </Admonition>
 
-</TabItem>
-</Tabs>
+### Step 1: Install foundryctl
 
-### Step 2: Create Sidecar Collector Container
+Run this on the machine where you run Terraform:
 
-This step involves integrating the SigNoz collector into your ECS task definitions as a sidecar container. The sidecar collector container will run alongside your application container(s) within the same ECS task and will collect ECS container metrics and send them to SigNoz.
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
 
-#### 2a. Update Task Definition
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
 
-In your ECS [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html), include a new container definition specifically for the sidecar container. This container will operate alongside your main application container(s) within the same task definition:
+### Step 2: Create casting.yaml
 
-```json minimap defaultCollapsed
-{
-    ...
-    "containerDefinitions": [
-        ...,
-        {
-            "name": "signoz-collector",
-            "image": "otel/opentelemetry-collector-contrib:0.139.0",
-            "user": "root",
-            "command": [
-                "--config=env:SIGNOZ_CONFIG_CONTENT"
-            ],
-            "secrets": [
-                {
-                "name": "SIGNOZ_CONFIG_CONTENT",
-                "valueFrom": "/ecs/signoz/otelcol-sidecar.yaml"
-                }
-            ],
-            "memory": 1024,
-            "cpu": 512,
-            "essential": true,
-            "portMappings": [
-                {
-                    "protocol": "tcp",
-                    "containerPort": 4317
-                },
-                {
-                    "protocol": "tcp",
-                    "containerPort": 4318
-                },
-                {
-                    "containerPort": 8006,
-                    "protocol": "tcp"
-                }
-            ],
-            "logConfiguration": {
-                "logDriver": "awsfirelens",
-                "options": {
-                    "Name": "forward",
-                    "Host": "127.0.0.1",
-                    "Port": "8006",
-                    "tls": "off"
-                }
-            }
-        }
-    ]
-...
+In the directory that holds the Terraform for your task definition, create a file named `casting.yaml` with one document for the collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/overview/#how-it-works). `collector.kind: sidecar` selects that collector:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/ecs-task-execution-role-arn: <execution-role-arn>
+spec:
+  deployment:
+    platform: aws
+    mode: ecs-serverless
+    flavor: terraform
+  collector:
+    kind: sidecar
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/sidecar/sidecar.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<execution-role-arn>`: The ARN of your task definition's execution role, its `execution_role_arn`.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/ecs-serverless/terraform" target="_blank" rel="noopener noreferrer nofollow">ECS Serverless Terraform example</a>.
+
+<Admonition type="info" title="Change the execution role" defaultCollapsed="true">
+The annotation under `metadata` names your task definition's execution role, which the module grants read access to the collector config. The casting reads this one:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/ecs-task-execution-role-arn: <execution-role-arn>   # your task definition's execution role; omitted, the module creates signoz-collectionagent-iam-exec
+```
+
+**Verify these values:**
+
+- `<execution-role-arn>`: The ARN of your task definition's execution role, its `execution_role_arn`.
+
+Without the annotation, the module creates a new execution role, and the task loses the old role's permissions.
+
+Terraform adds a role policy to the execution role and passes that role to ECS with your task definition. Your AWS credentials need permission for both.
+
+The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/aws/ecs-serverless/terraform/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes it.
+</Admonition>
+
+### Step 3: Forge the Terraform module
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl forge -f casting.yaml
+```
+
+It writes the Terraform module to `pours/collectionagent/collector/sidecar/`: `main.tf.json`, `outputs.tf.json`, `versions.tf.json`, and the collector config, `sidecar.yaml`.
+
+### Step 4: Add the module to your task definition
+
+Add the module to your Terraform and use its outputs in your task definition, as in this example:
+
+```hcl {1-3,9-11,13,18} defaultCollapsed
+module "signoz_collector_sidecar" {
+  source = "./pours/collectionagent/collector/sidecar"
+}
+
+resource "aws_ecs_task_definition" "app" {
+  family                   = "app"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 1024
+  memory                   = 2048
+  execution_role_arn       = module.signoz_collector_sidecar.execution_role_arn
+
+  container_definitions = jsonencode(concat(module.signoz_collector_sidecar.container_definitions, [
+    {
+      name             = "app"
+      image            = "<your-application-image>"
+      essential        = true
+      logConfiguration = module.signoz_collector_sidecar.log_configuration
+    },
+  ]))
 }
 ```
 
-<Admonition type="warning">
-Avoid defining a healthCheck for the otel-collector container in your ECS task definition.
-The OpenTelemetry Collector image is based on a minimal base and does not include a shell (/bin/sh or /bin/bash). As a result, any health check command defined in the task definition will fail because AWS ECS attempts to execute it inside the container.
+**Verify these values:**
 
-This failure can cause the task to remain in a UNHEALTHY state even when the collector is running correctly.
+- `<your-application-image>`: Your application's image. Keep your own container definitions in place of the example's.
 
-</Admonition>
+Raise the task's `cpu` and `memory` by the collector's 256 CPU units and 256 MiB, to a <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size" target="_blank" rel="noopener noreferrer nofollow">Fargate task size</a>.
 
-The sidecar container will run the SigNoz collector and includes essential components like the **name** ("signoz-collector"), **image** (e.g., "signoz/signoz-otel-collector:0.88.7"), and **command** for execution, alongside **secrets** for secure configuration. It also specifies **memory** and **CPU** resources, **port mappings** for network communication, a **health check** to ensure operational integrity, and **log configuration** for output management.
+The `logConfiguration` line sends the `app` container's stdout and stderr to the collector instead of CloudWatch Logs. For the rules on which containers use it, see [Collect Container Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#collect-container-logs).
 
-#### 2b. Update ECS Task Execution Role
+### Step 5: Deploy
 
-Your ECS Task Execution Role needs permission to read from SSM Parameter Store and write to CloudWatch Logs.
+Deploy the task definition with your usual Terraform workflow. For example, run this from your Terraform root:
 
-- Attach `AmazonSSMReadOnlyAccess` and `CloudWatchLogsFullAccess` managed policies, **or**
-- Add an inline policy that allows `ssm:GetParameter` for your config and CloudWatch Logs actions.
+```bash
+terraform init
+terraform plan
+terraform apply
+```
 
-#### 2c. Update ECS Task Role
+When you apply, Terraform:
 
-The ECS Task Role (not the execution role) should also have access to SSM Parameter Store and CloudWatch Logs if your app/sidecar needs it.
+- creates the SSM parameter `signoz-collectionagent-ssm-collector-sidecar` that holds the collector config;
+- adds the `signoz-collectionagent-iam-exec-ssm-read` policy to the execution role, so the task can read that parameter when it starts;
+- registers a new revision of your task definition with the `signoz-collector-sidecar` container, which a service that uses the task definition rolls out.
 
-- Attach the same managed policies as above, or
-- Use a minimal inline policy for just the required resources.
+### Step 6: Verify the Collection Agent
 
-### Step 3: Deploy the Task Definition
+Run this on the machine where you use the AWS CLI to check that the collector runs in a task:
 
-Deploy your updated ECS task definition as usual (update your service or run a new task). You should see SigNoz sidecar logs in CloudWatch Logs if everything is set up correctly.
+```bash
+aws ecs describe-tasks --region <aws-region> --cluster <ecs-cluster> \
+  --tasks $(aws ecs list-tasks --region <aws-region> --cluster <ecs-cluster> --family <task-family> --query 'taskArns[0]' --output text) \
+  --query 'tasks[0].containers[].[name,lastStatus]' --output text
+```
 
-## Troubleshooting Installation
+**Verify these values:**
 
-### Common Issues
+- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`.
+- `<ecs-cluster>`: The name or ARN of the cluster your task runs in.
+- `<task-family>`: The `family` of your task definition, `app` in the example.
 
-**Task Not Starting:**
+The output should look similar to the following, with `signoz-collector-sidecar` as `RUNNING`. Your container names and their order vary:
 
-- Check ECS cluster has available capacity
-- Verify the container image can be pulled
-- Review CloudWatch logs for the failed tasks
+```output
+signoz-collector-sidecar	RUNNING
+app	RUNNING
+```
 
-**Parameter Store Access Issues:**
+If the collector shows `STOPPED`, see [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#view-the-collectors-logs).
 
-- Ensure the IAM role has `ssm:GetParameter` permissions
-- Verify the parameter name matches exactly: `/ecs/signoz/otelcol-sidecar.yaml`
-- Check the parameter is in the same region as your ECS cluster
+In SigNoz, [import](https://signoz.io/docs/dashboards/import-dashboard/) the <a href="https://github.com/SigNoz/dashboards/tree/main/ecs-infra-metrics" target="_blank" rel="noopener noreferrer nofollow">Container Metrics - ECS</a> dashboard to see the task metrics. Check **Logs Explorer** to confirm your containers' logs are flowing, each under its container name as `service.name`.
 
-**Container Health Check Failures:**
+## Customize the Collection Agent
 
-- Verify the health check endpoint is accessible
-- Check container logs for any startup errors
-- Ensure proper port mappings are configured
+Every change follows the same loop: edit `casting.yaml`, run `foundryctl forge -f casting.yaml`, then apply with your usual Terraform workflow.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/sidecar/sidecar.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to collect task metrics every 60s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/sidecar/sidecar.yaml: |
+              receivers:
+                awsecscontainermetrics:
+                  collection_interval: 60s
+  ```
+
+  The module stores the collector config in a Standard-tier SSM parameter, which holds up to 4 KB. For a larger config, patch the parameter's `tier` in `main.tf.json` to `Advanced`, which holds 8 KB, is charged, and cannot go back to Standard, as <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html" target="_blank" rel="noopener noreferrer nofollow">parameter tiers</a> describes.
+
+- **Terraform** (collector container, SSM parameter): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against the files under `collectionagent/collector/sidecar/`, such as `main.tf.json` for the collector container and the SSM parameter. To find the path to patch, run `foundryctl forge -f casting.yaml` and look in the generated files under `pours/collectionagent/collector/sidecar/`. For example, to reserve more memory for the collector:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/sidecar/main.tf.json
+        operations:
+          - op: replace
+            path: /locals/container_collector_sidecar/memoryReservation
+            value: 512
+  ```
+
+  Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### foundryctl forge stops with `unsupported collector kind "agent"`
+
+In Step 3, `foundryctl forge -f casting.yaml` stops before it writes anything, with the message `unsupported collector kind "agent"`.
+
+**Cause:** the casting has no `collector.kind`, so the collector kind defaults to `agent`, and on Fargate the collector runs as a sidecar in your task.
+
+**Fix:** add `kind: sidecar` under `spec.collector`, as in Step 2, then run Step 3 again.
+
+After the fix, `foundryctl forge` writes the module under `pours/collectionagent/collector/sidecar/`, and you can go on to Step 4.
+
+### foundryctl forge rejects `replicas`
+
+In Step 3, `foundryctl forge -f casting.yaml` stops with the message `spec.collector.spec.cluster.replicas is 2, a sidecar runs once in every task it joins`.
+
+**Cause:** the casting sets `spec.collector.spec.cluster.replicas`, and the sidecar runs once in each task.
+
+**Fix:** remove `replicas` from `casting.yaml`, then run Step 3 again. To run more collectors, run more tasks.
+
+After the fix, `foundryctl forge` writes the module under `pours/collectionagent/collector/sidecar/`, and you can go on to Step 4.
+
+### foundryctl forge rejects a patch
+
+After you add a patch from [Customize the Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/#customize-the-collection-agent), `foundryctl forge -f casting.yaml` stops before it writes anything, with the message `failed to apply patch for target "<target>"`. Its cause ends with `doc is missing key: <path>: missing value` or `doc is missing path: <path>: missing value`, or, when no generated file matches the target, `patch target "<target>" did not match any generated material`.
+
+**Cause:** the patch's target or `path` does not exist in what Foundry generates.
+
+**Fix:** remove the patch and forge again. Then take the target and the path from the generated files under `pours/collectionagent/collector/sidecar/`, add the patch back, and forge again.
+
+After the fix, `foundryctl forge` writes the module with the patch applied, and you can apply it with your usual Terraform workflow.
+
+### terraform plan stops on an interpolation in `env`
+
+In Step 5, `terraform plan` stops on `pours/collectionagent/collector/sidecar/main.tf.json`, in `locals.container_collector_sidecar.environment`, with `Error: Invalid reference` for a value such as `${MY_KEY}`, or `Error: Extra characters after interpolation expression` for a value such as `${env:MY_KEY}`.
+
+**Cause:** a value under `spec.collector.spec.env` contains `${`, which Terraform reads as one of its own expressions.
+
+**Fix:** replace the expression with the literal value in `casting.yaml`, run Step 3 again, then run Step 5 again.
+
+After the fix, `terraform plan` lists the resources to create or change.
+
+### The task stops with `ResourceInitializationError`
+
+After Step 5, your tasks stop before they reach `RUNNING`. Run this on the machine where you use the AWS CLI to read why the latest task stopped:
+
+```bash
+aws ecs describe-tasks --region <aws-region> --cluster <ecs-cluster> \
+  --tasks $(aws ecs list-tasks --region <aws-region> --cluster <ecs-cluster> --family <task-family> --desired-status STOPPED --query 'taskArns[0]' --output text) \
+  --query 'tasks[0].stoppedReason' --output text
+```
+
+**Verify these values:**
+
+- `<aws-region>`: The AWS region of your ECS cluster.
+- `<ecs-cluster>`: The name or ARN of the cluster your task runs in.
+- `<task-family>`: The `family` of your task definition.
+
+The reason starts with `ResourceInitializationError: unable to pull secrets or registry auth`. Read the rest of it: `AccessDeniedException` points to the execution role, and `dial tcp` or `i/o timeout` points to the network.
+
+**Cause:** with `AccessDeniedException`, the task's execution role cannot read the collector config parameter `signoz-collectionagent-ssm-collector-sidecar`. The module grants that read only to the role in the `foundry.signoz.io/ecs-task-execution-role-arn` annotation, and the task definition names another role. With `dial tcp` or `i/o timeout`, the task's subnets have no route to SSM, such as a NAT gateway or an SSM VPC endpoint. See <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/resource-initialization-error.html" target="_blank" rel="noopener noreferrer nofollow">Troubleshooting ResourceInitializationError errors</a>.
+
+**Fix:** for `AccessDeniedException`, set the annotation to the task's execution role ARN as in Step 2, and take the task definition's `execution_role_arn` from the module as in Step 4. Then run Step 3 and Step 5 again. For a timeout, give the task's subnets a route to SSM, as <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/verify-connectivity.html" target="_blank" rel="noopener noreferrer nofollow">Verifying Amazon ECS stopped task connectivity</a> describes, then run Step 5 again.
+
+After the fix, the Step 6 command shows `signoz-collector-sidecar` as `RUNNING`.
+
+### The collector container stops
+
+In Step 6, `signoz-collector-sidecar` shows `STOPPED` while your other containers keep running.
+
+**Cause:** the collector exited soon after it started, for example on a config error, so ECS did not restart it.
+
+**Fix:** read the collector's error as [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#view-the-collectors-logs) shows, fix the config in `casting.yaml`, then run Step 3 and Step 5 again.
+
+After the fix, the Step 6 command shows `signoz-collector-sidecar` as `RUNNING`.
+
+</details>
+
+## Send data from your applications
+
+Task metrics and container logs flow as soon as the collector is running. To send traces, metrics, and logs from your applications, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/#send-data-from-applications-to-the-collector).
 
 ## Next Steps
 
-- [Configure the Sidecar Collection Agent in your ECS Cluster ](/docs/opentelemetry-collection-agents/ecs/sidecar/configure/)
-- [Learn more about Collection from Serverless](/docs/opentelemetry-collection-agents/ecs/sidecar/overview/)
+- [Configure the ECS Serverless Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/configure/)
+- [Monitoring ECS Fargate using OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

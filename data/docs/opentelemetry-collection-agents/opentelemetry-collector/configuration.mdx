@@ -1,5 +1,5 @@
 ---
-date: 2026-06-29
+date: 2026-09-10
 title: OpenTelemetry Collector Configuration
 meta_title: OpenTelemetry Collector Configuration
 description: "Configure the OpenTelemetry Collector: receivers, processors, exporters, extensions, and service pipelines for collecting and exporting telemetry."
@@ -72,7 +72,7 @@ service:
 
 ### 1. Receivers
 
-Receivers define how telemetry data enters the OTel Collector. Receivers can collect telemetry data from one or more sources and they can be pull or push based. Each receiver listens on a network endpoint, or scrapes metrics from targets.
+<Tooltip text="Receivers" content="A Collector pipeline component that defines how telemetry enters the Collector: an OTLP endpoint, a Prometheus scrape, a log file tail." link="https://signoz.io/docs/glossary/#receiver" /> define how telemetry data enters the OTel Collector. Receivers can collect telemetry data from one or more sources and they can be pull or push based. Each receiver listens on a network endpoint, or scrapes metrics from targets.
 
 #### OTLP Receiver
 
@@ -159,7 +159,7 @@ The forward slash separator is required. Writing `httpcheckcritical` (without th
 
 ### 2. Processors
 
-Processors are used to transform, filter, or enrich telemetry data between receivers and exporters.
+<Tooltip text="Processors" content="A Collector pipeline component that sits between receiving and exporting, transforming data in flight: batching, filtering, adding resource attributes, tail sampling." link="https://signoz.io/docs/glossary/#processor" /> are used to transform, filter, or enrich telemetry data between receivers and exporters.
 
 #### Batch Processor
 
@@ -175,7 +175,7 @@ processors:
 
 #### Memory Limiter
 
-This processor prevents out-of-memory (OOM) errors by continuously checking and limiting the memory usage of the collector.
+This processor prevents out-of-memory (OOM) errors by continuously checking and limiting the memory usage of the <Tooltip text="collector" content="The OpenTelemetry Collector, a vendor-agnostic binary that receives, processes, and exports telemetry." link="https://signoz.io/docs/glossary/#collector" />.
 
 ```yaml
 processors:
@@ -314,7 +314,8 @@ The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/b
 ```yaml
 processors:
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 
 service:
   pipelines:
@@ -332,13 +333,13 @@ service:
       exporters: [otlp]
 ```
 
-This example automatically adds resource attributes from the environment, host system, Docker containers, and Kubernetes nodes to traces, logs, and metrics. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#supported-detectors" target="_blank" rel="noopener noreferrer nofollow">complete list of supported detectors</a>.
+This example adds resource attributes from the environment, host system, and Docker containers to traces, logs, and metrics. On Kubernetes, add the `k8snode` detector, which needs the `K8S_NODE_NAME` environment variable and RBAC read access to nodes. On Collector v0.154.0 and newer, use `k8s_api` to avoid a deprecation warning. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#supported-detectors" target="_blank" rel="noopener noreferrer nofollow">complete list of supported detectors</a>.
 
 The `timeout` defines how long the processor waits for detection to complete. See [Setting resource attributes for logs using the resource detection processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor) for more details.
 
 ### 3. Exporters
 
-Exporters send processed telemetry data to observability backends. You can configure multiple exporters to send data to various backends.
+<Tooltip text="Exporters" content="The component that emits telemetry to a consumer: an SDK exporter sending OTLP to a Collector, or a Collector exporter sending data to SigNoz." link="https://signoz.io/docs/glossary/#exporter" /> send processed telemetry data to observability backends. You can configure multiple exporters to send data to various backends.
 
 #### OTLP gRPC Exporter
 

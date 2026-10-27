@@ -84,5 +84,7 @@ test('getLlmStarterLinks is unique and respects default max size', async () => {
   const uniqueRoutes = new Set(routes)
 
   assert.equal(uniqueRoutes.size, routes.length)
-  assert.equal(starters.length <= 24, true)
+  // Raised from 24 when the access-control matchers were added, so the new
+  // entries cannot evict existing starter docs from the cap.
+  assert.equal(starters.length <= 30, true)
 })

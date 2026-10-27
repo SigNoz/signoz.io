@@ -1,5 +1,5 @@
 ---
-date: 2026-06-23
+date: 2026-10-26
 title: Tomcat OpenTelemetry Instrumentation Guide
 description: Learn how to instrument Apache Tomcat with the OpenTelemetry Java agent using setenv.sh configuration. Send traces to SigNoz for real-time monitoring.
 doc_type: howto
@@ -7,7 +7,7 @@ doc_type: howto
 
 This guide shows how to instrument your Apache Tomcat application server with OpenTelemetry and send traces to SigNoz. Tomcat uses `setenv.sh` (Linux/Mac) or `setenv.bat` (Windows) to configure JVM options, making it straightforward to attach the OpenTelemetry Java agent.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -15,7 +15,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 - <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation" target="_blank" rel="noopener noreferrer nofollow">Java 8+</a>
 - <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md#application-servers" target="_blank" rel="noopener noreferrer nofollow">Supported Tomcat version</a>
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- A SigNoz Cloud account or Self-Hosted SigNoz instance
 
 ## Send traces to SigNoz
 
@@ -179,7 +179,7 @@ metadata:
   name: java-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4318
+    endpoint: http://<collector-service>:4318
   propagators:
     - tracecontext
     - baggage
@@ -191,6 +191,8 @@ spec:
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
 ```
+
+Replace `<collector-service>` with the address of the collector Service that receives the application's telemetry. If you installed the Collection Agent with the OpenTelemetry Operator guide, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector) for its Service.
 
 <KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
@@ -403,6 +405,8 @@ With your Tomcat application running, verify traces are being sent to SigNoz:
 ## Troubleshooting
 
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Traces not showing up in SigNoz?
 

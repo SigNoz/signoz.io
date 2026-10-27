@@ -1,4 +1,5 @@
 import React from 'react'
+import { Info } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import {
   CheckSolid,
@@ -8,8 +9,11 @@ import {
   ServerSolid,
 } from '@/components/homepage-icons/icons'
 import Line from '@/components/ui/Line'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 // Plan header type
 type PlanHeader = {
@@ -37,12 +41,15 @@ const ALL_FEATURES_DATA = {
   HEADER: [
     { heading: '', desc: '' },
     {
-      heading: 'Community Edition',
+      heading: 'Self Hosted SigNoz (Community)',
       desc: 'Install & manage yourself',
       action: (
         <TrackingLink
           href={'/docs/introduction/'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'w-full truncate !text-[9px] sm:!text-sm'
+          )}
           clickType="Secondary CTA"
           clickName="Docs Link"
           clickText="Read Documentation"
@@ -54,12 +61,15 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Teams',
-      desc: 'Cloud ⎯ starts at $49/mo',
+      heading: 'SigNoz Cloud (Teams)',
+      desc: 'Starts at $49/mo',
       action: (
         <TrackingLink
           href={'/teams/'}
-          className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'default', size: 'sm' }),
+            'w-full truncate !text-[9px] sm:!text-sm'
+          )}
           clickType="Primary CTA"
           clickName="Sign Up Button"
           clickText="Get Started - Free"
@@ -71,12 +81,15 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Enterprise',
-      desc: 'Cloud / Self-Hosted',
+      heading: 'SigNoz Enterprise',
+      desc: 'Cloud, BYOC, or Self-Hosted',
       action: (
         <TrackingLink
           href={'/contact-us/?source=pricing'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'w-full !text-[9px] sm:!text-sm'
+          )}
           clickType="Secondary CTA"
           clickName="Enterprise Contact Button"
           clickText="Contact Us"
@@ -589,13 +602,33 @@ const ALL_FEATURES_DATA = {
           ),
         },
         {
-          feature: 'Finer RBAC with custom roles',
+          feature: 'Fine-grained RBAC',
           inCommunity: <CrossSolid />,
           inTeams: <CrossSolid />,
           inEnterprise: (
-            <div className="flex items-center">
-              <ClockSolid height="15" width="15" />
-              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+            <div className="flex items-center gap-1.5">
+              <CheckSolid />
+              <span className="text-[8px] text-signoz_vanilla-400 sm:text-xs">BETA</span>
+              <Tooltip
+                content={
+                  <div className="max-w-xs">
+                    <p className="mb-1 font-medium text-signoz_vanilla-100">Beta availability:</p>
+                    <p className="m-0 text-sm text-signoz_vanilla-400">
+                      Fine-grained RBAC is available in beta for Enterprise plans. It currently
+                      supports selected resources, with more being added gradually.
+                    </p>
+                  </div>
+                }
+                contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+              >
+                <button
+                  type="button"
+                  aria-label="Fine-grained RBAC beta details"
+                  className="inline-flex cursor-pointer items-center text-signoz_robin-400"
+                >
+                  <Info size={14} />
+                </button>
+              </Tooltip>
             </div>
           ),
         },

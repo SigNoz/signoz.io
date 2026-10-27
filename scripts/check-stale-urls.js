@@ -3,6 +3,7 @@
 const { execSync, execFileSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
+const { isResolvableRelatedArticle } = require('./check-cms-frontmatter')
 
 async function readRedirects() {
   const configPath = path.resolve(process.cwd(), 'next.config.js')
@@ -57,11 +58,53 @@ function stripFencedCodeBlocks(content) {
   return out
 }
 
+function findRelatedArticlesEntries(lines) {
+  const entries = new Map()
+  if (lines[0] !== '---') return entries
+
+  let end = -1
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i] === '---') {
+      end = i
+      break
+    }
+  }
+  if (end === -1) return entries
+
+  let inList = false
+  for (let i = 1; i < end; i++) {
+    const line = lines[i]
+    if (/^related_articles:\s*$/.test(line)) {
+      inList = true
+      continue
+    }
+    if (!inList) continue
+    const match = line.match(/^\s+-\s*(.+?)\s*$/)
+    if (match) {
+      let value = match[1]
+      const quote = value[0]
+      if ((quote === "'" || quote === '"') && value.endsWith(quote) && value.length >= 2) {
+        value = value.slice(1, -1)
+      }
+      if (value) entries.set(i + 1, value)
+    } else if (line.trim() !== '') {
+      inList = false
+    }
+  }
+  return entries
+}
+
 function extractUrls(content, filePath) {
   const isMdx = filePath.endsWith('.mdx')
   const scanContent = isMdx ? stripFencedCodeBlocks(content) : content
   const lines = scanContent.split('\n')
   const results = []
+
+  if (isMdx) {
+    for (const [line, url] of findRelatedArticlesEntries(lines)) {
+      results.push({ url, line, context: 'related_articles' })
+    }
+  }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
@@ -126,15 +169,42 @@ function normalizeForRedirectMatch(rawUrl) {
   return urlPath
 }
 
-function checkUrl(rawUrl, redirectMap) {
+function checkUrl(rawUrl, redirectMap, context) {
   const issues = []
   const normalized = normalizeForRedirectMatch(rawUrl)
   if (!normalized) return issues
+
+  const isRelatedArticle = context === 'related_articles'
 
   // Stale check: does the normalized path match a redirect source?
   const withSlash = normalizeTrailingSlash(normalized)
   const withoutSlash = withSlash.endsWith('/') ? withSlash.slice(0, -1) : withSlash
   const finalDest = redirectMap.get(withSlash) || redirectMap.get(withoutSlash)
+
+  if (isRelatedArticle) {
+    if (finalDest) {
+      const dest = relatedArticleDestination(finalDest)
+      if (isResolvableRelatedArticle(dest)) {
+        issues.push({
+          type: 'stale',
+          message: `Stale URL (redirects to ${dest})`,
+          suggestion: dest,
+        })
+        return issues
+      }
+      if (!isResolvableRelatedArticle(withoutSlash)) {
+        issues.push({
+          type: 'related-unresolvable',
+          message: `Redirects to ${dest}, which is not an article — remove or replace this entry`,
+          suggestion: null,
+        })
+      }
+      // Otherwise the source article file still exists (redirect only shadows
+      // its URL), so the entry still resolves on the CMS: leave it alone.
+    }
+    return issues
+  }
+
   if (finalDest) {
     issues.push({
       type: 'stale',
@@ -175,6 +245,10 @@ function checkUrl(rawUrl, redirectMap) {
   }
 
   return issues
+}
+
+function relatedArticleDestination(finalDest) {
+  return finalDest.split('#')[0].split('?')[0].replace(/\/+$/, '')
 }
 
 function stripSigNozPrefix(rawUrl) {
@@ -251,13 +325,21 @@ function getAllFiles() {
   return files
 }
 
-function computeReplacement(rawUrl, redirectMap) {
+function computeReplacement(rawUrl, redirectMap, context) {
   const normalized = normalizeForRedirectMatch(rawUrl)
   if (!normalized) return null
 
   const withSlash = normalizeTrailingSlash(normalized)
   const withoutSlash = withSlash.endsWith('/') ? withSlash.slice(0, -1) : withSlash
   const finalDest = redirectMap.get(withSlash) || redirectMap.get(withoutSlash)
+
+  if (context === 'related_articles') {
+    if (finalDest) {
+      const dest = relatedArticleDestination(finalDest)
+      if (isResolvableRelatedArticle(dest)) return dest
+    }
+    return null
+  }
 
   if (finalDest) {
     const sigNozPrefix = 'https://signoz.io'
@@ -337,8 +419,8 @@ function fixFile(filePath, content, redirectMap) {
   if (urls.length === 0) return null
 
   const lineReplacements = new Map()
-  for (const { url, line } of urls) {
-    const replacement = computeReplacement(url, redirectMap)
+  for (const { url, line, context } of urls) {
+    const replacement = computeReplacement(url, redirectMap, context)
     if (replacement && replacement !== url) {
       if (!lineReplacements.has(line)) lineReplacements.set(line, [])
       lineReplacements.get(line).push({ from: url, to: replacement })
@@ -449,8 +531,8 @@ async function main() {
     const urls = extractUrls(content, filePath)
     const fileIssues = []
 
-    for (const { url, line } of urls) {
-      const issues = checkUrl(url, redirectMap)
+    for (const { url, line, context } of urls) {
+      const issues = checkUrl(url, redirectMap, context)
       for (const issue of issues) {
         fileIssues.push({ line, url, ...issue })
       }
@@ -478,6 +560,8 @@ async function main() {
         console.error(
           `    line ${issue.line}: ${issue.url} -> remove slash after anchor: ${issue.suggestion}`
         )
+      } else if (issue.type === 'related-unresolvable') {
+        console.error(`    line ${issue.line}: ${issue.url} -> ${issue.message}`)
       } else {
         console.error(
           `    line ${issue.line}: ${issue.url} -> add trailing slash: ${issue.suggestion}`
@@ -491,7 +575,9 @@ async function main() {
 
 module.exports = {
   extractUrls,
+  findRelatedArticlesEntries,
   checkUrl,
+  computeReplacement,
   readRedirects,
   buildRedirectMap,
   normalizeForRedirectMatch,

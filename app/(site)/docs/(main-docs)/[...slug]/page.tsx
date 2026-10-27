@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
+import { DOC_CONTENT_ROW_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchDocBySlug } from '@/utils/cachedData'
@@ -91,7 +92,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     <>
       <JsonLdScript data={jsonLd} />
       <JsonLdScript data={breadcrumbJsonLd} />
-      <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
+      <div className={DOC_CONTENT_ROW_CLASSES}>
         <DocContent
           title={title}
           post={postForClient}

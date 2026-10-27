@@ -1,16 +1,18 @@
 ---
-date: 2026-06-11
-title: Send Metrics from Python application
+date: 2026-10-21
+title: Send Metrics from Python Applications with OpenTelemetry
 description: Learn how to send metrics from Python applications (Flask, Django, FastAPI, Celery, Runtime) to SigNoz using OpenTelemetry
 
 doc_type: howto
 ---
 
+## Overview
+
 This guide shows you how to send metrics from your Python application (Flask, Django, FastAPI, Celery, Runtime) to SigNoz using OpenTelemetry.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-    Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
 
 ## Prerequisites
 
@@ -23,14 +25,9 @@ Tested with <a href="https://docs.python.org/3.11/" target="_blank" rel="noopene
 
 <Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
-    A VM is a virtual computer that runs on physical hardware. This includes:
-    - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
-    - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
-    - **Bare metal servers**: Physical servers running Linux/Unix directly
-
-    Use this section if you're deploying your Python application directly on a server or VM without containerization.
-</KeyPointCallout>
+<Admonition type="info" title="What counts as a VM?" defaultCollapsed="true">
+Use this tab when your Python app runs on a cloud VM (AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets), an on-premises VM (VMware, VirtualBox, Hyper-V, KVM), or a bare-metal Linux server, without containers.
+</Admonition>
 
 ### Step 1. Set environment variables
 Set the following environment variables to configure the OpenTelemetry exporter:
@@ -147,19 +144,13 @@ Verify these values:
 </TabItem>
 </Tabs>
 
-<KeyPointCallout title="Why explicitly disable traces?" defaultCollapsed="true">
-The bootstrap command (Step 3) installs instrumentations for all detected libraries, including web frameworks like Flask, Django, and FastAPI. These instrumentations generate traces (spans) for every incoming HTTP request.
+<Admonition type="info" title="Why disable traces?" defaultCollapsed="true">
+The bootstrap command in Step 3 also instruments web frameworks such as Flask, Django, and FastAPI, and `opentelemetry-distro` sends a trace for every incoming request by default. `OTEL_TRACES_EXPORTER="none"` stops these traces and keeps metrics. To send traces later, set it to `otlp` or see the [Python traces instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-python/).
+</Admonition>
 
-Since `opentelemetry-distro` enables traces by default, these traces would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant trace volume and costs.
-
-Setting `OTEL_TRACES_EXPORTER` to `none` disables traces while keeping metrics working as expected. If you want traces later, you can change it to `otlp` or remove this variable altogether. See the [Python traces instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-python/) for more details.
-</KeyPointCallout>
-
-<KeyPointCallout title="Why delta temporality?" defaultCollapsed="true">
-OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` set to `delta`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
-
-Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
-</KeyPointCallout>
+<Admonition type="info" title="Why delta temporality?" defaultCollapsed="true">
+With the default cumulative temporality, the SDK sends the running total of every active series at each export, even when nothing changed. With `delta`, a synchronous instrument (Counter, Histogram) that recorded nothing in an interval sends no data point, so you pay for fewer samples. Observable (asynchronous) instruments send a data point at every collection either way. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -233,9 +224,9 @@ Want more metrics? See [Library Metrics](#library-metrics) to collect framework-
 
 Library instrumentation automatically collects metrics from supported frameworks like Flask, Django, and FastAPI. Choose your framework below to see the specific run command:
 
-<Tabs variant="pill" className="mb-8">
+<Tabs variant="pill" className="mb-8" entityName="framework-type">
     <TabItem value="web-frameworks" label="Web Frameworks" default>
-        <Tabs variant="pill" className="mb-8">
+        <Tabs variant="pill" className="mb-8" entityName="framework">
             <TabItem value="flask" label="Flask" default>
 
                 ```bash
@@ -252,12 +243,14 @@ Library instrumentation automatically collects metrics from supported frameworks
                 Always use `--no-reload` with Flask. The reloader spawns a child process that breaks OpenTelemetry instrumentation.
                 </Admonition>
 
-                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
-                - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
+                Exported metrics:
+
+                - `http.server.duration` - Duration of HTTP server requests (histogram, milliseconds)
                 - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
 
+                To get `http.server.request.duration` (seconds) with the `http.route` attribute instead, set `OTEL_SEMCONV_STABILITY_OPT_IN=http`.
+
                 <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/flask/flask.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-                </KeyPointCallout>
 
             </TabItem>
             <TabItem value="django" label="Django">
@@ -278,12 +271,14 @@ Library instrumentation automatically collects metrics from supported frameworks
                 Always use `--noreload` with Django. The auto-reload mechanism spawns child processes that break OpenTelemetry instrumentation.
                 </Admonition>
 
-                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
-                - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
+                Exported metrics:
+
+                - `http.server.duration` - Duration of HTTP server requests (histogram, milliseconds)
                 - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
 
+                To get `http.server.request.duration` (seconds) with the `http.route` attribute instead, set `OTEL_SEMCONV_STABILITY_OPT_IN=http`.
+
                 <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/django/django.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-                </KeyPointCallout>
 
             </TabItem>
             <TabItem value="fastapi" label="FastAPI">
@@ -296,14 +291,18 @@ Library instrumentation automatically collects metrics from supported frameworks
                 Do not use `--reload` with Uvicorn when instrumenting. The reload mode spawns new processes that break instrumentation.
                 </Admonition>
 
-                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
-                - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
+                Exported metrics:
+
+                - `http.server.duration` - Duration of HTTP server requests (histogram, milliseconds)
                 - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
-                - `http.server.request.body.size` - Size of HTTP request body (histogram, bytes)
-                - `http.server.response.body.size` - Size of HTTP response body (histogram, bytes)
+                - `http.server.request.size` - Size of HTTP request bodies (histogram, bytes)
+                - `http.server.response.size` - Size of HTTP response bodies (histogram, bytes)
+
+                To get `http.server.request.duration` (seconds), `http.server.request.body.size`, and `http.server.response.body.size` with the `http.route` attribute instead, set `OTEL_SEMCONV_STABILITY_OPT_IN=http`.
 
                 <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/fastapi/fastapi.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-                </KeyPointCallout>
+
+                FastAPI 0.142.0 and newer also record `http.server.request.duration` (seconds) and `http.server.active_requests` without `opentelemetry-instrument`. See [FastAPI native OpenTelemetry](https://signoz.io/docs/instrumentation/python/fastapi-native-opentelemetry/).
 
             </TabItem>
             <TabItem value="other" label="Other">
@@ -320,7 +319,7 @@ Library instrumentation automatically collects metrics from supported frameworks
         </Tabs>
     </TabItem>
     <TabItem value="background-workers" label="Background Workers">
-        <Tabs variant="pill" className="mb-8">
+        <Tabs variant="pill" className="mb-8" entityName="framework">
             <TabItem value="celery" label="Celery" default>
 
                 ```bash
@@ -329,11 +328,11 @@ Library instrumentation automatically collects metrics from supported frameworks
 
                 Replace `tasks` with your Celery app module name.
 
-                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
+                Exported metrics:
+
                 - `flower.task.runtime.seconds` - The time it took to run the task (histogram, seconds)
 
                 <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/celery/celery.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-                </KeyPointCallout>
 
             </TabItem>
         </Tabs>
@@ -509,7 +508,10 @@ See the OpenTelemetry semantic conventions for the complete list:
 <details>
 <ToggleHeading>
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Metrics not appearing?
 
@@ -559,10 +561,10 @@ Think of the OTel Collector as a middleman between your app and SigNoz. Instead 
 
 ### Why use it?
 
-- **Cleaning up data** — Filter out noisy metrics you don't care about, or remove sensitive info before it leaves your servers.
-- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
-- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
-- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+- **Cleaning up data**: Filter out noisy metrics you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight**: Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically**: The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility**: Want to send data to multiple backends later? The Collector makes that easy without changing your app.
 
 See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
 
@@ -570,8 +572,12 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-## Next Steps
+## Next steps
 
 - [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your metrics.
 - [Set up Alerts](https://signoz.io/docs/setup-alerts-notification/) on your metrics.
 - [Instrument your Python application with traces](https://signoz.io/docs/instrumentation/opentelemetry-python/) to correlate metrics with traces for better observability.
+
+## Get Help
+
+<GetHelp />

@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 import Button from '@/components/ui/Button'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-otel.svg?url'
 
 export const HEADER_BUTTONS = [
@@ -9,7 +8,6 @@ export const HEADER_BUTTONS = [
     text: 'Get Started Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Get Started Free',
@@ -21,7 +19,6 @@ export const HEADER_BUTTONS = [
     text: 'Read the Docs',
     href: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Read the Docs',
@@ -42,7 +39,7 @@ export const FEATURE_CARDS = [
           Go from node CPU to service trace to the exact log line in one click. No copy-pasting
           trace IDs or manually matching any timestamps.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
             clickType="Secondary CTA"
@@ -93,7 +90,7 @@ export const FEATURE_CARDS = [
           Route to Slack, PagerDuty, Opsgenie, Teams, Incident.io. No extra configuration layer for
           maintenance windows or multi-severity rules.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts/"
             clickType="Secondary CTA"
@@ -114,10 +111,10 @@ export const FEATURE_CARDS = [
       <div>
         <p>
           Most observability platforms force a trade-off between data you process and price you pay.
-          SigNoz adds full visibility into every layer of your Kubernetes cluster, nodes, control
-          plane, and workloads without the operational overhead or tradeoffs.
+          SigNoz Cloud adds full visibility into every layer of your Kubernetes cluster, nodes,
+          control plane, and workloads without the operational overhead or tradeoffs.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/pricing/"
             clickType="Secondary CTA"
@@ -137,7 +134,7 @@ export const FEATURE_CARDS = [
       <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
         <Image
           src="/img/graphics/homepage/feature-graphic-columnar-db.svg"
-          alt="SigNoz columnar database — predictable pricing with efficient storage"
+          alt="SigNoz Cloud columnar database — predictable pricing with efficient storage"
           width={449}
           height={352}
           className="object-contain"
@@ -170,9 +167,9 @@ export const FEATURE_CARDS = [
           consolidate. CronJob monitoring shows run history, duration, and failure rates. GPU
           utilization tracked for AI and ML workloads alongside standard compute.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
-            href="/guides/kubernetes-monitoring-best-practices/"
+            href="/blog/kubernetes-monitoring/"
             clickType="Secondary CTA"
             clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
@@ -195,7 +192,7 @@ export const FEATURE_CARDS = [
           production Kubernetes issues without leaving your terminal - all in one session. No
           separate AI SRE tool.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/agent-native-observability/"
             clickType="Secondary CTA"
@@ -248,7 +245,7 @@ export const FEATURE_CARDS = [
           in. No proprietary agents, no DaemonSet sprawl, no re-instrumentation if you ever want to
           switch backends. Your instrumentation is a company asset, not a vendor dependency.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/docs/setup/kubernetes/kustomize/"
             clickType="Secondary CTA"
@@ -274,7 +271,7 @@ export const FEATURE_CARDS = [
           every signal is tagged with namespace, cluster, pod, and workload - so filters just work,
           for services that didn&apos;t exist last week.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
             clickType="Secondary CTA"
@@ -325,7 +322,7 @@ export const FEATURE_CARDS = [
           you didn&apos;t know what threshold to set. Detect problematic services, unusual traffic
           patterns, and pod behavior that deviates from seasonal baselines automatically.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/docs/alerts-management/anomaly-based-alerts/"
             clickType="Secondary CTA"

@@ -1,33 +1,161 @@
 ---
-date: 2026-05-12
-
-title: Integrate with Incident.io (Prometheus Alertmanager Webhook)
-description: Integrate SigNoz with Incident.io to automatically create incidents from your alerts.
+date: 2026-08-21
 doc_type: howto
+title: incident.io Notification Channel Setup for Alerts
+description: Set up incident.io as a notification channel in SigNoz to fire and resolve incident.io alerts automatically, and turn them into incidents with alert routes.
 ---
 
+## Prerequisites
 
-## Integration with Incident.io
+Before configuring incident.io as a notification channel in SigNoz, ensure that you have:
 
-SigNoz can be integrated with Incident.io to create incidents from alerts. It uses the Prometheus Alertmanager webhook integration to send alerts to Incident.io.
+- **An incident.io account** with alerts enabled (On-call → Alert routing is visible).
+- **An HTTP alert source** in incident.io. SigNoz delivers alerts to its Alert Events endpoint; you'll create one in the next step.
 
-### Steps to integrate
+## Create an HTTP alert source in incident.io
 
-1. On Incident.io, navigate to `Settings > Integrations`
-2. Search for "Prometheus" in the search bar
-<Figure src="/img/docs/alerts/prometheus_incident_io.png" alt="Incident.io Integrations" caption="Incident.io Integrations" />
-3. Click on the "Prometheus Alertmanager" integration
-4. Click on the Connect button
-<Figure src="/img/docs/alerts/prometheus_incident_io_connect.png" alt="Incident.io Connect" caption="Incident.io Connect" />
-5. Give the source name as "SigNoz" or something similar that helps you identify the source as SigNoz
-<Figure src="/img/docs/alerts/prometheus_incident_io_give_name.png" alt="Incident.io Give Name" caption="Incident.io Give Name" />
-6. Click on the "Continue" button
-7. Copy the webhook URL and use it in the SigNoz Channel webhook integration
-8. Copy the "credentials" and paste it in the SigNoz Channel password field (leave the username empty)
-<Figure src="/img/docs/alerts/prometheus_incident_io_creds_and_test.png" alt="Incident.io Credentials" caption="Incident.io Credentials" />
-9. On SigNoz, Click on the "Test" button to test the integration
+1. In incident.io, navigate to **On-call → Alert routing → Sources** and create a new **HTTP** alert source. Give it a name that identifies SigNoz, e.g. `signoz`.
+2. On the source's setup page, copy two values:
+   - The **alert events URL**, of the form `https://api.incident.io/v2/alert_events/http/<source_config_id>`.
+   - The **secret token**.
+
+<Figure src="/img/docs/incident-io-source-setup.webp" alt="incident.io HTTP alert source setup page with the alert events URL and secret token." caption="The source's setup page: copy the URL and the token." />
+
+## Creating a new Notification channel
+
+To create a new incident.io notification channel in SigNoz:
+
+- Navigate to `Settings > Notification Channels`.
+- Click on **New Channel** and enter a name.
+- Select **incident.io** as the channel type and fill in:
+
+| Field | Description |
+| :--- | :--- |
+| **Alert source URL** | The alert events URL copied above. **Required**. |
+| **Token** | The alert source's secret token. **Required**. Pasting it with a leading `Bearer ` prefix is fine; SigNoz strips it. |
+| **Send resolved alerts** | On by default. When on, SigNoz resolves the incident.io alert when the SigNoz alert resolves. |
+| **Title** | Template for the alert title. Prefilled with a sensible default. |
+| **Description** | Template for the alert body. Markdown, rendered natively by incident.io. Prefilled with a default that includes the alert summary, description, and deep links back to SigNoz. |
+| **Additional metadata** | Optional key-value pairs added to every alert's metadata. See [Send metadata to incident.io](#send-metadata-to-incidentio). |
+
+<Figure src="/img/docs/incident-io-channel-form.webp" alt="SigNoz incident.io channel form with URL, token, templates and additional metadata." caption="The incident.io channel form in SigNoz." />
+
+- Click **Test** to send a test alert, then **Save**.
+
+<Admonition>
+A successful test confirms the URL and token are correct. incident.io accepts events asynchronously, so also check the alert appeared: in incident.io, open your source's **Requests** tab (On-call → Alert routing → your source), which lists every event received, with its outcome, for 7 days.
+</Admonition>
+
+<Figure src="/img/docs/incident-io-requests-tab.webp" alt="incident.io Requests tab showing each received event with its payload and outcome." caption="The source's Requests tab: every event SigNoz sent, with payload and outcome." />
+
+## Editing a Notification channel
+
+To edit an existing incident.io channel, navigate to `Settings > Notification Channels`, click **Edit** on the channel, adjust any field except the name and type, and save.
+
+## Send metadata to incident.io
+
+Every alert event carries a flat `metadata` map that incident.io can use for filtering, routing, and display:
+
+- **Sent automatically**: all the alert's labels: `severity`, `alertname`, and any labels you set on the alert rule (e.g. `team`, `service`, `environment`).
+- **Additional metadata** (channel setting): static key-value pairs added on top. On a key clash, the channel's value **overrides** the alert's label. Values may use Go templates, e.g. `{{ .CommonLabels.severity }}`; a value that fails to render is sent as the raw string, so delivery is never blocked by a template typo.
+
+To make metadata usable inside incident.io (visible on alerts, filterable in routes), map it to **alert attributes** on your source; see incident.io's <a href="https://docs.incident.io/alerts/attributes-and-priorities" target="_blank" rel="noopener noreferrer nofollow">Attributes and Priorities</a> documentation. Send a test alert first so incident.io can suggest attribute mappings from real payloads.
+
+## Receive alerts in incident.io
+
+- An alert **firing creates** an incident.io alert. The description renders the markdown template, including deep links back to SigNoz: **View in SigNoz**, and **View related logs** / **View related traces** when the alert carries those links. The alert's **Links** panel also carries a link to the SigNoz rule.
+
+<Figure src="/img/docs/incident-io-firing-alert.webp" alt="A firing SigNoz alert delivered in incident.io with markdown description and SigNoz deep links." caption="A firing alert delivered in incident.io." />
+
+- When several alerts fire together, they are delivered as a **single incident.io alert** for the group.
+- **Repeat notifications while the alert is firing are ignored by incident.io**, so the alert keeps the content of its first event, with no duplicates created. For current values, follow the SigNoz links on the alert.
+- A **resolve** closes the incident.io alert (`Send resolved alerts` on). If the same alert fires again later, a fresh incident.io alert is created.
+
+<Figure src="/img/docs/incident-io-resolved-alert.webp" alt="A resolved alert in incident.io showing the SigNoz labels mapped as attributes." caption="A resolved alert: SigNoz labels appear under Attributes once mapped." />
+
+- If someone resolves the alert manually in incident.io while the SigNoz alert is still firing, the next repeat notification from SigNoz re-creates it.
+
+### Limits handled automatically
+
+- incident.io caps event payloads at **512 KB**; SigNoz truncates oversized descriptions before sending.
+- incident.io rate-limits each alert source to **120 events/minute**; rate-limited requests (`429`) are retried automatically.
+
+## Alert routes and incidents
+
+Alerts don't create incidents by themselves. In incident.io, **alert routes** decide which alerts become incidents and how they group. Points worth knowing:
+
+- Connect your SigNoz source to an alert route to auto-create incidents; see incident.io's <a href="https://docs.incident.io/alerts/getting-started" target="_blank" rel="noopener noreferrer nofollow">Creating incidents automatically via alerts</a>.
+- With default grouping, alerts on a route within a fixed 30-minute window group into **one incident**; incidents start in **Triage**.
+- A SigNoz resolve closes the incident.io **alert**, not the incident; incidents are closed by responders.
+
+## Customizing the message
+
+The **Title** is the alert's title (plain text). The **Description** is standard **markdown**, rendered natively by incident.io. Both accept Go templates.
+
+incident.io keeps an alert's content from its **first** event for as long as it fires, so avoid putting fast-changing values in the title. Put stable identity there and let the SigNoz links carry current state.
+
+## Turn off resolved alerts
+
+The **Send resolved alerts** toggle is on by default. To stop SigNoz from resolving incident.io alerts:
+
+- Navigate to `Settings > Notification Channels`.
+- Click **Edit** on the channel.
+- Toggle off **Send resolved alerts** and click **Save**.
+
+With the toggle off, incident.io alerts are created when SigNoz alerts fire but stay open until resolved in incident.io.
 
 ## Configure programmatically
 
-Since this integration uses the Webhook channel, you can configure it programmatically using the same way as described in the [Webhook](https://signoz.io/docs/alerts-management/notification-channel/webhook/#configure-programmatically) section.
+You can also configure the incident.io notification channel using the SigNoz API.
 
+**API Endpoint:** `POST /api/v1/channels`
+
+Send a `POST` request to `/api/v1/channels` with the following `curl` command. Replace `<your-api-key>` with an API key from **Settings → Service Accounts** (see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one).
+
+```bash defaultCollapsed
+curl '<your-signoz-url>/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: <your-api-key>' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "Prod Critical Alerts - incident.io",
+    "incidentio_configs": [
+        {
+            "send_resolved": true,
+            "url": "https://api.incident.io/v2/alert_events/http/<source_config_id>",
+            "token": "<your-source-token>",
+            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}",
+            "metadata": {
+                "environment": "prod"
+            }
+        }
+    ]
+}'
+```
+
+**Request Body Attributes:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
+| `incidentio_configs` | `array` | List of incident.io configurations. |
+| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`. **Required**. |
+| `incidentio_configs[].token` | `string` | The alert source's secret token. **Required**. A leading `Bearer ` prefix is stripped. |
+| `incidentio_configs[].send_resolved` | `boolean` | Whether to resolve the incident.io alert when the SigNoz alert resolves. |
+| `incidentio_configs[].title` | `string` | Templated alert title. Go templates are supported. A default is applied if omitted. |
+| `incidentio_configs[].description` | `string` | Templated alert body in markdown. Go templates are supported. A default is applied if omitted. |
+| `incidentio_configs[].metadata` | `object` | Optional key-value pairs merged into every alert's metadata on top of the alert's labels (these win on a key clash). Values may use Go templates. |
+
+## Troubleshooting
+
+If you encounter issues:
+
+- **401** → the token is wrong. Re-copy it from the alert source's setup page (with or without the `Bearer ` prefix; both work).
+- **404** → the URL is wrong, usually a bad or missing `<source_config_id>`. Re-copy the full alert events URL.
+- **Test succeeded but no alert appears** → check the source's **Requests** tab in incident.io. Each event shows an outcome: `Alert ingested`, `No update to existing alert` (a repeat of an already-firing alert), or `No alert to resolve` (a resolve for an alert incident.io doesn't have; harmless).
+- **Metadata not visible on alerts** → metadata must be mapped to attributes on the incident.io source; see [Send metadata to incident.io](#send-metadata-to-incidentio).
+- **No incident created** → alerts only create incidents through an alert route; see [Alert routes and incidents](#alert-routes-and-incidents).
+
+## Next steps
+
+- Group and route alerts into incidents with <a href="https://docs.incident.io/alerts/getting-started" target="_blank" rel="noopener noreferrer nofollow">alert routes</a>.
+- Map SigNoz labels to <a href="https://docs.incident.io/alerts/attributes-and-priorities" target="_blank" rel="noopener noreferrer nofollow">attributes and priorities</a> for routing and escalation.

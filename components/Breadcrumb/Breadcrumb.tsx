@@ -16,7 +16,7 @@ const toRelativePath = (url: string): string => {
 }
 
 const Separator = () => (
-  <ChevronRight size={12} className="shrink-0 text-signoz_vanilla-400/40" aria-hidden="true" />
+  <ChevronRight size={12} className="shrink-0 text-[var(--l3-foreground)]" aria-hidden="true" />
 )
 
 export default function Breadcrumb({ crumbs }: BreadcrumbProps) {
@@ -39,7 +39,7 @@ export default function Breadcrumb({ crumbs }: BreadcrumbProps) {
       items.push(
         <li key="ellipsis" className="flex items-center gap-1.5 md:hidden" aria-hidden="true">
           <Separator />
-          <span className="text-signoz_vanilla-400">...</span>
+          <span className="text-[var(--l2-foreground)]">...</span>
         </li>
       )
     }
@@ -54,21 +54,21 @@ export default function Breadcrumb({ crumbs }: BreadcrumbProps) {
         {isLast ? (
           <span
             aria-current="page"
-            className="max-w-[300px] truncate font-medium text-signoz_vanilla-100"
+            className="max-w-[300px] truncate font-medium text-[var(--l1-foreground)]"
           >
             {crumb.name}
           </span>
         ) : isFirst ? (
           <Link
             href={toRelativePath(crumb.url)}
-            className="flex items-center text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-400"
+            className="flex items-center text-[var(--l2-foreground)] transition-colors hover:text-[var(--accent-primary-hover)]"
           >
             <Home size={14} aria-label="Home" />
           </Link>
         ) : (
           <Link
             href={toRelativePath(crumb.url)}
-            className="whitespace-nowrap text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-400"
+            className="whitespace-nowrap text-[var(--l2-foreground)] transition-colors hover:text-[var(--accent-primary-hover)]"
           >
             {crumb.name}
           </Link>

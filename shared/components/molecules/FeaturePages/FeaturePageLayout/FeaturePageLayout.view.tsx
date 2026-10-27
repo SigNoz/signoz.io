@@ -9,10 +9,15 @@ const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({
   showDotPattern = true,
 }) => {
   return (
-    <main className={cn('relative mx-auto !mt-[-10px] mb-auto', !fullWidth && 'max-w-8xl')}>
+    <main
+      className={cn(
+        'relative mx-auto !mt-[-10px] mb-auto',
+        !fullWidth && 'max-w-8xl xl:max-[1728px]:max-w-[80dvw]'
+      )}
+    >
       {showProductNav && <ProductNav />}
 
-      <div className="relative bg-signoz_ink-500">
+      <div className="relative bg-[var(--l1-background)]">
         {showDotPattern && (
           <div className="bg-dot-pattern masked-dots pointer-events-none absolute top-0 flex h-screen w-full items-center justify-center" />
         )}

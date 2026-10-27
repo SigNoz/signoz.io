@@ -8,14 +8,47 @@ import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import type { TabItemProps } from './TabItem'
 import styles from './Tabs.module.css'
 
+const PILLS_THRESHOLD = 6
+
 interface TabsProps {
   children: React.ReactNode
   entityName?: string
   variant?: 'default' | 'pill'
   className?: string
+  segmented?: boolean
+  layout?: 'auto' | 'tabs' | 'pills'
 }
 
-const Tabs = ({ children, entityName, variant = 'default', className }: TabsProps) => {
+// Segmented button bar look for DS secondary tabs, shared with
+// TroubleshootingWizard's SegmentedControl. Pairs with styles.segmented.
+export const segmentedTabVars = (size: 'default' | 'small' = 'default'): React.CSSProperties =>
+  ({
+    '--tab-list-wrapper-secondary-padding-left': '0px',
+    '--tab-trigger-secondary-padding': `var(--spacing-5, 10px) ${
+      size === 'small' ? 'var(--spacing-6, 12px)' : 'var(--spacing-12, 24px)'
+    }`,
+    '--tab-trigger-secondary-font-size': 'var(--periscope-font-size-small, 11px)',
+    '--tab-trigger-secondary-gap': 'var(--spacing-3, 6px)',
+    /* Bar border lives on the wrapper (Tabs.module.css); no per-cell borders */
+    '--tab-trigger-secondary-border-width': '0px',
+    /* Border-radius rounds the active cell bg even at 0 border width */
+    '--tab-trigger-secondary-border-radius': '0px',
+    '--tab-trigger-secondary-bg': 'transparent',
+    '--tab-trigger-secondary-active-bg': 'var(--l3-background-60)',
+    '--tab-text-color': 'var(--l2-foreground)',
+    /* DS fallbacks for hover/active text are broken (missing inner var()) */
+    '--tab-hover-text-color': 'var(--l1-foreground-hover)',
+    '--tab-active-text-color': 'var(--l1-foreground-hover)',
+  }) as React.CSSProperties
+
+const Tabs = ({
+  children,
+  entityName,
+  variant = 'default',
+  className,
+  segmented = false,
+  layout = 'auto',
+}: TabsProps) => {
   const searchParams = useSearchParamsState()
   const pathname = usePathname()
 
@@ -74,8 +107,10 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
   const isOnboarding = isDocsOnboardingPathname(pathname)
   const hideSelfHostTab = isOnboarding && entityName === 'plans'
 
-  // Site `default` → DS secondary (underline); site `pill` → DS primary (segmented)
   const dsVariant = variant === 'pill' ? 'primary' : 'secondary'
+  const isSegmented = segmented && variant !== 'pill'
+
+  const segmentedVars = isSegmented ? segmentedTabVars() : {}
 
   const visibleChildren = validChildren.filter((child) => {
     if (hideSelfHostTab && (child.props.value as string).startsWith('self-host')) {
@@ -84,9 +119,66 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
     return true
   })
 
+  const usePills =
+    layout === 'pills' || (layout === 'auto' && visibleChildren.length >= PILLS_THRESHOLD)
+
+  const panels = (
+    <div data-tab-panels="" className="[&>[data-tab-value]>*:first-child]:mt-0">
+      {visibleChildren.map((child) => {
+        const isActive = child.props.value === activeTab
+        const { value, label } = child.props
+        return (
+          <div
+            key={value as string}
+            data-tab-value={value}
+            hidden={!isActive}
+            role={usePills ? 'region' : undefined}
+            aria-label={
+              usePills ? (typeof label === 'string' ? label : (value as string)) : undefined
+            }
+          >
+            {child.props.children}
+          </div>
+        )
+      })}
+    </div>
+  )
+
+  if (usePills) {
+    return (
+      <div data-tabs-root="" className={className || 'w-full'}>
+        <div className="mb-3 flex flex-wrap gap-2">
+          {visibleChildren.map((child) => {
+            const value = child.props.value as string
+            const isActive = value === activeTab
+            return (
+              <button
+                key={value}
+                type="button"
+                data-tab-value={value}
+                aria-pressed={isActive}
+                onClick={() => handleTabChange(value)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] ${
+                  isActive
+                    ? 'bg-[var(--primary-background)] text-[var(--primary-foreground)]'
+                    : 'bg-[var(--l3-background)] text-[var(--l2-foreground)] hover:bg-[var(--l3-background-hover)]'
+                }`}
+              >
+                {child.props.label}
+              </button>
+            )
+          })}
+        </div>
+        {panels}
+      </div>
+    )
+  }
+
   return (
     <TabsRoot
-      className={`${styles.root} ${className || 'w-full'} [&>div:first-child]:overflow-x-auto`}
+      className={`${styles.root} ${isSegmented ? styles.segmented : ''} ${
+        className || 'w-full'
+      } [&>div:first-child]:overflow-x-auto`}
       data-tabs-root=""
       value={activeTab ?? undefined}
       onValueChange={handleTabChange}
@@ -94,8 +186,10 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       style={
         {
           '--tab-list-wrapper-secondary-padding-left': '0px',
-          /* Docs-only: short left gutter stub (faded in Tabs.module.css) */
+          /* Short left gutter stub (faded in Tabs.module.css) */
           '--tab-border-spacer-min-width': 'var(--spacing-5)',
+          '--tab-gap': 'var(--spacing-6, 12px)',
+          ...segmentedVars,
         } as React.CSSProperties
       }
     >
@@ -116,20 +210,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
           )
         })}
       </TabsList>
-      <div className="mt-4">
-        {visibleChildren.map((child) => {
-          const isActive = child.props.value === activeTab
-          return (
-            <div
-              key={child.props.value as string}
-              data-tab-value={child.props.value}
-              hidden={!isActive}
-            >
-              {child.props.children}
-            </div>
-          )
-        })}
-      </div>
+      {panels}
     </TabsRoot>
   )
 }

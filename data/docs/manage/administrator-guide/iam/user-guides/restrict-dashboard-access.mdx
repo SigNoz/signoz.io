@@ -1,0 +1,127 @@
+---
+date: 2026-09-16
+title: Restrict Dashboard Access in SigNoz with Custom Roles
+description: Grant read or edit access to specific dashboards in SigNoz using a custom role with dashboard transactions scoped by dashboard ID.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: tutorial
+---
+
+<Admonition type="warning">
+Fine-grained access control is currently in beta.
+</Admonition>
+
+## Overview
+
+By default, every managed role can open every dashboard in the workspace: `signoz-viewer` can read all of them, and `signoz-admin` and `signoz-editor` can also create, edit, and delete them. In this tutorial you'll create a custom role that can read only the dashboards you name, and extend it so the same role can edit one of them.
+
+**What you'll do:**
+
+- Collect the IDs of the dashboards the role should reach.
+- Create a custom role with dashboard transactions scoped to those IDs.
+- Assign the role so it replaces the user's managed role.
+- Validate what the role can and cannot do in the app.
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- An active SigNoz license.
+- The `signoz-admin` role (role assignment is admin-only).
+- The dashboards you want to scope access to already created.
+
+## Step 1: Collect the dashboard IDs
+
+Open each dashboard you want the role to reach and copy the ID from its URL. For `https://<your-signoz-host>/dashboard/0199c47d-f61b-7833-bc5f-c0730f12f046`, the ID is `0199c47d-f61b-7833-bc5f-c0730f12f046`.
+
+## Step 2: Create the scoped custom role
+
+1. Go to **Settings > Roles** and click **Custom role**.
+2. Enter a name (for example, `platform-dashboards`).
+3. Configure the **Transaction Groups** below, then click **Create role**.
+
+**Interactive mode**: On the **Dashboards** card, set **list** to **All**, set **read** to **Only selected**, and add each dashboard ID from Step 1. Leave **create**, **update**, and **delete** as **None**.
+
+Panels run queries, so the role also needs telemetry `read` for the signals its dashboards query. On the **Logs**, **Traces**, and **Metrics** cards, set **read** to **All**, or scope it further with a [telemetry selector](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#telemetry-selectors).
+
+**JSON mode**: Paste the following:
+
+```json minimap defaultCollapsed
+[
+  {
+    "objectGroup": {
+      "resource": { "kind": "dashboard", "type": "metaresource" },
+      "selectors": ["*"]
+    },
+    "relation": "list"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "dashboard", "type": "metaresource" },
+      "selectors": ["<dashboard-id>", "<another-dashboard-id>"]
+    },
+    "relation": "read"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "logs", "type": "telemetryresource" },
+      "selectors": ["*"]
+    },
+    "relation": "read"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "traces", "type": "telemetryresource" },
+      "selectors": ["*"]
+    },
+    "relation": "read"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "metrics", "type": "telemetryresource" },
+      "selectors": ["*"]
+    },
+    "relation": "read"
+  }
+]
+```
+
+**Verify these values:**
+
+- `<dashboard-id>`: A dashboard ID you copied in [Step 1](#step-1-collect-the-dashboard-ids). List every dashboard the role should open in the `selectors` array.
+
+To let the role edit one of those dashboards, add another group with `"relation": "update"` and that dashboard's ID as its selector. `update` also covers locking and unlocking the dashboard and publishing its public link.
+
+<Admonition type="info">
+`list` and `create` cover the workspace rather than an instance, so they can only be granted as **All** or **None**. Without `list`, the dashboards page is blocked entirely, including the dashboards the role can read. See [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#dashboard).
+</Admonition>
+
+## Step 3: Assign the role
+
+On **Settings > Identity & Access > Members**, open the member and assign `platform-dashboards`.
+
+<Admonition type="warning">
+Roles are **additive**: a principal receives the union of transactions from all of their roles. A `signoz-viewer` who is also given `platform-dashboards` still has the viewer's access to every dashboard. To actually restrict a user, the scoped custom role must **replace** their managed role, not sit alongside it. Add any other transactions the user needs to the same custom role.
+</Admonition>
+
+## Validate
+
+Sign in as a user holding only the scoped role and open the dashboards list:
+
+1. Open a dashboard named in the role. It loads with its panels.
+2. Open a dashboard that is not named in the role. The page reports that you are not authorized to read it.
+3. Check the toolbar and the Actions menu on a dashboard the role can read. Controls the role cannot use, such as the edit and delete actions, are visible but disabled, and each states the transaction it needs.
+
+## What the Role Can and Cannot Do
+
+- **The list shows everything.** `list` is not filtered by `read`, so the list still shows every dashboard in the workspace. A row the role cannot read stays clickable and reports the denial when it is opened. `read` controls what a dashboard shows; the rows come from `list`.
+- **Saved views and pins follow `list`.** Anyone holding `list` can create, rename, and delete the saved views on the dashboards page, and pin dashboards for themselves.
+- **Denied controls stay visible and disabled.** Editing, locking, publishing, and deleting each state the transaction they need on hover, so a user can tell what to ask for.
+- **New dashboard is independent of `list`.** The button stays enabled for a role that holds `create` without `list`.
+- **Public links are anonymous.** Anyone with a published link opens the dashboard without signing in, whatever the `dashboard` transactions say. Publishing and unpublishing require `update`.
+
+## Next Steps
+
+- [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#dashboard): dashboard relations, selectors, and managed role access
+- [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/): create and manage managed and custom roles
+- [Scope Telemetry Access by Ingestion Key](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key/): restrict which telemetry the same role can query
+- [Dashboards](https://signoz.io/docs/dashboards/overview/): build and manage dashboards in SigNoz

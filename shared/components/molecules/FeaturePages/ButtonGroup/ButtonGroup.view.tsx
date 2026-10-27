@@ -12,8 +12,8 @@ const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons, className = '' }) =>
             key={`${button.text}-${index}`}
             asChild
             variant={button.variant}
-            rounded="full"
-            className={`flex !w-fit items-center gap-2 ${button.className || ''}`}
+            size={button.size}
+            className={`flex !w-fit items-center ${button.className || ''}`}
           >
             <TrackingLink
               href={button.href}
@@ -29,10 +29,10 @@ const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons, className = '' }) =>
         ) : (
           <Button
             key={`${button.text}-${index}`}
-            to={button.href}
+            href={button.href}
             variant={button.variant}
-            rounded="full"
-            className={`flex !w-fit items-center gap-2 ${button.className || ''}`}
+            size={button.size}
+            className={`flex !w-fit items-center ${button.className || ''}`}
           >
             {button.text}
             {button.icon || <ArrowRight size={14} />}

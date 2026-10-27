@@ -1,0 +1,194 @@
+---
+date: 2026-10-26
+title: Collect EKS Fargate Logs with OpenTelemetry and CloudWatch
+description: Send EKS Fargate container logs to SigNoz with the OpenTelemetry Collector of the EKS Fargate Collection Agent, over OTLP or from CloudWatch Logs.
+doc_type: howto
+---
+
+Fargate keeps container stdout and stderr on the Fargate node, outside every pod, so application logs reach the collector in one of two ways:
+
+- **Over OTLP from the application.** The OpenTelemetry SDK sends logs to the same endpoint the application already uses for traces and metrics: the sidecar in its own pod or the deployment collector's Service, as [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#send-data-from-applications-to-the-collector) shows. They carry the trace context of the request that wrote them, and the Kubernetes resource attributes too. To turn on log export for your language, see [SDK OTLP export](https://signoz.io/docs/logs-management/send-logs/collection-methods/#path-1-sdk-otlp-export-for-application-logs).
+- **From CloudWatch Logs.** Fargate's log router writes stdout and stderr to CloudWatch Logs, and the collector's `awscloudwatch` receiver reads them from there. Use this route for applications whose logging you can't change. CloudWatch Logs bills for ingestion and storage, logs arrive within the poll interval, and each record keeps the pod's details in its body rather than as Kubernetes resource attributes.
+
+Pick one route per application: an application on both shows every line twice.
+
+The steps below set up the CloudWatch route.
+
+## Prerequisites
+
+- The EKS Fargate Collection Agent, installed with Foundry (see the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/)).
+- `kubectl` configured to reach the cluster, and access to create IAM policies and roles in your AWS account.
+
+## Step 1: Create the aws-observability namespace
+
+Create a file named `aws-observability-namespace.yaml` for the `aws-observability` namespace, where the log router reads its config:
+
+```yaml:aws-observability-namespace.yaml
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: aws-observability
+  labels:
+    aws-observability: enabled
+```
+
+Run this from the directory that contains the file:
+
+```bash
+kubectl apply -f aws-observability-namespace.yaml
+```
+
+## Step 2: Configure the log router
+
+Create a file named `aws-logging-configmap.yaml` with the `aws-logging` ConfigMap, which sends container logs to CloudWatch Logs:
+
+```yaml:aws-logging-configmap.yaml minimap defaultCollapsed
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: aws-logging
+  namespace: aws-observability
+data:
+  flb_log_cw: "false"
+  filters.conf: |
+    [FILTER]
+        Name parser
+        Match *
+        Key_name log
+        Parser crio
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        Buffer_Size 0
+        Kube_Meta_Cache_TTL 300s
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
+  output.conf: |
+    [OUTPUT]
+        Name cloudwatch_logs
+        Match   kube.*
+        region <aws-region>
+        log_group_name <LOG_GROUP>
+        log_stream_prefix <LOG_STREAM_PREFIX>
+        log_retention_days 1
+        auto_create_group false
+  parsers.conf: |
+    [PARSER]
+        Name crio
+        Format Regex
+        Regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>P|F) (?<log>.*)$
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+```
+
+**Verify these values:**
+
+- `<aws-region>`: The AWS region of your cluster, for example `us-east-1`.
+- `<LOG_GROUP>`: The CloudWatch Logs log group for the container logs, which must exist unless you set `auto_create_group true` so the log router creates it.
+- `<LOG_STREAM_PREFIX>`: A prefix for the log streams, for example `from-fluent-bit-`.
+
+Run this from the directory that contains the file:
+
+```bash
+kubectl apply -f aws-logging-configmap.yaml
+```
+
+Then attach the CloudWatch Logs permissions to the pod execution role of your Fargate profile, as the AWS <a href="https://docs.aws.amazon.com/eks/latest/userguide/fargate-logging.html" target="_blank" rel="noopener noreferrer nofollow">Fargate logging guide</a> shows.
+
+## Step 3: Create an IAM role for the collector
+
+Create an <a href="https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html" target="_blank" rel="noopener noreferrer nofollow">IAM role for the service account</a> of the collector that reads the logs, with the <a href="https://docs.aws.amazon.com/aws-managed-policy/latest/reference/CloudWatchReadOnlyAccess.html" target="_blank" rel="noopener noreferrer nofollow">CloudWatchReadOnlyAccess</a> policy, trusted by your cluster's OIDC provider for that collector's service account, `system:serviceaccount:signoz:signoz-collector-deployment`. That is the deployment collector's service account, where `signoz` is the namespace from `metadata.name` in `casting.yaml`.
+
+## Step 4: Read the logs into the collector
+
+In the deployment collector's document of `casting.yaml`, add the `awscloudwatch` receiver, list it in the `logs` pipeline, and annotate the deployment collector's service account with the role from Step 3:
+
+```yaml defaultCollapsed
+spec:
+  collector:
+    spec:
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            receivers:
+              awscloudwatch:
+                region: <aws-region>
+                logs:
+                  poll_interval: 1m
+                  groups:
+                    autodiscover:
+                      limit: 100
+                      prefix: <LOG_GROUP>
+                      streams:
+                        prefixes: [<LOG_STREAM_PREFIX>]
+            service:
+              pipelines:
+                logs:
+                  receivers: [otlp/http, otlp/grpc, k8s_events, awscloudwatch]
+  patches:
+    - target: collectionagent/collector/deployment/serviceaccount.yaml
+      operations:
+        - op: add
+          path: /metadata/annotations
+          value:
+            eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<collector-role>
+```
+
+**Verify these values:**
+
+- `<aws-region>`, `<LOG_GROUP>`, `<LOG_STREAM_PREFIX>`: The values from Step 2.
+- `<account-id>`: Your AWS account ID.
+- `<collector-role>`: The name of the IAM role from Step 3.
+
+Lists replace, so the `logs` pipeline is restated with Foundry's default receivers `otlp/http`, `otlp/grpc`, and `k8s_events`. Run `foundryctl cast -f casting.yaml` from the directory that contains `casting.yaml`.
+
+Then restart your application Deployments so the log router starts for their pods. Run this on the machine where you use `kubectl`:
+
+```bash
+kubectl rollout restart -n <your-namespace> deployment/<your-workload>
+```
+
+**Verify these values:**
+
+- `<your-namespace>`: Your application's namespace.
+- `<your-workload>`: The name of your application's Deployment.
+
+The events of the new pods show the log router starting:
+
+```output
+Normal  LoggingEnabled  3m5s   fargate-scheduler  Successfully enabled logging for pod
+```
+
+Within the poll interval, the container logs show in **Logs Explorer** in SigNoz.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Container logs do not reach SigNoz
+
+In Step 4, no container logs show in **Logs Explorer**. Read the logs of the deployment collector, which runs the `awscloudwatch` receiver, as [View the Collector's Logs](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/#view-the-collectors-logs) shows. The logs show errors from the `awscloudwatch` receiver.
+
+**Cause:** the collector's service account has no `eks.amazonaws.com/role-arn` annotation, or the role's trust policy does not name that service account.
+
+**Fix:** check that the role from [Step 3](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/eks-fargate-logs/#step-3-create-an-iam-role-for-the-collector) trusts the service account, and that the annotation is set. Run this on the machine where you use `kubectl`:
+
+```bash
+kubectl get serviceaccount -n signoz signoz-collector-deployment -o jsonpath='{.metadata.annotations}'
+```
+
+Here `signoz` is the namespace from `metadata.name`. The collector picks up the role when its pod starts, so restart it after a fix with `kubectl rollout restart -n signoz deployment/signoz-collector-deployment`. Under the OpenTelemetry Operator, restart `deployment/signoz-collector-deployment-collector`.
+
+After the fix, the container logs show in **Logs Explorer** within the poll interval.
+
+</details>
+
+## Next Steps
+
+- [Configure the EKS Fargate Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/configure/)
+- [Add the sidecar to your workloads](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/collector-sidecar/)
+- [Logs Management overview](https://signoz.io/docs/logs-management/overview/)

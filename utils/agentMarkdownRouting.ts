@@ -7,7 +7,7 @@
  *
  * Two pipelines:
  * - CMS/MDX-backed content sections (blog, comparisons, guides, opentelemetry,
- *   faqs, case-study) rewrite to /api/content-markdown/<section>/<slug>, which
+ *   faqs, customers) rewrite to /api/content-markdown/<section>/<slug>, which
  *   renders the raw MDX source through the agent markdown renderer.
  * - Every other page (pricing, feature pages, alternatives, home, ...) rewrites
  *   to /api/page-markdown/<path>, which converts the page's own server-rendered
@@ -26,7 +26,7 @@ export const CONTENT_MARKDOWN_SECTIONS = [
   'guides',
   'opentelemetry',
   'faqs',
-  'case-study',
+  'customers',
 ] as const
 
 export type ContentMarkdownSection = (typeof CONTENT_MARKDOWN_SECTIONS)[number]

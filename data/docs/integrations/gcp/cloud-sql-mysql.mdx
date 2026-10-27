@@ -1,0 +1,229 @@
+---
+published_date: 2026-08-20
+updated_date: 2026-10-19
+title: Monitor GCP Cloud SQL for MySQL Metrics and Logs in SigNoz
+description: Collect Cloud SQL for MySQL metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
+doc_type: howto
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+---
+
+The **Cloud SQL for MySQL** integration brings instance metrics and logs into SigNoz, with a pre-built dashboard for the service.
+
+Cloud SQL publishes its metrics to **Cloud Monitoring** and its logs to **Cloud Logging**. SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
+
+## Choose a setup method
+
+<Tabs entityName="setup">
+<TabItem value="manual" label="Manual setup" default>
+
+**Available now.** You run the OpenTelemetry Collector in your own GCP project and add Cloud SQL metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics**, and **logs** if you set up the [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/).
+
+Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps below for each Cloud SQL instance you want to monitor.
+
+</TabItem>
+<TabItem value="agent" label="SigNoz agent (coming soon)">
+
+**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers and log routing in the background. No Collector configuration to maintain.
+
+Until then, use the **Manual setup** tab.
+
+</TabItem>
+</Tabs>
+
+## Prerequisites
+
+Before configuring this service, complete the shared GCP integration setup:
+
+- Your [GCP account is connected in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/), and the project running your Cloud SQL instances is in [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields).
+- The [OpenTelemetry Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/).
+- The `signoz-integration-collector` service account has `roles/monitoring.viewer` on the project that hosts the instances. See [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
+- The **Cloud Monitoring API** is enabled in that project.
+- For logs only: the **Cloud Logging API** is enabled in that project, and you have finished steps 1 to 5 of [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
+
+## Step 1: Enable the service in SigNoz
+
+1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
+2. Select **GCP Cloud SQL for MySQL** from the service list.
+3. Toggle **Metric Collection** on to activate the pre-built dashboard. Toggle **Log Collection** if you also want to [send logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
+4. Open the **Data Collected** tab and note the metrics listed there. These are the metrics the dashboard's panels query.
+
+<Admonition type="warning">
+Enabling the toggle does not start collection on its own. The metrics that reach SigNoz are exactly the ones in your Collector's `metrics_list`. If you skip a metric in step 2, its dashboard panel stays empty.
+</Admonition>
+
+## Step 2: Add the metrics to your Collector config
+
+Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Cloud SQL metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in. Only the `metrics_list` shown below changes; leave the rest of the file as is:
+
+```yaml:otel-collector-config.yaml defaultCollapsed
+receivers:
+  googlecloudmonitoring:
+    project_id: "<monitored-project-id>"
+    collection_interval: 300s   # 5 minutes; minimum is 60s
+    metrics_list:
+      # Health
+      - metric_name: "cloudsql.googleapis.com/database/up"
+      - metric_name: "cloudsql.googleapis.com/database/instance_state"
+      - metric_name: "cloudsql.googleapis.com/database/replication/replica_lag"
+      # CPU, memory & disk
+      - metric_name: "cloudsql.googleapis.com/database/cpu/utilization"
+      - metric_name: "cloudsql.googleapis.com/database/memory/utilization"
+      - metric_name: "cloudsql.googleapis.com/database/disk/utilization"
+      - metric_name: "cloudsql.googleapis.com/database/network/connections"
+      # Throughput
+      - metric_name: "cloudsql.googleapis.com/database/mysql/queries"
+      - metric_name: "cloudsql.googleapis.com/database/mysql/dml_operations_count"
+      - metric_name: "cloudsql.googleapis.com/database/mysql/threads"
+      - metric_name: "cloudsql.googleapis.com/database/mysql/innodb/buffer_pool_reads_count"
+      - metric_name: "cloudsql.googleapis.com/database/mysql/innodb/buffer_pool_read_requests_count"
+      # Errors & contention
+      - metric_name: "cloudsql.googleapis.com/database/mysql/slow_queries_count"
+      - metric_name: "cloudsql.googleapis.com/database/mysql/aborted_connects_count"
+      - metric_name: "cloudsql.googleapis.com/database/mysql/innodb/deadlocks_count"
+      - metric_name: "cloudsql.googleapis.com/database/mysql/innodb/row_lock_waits_count"
+      - metric_name: "cloudsql.googleapis.com/database/disk/read_ops_count"
+      - metric_name: "cloudsql.googleapis.com/database/disk/write_ops_count"
+```
+
+**Verify these values:**
+
+- `<monitored-project-id>`: The GCP project that hosts your Cloud SQL instances. It must be one of the entries in your **Projects to Monitor** list.
+
+<Admonition type="info">
+If your instances span several projects, add one **named** receiver per project (`googlecloudmonitoring/<name>`) and list them all in the metrics pipeline. See [Configure multiple projects](https://signoz.io/docs/integrations/gcp/collect-metrics/#step-3-configure-multiple-projects).
+</Admonition>
+
+<Admonition type="info">
+**Also monitoring Cloud SQL for PostgreSQL in the same project?** Add its metrics from the [PostgreSQL section](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) to the same `googlecloudmonitoring` receiver. Three metrics are in both lists: `database/up`, `database/cpu/utilization`, and `database/memory/utilization`. Listing them twice is harmless, but you only need them once. Don't add a second receiver for the same project instead: the shared metrics would then be collected twice.
+</Admonition>
+
+The **InnoDB buffer pool miss ratio** panel derives its value from two metrics, `buffer_pool_reads_count` and `buffer_pool_read_requests_count`. Keep both in the list or the panel stays empty.
+
+The receiver polls every metric in the list once per `collection_interval`, and the Monitoring API bills per read call, so keep the list to the metrics your dashboards and alerts actually use. See [Cost and tuning](https://signoz.io/docs/integrations/gcp/collect-metrics/#cost-and-tuning).
+
+## Step 3: Apply the configuration
+
+The Collector loads its config from the `signoz-integration-collector-config` secret, so a config change needs a new secret version and a redeploy:
+
+1. Save your updated `otel-collector-config.yaml`.
+2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
+3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
+
+## Step 4: Send logs (optional)
+
+To also send MySQL logs to SigNoz, follow [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/) to set up the Pub/Sub topic, the push subscription, and the logs receiver. In [step 6, Create a log sink](https://signoz.io/docs/integrations/gcp/collect-logs/#step-6-create-a-log-sink-in-each-monitored-project), use this filter:
+
+```text
+resource.type="cloudsql_database" AND (
+  logName:"/logs/cloudsql.googleapis.com%2Fmysql"
+  OR (log_id("cloudaudit.googleapis.com/data_access")
+    AND protoPayload.request.@type="type.googleapis.com/google.cloud.sql.audit.v1.MysqlAuditEntry")
+)
+```
+
+See **Logs** under [What's collected](#whats-collected) for what this filter picks up and which logs need a setting in GCP first.
+
+<Admonition type="warning">
+Add the same filter as an **exclusion filter** on the project's `_Default` sink, or you pay to store these logs in both Cloud Logging and SigNoz. See [Avoid paying twice for logs](https://signoz.io/docs/integrations/gcp/collect-logs/#step-8-avoid-paying-twice-for-logs).
+</Admonition>
+
+## Validate
+
+1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
+2. In SigNoz, go to **Dashboards** and open the **GCP Cloud SQL for MySQL Overview** dashboard. Panels should start filling in.
+3. To check a single metric, open **Metrics Explorer** and query `cloudsql.googleapis.com/database/cpu/utilization`.
+4. For logs, open **Logs** and filter on `gcp.resource_type = 'cloudsql_database'`.
+
+## What's collected
+
+The **GCP Cloud SQL for MySQL Overview** dashboard groups its 17 panels into four sections:
+
+- **Health:** Server up, Instance state, Replication lag.
+- **CPU, Memory & Disk:** CPU utilization, Memory utilization, Disk utilization, Connections.
+- **Throughput:** Queries, DML operations, Threads, InnoDB buffer pool miss ratio.
+- **Errors & Contention:** Slow queries, Aborted connects, InnoDB deadlocks, InnoDB row lock waits, Disk Read IOPS, Disk Write IOPS.
+
+<details>
+<summary>Metrics</summary>
+
+See the **Data Collected** tab in the SigNoz integration for the definitive list the dashboard uses, and the <a href="https://docs.cloud.google.com/monitoring/api/metrics_gcp_c#gcp-cloudsql" target="_blank" rel="noopener noreferrer nofollow">GCP metrics list</a> for full definitions.
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `cloudsql.googleapis.com/database/up` | Count | Gauge |
+| `cloudsql.googleapis.com/database/instance_state` | Count | Gauge |
+| `cloudsql.googleapis.com/database/replication/replica_lag` | Seconds | Gauge |
+| `cloudsql.googleapis.com/database/cpu/utilization` | Percent | Gauge |
+| `cloudsql.googleapis.com/database/memory/utilization` | Percent | Gauge |
+| `cloudsql.googleapis.com/database/disk/utilization` | Percent | Gauge |
+| `cloudsql.googleapis.com/database/network/connections` | Count | Gauge |
+| `cloudsql.googleapis.com/database/mysql/queries` | Count | Sum |
+| `cloudsql.googleapis.com/database/mysql/dml_operations_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/mysql/threads` | Count | Gauge |
+| `cloudsql.googleapis.com/database/mysql/innodb/buffer_pool_reads_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/mysql/innodb/buffer_pool_read_requests_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/mysql/slow_queries_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/mysql/aborted_connects_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/mysql/innodb/deadlocks_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/mysql/innodb/row_lock_waits_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/disk/read_ops_count` | Count | Sum |
+| `cloudsql.googleapis.com/database/disk/write_ops_count` | Count | Sum |
+
+</details>
+
+<details>
+<summary>Logs</summary>
+
+With **Log Collection** turned on, SigNoz collects these logs from your Cloud SQL for MySQL instances:
+
+| Log | What it contains | GCP setup needed |
+| --- | --- | --- |
+| Error log (`cloudsql.googleapis.com/mysql.err`) | Startup, shutdown, and error messages from the MySQL server | None |
+| Slow query log (`cloudsql.googleapis.com/mysql-slow.log`) | Queries that take longer than `long_query_time` | Turn on the `slow_query_log` flag and set `log_output` to `FILE` |
+| General query log (`cloudsql.googleapis.com/mysql-general.log`) | Every statement the server receives | Turn on the `general_log` flag and set `log_output` to `FILE` |
+| Audit logs (`cloudaudit.googleapis.com/data_access`) | Who ran which SQL statements, for auditing | Set up <a href="https://cloud.google.com/sql/docs/mysql/db-audit" target="_blank" rel="noopener noreferrer nofollow">MySQL database auditing</a> and turn on Data Access audit logs |
+
+<Admonition type="info">
+The general query log records every statement, so it can grow large quickly and raise your Cloud Logging, Pub/Sub, and SigNoz ingestion costs. Turn it on only while you need it.
+</Admonition>
+
+Use this filter for your log sink:
+
+```text
+resource.type="cloudsql_database" AND (
+  logName:"/logs/cloudsql.googleapis.com%2Fmysql"
+  OR (log_id("cloudaudit.googleapis.com/data_access")
+    AND protoPayload.request.@type="type.googleapis.com/google.cloud.sql.audit.v1.MysqlAuditEntry")
+)
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+**No logs after turning on Log Collection.** SigNoz can only forward logs that Cloud SQL writes to Cloud Logging. Open **Logs Explorer** in the GCP Console and filter on `resource.type="cloudsql_database"`. If the slow or general query log is missing there, check its database flag and that `log_output` is `FILE`. For audit logs, confirm the audit plugin is set up and Data Access audit logs are on for the project.
+
+**Logs don't arrive.** If Logs Explorer in GCP shows the logs but SigNoz doesn't, work back through the log pipeline: the push subscription must reach the Collector, and the sink's writer identity needs `roles/pubsub.publisher` on the topic. See [Collect logs troubleshooting](https://signoz.io/docs/integrations/gcp/collect-logs/#troubleshooting).
+
+**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+
+**The InnoDB buffer pool miss ratio panel is empty.** This panel needs both `buffer_pool_reads_count` and `buffer_pool_read_requests_count`. Add whichever is missing and repeat step 3.
+
+**No Cloud SQL metrics at all.** Confirm the `signoz-integration-collector` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
+
+**Metrics appear but are stale.** The receiver polls on `collection_interval` (default `300s`) and Cloud SQL itself samples most metrics no faster than every 60 seconds. Lower the interval only if you need the resolution, and expect a higher Monitoring API bill.
+
+</details>
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) on instance availability, CPU or memory saturation, disk growth, connection exhaustion, slow queries, aborted connects, InnoDB deadlocks, or replication lag.
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate database metrics with traces from the applications querying them.
+- [Monitor Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) or [Memorystore for Redis](https://signoz.io/docs/integrations/gcp/memorystore-redis/) if your stack also uses them.
+
+## Get Help
+
+<GetHelp />

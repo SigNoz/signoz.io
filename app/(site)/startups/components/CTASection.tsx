@@ -15,20 +15,17 @@ export default function CTASection() {
               </h2>
 
               <p className="mb-8 text-gray-300">
-                Start using SigNoz to monitor your applications without breaking the bank.
+                Start using SigNoz Cloud to monitor your applications without breaking the bank.
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row">
                 <CTAButton />
 
-                <Link href="/teams/" prefetch={false}>
-                  <Button
-                    variant="legacySecondary"
-                    className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90 md:px-6 md:py-3"
-                  >
+                <Button asChild variant="secondary">
+                  <Link href="/teams/" prefetch={false}>
                     Start your free trial
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
 

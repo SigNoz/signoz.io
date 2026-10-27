@@ -1,4 +1,3 @@
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import { ArrowRight } from 'lucide-react'
 import type {
   SupportTier,
@@ -17,7 +16,6 @@ export const SUPPORT_HEADER_BUTTONS = [
     text: 'Get Started',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -28,7 +26,6 @@ export const SUPPORT_HEADER_BUTTONS = [
     text: 'Talk to Sales',
     href: '/contact-us/?source=support',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Contact Us Button',
@@ -224,8 +221,8 @@ export const SUPPORT_STATS: SupportStat[] = [
       'Our logs, metrics, and traces work on an innovative co-related architecture so you find the needle in the haystack, faster.',
   },
   {
-    value: '10 TB+/day',
-    title: 'Daily ingest for a single deployment',
+    value: '2 PB+/month',
+    title: 'Monthly ingest for a single deployment',
     description:
       'ClickHouse core handles high scalability Kubernetes and AI workloads at scale. 50% higher throughput guaranteed.',
   },
@@ -385,8 +382,8 @@ export const COMPLIANCE_LINKS = [
     label: 'Security Documentation',
   },
   {
-    text: 'signoz.io/privacy',
-    href: 'https://signoz.io/privacy',
+    text: 'signoz.io/legal/privacy',
+    href: 'https://signoz.io/legal/privacy/',
     label: 'Privacy Policy',
   },
 ]
@@ -396,7 +393,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Get Started',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -407,7 +403,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Talk to Sales',
     href: '/contact-us/?source=support',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Contact Us Button',

@@ -1,22 +1,45 @@
 ---
-date: 2026-08-10
+date: 2026-08-25
 title: Understanding Metrics Billing and Reducing Costs
-description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
+description: How SigNoz bills metrics per sample ingested, why cardinality is the primary cost driver, and the strategies that actually reduce your metrics bill.
 doc_type: explanation
 ---
 
 ## Overview
 
-Metrics billing is based on **cardinality** - the number of unique time series created by your metrics. Understanding how attributes affect cardinality is key to managing costs effectively.
+Metrics are billed **per sample ingested, at $0.10 per million samples** (at one-month retention; longer retention raises the rate, see [Pricing](https://signoz.io/pricing/)). A sample is one float value at one timestamp in one time series. There is no charge per time series, per unique metric, or per label. The [glossary](https://signoz.io/docs/glossary/) defines every term used on this page.
+
+Cardinality is still the primary cost driver, and the reason is arithmetic rather than pricing:
+
+```
+total samples = active time series × export frequency
+```
+
+Every <Tooltip text="active series" content="A time series that is currently receiving data points." link="https://signoz.io/docs/glossary/#active-series" /> emits one sample per export interval, whether or not its value changed. So one series exporting every 30 seconds produces about 86,400 samples per month (about \$0.0086). At the more common 60-second interval, about 43,200, or half that. Scale it up and 100,000 active series at a 30-second interval is roughly 8.6 billion samples per month, about \$864.
+
+That gives you exactly two levers: **reduce the number of active series**, or **export less often**. When this page says "reduce cardinality", it means reduce the series count so that fewer samples arrive on each interval.
+
+Two consequences worth knowing up front:
+
+- **Churn is free.** A series replaced by a new one (a rollout giving each replacement pod a new `k8s.pod.uid`) sends the same number of samples. SigNoz does not bill per series, so churn adds no cost.
+- **Dropping labels alone saves nothing.** The same samples still arrive. Attributes have to be *aggregated away* so that the series collapse. See [Volume control](https://signoz.io/docs/metrics-management/volume-control/).
+
+<Tooltip text="Histograms" content="A metric that aggregates many observations client-side into buckets, plus a count and optional sum, min, and max." link="https://signoz.io/docs/glossary/#histogram" /> and summaries are the exceptions to "one data point, one sample". A classic histogram data point costs one sample per bucket (including the `+Inf` bucket), plus `.count`, which is always present, plus `.sum`, `.min`, and `.max` only when the SDK emits them. A summary data point costs one sample per quantile, plus `.count` and `.sum`.
 
 ## How Attributes Affect Billing
 
-There are two types of attributes that affect your metrics differently:
+Attributes affect the series count in one of two ways:
 
-1. **Identifying attributes** - These create new time series and contribute to cost. For example, adding a new `host.name` creates a new series.
-2. **Non-identifying/descriptive attributes** - These enrich existing metrics without creating new series. Examples include host family or EC2 tags.
+1. **Identifying attributes**: their values split otherwise-identical label sets into more series, so they multiply samples. If a metric has one label set and you add `http.route`, you get one series per route that actually appears, up to 10 series for 10 distinct routes, and that many data points per export interval instead of one. `http.route`, `http.response.status_code`, and `host.name` are all identifying.
+2. **Non-identifying attributes**: their value is already determined by attributes present on the series, so they create zero new series and zero new samples. `host.type` is non-identifying when `host.id` is already there, because each host has exactly one type.
 
-You can add as many non-identifying attributes as needed without additional cost, but each new identifying attribute with unique values increases your bill, often exponentially.
+Resource attributes are not treated specially: they are part of series identity exactly like data point attributes, and they can be identifying or non-identifying in the same way. EC2 tags added by the AWS resource detector are a common example. They become part of series identity, but since each instance already has its own series, they add no series and no cost.
+
+You can add as many non-identifying attributes as you like at no additional cost; metrics are not billed by label count or label size. Each new identifying attribute, however, multiplies your series count by its number of distinct values.
+
+<Admonition type="info">
+OpenTelemetry does not yet publish a canonical list of identifying attributes, though the project is moving toward distinguishing them. Until then, the practical test is the one above: would this attribute's values split an existing label set into more series?
+</Admonition>
 
 ## Common Cost Drivers
 
@@ -39,13 +62,13 @@ Use a templated approach:
 Histogram metrics are particularly costly because:
 
 1. **Bucket configuration** - Each bucket distribution creates a separate series. Optimize your bucket configuration based on your workload's latency patterns.
-2. **Cumulative nature** - With cumulative histogram metrics, values continue to be sent even when there's no recent activity, especially problematic when combined with high-cardinality attributes like method names containing IDs. Switching to delta temporality avoids this — see [Use Delta Temporality](#1-use-delta-temporality).
+2. **Cumulative nature** - With cumulative histogram metrics, values continue to be sent even when there's no recent activity, especially problematic when combined with high-cardinality attributes like method names containing IDs. Switching to delta temporality avoids this. See [Use Delta Temporality](#1-use-delta-temporality).
 
 ## Cost Reduction Strategies
 
 ### 1. Use Delta Temporality
 
-OpenTelemetry SDKs export metrics with **cumulative** temporality by default: on every export interval, the SDK re-sends the running total for every active series — even when nothing has changed since the last export. With **delta** temporality, synchronous instruments (Counter, Histogram) that record no measurements during an export interval export no data points at all for that interval, so idle series don't add billable samples.
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default: on every export interval, the SDK re-sends the running total for every active series, even when nothing has changed since the last export. With **delta** temporality, synchronous instruments (Counter, Histogram) that record no measurements during an export interval export no data points at all for that interval, so idle series don't add billable samples.
 
 <Admonition type="warning">
 PromQL does not read delta series. Before you switch a metric to delta, move any PromQL panel or alert on that metric to the Query Builder. A PromQL query on a delta metric keeps running and receives no new samples.
@@ -57,7 +80,7 @@ We recommend setting delta temporality in your application's SDK using the stand
 export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ```
 
-This environment variable is supported by the OpenTelemetry SDKs for Java, Python, Go, JavaScript/Node.js, .NET, and Ruby. Some SDKs (such as Rust) configure temporality in code instead — see the [application metrics guides](https://signoz.io/docs/metrics-management/send-metrics/#applications) for language-specific instructions.
+This environment variable is supported by the OpenTelemetry SDKs for Java, Python, Go, JavaScript/Node.js, .NET, and Ruby. Some SDKs (such as Rust) configure temporality in code instead. See the [application metrics guides](https://signoz.io/docs/metrics-management/send-metrics/#applications) for language-specific instructions.
 
 Switching a metric to delta does not break the cumulative data that SigNoz already stored. The Query Builder reads the older cumulative points and the newer delta points together. See [Temporality of Metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
 
@@ -66,7 +89,7 @@ The savings apply to synchronous instruments only. Observable (asynchronous) ins
 </Admonition>
 
 <Admonition type="warning">
-Deriving deltas at the OpenTelemetry Collector with the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/cumulativetodeltaprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">cumulativetodelta processor</a> does **not** reduce costs. The SDK still exports the cumulative value on every interval even when nothing changed, and the processor converts each of those points into a zero-value delta point — which is still ingested and billed. To get the savings, set delta temporality in the SDK itself.
+Deriving deltas at the OpenTelemetry Collector with the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/cumulativetodeltaprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">cumulativetodelta processor</a> does **not** reduce costs. The SDK still exports the cumulative value on every interval even when nothing changed, and the processor converts each of those points into a zero-value delta point, which is still ingested and billed. To get the savings, set delta temporality in the SDK itself.
 </Admonition>
 
 ### 2. Remove or Template High-Cardinality Attributes
@@ -93,7 +116,7 @@ Consider using the following techniques:
 - **Drop entire metrics** - See <a href="https://signoz.io/docs/userguide/drop-metrics/"> How to Drop and Filter OpenTelemetry Metrics </a> to remove unnecessary metrics entirely.
 
 <Admonition type="warning">
-Note that simply dropping metric labels/attributes does **not** reduce cardinality or costs. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for a detailed explanation of why this doesn't work and what to do instead.
+Dropping metric labels or attributes does **not** reduce cardinality or costs. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for a detailed explanation of why this doesn't work and what to do instead.
 </Admonition>
 
 ## Monitoring Your Costs
@@ -108,5 +131,6 @@ Use the [Cost Meter](https://signoz.io/docs/cost-meter/overview/) to:
 ## Additional Resources
 
 - <a href="https://signoz.io/blog/high-cardinality-data/" rel="noopener noreferrer nofollow" target="_blank">Comprehensive guide on cardinality</a>
-- [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) - Why dropping labels doesn't reduce costs
-- [Cost Meter Overview](https://signoz.io/docs/cost-meter/overview/) - Monitor your observability costs
+- [Cost Control](https://signoz.io/docs/cost-control/optimize-metrics/): find which metrics drive your sample volume, then verify the reduction
+- [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/): why dropping labels doesn't reduce costs
+- [Cost Meter Overview](https://signoz.io/docs/cost-meter/overview/): monitor your observability costs

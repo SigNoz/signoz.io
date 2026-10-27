@@ -12,6 +12,7 @@ Use this file as the stable entrypoint for contributing to `signoz-web`.
 - [Review docs PRs](contributing/docs-review.md)
 - [Change site code](contributing/site-code.md)
 - [Publish or update a blog post](contributing/blog-workflow.md)
+- [Add or update a legal page](contributing/legal-pages.md)
 - [Work with CMS-migrated content](contributing/cms-content.md) (blogs, guides, comparisons, FAQs, case studies, opentelemetry)
 - [Follow the shared repo workflow](contributing/repo-workflow.md)
 - [Use contributor templates](contributing/templates/)
@@ -27,7 +28,7 @@ Use the canonical verification matrix in [contributing/repo-workflow.md](contrib
 
 ## Shared PR Workflow
 
-1. Fork and clone the repo.
+1. Clone the repo and branch. Internal contributors (write access) must branch on this repo directly — never from a fork, because fork PRs are excluded from CMS staging sync. External contributors fork; see [Contributing From a Fork](README.md#contributing-from-a-fork-external-contributors) for what local preview covers and how content is published after merge.
 2. Create a focused branch.
 3. Make task-scoped changes.
 4. Run the checks that match your files using the matrix in [contributing/repo-workflow.md](contributing/repo-workflow.md#verification-matrix).

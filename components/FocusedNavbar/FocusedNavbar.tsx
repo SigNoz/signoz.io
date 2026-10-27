@@ -1,25 +1,17 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ExternalLink } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import { Github } from '@/components/social-icons/SolidIcons'
+import { useGithubStars } from '@/components/GithubStars/useGithubStars'
 
 const NavGitHubStars: React.FC = () => {
-  const [stars, setStars] = useState<number | null>(null)
-
-  useEffect(() => {
-    fetch('https://api.github.com/repos/SigNoz/signoz')
-      .then((r) => r.json())
-      .then((d) => setStars(d.stargazers_count))
-      .catch(() => {})
-  }, [])
+  const { stars, formatted } = useGithubStars()
 
   if (!stars) return null
-
-  const formatted = stars >= 1000 ? (stars / 1000).toFixed(1) + 'k' : stars.toString()
 
   return (
     <span className="flex items-center gap-1.5 px-1.5 py-1 text-sm font-normal text-gray-400">

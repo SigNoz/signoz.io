@@ -102,6 +102,25 @@ describe('buildPayload', () => {
     assert.deepEqual(result.tags, ['docs-list'])
   })
 
+  it('maps case-study files to /customers URLs and revalidates the listing', () => {
+    const result = buildPayload({
+      changedFiles: ['data/case-study/kernel.mdx'],
+      addedFiles: [],
+      renamedFiles: [],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.paths, ['/customers/kernel', '/customers'])
+    assert.deepEqual(result.tags, ['case-studies-list'])
+  })
+
   it('skips list tags for edit-only syncs when added files are known', () => {
     const result = buildPayload({
       changedFiles: ['data/docs/existing-page.mdx', 'data/blog/existing-post.mdx'],
@@ -180,7 +199,7 @@ describe('buildPayload', () => {
     })
 
     assert.equal(result.mode, 'selective')
-    assert.deepEqual(result.tags, ['faqs-list', 'case-studies-list', 'opentelemetries-list'])
+    assert.deepEqual(result.tags, ['faqs-list', 'opentelemetries-list', 'case-studies-list'])
   })
 
   it('falls back to purging list tags when added files are unknown (legacy caller)', () => {

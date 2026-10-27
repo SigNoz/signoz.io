@@ -1,318 +1,237 @@
 ---
-date: 2026-08-03
-title: Docker Swarm Collection Agent - Install
-description: Install the OpenTelemetry Collector on your Docker Swarm cluster to collect metrics, logs, and traces and send them to SigNoz.
+date: 2026-10-26
+title: Docker Swarm OpenTelemetry Collection Agent - Install
+description: Install the OpenTelemetry Collector on every Docker Swarm node with Foundry to collect host metrics, container metrics, and logs and send them to SigNoz.
 doc_type: howto
 ---
 
-This guide walks you through installing the OpenTelemetry Collector **contrib** image on your Docker Swarm cluster. The collector is deployed as a global service (one replica per node), collecting host metrics, container metrics, container logs, and forwarding application traces to SigNoz.
+This guide explains how to install the Docker Swarm Collection Agent on a Docker Swarm with Foundry.
+
+<Admonition type="warning" title="Migrating from a collector you set up yourself?" defaultCollapsed="true">
+Foundry, documented below, is now the supported way to install and manage the Docker Swarm Collection Agent.
+
+If you already run the agent as the `signoz-collection-agent` service with your own `config.yaml`, follow [Migrate to Foundry](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#migrate-to-foundry) to move it over.
+</Admonition>
 
 ## Prerequisites
 
-- Docker Engine 20.10+ installed and running
-- Docker Swarm initialized (`docker swarm init` if not already)
-- SigNoz Cloud account or self-hosted SigNoz instance
-- Ports `4317`, `4318` available on each Swarm node
+- An active <a href="https://docs.docker.com/engine/swarm/" target="_blank" rel="noopener noreferrer nofollow">Docker Swarm</a>. The agent runs one copy on every node of the Swarm, so every node needs Linux and <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Engine</a> 25.0 or newer.
+- A shell on a manager node of the Swarm, where you run the commands in this guide. `foundryctl cast` deploys the agent with `docker stack deploy`, which runs only on a manager node.
+- Ports `4317` and `4318` free on every node. To run the agent on a Swarm that runs self-hosted SigNoz, see [Run on the same Swarm as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#run-on-the-same-swarm-as-self-hosted-signoz).
+- A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+## Install the Collection Agent
 
-## Step 1: Create Collector Configuration
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
 
-Create a `config.yaml` file with the following content. This config is tailored for SigNoz usage: it collects host metrics, container metrics, container logs, and accepts OTLP data from instrumented applications.
+### Step 1: Install foundryctl
 
-```yaml:config.yaml minimap defaultCollapsed
-receivers:
-  # OTLP: accept traces, metrics, and logs from instrumented apps (SDKs, agents)
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-  # Host metrics: CPU, disk, memory, network, etc. (root_path for container)
-  hostmetrics:
-    collection_interval: 60s
-    root_path: /hostfs
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-        mute_process_user_error: true
-      processes: {}
-  # Container metrics from Docker daemon
-  docker_stats:
-    endpoint: unix:///var/run/docker.sock
-    collection_interval: 10s
-    timeout: 20s
-  # Container logs: Docker JSON log files
-  filelog:
-    include: [/var/lib/docker/containers/*/*-json.log]
-    start_at: end
-    include_file_name: false
-    include_file_path: true
-    operators:
-      - id: container-parser
-        type: container
-        format: docker
-        add_metadata_from_filepath: false
-
-processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-  resourcedetection:
-    detectors: [env, system, docker]
-    timeout: 2s
-    system:
-      hostname_sources: [os]
-  memory_limiter:
-    check_interval: 5s
-    limit_mib: 4000
-    spike_limit_mib: 800
-
-exporters:
-  otlphttp:
-    endpoint: 'https://ingest.<region>.signoz.cloud:443'
-    headers:
-      'signoz-ingestion-key': '<your-ingestion-key>'
-
-extensions:
-  health_check:
-    endpoint: 0.0.0.0:13133
-  pprof:
-    endpoint: 0.0.0.0:1777
-  zpages:
-    endpoint: 0.0.0.0:55679
-
-service:
-  extensions: [health_check, pprof, zpages]
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlphttp]
-    metrics:
-      receivers: [otlp, hostmetrics, docker_stats]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlphttp]
-    logs:
-      receivers: [otlp, filelog]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlphttp]
-```
-
-Verify the following values:
-
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
-## Step 2: Deploy the Collector Service
-
-Deploy the collector as a **global** service so one replica runs on each Swarm node. Each replica collects host metrics, container metrics, and logs from its local node.
-
-<KeyPointCallout title="Why global mode?" defaultCollapsed="true">
-With `--mode global`, one collector runs on each Swarm node. Bind mounts (`/var/run/docker.sock`, `/var/lib/docker/containers`, `/`) are node-local, so each replica collects telemetry from its own node. For a single-node Swarm, you still get one collector.
-
-`--hostname '{{.Node.Hostname}}'` sets the container hostname to the Swarm node's hostname. Without this, the `system` resource detector reports the container ID as `host.name` instead of the actual node hostname, making it hard to identify which node data came from in SigNoz.
-</KeyPointCallout>
-
-<Tabs entityName="method">
-<TabItem value="docker-stack" label="Docker Stack" default>
-
-Create a `docker-stack.yaml` file:
-
-```yaml:docker-stack.yaml defaultCollapsed minimap
-services:
-  signoz-collection-agent:
-    image: otel/opentelemetry-collector-contrib:0.139.0
-    user: "0:0"
-    hostname: "{{.Node.Hostname}}"
-    environment:
-      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment>
-    configs:
-      - source: otelcol_config
-        target: /etc/otelcol-contrib/config.yaml
-        mode: 0444
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-      - type: bind
-        source: /var/lib/docker/containers
-        target: /var/lib/docker/containers
-        read_only: true
-      - type: bind
-        source: /
-        target: /hostfs
-        read_only: true
-    ports:
-      - target: 4317
-        published: 4317
-        protocol: tcp
-        mode: host
-      - target: 4318
-        published: 4318
-        protocol: tcp
-        mode: host
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-
-configs:
-  otelcol_config:
-    file: ./config.yaml
-```
-
-Deploy the stack:
+Run this on a manager node:
 
 ```bash
-docker stack deploy -c docker-stack.yaml signoz
+curl -fsSL https://signoz.io/foundry.sh | bash
 ```
 
-To update the config, edit `config.yaml` and redeploy with the same command. Docker Swarm automatically creates a new config version and updates the running tasks.
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
 
-</TabItem>
-<TabItem value="docker-service" label="Docker Service">
+### Step 2: Create casting.yaml
 
-First, create a Swarm config from your `config.yaml`:
+Create a file named `casting.yaml` on the manager node, with one document for the agent described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/overview/#how-it-works):
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+```yaml:casting.yaml defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: docker
+    flavor: swarm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<your-environment>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-environment>`: Your deployment environment, for example `staging` or `production`.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/docker/swarm" target="_blank" rel="noopener noreferrer nofollow">Docker Swarm example</a>.
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
 
 ```bash
-docker config create otelcol_config ./config.yaml
+foundryctl cast -f casting.yaml
 ```
 
-Then deploy the service:
+This command:
+
+- writes the stack file `compose.yaml` to `pours/collectionagent/` and the collector config `agent.yaml` to `pours/collectionagent/collector/agent/`;
+- deploys `compose.yaml` with `docker stack deploy`, as the stack `signoz`;
+- runs the agent as the service `signoz_collector-agent`, with one task on every node.
+
+Run the same command again after editing `casting.yaml`. A changed collector config becomes a new Swarm config, and Swarm replaces the agent's tasks to use it.
+
+<Admonition type="tip" title="Run docker stack deploy yourself" defaultCollapsed="true">
+To run `docker stack deploy` directly, generate the files and deploy them. Run this from the directory that contains `casting.yaml`:
 
 ```bash
-docker service create \
-  --name signoz-collection-agent \
-  --mode global \
-  --detach \
-  --restart-condition any \
-  --user 0:0 \
-  --hostname '{{.Node.Hostname}}' \
-  --env OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<your-environment> \
-  --config source=otelcol_config,target=/etc/otelcol-contrib/config.yaml,mode=0444 \
-  --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
-  --mount type=bind,source=/var/lib/docker/containers,target=/var/lib/docker/containers,readonly \
-  --mount type=bind,source=/,target=/hostfs,readonly \
-  --publish target=4317,published=4317,protocol=tcp,mode=host \
-  --publish target=4318,published=4318,protocol=tcp,mode=host \
-  otel/opentelemetry-collector-contrib:0.139.0
+foundryctl forge -f casting.yaml   # writes compose.yaml and agent.yaml under pours/collectionagent
+docker stack deploy -c pours/collectionagent/compose.yaml signoz
 ```
+</Admonition>
 
-To update the config later, create a new config (for example `otelcol_config_v2`), update the service to use it, and remove the old config.
+### Step 4: Verify the Collection Agent
 
-### Optional: Attach to an overlay network
-
-If your application services send OTLP over an overlay network, attach the collector to that network by adding `--network your_overlay_network` to the command above.
-
-</TabItem>
-</Tabs>
-
-Verify the following values:
-
-- `<your-environment>`: The environment name for the deployment
-
-## Step 3: Validate
-
-Check that the service is running:
+Run this on the manager node to check that the agent started:
 
 ```bash
-docker service ls | grep signoz-collection-agent
-docker service ps signoz-collection-agent
+docker service logs signoz_collector-agent
 ```
 
-View collector logs:
+The logs should include a line similar to the following from each node, where task IDs and node names vary:
 
-```bash
-docker service logs signoz-collection-agent
+```output
+signoz_collector-agent.0.qij0plduzksw@node-1    | ... Everything is ready. Begin running and processing data.
 ```
 
-You should see log lines indicating the receivers started successfully:
+`docker service ps signoz_collector-agent` lists one `Running` task per node. In SigNoz, open **[Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)** > **Hosts**: each node appears under its host name as data arrives. Check **[Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)** to confirm container logs are flowing.
 
-```
-... Everything is ready. Begin running and processing data.
-```
+## Customize the Collection Agent
 
-In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your Swarm nodes appear. Check **Logs Explorer** to confirm container logs are flowing.
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to collect host metrics every 30s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/agent/agent.yaml: |
+              receivers:
+                hostmetrics:
+                  collection_interval: 30s
+  ```
+
+- **Stack file** (mounts, placement, memory limit): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/compose.yaml`. For example, to mount the node's `/var/log` into the agent:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/compose.yaml
+        operations:
+          - op: add
+            path: /services/collector-agent/volumes/-
+            value:
+              type: bind
+              source: /var/log
+              target: /var/log
+              read_only: true
+  ```
+
+  Take the target and paths from the files under `pours/`. Each run regenerates them, so keep every change in `casting.yaml`.
 
 <details>
+
 <ToggleHeading>
-
 ## Troubleshooting
-
 </ToggleHeading>
 
-### Service tasks failing on some nodes
+### foundryctl cast stops with `tools are not available`
 
-Bind mounts require the source path to exist on each node. Ensure `/var/run/docker.sock`, `/var/lib/docker/containers`, and `/` exist on all Swarm nodes. If a node lacks these paths (for example, a Windows worker), add a placement constraint to exclude it:
+In Step 3, `foundryctl cast -f casting.yaml` stops with `tools are not available, please install them and try again: docker-swarm`.
+
+**Cause:** the machine is not a manager node of an active Swarm. Run the command with `--debug` to see which: `docker swarm is not active` or `current node is a swarm worker, not a manager`.
+
+**Fix:** run Step 3 on a manager node. To create a Swarm on this machine, run <a href="https://docs.docker.com/reference/cli/docker/swarm/init/" target="_blank" rel="noopener noreferrer nofollow">`docker swarm init`</a> first.
+
+After the fix, `foundryctl cast -f casting.yaml` deploys the stack, and `docker service logs signoz_collector-agent` shows `Everything is ready`.
+
+### A port conflict stops the agent
+
+In Step 3, `foundryctl cast -f casting.yaml` stops with `port '4317' is already in use by service '<service>' (<id>) as an ingress port`. Or in Step 4, `docker service logs signoz_collector-agent` stays empty, and `docker service ps --no-trunc signoz_collector-agent` shows tasks `Pending` with `host-mode port already in use on 1 node`, or `Failed` with `failed to bind host port 0.0.0.0:4317/tcp: address already in use` or `Bind for 0.0.0.0:4317 failed: port is already allocated`.
+
+**Cause:** something else holds port `4317` or `4318`:
+
+- `as an ingress port`: another service publishes it through the Swarm routing mesh, such as the ingester of self-hosted SigNoz.
+- `host-mode port already in use`: another Swarm service publishes it in host mode on that node.
+- `address already in use` or `port is already allocated`: a container or process outside the Swarm holds it on that node, such as the Docker Collection Agent or a self-hosted SigNoz run with Docker Compose.
+
+**Fix:** for self-hosted SigNoz on the Swarm, give the agent its own name and ports as [Run on the same Swarm as self-hosted SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#run-on-the-same-swarm-as-self-hosted-signoz) shows, then run Step 3 again. Otherwise, stop what holds the port on that node. Swarm then starts the waiting tasks on its own.
+
+After the fix, `docker service logs signoz_collector-agent` shows `Everything is ready`.
+
+### The agent logs `at least one endpoint must be specified`
+
+In Step 4, `docker service logs signoz_collector-agent` shows `exporters::otlphttp/signoz: at least one endpoint must be specified`, and the agent's tasks keep restarting.
+
+**Cause:** the casting sets no `SIGNOZ_INGESTION_ENDPOINT` under `spec.collector.spec.env`.
+
+**Fix:** add it as in Step 2, then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `docker service logs signoz_collector-agent` shows `Everything is ready`.
+
+### foundryctl cast rejects a patch
+
+`foundryctl cast -f casting.yaml` stops before it deploys the agent, with `failed to apply patch for target "<target>"` followed by one of these:
+
+- `patch target "<target>" did not match any generated material`
+- `doc is missing path: <path>: missing value`
+- `doc is missing key: <path>: missing value`
+- `unable to remove nonexistent key: <key>: missing value`
+
+**Cause:** the patch's target or path does not exist in what Foundry generates.
+
+**Fix:** remove the patch, then run this from the directory that contains `casting.yaml`:
 
 ```bash
-docker service update signoz-collection-agent \
-  --constraint-add 'node.platform.os==linux'
+foundryctl forge -f casting.yaml
 ```
 
-### Permission denied on Docker socket
+Take the target and path from the files under `pours/collectionagent/`, add the patch back, then run `foundryctl cast -f casting.yaml` again.
 
-If the collector logs show permission errors accessing `/var/run/docker.sock`, ensure the service runs as root. The example uses `--user 0:0`. Alternatively, add the Docker group:
-
-```bash
-docker service create ... --group-add $(getent group docker | cut -d: -f3) ...
-```
-
-### No host metrics appearing
-
-Verify the host filesystem is mounted correctly. Inspect a running task:
-
-```bash
-docker inspect $(docker ps -q -f name=signoz-collection-agent) | grep -A5 hostfs
-```
-
-Ensure the `root_path: /hostfs` setting in the `hostmetrics` receiver matches the mount target.
-
-### Configuration errors
-
-Check the collector logs for configuration parsing errors:
-
-```bash
-docker service logs signoz-collection-agent 2>&1 | head -50
-```
-
-Common causes:
-- Invalid YAML syntax in `config.yaml`
-- Missing or incorrect SigNoz ingestion key
-- Port conflicts with other services on 4317 or 4318
-
-### Updating the config
-
-**Docker Stack:** Edit `config.yaml` and redeploy:
-
-```bash
-docker stack deploy -c docker-stack.yaml signoz
-```
-
-**docker service create:** Create a new config and update the service manually:
-
-1. Create a new config: `docker config create otelcol_config_v2 ./config.yaml`
-2. Update the service: `docker service update --config-rm otelcol_config --config-add source=otelcol_config_v2,target=/etc/otelcol-contrib/config.yaml,mode=0444 signoz-collection-agent`
-3. Remove the old config: `docker config rm otelcol_config`
+After the fix, `docker service logs signoz_collector-agent` shows `Everything is ready`.
 
 </details>
+
+## Send data from your applications
+
+Host metrics, container metrics, and container logs flow as soon as the agent is running. To send traces, metrics, and logs from your applications through the agent, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/#send-data-from-applications-to-the-collector).
 
 ## Next Steps
 
 - [Configure the Docker Swarm Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/configure/)
-- [Docker Swarm Collection Agent Overview](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/overview/)
-- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
+- [Learn more about the Docker Swarm Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/overview/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

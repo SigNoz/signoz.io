@@ -1,5 +1,5 @@
 ---
-date: 2026-08-01
+date: 2026-10-15
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -10,8 +10,8 @@ Dashboards in SigNoz let you interact with data through [panels](https://signoz.
 and click actions allow you to drill deeper, apply filters, and move to related logs, traces, or metrics.
 
 <Figure
-  src="/img/docs/dashboards/interactivity/context-menu.png"
-  alt="Dashboard context menu example"
+  src="/img/docs/dashboards/interactivity/context-menu-datapoint.webp"
+  alt="Context menu on a time series panel datapoint with Dashboard Variables, View in Logs, View in Traces, and Breakout by"
   caption="Context menu on a metrics panel."
 />
 
@@ -42,13 +42,13 @@ This helps not only in viewing the exact records behind a metric or trace but al
 This ensures that you can move seamlessly from **high-level aggregates** to **detailed records** without needing to rebuild queries.  
 
 #### Example
-In the example below, a **CPU Usage by Host** metrics panel shows an anomaly.  
-By right-clicking on the datapoint, you can select **View in Logs** or **View in Traces** from the context menu.  
+In the example below, a **CPU usage by namespace** metrics panel shows a spike.  
+Click the datapoint and select **View in Logs** or **View in Traces** from the context menu. The Logs Explorer opens in a new tab, filtered to the clicked namespace and time.  
 
 <Figure
-  src="/img/docs/dashboards/interactivity/view-in-logs-traces.gif"
-  alt="Right-clicking a datapoint in a metrics panel to open related logs and traces"
-  caption="Right-clicking a datapoint in a metrics panel to open related logs and traces"
+  src="/img/docs/dashboards/interactivity/view-in-logs.gif"
+  alt="Clicking a datapoint in a metrics panel and selecting View in Logs opens the Logs Explorer filtered to that namespace"
+  caption="Clicking a datapoint and selecting View in Logs"
 />  
 
 This workflow shortens the gap between **observing anomalies** and **finding their root cause** by connecting metrics, traces, and logs in one flow.  
@@ -90,8 +90,8 @@ Instead of building a new query from scratch, you can click on a datapoint or ta
 #### How it works
 1. Click on a chart datapoint, bar segment, or table cell.  
 2. From the context menu, select **Breakout by...**.  
-3. Choose an attribute from the list (for example, `k8s.pod.name` or `host.name`).  
-4. The panel is updated in place to show the new breakdown:  
+3. Choose an attribute from the list, or type in **Search breakout options...** to find one (for example, `k8s.pod.name` or `host.name`).  
+4. The panel opens in the expanded **View** modal with the new breakdown. Further drill-downs refine it in place. See [Drill down in the expanded view](#drill-down-in-the-expanded-view).  
    - Existing filters, time range, and dashboard variables are preserved.  
    - The **selected data is applied as a filter** so the new breakdown focuses only on that slice.  
    - The chosen attribute becomes the **new group by dimension** (it replaces the previous grouping).  
@@ -99,13 +99,13 @@ Instead of building a new query from scratch, you can click on a datapoint or ta
 This lets you move from a broad overview to more granular insights step by step.  
 
 #### Example
-In the example below, a panel showing **CPU Usage by Host** can be further analyzed by selecting **Breakout by → k8s.pod.name**.  
-This reveals which pods inside the host are contributing most to CPU usage.  
+In the example below, a panel showing **CPU usage by namespace** is broken out with **Breakout by** and `k8s.pod.name`.  
+The panel then shows the pods in the clicked namespace, so you can see which pods use the most CPU.  
 
 <Figure
-  src="/img/docs/dashboards/interactivity/breakout-by.gif"
-  alt="Breaking down CPU usage by host into pod-level details using Breakout by"
-  caption="Breaking down CPU usage by host into pod-level details using Breakout by"
+  src="/img/docs/dashboards/interactivity/breakout-by-pod.gif"
+  alt="Breaking down CPU usage by namespace into pod-level series using Breakout by and k8s.pod.name"
+  caption="Breaking down CPU usage by namespace into pods with Breakout by"
 />  
 
 #### Why use it
@@ -119,15 +119,15 @@ This reveals which pods inside the host are contributing most to CPU usage.
 They let you attach dynamic URLs to a panel and navigate to **internal explorers** (Logs, Traces, Metrics) or **external tools** (e.g. Jenkins, PagerDuty) using the values of the datapoint you clicked.  
 
 <Figure
-  src="/img/docs/dashboards/interactivity/context-links-eg.png"
-  alt="Context menu showing dynamic links that use the clicked value and time range"
+  src="/img/docs/dashboards/interactivity/context-links-in-table-menu.webp"
+  alt="Table cell context menu with two context links, Open runbook for kube-system and View pod in Infrastructure Monitoring, below the built-in actions"
   caption="Context menu showing dynamic links that use the clicked value and time range"
 />
 
 #### Add a context link
 
-1. Edit a panel and expand the **Context Links** section in the panel settings pane.
-2. Select **Add Context Link** to open the context link editor.
+1. Edit a panel and expand the **Context Links** section in the config pane. Links appear in a menu when someone clicks a data point. They can pass the clicked values and dashboard variables into the destination URL.
+2. Select **Add link** (formerly "Add Context Link") to open the context link editor.
 3. Configure the link:
    - **Label**: the text shown in the context menu. If you leave it empty, SigNoz shows the URL instead.
    - **URL**: the destination URL. It can include `{{variable}}` tokens that resolve to the clicked datapoint's values (see [Available variables](#available-variables)).
@@ -161,7 +161,7 @@ The URL must start with one of the following, or the link cannot be saved:
 - `/` for a root-relative path inside SigNoz, for example `/logs`.
 - A `{{variable}}/` token, so the resolved variable value forms the start of the URL.
 
-If the URL does not match, SigNoz highlights the field and shows the message `URLs must start with http(s), /, or {{.*}}/`. Fix the URL to save the link.
+If the URL does not match, SigNoz highlights the field and shows the message `URL must start with http(s)://, /, or {{variable}}/`. Fix the URL to save the link.
 
 <Figure
   src="/img/docs/dashboards/interactivity/context-links-validation.webp"
@@ -218,7 +218,7 @@ URL: https://pagerduty.example.com/incidents?service={{_service.name}}&since={{t
 ### Cross Filtering
 
 **Cross Filtering** lets you use clicked data in a panel to update or create **dashboard variables**.  
-When you click on a service, pod, or trace ID, the panel’s **context menu** includes a **Dashboard Variables** option.  
+When you click on a service, pod, or <Tooltip text="trace ID" content="The 16-byte identifier shared by every span in a trace." link="https://signoz.io/docs/glossary/#trace-id" />, the panel’s **context menu** includes a **Dashboard Variables** option.  
 From here, the following actions are available:  
 
 - **Set** – Assign the clicked value to an existing dashboard variable.  
@@ -228,7 +228,7 @@ From here, the following actions are available:
 If the clicked field already has a dynamic variable, you’ll see **Set/Unset**. Otherwise, the option will be **Create var**. Panels that use the updated variable will automatically refresh.
 
 <Figure
-  src="/img/docs/dashboards/interactivity/cross-filtering-demo.gif"
+  src="/img/docs/dashboards/interactivity/cross-filtering-set-variable.gif"
   alt="Using the context menu to set a dashboard variable from clicked panel data"
   caption="Using the context menu to set a dashboard variable from clicked panel data"
 /> 
@@ -248,15 +248,15 @@ The **Filter in Tables** option allows you to quickly narrow results by applying
 
 
 <Figure
-  src="/img/docs/dashboards/interactivity/filter-in-tables.png"
-  alt="Clicking a table cell to add a filter condition directly from the group-by value"
+  src="/img/docs/dashboards/interactivity/filter-in-tables-menu.webp"
+  alt="Filter by k8s.namespace.name menu on a table cell with Is this and Is not this options"
   caption="Clicking a table cell to add a filter condition directly from the group-by value"
 />
 
 
-3. From the context menu, select **Filter by...**.  
+3. A **Filter by** menu for that field opens, for example **Filter by k8s.namespace.name**.  
 4. Choose an operator based on the field type:  
-   - **String**: `=` or `!=`  
+   - **String**: `=` (**Is this**) or `!=` (**Is not this**)  
    - **Number**: `=`, `>`, `<`, `>=`, `<=`  
    - **Boolean**: `is true`, `is false`  
 5. Enter or confirm the filter value.  
@@ -284,7 +284,7 @@ When a dashboard has multiple charts describing the same system — request rate
 
 <Figure
   src="/img/docs/dashboards/interactivity/cross-panel-sync-config.webp"
-  alt="Dashboard Configuration panel showing Tooltip sync mode with Synced Tooltip Series set to Filtered"
+  alt="Cross-Panel Sync settings in the dashboard Configure drawer with Sync Mode set to Tooltip and Synced Tooltip Series set to Filtered"
   caption="Cross-Panel Sync settings with Tooltip mode and Synced Tooltip Series options."
 />
 
@@ -298,7 +298,7 @@ When you hover a chart (the **source**), every other chart on the dashboard (the
 
 <Figure
   src="/img/docs/dashboards/interactivity/cross-panel-sync-demo.webp"
-  alt="Two dashboard panels with synchronized crosshair and tooltip showing matching series"
+  alt="Two time series panels side by side. Hovering frontendproxy on the left panel draws a crosshair on the right panel, whose tooltip shows only the matching frontendproxy series"
   caption="Hovering the source chart shows a crosshair and filtered tooltip on the receiver."
 />
 
@@ -340,12 +340,56 @@ When a receiver tooltip appears, it lists only the series that match the source'
 
 #### Interaction with the legend
 
-You can toggle individual series on and off through the chart legend. Hidden series are treated as if they do not exist for tooltip matching:
+If you hide a series in the chart legend (see [Work with the chart legend](#work-with-the-chart-legend)), tooltip matching ignores that series:
 
 - If you hide a series in the receiver chart, it will not be considered when looking for a match.
 - If every matching series in the receiver is hidden, the receiver tooltip disappears entirely the next time you move the cursor on the source.
 
 This makes it easy to focus comparison on a specific subset by hiding the rest.
+
+## Work with the chart legend
+
+Use the legend below or beside a chart to choose which series the chart draws and to read the full name of a series. Each legend row has a square marker in the series color, and a label. The marker is filled when the series is visible. It is hollow when the series is hidden.
+
+These controls work on each chart that uses the shared chart legend: dashboard panels (Time Series, Area, Bar, Pie, Histogram, and Heatmap), the [alert chart preview](https://signoz.io/docs/alerts-management/metrics-based-alerts/), and infrastructure monitoring panels. The Logs and Traces explorers use a different legend, so these controls do not apply there.
+
+### Show and hide series
+
+The result of a click on a row depends on which series are visible:
+
+- If all series are visible, a click on a row shows only that series and hides the others.
+- If only one series is visible, a click on its row shows all series again.
+- In all other cases, a click on a row shows or hides that series.
+
+A click on the square marker always shows or hides that one series, no matter how many series are visible. At least one series must stay visible. For this reason, the marker of the last visible series does not respond to clicks.
+
+### Row hover actions
+
+When you hover over a legend row, two buttons appear on the right side of the row:
+
+- **Only** shows only that series. If the row is visible and other series are hidden, the button reads **All**, and it shows all series again.
+- The copy button copies the full name of the series to your clipboard. Use it when the row cuts off a long label.
+
+<Figure
+  src="/img/docs/dashboards/interactivity/legend-hover-actions.webp"
+  alt="Time series legend with the kube-system row hovered, showing the Only and copy buttons, the full series name tooltip, and the other series dimmed on the chart"
+  caption="Hovering a legend row highlights its series and shows the Only and copy buttons."
+/>
+
+When you hover over a row, the chart also highlights that series or slice and dims the others, so you can find it without hiding anything. The highlight stops when you move the pointer off the row.
+
+### Series count
+
+A search box and a **Showing N of M series** count appear above the legend. When they appear depends on the legend position:
+
+- **Right of chart**: They appear when the legend has at least one series.
+- **Below chart**: They appear only when the series need more than two rows and the panel has room for the search row.
+
+N is the number of series that are visible and match the search. M is the total number of series. Heatmap panels show the search box but not the count.
+
+<Admonition type="info">
+Chart tooltips use the same square marker and monospace text as the legend rows. A series looks the same in the tooltip and in the legend.
+</Admonition>
 
 ## Create an alert from a panel
 
@@ -433,7 +477,7 @@ The primary action in the empty state is **Extend time range**. Select it to wid
 Extending from a panel on the dashboard updates the dashboard's global time range, so every panel refreshes on the wider window. This is the same behavior as the zoom-out control in the dashboard toolbar.
 
 <Admonition type="info">
-When a panel uses a fixed **Panel time preference** (for example, `Last 6 hours`) instead of `Global Time`, it ignores the dashboard-wide time range. If such a panel returns no data, its empty state shows only a **Retry** button and hides **Extend time range**, because the panel's fixed window cannot be widened from the dashboard time picker.
+When a panel uses a fixed **Time range** (for example, `Last 6 hours`) instead of `Global Time`, it ignores the dashboard-wide time range. If such a panel returns no data, its empty state shows only a **Retry** button and hides **Extend time range**, because the dashboard time picker cannot widen the panel's fixed window.
 </Admonition>
 
 ### Retry

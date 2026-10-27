@@ -25,9 +25,7 @@ const Observability = () => {
               clickLocation="Observability Section"
               clickText="Why SigNoz"
             >
-              <Button variant="secondary" rounded="full" isButton>
-                Why SigNoz
-              </Button>
+              <Button variant="secondary">Why SigNoz</Button>
             </TrackingLink>
 
             <ul className="ul-no-padding flex flex-col gap-3">

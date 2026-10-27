@@ -1,0 +1,70 @@
+.itemTitle {
+  color: var(--l1-foreground);
+}
+
+.itemDesc {
+  color: var(--l2-foreground);
+}
+
+.itemProgress {
+  width: var(--progress, 0%);
+  opacity: 0;
+  transition: opacity 0.38s ease;
+}
+
+.reveal {
+  grid-template-rows: 1fr;
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .item {
+    transition: padding 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .item.isActive {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .item.isActive .itemProgress {
+    opacity: 1;
+  }
+
+  .item.isDone .itemProgress {
+    opacity: 0;
+  }
+
+  .item:not(.isActive) .itemTitle {
+    color: var(--l3-foreground);
+  }
+
+  .item:not(.isActive):hover .itemTitle {
+    color: var(--l1-foreground);
+  }
+
+  .item:not(.isActive) .itemDesc {
+    color: color-mix(in srgb, var(--l2-foreground) 55%, transparent);
+  }
+
+  .reveal {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.55s cubic-bezier(0.23, 1, 0.32, 1),
+      opacity 0.34s ease;
+  }
+
+  .reveal > * {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .item.isActive .reveal {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .item.isActive .revealCta {
+    transition-delay: 0.06s;
+  }
+}

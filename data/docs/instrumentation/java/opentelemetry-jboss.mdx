@@ -1,5 +1,5 @@
 ---
-date: 2026-06-17
+date: 2026-10-26
 title: JBoss & WildFly OpenTelemetry Setup Guide
 description: Learn how to instrument JBoss EAP and WildFly with the OpenTelemetry Java agent. Configure standalone.conf and send traces to SigNoz for better debugging.
 doc_type: howto
@@ -7,7 +7,7 @@ doc_type: howto
 
 This guide walks you through instrumenting your JBoss EAP or WildFly application server with OpenTelemetry and sending traces to SigNoz. JBoss and WildFly use `standalone.conf` (Linux/Mac) or `standalone.conf.bat` (Windows) to configure JVM options, making it straightforward to attach the OpenTelemetry Java agent.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -15,7 +15,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 - <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation" target="_blank" rel="noopener noreferrer nofollow">Java 8+</a>
 - <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md#application-servers" target="_blank" rel="noopener noreferrer nofollow">Supported WildFly version</a> or compatible JBoss EAP
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- A SigNoz Cloud account or Self-Hosted SigNoz instance
 
 ## Send traces to SigNoz
 
@@ -192,7 +192,7 @@ metadata:
   name: java-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4318
+    endpoint: http://<collector-service>:4318
   propagators:
     - tracecontext
     - baggage
@@ -204,6 +204,8 @@ spec:
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
 ```
+
+Replace `<collector-service>` with the address of the collector Service that receives the application's telemetry. If you installed the Collection Agent with the OpenTelemetry Operator guide, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector) for its Service.
 
 <KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed="true">
 The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
@@ -409,6 +411,8 @@ With JBoss/WildFly running, verify traces are being sent to SigNoz:
 ## Troubleshooting
 
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Traces not showing up in SigNoz?
 

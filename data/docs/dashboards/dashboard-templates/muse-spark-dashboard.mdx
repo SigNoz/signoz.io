@@ -1,0 +1,69 @@
+---
+date: 2026-09-09
+title: Meta Muse Spark Dashboard
+meta_title: Muse Spark Usage Dashboard
+description: "Monitor Meta Muse Spark in SigNoz: true cost with prompt caching priced correctly, reasoning share of output tokens, cache hit rate, and truncation."
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [Meta Muse Spark Monitoring](https://signoz.io/docs/muse-spark-monitoring/) guide to get started.
+</Admonition>
+
+The Meta Model API bills you a number at the end of the month. This dashboard tells you where it went: which model tier, how much of every response was reasoning the caller never saw, how much of your input was served from cache, and how often a request hit its token ceiling and returned nothing. It covers cost and token spend per model, prompt cache effectiveness, call duration against time to first chunk, and the split of finish reasons.
+
+Every panel filters on `gen_ai.provider.name = 'meta'`. That filter does two jobs and should not be removed. It separates Muse Spark from other providers reached through the same OpenAI compatible SDK, which otherwise all report `gen_ai.provider.name = openai`, and it prevents double counting, because the wrapper span and the SDK span both carry `gen_ai.request.model`. A Service variable and a Model variable scope every panel.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/muse-spark-dashboard.webp"
+  alt="Meta Muse Spark Dashboard"
+  caption="Meta Muse Spark Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/muse-spark/muse-spark-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the telemetry your instrumented Muse Spark calls emit to help you:
+
+- **Attribute Cost Correctly**: Price cached input separately from fresh input, which is the difference between a real number and one inflated several times over
+- **See the Reasoning Tax**: Compare reasoning tokens against output tokens to see how much of your output spend never reaches the caller
+- **Measure Cache Effectiveness**: Watch cache reads against input tokens, the single biggest lever on Muse Spark spend
+- **Separate Perceived from Total Latency**: Read time to first chunk next to full call duration, because on a reasoning model those are very different numbers
+- **Catch Silent Failures**: Track the `length` finish reason, which returns empty content rather than an error
+- **Compare Model Tiers**: Split every metric by model id, since the contributor tier is roughly 12x cheaper than standard for a near identical name
+
+## Panels Included
+
+The Overview section summarizes activity in the selected time range:
+
+| Panel | What it shows |
+|---|---|
+| Total Cost | Summed cost across all calls, with cached input priced separately |
+| Requests | Muse Spark calls in the window, counted once per request |
+| Error Rate | Share of calls that ended in an error |
+| Prompt Cache Hit Rate | Cache read tokens as a share of input tokens |
+
+**Cost and Tokens** breaks spend down by model and token type:
+
+- **Cost Over Time by Model**: True cost per model id over time, so a tier change shows up immediately
+- **Cost Share by Model**: Which model id is actually spending the money, usually standard tier models on a minority of requests
+- **Token Usage by Type**: Input, output, reasoning, and cache read tokens on one axis, where reasoning is a subset of output and cache read is a subset of input
+- **Per-Model Usage and Cost**: Requests, cost, tokens, and average latency per model id, with Reasoning Tokens next to Output Tokens
+
+**Latency** separates what the model does from what the user feels:
+
+- **Call Duration (p50 / p95 / p99)**: End to end duration. The p99 spikes are real, not noise: they are calls that ran to a large token ceiling
+- **Time to First Chunk (p50 / p95)**: Seconds of reasoning before the first visible token on streaming calls, which is the number users actually experience
+- **Slowest Calls**: Individual spans, slowest first, with output tokens, reasoning tokens, and cost per call
+
+**Reliability** covers volume, failures, and the truncation signal:
+
+- **Requests Over Time by Model**: Call volume per model id, useful context for reading any cost or latency change
+- **Errors Over Time by Model**: Errored calls per model. Grouping by model is the only breakdown available, because the instrumentation records no `error.type`
+- **Finish Reasons**: The split across `stop`, `tool_calls`, and `length`. A growing `length` slice is the leading indicator worth alerting on, since those calls return empty content rather than failing
+- **Recent Errors**: The latest errored spans with service and model, where the provider error string survives

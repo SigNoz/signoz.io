@@ -4,17 +4,17 @@ import siteMetadata from '@/data/siteMetadata'
 export const metadata: Metadata = {
   title: 'Unified Observability Platform',
   description:
-    "Transform your monitoring from fragmented silos to seamless insights with SigNoz's single-pane unified observability platform. Combine metrics, traces, and logs for complete system visibility.",
+    'Transform fragmented monitoring into unified insights with SigNoz Cloud. Correlate metrics, traces, and logs in one OpenTelemetry-native platform for complete system visibility.',
   openGraph: {
-    title: 'Unified Observability Platform | SigNoz',
+    title: 'Unified Observability Platform | SigNoz Cloud',
     description:
-      "Transform your monitoring from fragmented silos to seamless insights with SigNoz's single-pane unified observability platform. Combine metrics, traces, and logs for complete system visibility.",
+      'Transform fragmented monitoring into unified insights with SigNoz Cloud. Correlate metrics, traces, and logs in one OpenTelemetry-native platform for complete system visibility.',
     images: [
       {
         url: '/img/unified-observability/unified-observability-unified-observabilty-with-signoz.webp',
         width: 800,
         height: 533,
-        alt: 'SigNoz Unified Observability Platform',
+        alt: 'SigNoz Cloud Unified Observability Platform',
       },
     ],
     type: 'website',
@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   } as const,
   twitter: {
     card: 'summary_large_image',
-    title: 'Unified Observability Platform | SigNoz',
+    title: 'Unified Observability Platform | SigNoz Cloud',
     description:
-      "Transform your monitoring from fragmented silos to seamless insights with SigNoz's single-pane unified observability platform. Combine metrics, traces, and logs for complete system visibility.",
+      'Transform fragmented monitoring into unified insights with SigNoz Cloud. Correlate metrics, traces, and logs in one OpenTelemetry-native platform for complete system visibility.',
     images: [
       '/img/unified-observability/unified-observability-unified-observabilty-with-signoz.webp',
     ],

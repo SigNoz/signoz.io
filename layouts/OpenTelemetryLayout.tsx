@@ -1,12 +1,13 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { AuthorDetail, Blog } from '../types/transformedContent'
+import type { MDXContent } from '@/utils/strapi'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 
 interface LayoutProps {
-  content: CoreContent<Blog>
+  content: CoreContent<Blog> | CoreContent<MDXContent>
   authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
@@ -32,7 +33,6 @@ export default function OpenTelemetryLayout({
         authors={authors}
         toc={toc}
         contentType="blog"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

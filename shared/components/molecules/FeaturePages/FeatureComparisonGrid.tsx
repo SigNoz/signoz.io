@@ -44,7 +44,7 @@ export default function FeatureComparisonGrid({
   gridClassName,
   sectionHeadingSize = 'lg',
   stickyOffset = 'top-[220px]',
-  stickyBg = 'bg-[#0f1013]',
+  stickyBg = 'bg-[var(--l2-background)]',
   stickyZIndex = 'z-10',
   overlay,
   className,
@@ -61,7 +61,7 @@ export default function FeatureComparisonGrid({
   const headingClass =
     sectionHeadingSize === 'lg'
       ? 'mb-3 mt-8 py-2 text-center text-sm font-medium sm:text-lg md:text-left'
-      : 'py-3 text-sm font-medium leading-6 text-white'
+      : 'py-3 text-sm font-medium leading-6 text-[var(--l1-foreground)]'
 
   const renderSeparator = (occludeId?: string) => {
     const occludeProps = occludeId ? { 'data-occlude-sticky-text': occludeId } : {}

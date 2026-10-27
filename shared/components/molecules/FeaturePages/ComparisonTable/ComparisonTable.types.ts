@@ -8,8 +8,12 @@ export type ComparisonTableRow<VendorKey extends string> = {
   vendors: Record<VendorKey, ComparisonCell>
 }
 
+export type ComparisonTableVariant = 'default' | 'striped'
+
 export type ComparisonTableProps<VendorKey extends string> = {
   vendors: { key: VendorKey; label: string | React.ReactNode; className?: string }[]
   rows: ComparisonTableRow<VendorKey>[]
   className?: string
+  variant?: ComparisonTableVariant
+  featureColumnLabel?: string
 }
