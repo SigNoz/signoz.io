@@ -188,7 +188,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
                   Newsletter
                 </FooterPillLink>
                 <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2026/" newTab>
-                  KubeCon Salt Lake City 2026
+                  KubeCon, Salt Lake City 2026
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
               </div>
