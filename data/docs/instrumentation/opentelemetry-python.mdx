@@ -1,5 +1,5 @@
 ---
-date: 2026-10-21
+date: 2026-10-26
 title: Python OpenTelemetry Instrumentation - Send Traces to SigNoz
 description: Learn how to instrument your Python app with OpenTelemetry and send traces to SigNoz. Auto-instrument Django, Flask, FastAPI, and more.
 doc_type: howto
@@ -175,7 +175,7 @@ metadata:
   name: python-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4318
+    endpoint: http://<collector-service>:4318
   propagators:
     - tracecontext
     - baggage
@@ -187,6 +187,8 @@ spec:
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
 ```
+
+Replace `<collector-service>` with the address of the collector Service that receives the application's telemetry. If you installed the Collection Agent with the OpenTelemetry Operator guide, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/configure/#send-data-from-applications-to-the-collector) for its Service.
 
 <Admonition type="info" title="Why disable metrics?" defaultCollapsed="true">
 The Python auto-instrumentation image of the OTel Operator instruments HTTP clients such as `requests`, `urllib3`, and `httpx`, and sends their request metrics to your Collector by default. `OTEL_METRICS_EXPORTER` set to `none` stops these metrics and keeps traces. To send metrics later, set it to `otlp` or remove the variable.

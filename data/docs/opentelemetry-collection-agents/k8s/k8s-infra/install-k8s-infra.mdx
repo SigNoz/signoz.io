@@ -1,390 +1,1572 @@
 ---
-date: 2026-08-03
+date: 2026-10-15
 title: K8s Infra - Install
-description: Install the k8s-infra OpenTelemetry collection agent to send Kubernetes metrics, logs, and traces to SigNoz.
+description: Install the K8s Infra OpenTelemetry collection agent on Kubernetes with Helm or with Foundry (Helm or Kustomize) to send metrics, logs, and traces to SigNoz.
+doc_type: howto
 ---
-K8s-Infra is a set of observability components that help you monitor and gain insights into your Kubernetes clusters. This guide will walk you through the steps to deploy K8s-Infra using the official [Helm Chart](https://github.com/SigNoz/charts/tree/main/charts/k8s-infra) provided by SigNoz. By following these instructions, you'll be able to collect metrics, logs, and traces from your Kubernetes workloads and send them to your SigNoz backend for analysis.
 
-To add the SigNoz Helm repository to your helm client, run the following command:
+This guide explains how to install the K8s Infra collection agent on a Kubernetes cluster, with the `k8s-infra` Helm chart, or with Foundry through Helm or Kustomize.
+
+## Prerequisites
+
+- A Kubernetes cluster.
+- `kubectl` configured to reach the cluster.
+- For a Helm-based setup, Helm 3 installed on the same machine.
+- A SigNoz to send data to: [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted SigNoz](https://signoz.io/docs/install/self-host/).
+
+<Tabs entityName="tool">
+<TabItem value="helm" label="Helm" default>
+<Tabs entityName="setup">
+<TabItem value="helm" label="Helm CLI" default>
+
+## Install with the Helm CLI
+
+### Step 1: Add the Helm repository
+
+Run this on the machine where you use `kubectl`:
 
 ```bash
 helm repo add signoz https://charts.signoz.io
-```
-
-If the chart is already present, update the chart to the latest version:
-
-```bash
 helm repo update
 ```
 
-Based on how you are running SigNoz (e.g. SigNoz Cloud, in an independent VM or Kubernetes cluster),
-you have to provide the address to send data from the above receivers.
+### Step 2: Create override-values.yaml
 
-<Tabs entityName="plans">
-  <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+Create a file named `override-values.yaml` with the values for your Kubernetes platform:
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=k8s-infra#cloud-to-self-hosted).
+</Admonition>
+
 <Tabs entityName="k8s-vendor">
   <TabItem value="generic" label="Generic" default>
 
-    For generic Kubernetes clusters, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
+    ```yaml:override-values.yaml
     global:
-      cloud: others
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
     ```
+
+    **Verify these values:**
+
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+    - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+    - `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+    - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+    For every chart value, see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a>.
 
   </TabItem>
   <TabItem value="eks" label="AWS EKS">
 
-    For AWS Elastic Kubernetes Service (EKS), you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
+    ```yaml:override-values.yaml
     global:
       cloud: aws
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - eks
-          - system
     ```
+
+    **Verify these values:**
+
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+    - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+    - `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+    - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+    <Admonition type="warning" title="Nodes that require IMDSv2">
+    The AWS detectors of the `resourcedetection` processor read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS resource attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
+
+    Then restart the collectors so they detect again. Run this on the machine where you use `kubectl`:
+
+    ```bash
+    kubectl rollout restart daemonset/my-release-k8s-infra-otel-agent deployment/my-release-k8s-infra-otel-deployment
+    ```
+    </Admonition>
+
+    For every chart value, see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a>.
 
   </TabItem>
   <TabItem value="gke" label="GKE (Standard)">
 
-    For Google Kubernetes Engine (GKE) Standard, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
+    ```yaml:override-values.yaml
     global:
       cloud: gcp
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - gcp
-          - system
     ```
+
+    **Verify these values:**
+
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+    - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+    - `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+    - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+    For every chart value, see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a>.
 
   </TabItem>
   <TabItem value="gke-autopilot" label="GKE (Autopilot)">
 
-    For Google Kubernetes Engine (GKE) Autopilot, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
+    ```yaml:override-values.yaml
     global:
       cloud: gcp/autogke
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
-    presets:
-      kubeletMetrics:
-        authType: none
-        endpoint: ${K8S_NODE_NAME}:10255
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - gcp
-          - system
     ```
+
+    **Verify these values:**
+
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+    - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+    - `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+    - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+    <Admonition type="warning" title="What changes on GKE Autopilot">
+    On GKE Autopilot the agent binds no host ports, so applications send OTLP to the agent's Service, as shown in [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#send-data-from-applications-to-the-collector). Some kubelet metrics are turned off to fit Autopilot's restrictions; [Kubelet metrics on GKE Autopilot](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-autogke/) lists them and explains why.
+    </Admonition>
+
+    For every chart value, see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a>.
 
   </TabItem>
   <TabItem value="aks" label="AKS">
 
-    For Azure Kubernetes Service (AKS), you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
+    ```yaml:override-values.yaml
     global:
-      cloud: aks
+      cloud: azure
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - azure
-          - system
     ```
+
+    **Verify these values:**
+
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+    - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+    - `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+    - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+    For every chart value, see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a>.
 
   </TabItem>
   <TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
 
-    For Kubernetes clusters with Windows hosts, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml defaultCollapsed
+    ```yaml:override-values.yaml
     global:
-      cloud: aws
       clusterName: <CLUSTER_NAME>
       deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: https://ingest.{region}.signoz.cloud:443
+    otelCollectorEndpoint: https://ingest.<region>.signoz.cloud:443
     otelInsecure: false
     signozApiKey: <your-ingestion-key>
     presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - eks
-          - system
       hostMetrics:
         # Root path configuration is only required for Linux environments.
         # On Windows, this must be set to empty string to prevent installation failures.
-        root_path: ""
+        rootPath: ""
     otelAgent:
       # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
       image:
-        tag: 0.123.0-windows-2022-amd64
+        tag: 0.139.0-windows-2022-amd64
     otelDeployment:
       # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
       image:
-        tag: 0.123.0-windows-2022-amd64
+        tag: 0.139.0-windows-2022-amd64
     ```
+
+    **Verify these values:**
+
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+    - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+    - `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+    - `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+    - `0.139.0-windows-2022-amd64`: The image tag must match the Windows Server version of your nodes. `0.139.0-windows-2022-amd64` is for Windows Server 2022; use `0.139.0-windows-2019-amd64` for Windows Server 2019.
+
+    For every chart value, see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a>.
 
   </TabItem>
 </Tabs>
 
-<Admonition>
-Replace the placeholders with values for your environment:
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<CLUSTER_NAME>`: The name of the Kubernetes cluster, or a unique identifier for it.
-- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment (for example, `staging` or `production`).
-</Admonition>
+### Step 3: Install the chart
 
-</TabItem>
-<TabItem value='self-host' label='Self-Host'>
-<Tabs entityName="k8s-vendor">
-  <TabItem value="generic" label="Generic" default>
-
-    For generic Kubernetes clusters, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
-    global:
-      cloud: others
-      clusterName: <CLUSTER_NAME>
-      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: http://<IP-or-Endpoint-of-SigNoz-OtelCollector>:4318
-    otelInsecure: true
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-    ```
-
-  </TabItem>
-  <TabItem value="eks" label="AWS EKS">
-
-    For AWS Elastic Kubernetes Service (EKS), you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
-    global:
-      cloud: aws
-      clusterName: <CLUSTER_NAME>
-      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: http://<IP-or-Endpoint-of-SigNoz-OtelCollector>:4318
-    otelInsecure: true
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - eks
-          - system
-    ```
-
-  </TabItem>
-  <TabItem value="gke" label="GKE (Standard)">
-
-    For Google Kubernetes Engine (GKE) Standard, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
-    global:
-      cloud: gcp
-      clusterName: <CLUSTER_NAME>
-      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: http://<IP-or-Endpoint-of-SigNoz-OtelCollector>:4318
-    otelInsecure: true
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - gcp
-          - system
-    ```
-
-  </TabItem>
-  <TabItem value="gke-autopilot" label="GKE (Autopilot)">
-
-    For Google Kubernetes Engine (GKE) Autopilot, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
-    global:
-      cloud: gcp/autogke
-      clusterName: <CLUSTER_NAME>
-      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: http://<IP-or-Endpoint-of-SigNoz-OtelCollector>:4318
-    otelInsecure: true
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      kubeletMetrics:
-        authType: none
-        endpoint: ${K8S_NODE_NAME}:10255
-      resourceDetection:
-        detectors:
-          - gcp
-          - system
-    ```
-
-  </TabItem>
-  <TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
-
-    For Kubernetes clusters with Windows hosts, you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml defaultCollapsed
-    global:
-      cloud: aks
-      clusterName: <CLUSTER_NAME>
-      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: http://<IP-or-Endpoint-of-SigNoz-OtelCollector>:4318
-    otelInsecure: true
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - azure
-          - system
-      hostMetrics:
-        # Root path configuration is only required for Linux environments.
-        # On Windows, this must be set to empty string to prevent installation failures.
-        root_path: ""
-    otelAgent:
-      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
-      image:
-        tag: 0.123.0-windows-2022-amd64
-    otelDeployment:
-      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
-      image:
-        tag: 0.123.0-windows-2022-amd64
-    ```
-
-  </TabItem>
-  <TabItem value="aks" label="AKS">
-
-    For Azure Kubernetes Service (AKS), you can use the following configuration:
-
-    _override-values.yaml_
-
-    ```yaml
-    global:
-      cloud: aks
-      clusterName: <CLUSTER_NAME>
-      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-    otelCollectorEndpoint: http://<IP-or-Endpoint-of-SigNoz-OtelCollector>:4318
-    otelInsecure: true
-    presets:
-      otlphttpExporter:
-        enabled: true
-      loggingExporter:
-        enabled: false
-      resourceDetection:
-        detectors:
-          - azure
-          - system
-    ```
-
-  </TabItem>
-</Tabs>
-
-<Admonition>
-- Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique
-  identifier of the cluster.
-- Replace `<DEPLOYMENT_ENVIRONMENT>` with the deployment environment of your application.
-  Example: "staging", "production", etc.
-- If the OtelCollector endpoint is secured, you would have to disable `otelInsecure`
-  configuration and often make other changes such as including either config
-  or path to the TLS certificate and private key.
-</Admonition>
-</TabItem>
-</Tabs>
-
-
-To install the `k8s-infra` chart with the above configuration, run the following command:
+Run this from the directory that contains `override-values.yaml`:
 
 ```bash
 helm install my-release signoz/k8s-infra -f override-values.yaml
 ```
 
+Helm installs the release `my-release` into the namespace of your current `kubectl` context, `default` unless you set another.
+
+### Step 4: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that the pods are running:
+
+```bash
+kubectl get pods
+```
+
+The output should look similar to the following, with one `my-release-k8s-infra-otel-agent` pod per node. Pod suffixes vary, and if SigNoz runs in the same namespace its pods are listed too:
+
+```output
+NAME                                                    READY   STATUS    RESTARTS   AGE
+my-release-k8s-infra-otel-agent-7xk2p                   1/1     Running   0          2m
+my-release-k8s-infra-otel-agent-q9m4d                   1/1     Running   0          2m
+my-release-k8s-infra-otel-deployment-6d9c7b8f5c-k2x9p   1/1     Running   0          2m
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm container logs and Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `override-values.yaml`, then run this from the directory that contains it:
+
+```bash
+helm upgrade my-release signoz/k8s-infra -f override-values.yaml
+```
+
+- **Collector config** (presets, receivers, pipelines): see [Configure K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- **Chart values**: see the <a href="https://github.com/SigNoz/charts/tree/main/charts/k8s-infra" target="_blank" rel="noopener noreferrer nofollow">k8s-infra chart</a> for every setting.
+- **Chart version**: add `--version <chart-version>` to `helm install` and `helm upgrade`. Versions are listed in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+
+**Verify these values:**
+
+- `<chart-version>`: A `k8s-infra` chart version from the SigNoz charts releases, for example `0.17.1`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### helm install fails with `cannot re-use a name that is still in use`
+
+Run this on the machine where you use `kubectl` to list the releases in the current namespace:
+
+```bash
+helm list
+```
+
+**Cause:** the release `my-release` already exists.
+
+**Fix:** apply your changes with `helm upgrade`, as shown under Customize the Collection Agent.
+
+After the fix, `kubectl get pods` shows the agent pods as `Running`.
+
+### Agent pod stays Pending
+
+Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods`.
+
+**Cause:** another collector holds host ports `4317`, `4318`, `8888`, and `13133` on the node, for example an agent installed with Foundry. This happens on every platform except GKE Autopilot, where the agent binds no host ports.
+
+**Fix:** keep one of the two agents and remove the other.
+
+After the fix, `kubectl get pods` shows one agent pod per node as `Running`.
+
+### On GKE Autopilot the agent DaemonSet has no pods
+
+Run this on the machine where you use `kubectl` to see the DaemonSet's events:
+
+```bash
+kubectl describe daemonset my-release-k8s-infra-otel-agent
+```
+
+The events show the pods denied by an Autopilot policy (`denied by autogke-`).
+
+**Cause:** the values ask for host ports and host paths that GKE Autopilot denies.
+
+**Fix:** use the **GKE (Autopilot)** values from Step 2, which set `global.cloud: gcp/autogke`, and run the `helm upgrade` command under Customize the Collection Agent.
+
+After the fix, `kubectl get pods` shows one agent pod per node.
+
+### Agent logs a `root_path` warning on GKE Autopilot
+
+Run this on the machine where you use `kubectl` to see the agent's logs:
+
+```bash
+kubectl logs <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods`. The logs show a warning that starts with ``No `root_path` config set when running in docker environment``.
+
+**Cause:** on GKE Autopilot the agent has no host root to read, so the `hostmetrics` receiver runs without `root_path` and reports the agent container's filesystem.
+
+**Fix:** none needed. Node disk and network metrics come from the `kubeletstats` receiver as `k8s.node.filesystem.*` and `k8s.node.network.*`.
+
+The agent keeps running: `kubectl get pods` shows its pods as `Running`.
+
+### Agent pods stay in ErrImagePull
+
+Run this on the machine where you use `kubectl` to see the pull error:
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods`. The events show `ErrImagePull` or `ImagePullBackOff` with `no match for platform in manifest`.
+
+**Cause:** the collector image's OS does not match the node's OS, for example the Windows image on a Linux node.
+
+**Fix:** keep each agent on nodes of its OS: set `nodeSelector` under `otelAgent` and `otelDeployment` in `override-values.yaml`, for example `kubernetes.io/os: windows` for the Windows agent, then run the `helm upgrade` command under Customize the Collection Agent.
+
+After the fix, `kubectl get pods` shows the agent pods as `Running`.
+
+</details>
+
+</TabItem>
+<TabItem value="foundry" label="Foundry">
+
+## Install with Foundry and Helm
+
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
+
+### Step 1: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/#how-it-works-the-otelagent-and-oteldeployment):
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+<Tabs entityName="k8s-vendor">
+<TabItem value="generic" label="Generic" default>
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/helm" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Helm example</a>.
+
+</TabItem>
+<TabItem value="eks" label="AWS EKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+<Admonition type="warning" title="Nodes that require IMDSv2">
+The AWS detectors of the `resourcedetection` processor read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS resource attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
+
+Then restart the collectors so they detect again. Run this on the machine where you use `kubectl`:
+
+```bash
+kubectl rollout restart -n signoz daemonset/signoz-collector-agent deployment/signoz-collector-deployment
+```
+</Admonition>
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/kubernetes/helm" target="_blank" rel="noopener noreferrer nofollow">AWS EKS Helm example</a>.
+
+</TabItem>
+<TabItem value="gke" label="GKE (Standard)">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/gcp/kubernetes/helm" target="_blank" rel="noopener noreferrer nofollow">GKE Helm example</a>.
+
+</TabItem>
+<TabItem value="gke-autopilot" label="GKE (Autopilot)">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes-auto
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes-auto
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+<Admonition type="warning" title="What changes on GKE Autopilot">
+On GKE Autopilot the agent binds no host ports, so applications send OTLP to the agent's Service, as shown in [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#send-data-from-applications-to-the-collector). Some kubelet metrics are turned off to fit Autopilot's restrictions; [Kubelet metrics on GKE Autopilot](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-autogke/) lists them and explains why.
+</Admonition>
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/gcp/kubernetes-auto/helm" target="_blank" rel="noopener noreferrer nofollow">GKE Autopilot Helm example</a>.
+
+</TabItem>
+<TabItem value="aks" label="AKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/azure/kubernetes/helm" target="_blank" rel="noopener noreferrer nofollow">AKS Helm example</a>.
+
+</TabItem>
+<TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    spec:
+      image: otel/opentelemetry-collector-contrib:0.139.0-windows-2022-amd64
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                root_path: ""
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: helm
+  collector:
+    kind: deployment
+    spec:
+      image: otel/opentelemetry-collector-contrib:0.139.0-windows-2022-amd64
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+- `0.139.0-windows-2022-amd64`: The image tag must match the Windows Server version of your nodes. `0.139.0-windows-2022-amd64` is for Windows Server 2022; use `0.139.0-windows-2019-amd64` for Windows Server 2019.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/helm" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Helm example</a>.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="info" title="Change the namespace or pin the chart version" defaultCollapsed="true">
+Annotations under `metadata` set where the collectors are installed and which chart is used. Set them in both documents so both collectors land in the same namespace. The defaults are:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-namespace: signoz            # namespace to install into, created if missing
+    foundry.signoz.io/kubernetes-helm-chart: k8s-infra        # chart name, archive URL, or local path
+    foundry.signoz.io/kubernetes-helm-repo-url: https://charts.signoz.io
+    foundry.signoz.io/kubernetes-helm-chart-version: latest   # or a pinned version such as 0.17.1
+```
+
+The namespace defaults to `metadata.name`. The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/helm/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes each one.
+</Admonition>
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+This installs the `k8s-infra` chart into the `signoz` namespace as two releases, `signoz-collector-agent` and `signoz-collector-deployment`, and creates the namespace when it is missing. Run the same command again after editing `casting.yaml` to apply the change.
+
+<Admonition type="tip" title="Run Helm yourself" defaultCollapsed="true">
+To run Helm directly, generate the values files and pass each one to Helm:
+
+```bash
+foundryctl forge -f casting.yaml   # writes one values.yaml per collector under pours/collectionagent/collector/
+helm repo add signoz https://charts.signoz.io
+helm repo update
+helm upgrade --install signoz-collector-agent signoz/k8s-infra \
+   --namespace signoz --create-namespace \
+   -f pours/collectionagent/collector/agent/values.yaml
+helm upgrade --install signoz-collector-deployment signoz/k8s-infra \
+   --namespace signoz \
+   -f pours/collectionagent/collector/deployment/values.yaml
+```
+</Admonition>
+
+### Step 4: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that the pods are running:
+
+```bash
+kubectl get pods -n signoz
+```
+
+The output should look similar to the following, with one `signoz-collector-agent` pod per node. Pod suffixes vary, and if SigNoz runs in the same namespace its pods are listed too:
+
+```output
+NAME                                           READY   STATUS    RESTARTS   AGE
+signoz-collector-agent-7xk2p                   1/1     Running   0          2m
+signoz-collector-agent-q9m4d                   1/1     Running   0          2m
+signoz-collector-deployment-6d9c7b8f5c-k2x9p   1/1     Running   0          2m
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm container logs and Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml` or `collector/deployment/deployment.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/agent/agent.yaml: |
+              receivers:
+                kubeletstats:
+                  collection_interval: 60s
+  ```
+
+- **Chart values** (resources, tolerations, node selector): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/collector/agent/values.yaml` or `collectionagent/collector/deployment/values.yaml`. For example, to set the agent's resource requests:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/agent/values.yaml
+        operations:
+          - op: add
+            path: /otelAgent/resources
+            value:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+  ```
+
+  Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Agent pod stays Pending
+
+Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`.
+
+**Cause:** another collector holds host ports `4317`, `4318`, `8888`, and `13133` on the node, for example a `k8s-infra` release installed with Helm. This happens on every platform except GKE Autopilot, where the agent binds no host ports.
+
+**Fix:** keep one of the two agents and remove the other.
+
+After the fix, `kubectl get pods -n signoz` shows one agent pod per node as `Running`.
+
+### On GKE Autopilot the agent DaemonSet has no pods
+
+Run this on the machine where you use `kubectl` to see the DaemonSet's events:
+
+```bash
+kubectl describe daemonset -n signoz signoz-collector-agent
+```
+
+The events show the pods denied by an Autopilot policy (`denied by autogke-`).
+
+**Cause:** the casting asks for host ports and host paths that GKE Autopilot denies.
+
+**Fix:** use the **GKE (Autopilot)** casting from Step 2 and run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `kubectl get pods -n signoz` shows one agent pod per node.
+
+### Agent logs a `root_path` warning on GKE Autopilot
+
+Run this on the machine where you use `kubectl` to see the agent's logs:
+
+```bash
+kubectl logs -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`. The logs show a warning that starts with ``No `root_path` config set when running in docker environment``.
+
+**Cause:** on GKE Autopilot the agent has no host root to read, so the `hostmetrics` receiver runs without `root_path` and reports the agent container's filesystem.
+
+**Fix:** none needed. Node disk and network metrics come from the `kubeletstats` receiver as `k8s.node.filesystem.*` and `k8s.node.network.*`.
+
+The agent keeps running: `kubectl get pods -n signoz` shows its pods as `Running`.
+
+### Agent pods stay in ErrImagePull
+
+Run this on the machine where you use `kubectl` to see the pull error:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`. The events show `ErrImagePull` or `ImagePullBackOff` with `no match for platform in manifest`.
+
+**Cause:** the collector image's OS does not match the node's OS, for example the Windows image on a Linux node.
+
+**Fix:** keep each agent on nodes of its OS: add a patch on `collectionagent/collector/agent/values.yaml` that adds `/otelAgent/nodeSelector`, and one on `collectionagent/collector/deployment/values.yaml` that adds `/otelDeployment/nodeSelector`, for example `kubernetes.io/os: windows`. Then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `kubectl get pods -n signoz` shows the agent pods as `Running`.
+
+### foundryctl cast reaches the wrong cluster or none
+
+Run this on the machine where you run `foundryctl` to see which cluster it uses:
+
+```bash
+kubectl config current-context
+```
+
+**Cause:** `foundryctl cast` applies to the cluster of your current `kubectl` context.
+
+**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. Replace `<context-name>` with a context from `kubectl config get-contexts`.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods on that cluster.
+
+</details>
+
+</TabItem>
+</Tabs>
+</TabItem>
+<TabItem value="kustomize" label="Kustomize">
+
+## Install with Foundry and Kustomize
+
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
+
+### Step 1: Install foundryctl
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml` for your Kubernetes platform, with one document for each collector described in [How it works](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/#how-it-works-the-otelagent-and-oteldeployment):
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/?ingestion-client=collection-agent&collection-agent=foundry#cloud-to-self-hosted).
+</Admonition>
+
+<Tabs entityName="k8s-vendor">
+<TabItem value="generic" label="Generic" default>
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/kustomize" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Kustomize example</a>.
+
+</TabItem>
+<TabItem value="eks" label="AWS EKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: aws
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+<Admonition type="warning" title="Nodes that require IMDSv2">
+The AWS detectors of the `resourcedetection` processor read the instance metadata service from the collector pod. On nodes that require IMDSv2, the instance metadata hop limit must be 2, or the collectors start without the AWS resource attributes. To set the hop limit, see <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html" target="_blank" rel="noopener noreferrer nofollow">Configure the Instance Metadata Service options</a>.
+
+Then restart the collectors so they detect again. Run this on the machine where you use `kubectl`:
+
+```bash
+kubectl rollout restart -n signoz daemonset/signoz-collector-agent deployment/signoz-collector-deployment
+```
+</Admonition>
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/aws/kubernetes/kustomize" target="_blank" rel="noopener noreferrer nofollow">AWS EKS Kustomize example</a>.
+
+</TabItem>
+<TabItem value="gke" label="GKE (Standard)">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/gcp/kubernetes/kustomize" target="_blank" rel="noopener noreferrer nofollow">GKE Kustomize example</a>.
+
+</TabItem>
+<TabItem value="gke-autopilot" label="GKE (Autopilot)">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes-auto
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: gcp
+    mode: kubernetes-auto
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+<Admonition type="warning" title="What changes on GKE Autopilot">
+On GKE Autopilot the agent binds no host ports, so applications send OTLP to the agent's Service, as shown in [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#send-data-from-applications-to-the-collector). Some kubelet metrics are turned off to fit Autopilot's restrictions; [Kubelet metrics on GKE Autopilot](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-autogke/) lists them and explains why.
+</Admonition>
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/gcp/kubernetes-auto/kustomize" target="_blank" rel="noopener noreferrer nofollow">GKE Autopilot Kustomize example</a>.
+
+</TabItem>
+<TabItem value="aks" label="AKS">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    platform: azure
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/azure/kubernetes/kustomize" target="_blank" rel="noopener noreferrer nofollow">AKS Kustomize example</a>.
+
+</TabItem>
+<TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
+
+```yaml:casting.yaml minimap defaultCollapsed
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    spec:
+      image: otel/opentelemetry-collector-contrib:0.139.0-windows-2022-amd64
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/agent/agent.yaml: |
+            receivers:
+              hostmetrics:
+                root_path: ""
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+---
+apiVersion: v1alpha1
+kind: CollectionAgent
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: kubernetes
+    flavor: kustomize
+  collector:
+    kind: deployment
+    spec:
+      image: otel/opentelemetry-collector-contrib:0.139.0-windows-2022-amd64
+      env:
+        SIGNOZ_INGESTION_ENDPOINT: https://ingest.<region>.signoz.cloud:443
+        SIGNOZ_INGESTION_KEY: <your-ingestion-key>
+        K8S_CLUSTER_NAME: <CLUSTER_NAME>
+        OTEL_RESOURCE_ATTRIBUTES: deployment.environment=<DEPLOYMENT_ENVIRONMENT>
+      config:
+        data:
+          collector/deployment/deployment.yaml: |
+            exporters:
+              otlphttp/signoz:
+                headers:
+                  signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). It is set as a plain environment variable on the collector pods.
+- `<CLUSTER_NAME>`: A name for this cluster, unique across the clusters that send to the same SigNoz. Use the same value in both documents. It becomes `k8s.cluster.name` on every signal and names the cluster in the SigNoz Kubernetes views.
+- `<DEPLOYMENT_ENVIRONMENT>`: Your deployment environment, for example `staging` or `production`. It becomes `deployment.environment` on the collected telemetry.
+- `0.139.0-windows-2022-amd64`: The image tag must match the Windows Server version of your nodes. `0.139.0-windows-2022-amd64` is for Windows Server 2022; use `0.139.0-windows-2019-amd64` for Windows Server 2019.
+
+For every option of this casting, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/collectionagent/kubernetes/kustomize" target="_blank" rel="noopener noreferrer nofollow">Kubernetes Kustomize example</a>.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="info" title="Change the namespace" defaultCollapsed="true">
+The `foundry.signoz.io/kubernetes-namespace` annotation under `metadata` sets the namespace both collectors are applied to. Set it in both documents so both collectors land in the same namespace. The default is:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/kubernetes-namespace: signoz   # namespace to apply into, created by the apply
+```
+
+The namespace defaults to `metadata.name`. The <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/collectionagent/kubernetes/kustomize/README.md#annotations" target="_blank" rel="noopener noreferrer nofollow">example's annotations table</a> describes it.
+</Admonition>
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+This command:
+
+- writes one kustomize root per collector, `pours/collectionagent/collector/agent` and `pours/collectionagent/collector/deployment`;
+- applies each root with `kubectl apply -k` to the cluster of your current `kubectl` context;
+- creates the `signoz` namespace on the first apply, since each root holds the namespace, the collector's service account, RBAC, Service, workload, and config.
+
+Run the same command again after editing `casting.yaml` to apply the change.
+
+<Admonition type="tip" title="Run kubectl yourself" defaultCollapsed="true">
+To run kubectl directly, generate the kustomize roots and apply each one:
+
+```bash
+foundryctl forge -f casting.yaml   # writes one kustomize root per collector under pours/collectionagent/collector/
+kubectl apply -k pours/collectionagent/collector/agent
+kubectl apply -k pours/collectionagent/collector/deployment
+```
+
+To see the manifests before you apply them, run `kubectl kustomize` on a root, for example `kubectl kustomize pours/collectionagent/collector/agent`.
+</Admonition>
+
+### Step 4: Verify the Collection Agent
+
+Run this on the machine where you use `kubectl` to check that the pods are running:
+
+```bash
+kubectl get pods -n signoz
+```
+
+The output should look similar to the following, with one `signoz-collector-agent` pod per node. Pod suffixes vary, and if SigNoz runs in the same namespace its pods are listed too:
+
+```output
+NAME                                           READY   STATUS    RESTARTS   AGE
+signoz-collector-agent-7xk2p                   1/1     Running   0          2m
+signoz-collector-agent-q9m4d                   1/1     Running   0          2m
+signoz-collector-deployment-6d9c7b8f5c-k2x9p   1/1     Running   0          2m
+```
+
+In SigNoz, open the [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) views under **Infrastructure Monitoring**. The **Clusters** view lists your cluster under the name you set as `<CLUSTER_NAME>`, and the **Pods** and **Nodes** views fill in as data arrives. Check **Logs Explorer** to confirm container logs and Kubernetes events are flowing.
+
+## Customize the Collection Agent
+
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
+
+- **Collector settings** (image, environment): set them in the collector's `spec` (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#spec-fields" target="_blank" rel="noopener noreferrer nofollow">spec fields</a>). For example, to pin the collector image:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        image: otel/opentelemetry-collector-contrib:0.139.0
+  ```
+
+- **Collector config** (receivers, processors, pipelines): add it under `spec.collector.spec.config.data`, keyed `collector/agent/agent.yaml` or `collector/deployment/deployment.yaml`. It merges into the generated config (see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/moldings.md#custom-config-files" target="_blank" rel="noopener noreferrer nofollow">custom config files</a>). For example, to scrape kubelet metrics every 60s:
+
+  ```yaml
+  spec:
+    collector:
+      spec:
+        config:
+          data:
+            collector/agent/agent.yaml: |
+              receivers:
+                kubeletstats:
+                  collection_interval: 60s
+  ```
+
+- **Manifests** (resources, tolerations, node selector): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `collectionagent/collector/agent/workload.yaml` or `collectionagent/collector/deployment/workload.yaml`. For example, to set the agent's resource requests:
+
+  ```yaml
+  spec:
+    patches:
+      - target: collectionagent/collector/agent/workload.yaml
+        operations:
+          - op: replace
+            path: /spec/template/spec/containers/0/resources
+            value:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+  ```
+
+  Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Agent pod stays Pending
+
+Run this on the machine where you use `kubectl` to see why the pod is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`.
+
+**Cause:** another collector holds host ports `4317`, `4318`, `8888`, and `13133` on the node, for example a `k8s-infra` release installed with Helm. This happens on every platform except GKE Autopilot, where the agent binds no host ports.
+
+**Fix:** keep one of the two agents and remove the other.
+
+After the fix, `kubectl get pods -n signoz` shows one agent pod per node as `Running`.
+
+### On GKE Autopilot the agent DaemonSet has no pods
+
+Run this on the machine where you use `kubectl` to see the DaemonSet's events:
+
+```bash
+kubectl describe daemonset -n signoz signoz-collector-agent
+```
+
+The events show the pods denied by an Autopilot policy (`denied by autogke-`).
+
+**Cause:** the casting asks for host ports and host paths that GKE Autopilot denies.
+
+**Fix:** use the **GKE (Autopilot)** casting from Step 2 and run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `kubectl get pods -n signoz` shows one agent pod per node.
+
+### Agent logs a `root_path` warning on GKE Autopilot
+
+Run this on the machine where you use `kubectl` to see the agent's logs:
+
+```bash
+kubectl logs -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`. The logs show a warning that starts with ``No `root_path` config set when running in docker environment``.
+
+**Cause:** on GKE Autopilot the agent has no host root to read, so the `hostmetrics` receiver runs without `root_path` and reports the agent container's filesystem.
+
+**Fix:** none needed. Node disk and network metrics come from the `kubeletstats` receiver as `k8s.node.filesystem.*` and `k8s.node.network.*`.
+
+The agent keeps running: `kubectl get pods -n signoz` shows its pods as `Running`.
+
+### Agent pods stay in ErrImagePull
+
+Run this on the machine where you use `kubectl` to see the pull error:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with the agent pod's name from `kubectl get pods -n signoz`. The events show `ErrImagePull` or `ImagePullBackOff` with `no match for platform in manifest`.
+
+**Cause:** the collector image's OS does not match the node's OS, for example the Windows image on a Linux node.
+
+**Fix:** keep each agent on nodes of its OS: add a patch with `op: add` at `/spec/template/spec/nodeSelector` on each collector's workload, `collectionagent/collector/agent/workload.yaml` and `collectionagent/collector/deployment/workload.yaml`, for example `kubernetes.io/os: windows`. Then run `foundryctl cast -f casting.yaml` again from the directory that contains it.
+
+After the fix, `kubectl get pods -n signoz` shows the agent pods as `Running`.
+
+### foundryctl cast reaches the wrong cluster or none
+
+Run this on the machine where you run `foundryctl` to see which cluster it uses:
+
+```bash
+kubectl config current-context
+```
+
+**Cause:** `foundryctl cast` applies to the cluster of your current `kubectl` context.
+
+**Fix:** switch to the right context with `kubectl config use-context <context-name>`, then run `foundryctl cast -f casting.yaml` again from the directory that contains it. Replace `<context-name>` with a context from `kubectl config get-contexts`.
+
+After the fix, `kubectl get pods -n signoz` shows the collector pods on that cluster.
+
+</details>
+
+</TabItem>
+</Tabs>
+
+## Send data from your applications
+
+Node, pod, and container metrics, container logs, and Kubernetes events flow as soon as the agent pods are running. To send traces, metrics, and logs from your applications through the agent, see [Send Data from Applications to the Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#send-data-from-applications-to-the-collector).
 
 ## Video Walkthrough
 
@@ -395,13 +1577,8 @@ If you are someone who understands things better through video implementation, h
 <YouTube id="R5Lui7VK9Ys" />
 
 ## Next Steps
-- [Configure K8s-Infra OtelCollectors](/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/)
-- [Learn more about K8s-Infra](/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/)
+- [Configure K8s Infra collectors](/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/)
+- [Learn more about K8s Infra](/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/)
 - [Monitor Multiple K8S Clusters](/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
-
-
-
-
-
