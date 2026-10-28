@@ -118,22 +118,28 @@ function extractAuthorObjects(raw: unknown): { key?: string; name?: string; imag
     .filter((a) => a.name)
 }
 
+function normalizeAuthorKeys(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map((author: string | MDXContent) =>
+    typeof author === 'string' ? author : author.key
+  )
+}
+
+function normalizeTagValues(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
+}
+
 export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`
 
   const { publishedDate, updatedDate, sortDate } = deriveDates(comparison)
 
-  const authors = Array.isArray(comparison.authors)
-    ? comparison.authors.map((author: string | MDXContent) =>
-        typeof author === 'string' ? author : author.key
-      )
-    : []
+  const authors = normalizeAuthorKeys(comparison.authors)
   const authorObjects = extractAuthorObjects(comparison.authors)
 
-  const tags = Array.isArray(comparison.tags)
-    ? comparison.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
-    : []
+  const tags = normalizeTagValues(comparison.tags)
 
   const keywords = Array.isArray(comparison.keywords)
     ? comparison.keywords.map((keyword: string | MDXContent) =>
@@ -185,16 +191,10 @@ export const transformBlog = (blog: MDXContent) => {
 
   const { publishedDate, updatedDate, sortDate } = deriveDates(blog)
 
-  const authors = Array.isArray(blog.authors)
-    ? blog.authors.map((author: string | MDXContent) =>
-        typeof author === 'string' ? author : author.key
-      )
-    : []
+  const authors = normalizeAuthorKeys(blog.authors)
   const authorObjects = extractAuthorObjects(blog.authors)
 
-  const tags = Array.isArray(blog.tags)
-    ? blog.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
-    : []
+  const tags = normalizeTagValues(blog.tags)
 
   const keywords = Array.isArray(blog.keywords)
     ? blog.keywords.map((keyword: string | MDXContent) =>
@@ -257,16 +257,10 @@ export const transformGuide = (guide: MDXContent) => {
 
   const { publishedDate, updatedDate, sortDate } = deriveDates(guide)
 
-  const authors = Array.isArray(guide.authors)
-    ? guide.authors.map((author: string | MDXContent) =>
-        typeof author === 'string' ? author : author.key
-      )
-    : []
+  const authors = normalizeAuthorKeys(guide.authors)
   const authorObjects = extractAuthorObjects(guide.authors)
 
-  const tags = Array.isArray(guide.tags)
-    ? guide.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
-    : []
+  const tags = normalizeTagValues(guide.tags)
 
   const keywords = Array.isArray(guide.keywords)
     ? guide.keywords.map((keyword: string | MDXContent) =>
@@ -320,15 +314,9 @@ export const transformFaq = (faq: MDXContent) => {
   const slug = faq.path?.split('/').pop() || ''
   const { publishedDate, updatedDate, sortDate } = deriveDates(faq)
 
-  const authors = Array.isArray(faq.authors)
-    ? faq.authors.map((author: string | MDXContent) =>
-        typeof author === 'string' ? author : author.key
-      )
-    : []
+  const authors = normalizeAuthorKeys(faq.authors)
 
-  const tags = Array.isArray(faq.tags)
-    ? faq.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
-    : []
+  const tags = normalizeTagValues(faq.tags)
 
   return {
     type: 'FAQ',
@@ -359,11 +347,7 @@ export const transformDoc = (doc: MDXContent) => {
           .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
       : DEFAULT_DOC_TAGS
 
-  const authors = Array.isArray(doc.authors)
-    ? doc.authors.map((author: string | MDXContent) =>
-        typeof author === 'string' ? author : author.key
-      )
-    : []
+  const authors = normalizeAuthorKeys(doc.authors)
 
   const keywords = Array.isArray(doc.keywords)
     ? doc.keywords.map((keyword: string | MDXContent) =>
