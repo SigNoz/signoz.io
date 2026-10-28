@@ -100,7 +100,9 @@ and on (service)
 max by (service) (http_request_duration_seconds{quantile="0.9"}) > 1
 ```
 
-The error-rate calculation uses `http_requests_total` with `service` and `status` labels. The duration expression uses a summary metric with a `service` label; it takes the highest reported 90th percentile among instances, rather than calculating a service-wide percentile. `and on (service)` matches the two conditions by service. Check the metric names and labels in your own setup before using the expression. The [PromQL cheat sheet](https://signoz.io/guides/promql-cheat-sheet/) covers query syntax.
+The error-rate calculation uses `http_requests_total` with `service` and `status` labels. The duration expression uses a summary metric with a `service` label, that takes the highest reported 90th percentile among instances, rather than calculating a service-wide percentile.`and on (service)` matches these two conditions by service.
+
+Before using the expression in your own setup, check the metric names and labels and make adjustments accordingly. To quickly become familiar with PromQL query syntax, check out our [PromQL cheat sheet](https://signoz.io/guides/promql-cheat-sheet/).
 
 Use a `for` duration to avoid firing on brief spikes. For example, changing the CPU rule to `for: 15m` requires the condition to remain active for 15 minutes. Alertmanager can also group related alerts to reduce notification noise.
 
