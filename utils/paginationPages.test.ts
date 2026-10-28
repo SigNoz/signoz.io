@@ -58,8 +58,8 @@ describe('getListingPageNumber', () => {
     expect(getListingPageNumber(param, totalItems, 12)).toBeNull()
   })
 
-  it.each(['0', '-1', '02', '2abc', 'abc', '1.0', '1e1', ' 2', ''])(
-    'rejects the non-canonical page param %j',
+  it.each(['0', '-1', '1.5', '2abc', 'abc', 'Infinity', ''])(
+    'rejects the page param %j that is not a positive whole number',
     (param) => {
       expect(getListingPageNumber(param, 360, 12)).toBeNull()
     }

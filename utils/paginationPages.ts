@@ -11,9 +11,9 @@ export function getListingPageNumber(
   totalItems: number,
   perPage: number
 ): number | null {
-  if (!/^[1-9]\d*$/.test(param)) return null
-
   const page = Number(param)
+  if (!Number.isInteger(page) || page < 1) return null
+
   // An empty list means the CMS fetch failed, so render as before instead of caching a 404.
   if (totalItems === 0) return page
 
