@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-10-16
 title: LangChain & LangGraph Observability with OpenTelemetry
 meta_title: "LangGraph and LangChain Observability"
 description: Set up LangChain and LangGraph observability with OpenTelemetry and SigNoz. Monitor agent reasoning, tool calls, and chain execution with real-time traces.
@@ -223,6 +223,36 @@ When you click on a trace ID in SigNoz, you'll see a detailed view of the trace,
 
 <Admonition type="tip">
   Use the SigNoz MCP to automatically recognize important LangChain and LangGraph trace attributes and [create a custom dashboard using natural language](https://signoz.io/docs/ai/use-cases/dashboard-creation-natural-language/), with no manual configuration needed.
+</Admonition>
+
+## How SigNoz renders LangChain and LangSmith messages
+
+If you export traces with the <a href="https://docs.langchain.com/langsmith/trace-with-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">LangSmith OpenTelemetry exporter</a>, that exporter serialises each run's inputs and outputs as nested `{messages: [[…]]}` and `{generations: [[…]]}` structures of `langchain_core` messages. SigNoz detects this format automatically and renders it as a readable conversation in the [Trace Details](https://signoz.io/docs/userguide/span-details/) view. No configuration or attribute mapping is required, and the same rendering applies to every SigNoz user who sends LangChain traces in this format.
+
+SigNoz reads the serialised run and renders each turn with its parts:
+
+- **Conversation roles.** Each message is labelled with the role taken from its `langchain_core` message class: `system`, `user`, `assistant`, or `tool`.
+- **Message content.** Plain string content and `langchain_core`'s standard content blocks render as text.
+- **Tool calls.** An assistant tool call renders as a structured entry showing the tool name and arguments.
+- **Tool responses.** A tool message renders as a response and links back to the tool call that produced it by its call ID.
+- **Finish reason.** The reason a generation ended renders on the assistant message. SigNoz reads the key that each provider writes (see the table below).
+- **Error reason.** If a call fails, its error body (carried in `response_metadata`) renders on the message as `finish_reason: error`, so a failure such as an invalid API key is visible directly in the trace.
+- **Reasoning.** Reasoning content blocks sent as part of `langchain_core`'s standard content render as a dedicated reasoning part.
+- **Media.** Image, audio, video, and file content blocks render as typed media parts, including their URL, base64, and file-ID variants.
+
+### Finish reason keys by provider
+
+SigNoz surfaces the finish reason from the key each provider writes into the serialised response:
+
+| Provider | Key |
+|---|---|
+| OpenAI (and most providers) | `finish_reason` |
+| Anthropic | `stop_reason` |
+| Bedrock | `stopReason` |
+| Ollama | `done_reason` |
+
+<Admonition type="info">
+  Reasoning rendering applies to reasoning blocks sent through `langchain_core`'s standard content blocks. Provider-native thinking blocks (for example from Anthropic, Bedrock, or Google) are currently kept as sent and display as raw JSON rather than as a rendered reasoning part.
 </Admonition>
 
 ## LangChain and LangGraph Observability in JavaScript
