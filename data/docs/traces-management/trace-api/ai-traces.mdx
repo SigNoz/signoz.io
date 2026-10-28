@@ -1,0 +1,287 @@
+---
+date: 2026-10-28
+title: AI Traces Query API - Query LLM Cost and Tool Calls
+description: Query AI trace data in SigNoz with the builder_ai_query API type. Filter by tool calls, aggregate LLM cost by model, and select gen_ai token fields.
+doc_type: reference
+
+---
+
+The `builder_ai_query` query type runs queries against your AI traces, which are traces with at least one LLM, tool, or agent span. It adds per-trace fields such as tool call count and estimated cost, so you can filter, aggregate, and order AI traces programmatically. Use it when you want the data behind the [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/) without the UI.
+
+## API endpoint
+
+`builder_ai_query` uses the same endpoint, authentication, and top-level payload as the rest of the Trace API:
+
+`POST` `https://{URL}/api/v5/query_range`
+
+See the [Trace API overview](https://signoz.io/docs/traces-management/trace-api/overview/) for the API key and header setup, and the [payload model](https://signoz.io/docs/traces-management/trace-api/payload-model/) for the `start`, `end`, `requestType`, and `compositeQuery` fields.
+
+To use this query type, set `type` to `builder_ai_query` inside a query envelope and keep `signal` as `traces`:
+
+```json
+{
+  "type": "builder_ai_query",
+  "spec": {
+    "name": "A",
+    "signal": "traces"
+  }
+}
+```
+
+The `spec` accepts the same fields as a [builder query](https://signoz.io/docs/traces-management/trace-api/payload-model/#builder-query) (`filter`, `selectFields`, `aggregations`, `groupBy`, `order`, `limit`, `stepInterval`). The difference is that `builder_ai_query` also exposes the AI trace fields below.
+
+## Fields for AI queries
+
+Two kinds of fields are available in AI queries.
+
+**Trace fields** hold a total for the whole trace. Use them in `filter`, in `aggregations`, and in `order`.
+
+| Field | Type | Holds |
+| --- | --- | --- |
+| `trace.tool_call_count` | int | Number of tool calls in the trace. |
+| `trace.distinct_tool_count` | int | Number of different tools called in the trace. |
+| `trace.estimated_total_cost` | float | Estimated cost of all LLM calls in the trace. See [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/) for how cost is computed. |
+
+The Explorer lists the full set of trace fields, including `trace.llm_call_count`, `trace.input_tokens`, `trace.output_tokens`, `trace.total_tokens`, and `trace.max_llm_duration_nano`. See [Run a query](https://signoz.io/docs/ai-observability-explorer/#run-a-query) for the complete table.
+
+**Span attributes** come from the GenAI semantic conventions. Reference them with `fieldContext: attribute` in `selectFields` and `groupBy`.
+
+| Attribute | Holds |
+| --- | --- |
+| `gen_ai.request.model` | The model that the call requested, for example `gpt-4o`. |
+| `gen_ai.tool.name` | The name of a tool called by the model. |
+| `gen_ai.usage.input_tokens` | The number of input tokens consumed. |
+| `gen_ai.usage.output_tokens` | The number of output tokens produced. |
+
+For every attribute that SigNoz reads from GenAI spans and the source keys it maps by default, see [AI Observability Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/).
+
+## Examples
+
+All examples use `type: builder_ai_query` and `signal: traces`. The `start` and `end` values are epoch timestamps in milliseconds; replace them with your query range.
+
+### Raw spans from AI traces with many tool calls
+
+Return up to 100 spans from the `ai-agent` service whose trace has more than 10 tool calls, newest first. `requestType: raw` returns individual spans.
+
+```json minimap defaultCollapsed
+{
+  "schemaVersion": "v1",
+  "start": 1640995200000,
+  "end": 1640998800000,
+  "requestType": "raw",
+  "compositeQuery": {
+    "queries": [
+      {
+        "type": "builder_ai_query",
+        "spec": {
+          "name": "A",
+          "signal": "traces",
+          "filter": {
+            "expression": "service.name = 'ai-agent' AND trace.tool_call_count > 10"
+          },
+          "order": [
+            {
+              "key": {
+                "name": "timestamp",
+                "fieldContext": "span"
+              },
+              "direction": "desc"
+            }
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  }
+}
+```
+
+### Raw spans with selected gen_ai fields
+
+The same filter as above, with explicit output columns: the span name plus the requested model, tool name, and input and output token counts.
+
+```json minimap defaultCollapsed
+{
+  "schemaVersion": "v1",
+  "start": 1640995200000,
+  "end": 1640998800000,
+  "requestType": "raw",
+  "compositeQuery": {
+    "queries": [
+      {
+        "type": "builder_ai_query",
+        "spec": {
+          "name": "A",
+          "signal": "traces",
+          "filter": {
+            "expression": "service.name = 'ai-agent' AND trace.tool_call_count > 10"
+          },
+          "selectFields": [
+            {
+              "name": "name",
+              "fieldContext": "span"
+            },
+            {
+              "name": "gen_ai.request.model",
+              "fieldContext": "attribute"
+            },
+            {
+              "name": "gen_ai.tool.name",
+              "fieldContext": "attribute"
+            },
+            {
+              "name": "gen_ai.usage.input_tokens",
+              "fieldContext": "attribute"
+            },
+            {
+              "name": "gen_ai.usage.output_tokens",
+              "fieldContext": "attribute"
+            }
+          ],
+          "order": [
+            {
+              "key": {
+                "name": "timestamp",
+                "fieldContext": "span"
+              },
+              "direction": "desc"
+            }
+          ],
+          "limit": 100
+        }
+      }
+    ]
+  }
+}
+```
+
+### Average cost by model (scalar)
+
+Compute the average estimated per-trace cost for each model, most expensive first. `requestType: scalar` returns one summary value per group.
+
+```json minimap defaultCollapsed
+{
+  "schemaVersion": "v1",
+  "start": 1640995200000,
+  "end": 1640998800000,
+  "requestType": "scalar",
+  "compositeQuery": {
+    "queries": [
+      {
+        "type": "builder_ai_query",
+        "spec": {
+          "name": "A",
+          "signal": "traces",
+          "aggregations": [
+            {
+              "expression": "avg(trace.estimated_total_cost)"
+            }
+          ],
+          "groupBy": [
+            {
+              "name": "gen_ai.request.model",
+              "fieldContext": "attribute"
+            }
+          ],
+          "order": [
+            {
+              "key": {
+                "name": "avg(trace.estimated_total_cost)"
+              },
+              "direction": "desc"
+            }
+          ],
+          "limit": 10
+        }
+      }
+    ]
+  }
+}
+```
+
+### Cost by model over time (time series)
+
+Sum the estimated per-trace cost for each model in 60-second buckets. `requestType: time_series` with `stepInterval` is suited to trend charts.
+
+```json minimap defaultCollapsed
+{
+  "schemaVersion": "v1",
+  "start": 1640995200000,
+  "end": 1640998800000,
+  "requestType": "time_series",
+  "compositeQuery": {
+    "queries": [
+      {
+        "type": "builder_ai_query",
+        "spec": {
+          "name": "A",
+          "signal": "traces",
+          "aggregations": [
+            {
+              "expression": "sum(trace.estimated_total_cost)"
+            }
+          ],
+          "stepInterval": "60s",
+          "groupBy": [
+            {
+              "name": "gen_ai.request.model",
+              "fieldContext": "attribute"
+            }
+          ],
+          "order": [
+            {
+              "key": {
+                "name": "sum(trace.estimated_total_cost)"
+              },
+              "direction": "desc"
+            }
+          ],
+          "limit": 10
+        }
+      }
+    ]
+  }
+}
+```
+
+### Top traces by cost (trace list)
+
+Return the 10 most expensive traces that have more than 10 tool calls but fewer than 3 distinct tools. `requestType: trace` returns one row per trace.
+
+```json minimap defaultCollapsed
+{
+  "schemaVersion": "v1",
+  "start": 1640995200000,
+  "end": 1640998800000,
+  "requestType": "trace",
+  "compositeQuery": {
+    "queries": [
+      {
+        "type": "builder_ai_query",
+        "spec": {
+          "name": "A",
+          "signal": "traces",
+          "filter": {
+            "expression": "trace.tool_call_count > 10 AND trace.distinct_tool_count < 3"
+          },
+          "order": [
+            {
+              "key": {
+                "name": "trace.estimated_total_cost"
+              },
+              "direction": "desc"
+            }
+          ],
+          "limit": 10
+        }
+      }
+    ]
+  }
+}
+```
+
+## Next steps
+
+- [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/): run the same queries in the UI.
+- [AI Observability Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/): the full list of GenAI attributes and their default source keys.
+- [Trace API payload model](https://signoz.io/docs/traces-management/trace-api/payload-model/): the shared fields for every query type.
