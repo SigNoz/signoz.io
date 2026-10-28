@@ -1,9 +1,8 @@
-import { NextResponse } from 'next/server'
 import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
 import { buildIntroductionAgentMarkdown } from '@/utils/docs/buildIntroductionAgentMarkdown'
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 import { fetchDocBySlug } from '@/utils/cachedData'
-import { agentResponse } from '@/utils/agentResponseHeaders'
+import { agentResponse, agentNotFoundResponse } from '@/utils/agentResponseHeaders'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -12,14 +11,7 @@ export async function generateStaticParams() {
   return []
 }
 
-const notFoundResponse = () =>
-  new NextResponse('Not Found', {
-    status: 404,
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-store',
-    },
-  })
+const notFoundResponse = agentNotFoundResponse
 
 export async function GET(_: Request, props: { params: Promise<{ slug?: string[] }> }) {
   const params = await props.params
@@ -35,7 +27,7 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
   const doc = await fetchDocBySlug(slug)
 
   if (!doc) {
-    return notFoundResponse()
+    return notFoundResponse(`/docs/${slug}`)
   }
 
   const markdown = await renderDocMarkdownForAgents(doc)
