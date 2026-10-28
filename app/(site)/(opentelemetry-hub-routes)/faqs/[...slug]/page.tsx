@@ -5,7 +5,8 @@ import JsonLdScript from '@/components/JsonLdScript'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import { getAuthorDirectory, getContentBySlug } from '@/utils/contentRepository'
+import { getAuthorDirectory } from '@/utils/contentRepository'
+import { fetchFaqBySlug } from '@/utils/cachedData'
 import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
@@ -75,11 +76,8 @@ export async function generateMetadata(props: {
     // Convert slug array to path
     const path = params.slug.join('/')
 
-    const isProduction = process.env.VERCEL_ENV === 'production'
-
     try {
-      const deployment_status = isProduction ? 'live' : 'staging'
-      const content = await getContentBySlug('faqs', path, deployment_status)
+      const content = await fetchFaqBySlug(path)
 
       if (!content) {
         throw new Error(`FAQ content not found for path: ${path}`)
@@ -147,14 +145,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   const path = params.slug.join('/')
 
-  const isProduction = process.env.VERCEL_ENV === 'production'
-
   // Fetch content from the repository with error handling
   let content: MDXContent
   try {
-    const deployment_status = isProduction ? 'live' : 'staging'
-
-    const response = await getContentBySlug('faqs', path, deployment_status)
+    const response = await fetchFaqBySlug(path)
     if (!response) {
       console.error(`Invalid response for path: ${path}`)
       notFound()
