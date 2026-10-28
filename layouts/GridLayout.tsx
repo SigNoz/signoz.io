@@ -20,6 +20,7 @@ interface PaginationInternalProps extends PaginationProps {
 interface GridLayoutProps {
   posts: any[]
   title: string
+  emptyMessage: string
   initialDisplayPosts?: any[]
   pagination?: PaginationProps
   isDarkMode: boolean
@@ -109,6 +110,7 @@ export function Pagination({
 export default function GridLayout({
   posts,
   title,
+  emptyMessage,
   initialDisplayPosts = [],
   pagination,
   isDarkMode,
@@ -126,7 +128,7 @@ export default function GridLayout({
   if (posts && Array.isArray(posts) && posts.length <= 0) {
     return (
       <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
-        <Frown size={16} /> No Blogs found
+        <Frown size={16} /> {emptyMessage}
       </div>
     )
   }
@@ -141,7 +143,7 @@ export default function GridLayout({
             <div
               className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide text-[var(--l2-foreground)] max-md:max-w-full`}
             >
-              All posts
+              {title}
             </div>
 
             <div className="mt-4 grid gap-x-6 gap-y-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

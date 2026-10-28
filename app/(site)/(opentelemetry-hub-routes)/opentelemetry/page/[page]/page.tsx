@@ -78,6 +78,7 @@ export default async function Page(props: { params: Promise<{ page: string }> })
           description="Articles on OpenTelemetry concepts, implementation, and its use cases."
           searchPlaceholder="Search for an article..."
           gridTitle="All Articles"
+          emptyMessage="No articles found"
         />
       </ListingPageLayout>
     </>

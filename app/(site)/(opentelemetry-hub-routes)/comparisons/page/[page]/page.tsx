@@ -34,6 +34,7 @@ export default async function Page(props: { params: Promise<{ page: string }> })
           description="Stay informed about the latest tools in the observability domain with in-depth comparisons of popular options to determine the best fit for your needs."
           searchPlaceholder="Search for a comparison..."
           gridTitle="All Comparisons"
+          emptyMessage="No comparisons found"
         />
       </ListingPageLayout>
     </>

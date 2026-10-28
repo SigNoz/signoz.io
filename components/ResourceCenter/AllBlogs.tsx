@@ -26,6 +26,7 @@ export default function AllBlogs({
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
       title="All Blogs"
+      emptyMessage="No blogs found"
       isDarkMode={true}
     />
   )
