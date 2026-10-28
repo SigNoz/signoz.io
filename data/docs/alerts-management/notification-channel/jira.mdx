@@ -1,5 +1,5 @@
 ---
-date: 2026-08-19
+date: 2026-10-28
 doc_type: howto
 title: 'Jira Cloud: Create and Manage Issues from Alerts'
 description: Set up Jira Cloud as a notification channel in SigNoz to open, update, and resolve Jira issues automatically as alerts fire and resolve.
@@ -13,13 +13,13 @@ This page covers creating and managing Jira **issues** (work items) from alerts.
 
 Before configuring Jira Cloud as a notification channel in SigNoz, ensure that you have:
 
-- **A Jira Cloud site**: your site URL in the form `https://<your-site>.atlassian.net`. SigNoz appends the REST API path internally.
+- **A Jira Cloud site**: your site URL in the form `https://<your-site>.atlassian.net`, or a proxy or relay URL in front of it. SigNoz appends the REST API path internally.
 - **Authentication**: an Atlassian **email + API token**. We recommend a **service account** so issues aren't reported under a personal name and the channel doesn't break when someone leaves. See [Use a service account](#use-a-service-account-recommended). SigNoz authenticates with the email + token (basic auth).
 - **A project key and an issue type**: e.g. project `OPS` and issue type `Task`. The issue type must exist in that project. Types vary per project, so `Bug` or `Incident` may not be available everywhere.
 - **Permissions**: the account needs permission to **create** issues in the project (and to **transition** them, if you use resolve/reopen).
 
 <Admonition>
-Only **Jira Cloud** (`*.atlassian.net`) is supported. **Jira Server / Data Center are not supported**: Jira Cloud API tokens and the rich v3 (Atlassian Document Format) API used here are Cloud-only.
+The **Site URL** field accepts any URL, so you can point it at a proxy or relay in front of your Jira Cloud site. The target must still be **Jira Cloud** (`*.atlassian.net`), reached directly or through that proxy: the Jira Cloud API tokens and the rich v3 (Atlassian Document Format) API used here are Cloud-only. **Jira Server / Data Center are not supported.**
 </Admonition>
 
 ## Use a service account (recommended)
@@ -80,7 +80,7 @@ To create a new Jira notification channel:
 
 - Navigate to `Settings > Notification Channels` and click on `New Channel`.
 - Enter a **Name** for the channel and select **Jira** as the channel type.
-- **Site URL**: your Jira Cloud base URL, e.g. `https://your-domain.atlassian.net`.
+- **Site URL**: your Jira Cloud base URL, e.g. `https://your-domain.atlassian.net`, or a proxy or relay URL in front of it.
 - **Email**: the account email used for authentication, either the service account's `…@serviceaccount.atlassian.com` (recommended) or a personal account email.
 - **API token**: the token created above.
 - **Project key**: e.g. `OPS`.
@@ -218,7 +218,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `jira_configs` | `array` | List of Jira configurations. |
-| `jira_configs[].site` | `string` | Jira Cloud base URL, `https://<site>.atlassian.net`. **Required**. |
+| `jira_configs[].site` | `string` | Jira Cloud base URL, `https://<site>.atlassian.net`, or a proxy or relay URL in front of it. **Required**. |
 | `jira_configs[].project` | `string` | Project key, e.g. `OPS`. **Required**. |
 | `jira_configs[].issue_type` | `string` | An issue type that exists in the project, e.g. `Task`. **Required**. |
 | `jira_configs[].http_config.basic_auth.username` | `string` | Atlassian account email. **Required**. |
@@ -241,7 +241,7 @@ If you encounter issues:
 - **401 / 403 with a service account** → confirm you used the service account's `…@serviceaccount.atlassian.com` email, added the account to the project, and gave the token the `read:jira-work` and `write:jira-work` scopes.
 - **400 on create** → a field required by that project's issue type is missing, or the project / issue type / priority is invalid. Check the project's create screen.
 - **"can't find transition"** → only relevant when a transition-name override is set and doesn't match the workflow. Clear the override to fall back to auto-detection.
-- **Invalid Site URL** → the URL must be an `https` URL on an `atlassian.net` domain.
+- **Can't reach Jira / unexpected response** → the Site URL field accepts any URL, so confirm it points at your Jira Cloud site, directly or through a proxy that forwards to `*.atlassian.net`.
 - **Invalid Reopen window** → use a duration like `30m`, `72h`, or `3d` (minimum `1m`).
 - **Test the setup**: use the **Test** button in SigNoz to create an issue end-to-end. If it fails, the error identifies the misconfigured field.
 

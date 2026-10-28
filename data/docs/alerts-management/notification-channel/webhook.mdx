@@ -1,5 +1,5 @@
 ---
-date: 2026-10-12
+date: 2026-10-28
 title: Configure Webhook Channel
 description: Configure Webhook channels in SigNoz to send alerts to custom endpoints or third-party services.
 doc_type: howto
@@ -29,7 +29,10 @@ To create a new Webhook notification channel in SigNoz, follow these steps:
 - Navigate to `Settings > Account Settings > Notification Channels` and click on `New Channel`.
 - Enter a **Name** for the channel and select Webhook as the channel type.
 - **Webhook URL**: Enter the Webhook URL endpoint.
-- **Username and Password** (Optional): Provide the necessary credentials for authentication.
+- **Authentication**: Choose how SigNoz authenticates to the endpoint. Only the fields for the selected mode are shown:
+  - **None**: No credentials are sent, and no credential fields appear.
+  - **Basic auth**: Reveals a **Username** and a **Password** field. A username without a password is accepted, for schemes that carry the credential in the username alone.
+  - **Bearer token**: Reveals a single **Bearer token** field. No username or password field appears.
 
 **Test Configuration**: 
 Click the Test button to test the connection with your application.
@@ -41,6 +44,8 @@ Click the Test button to test the connection with your application.
 To edit an existing webhook notification channel:
 - Navigate to the channel settings in SigNoz.
 - You can edit the webhook URL and other parameters. However, note that the channel name and type are not editable after creation.
+
+When you open an existing channel, the **Authentication** mode is pre-selected from the stored credentials: **Bearer token** if a token is saved, **Basic auth** if a username or password is saved, otherwise **None**. Switching modes drops the previous mode's credentials when you save, so switching from Basic auth to Bearer token does not carry over the saved username and password.
 
 ![image](/img/docs/alerts/webhook-2.webp)
 
@@ -146,8 +151,8 @@ curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
 | `webhook_configs[].url` | `string` | The Webhook URL endpoint. **Mandatory**. Must be a valid URL. |
 | `webhook_configs[].http_config` | `object` | HTTP configuration for the webhook, such as basic auth. |
 | `webhook_configs[].http_config.basic_auth` | `object` | Basic authentication credentials. |
-| `webhook_configs[].http_config.basic_auth.username` | `string` | Username for basic authentication. Leave empty for bearer auth or when authentication is not necessary. |
-| `webhook_configs[].http_config.basic_auth.password` | `string` | Password for basic authentication. Specify a password or bearer token. |
+| `webhook_configs[].http_config.basic_auth.username` | `string` | Username for basic authentication. Can be set without a password. Leave empty when authentication is not necessary. |
+| `webhook_configs[].http_config.basic_auth.password` | `string` | Password for basic authentication. Optional. |
 
 
 ## Integrating with Incident.io, Rootly, Zenduty, Pagerly and more
