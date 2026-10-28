@@ -1,10 +1,11 @@
-import { sortPosts } from 'pliny/utils/contentlayer'
+import { dateSortDesc, sortPosts } from 'pliny/utils/contentlayer'
 import type { MDXContent } from '@/utils/strapi'
 import hubConfig from '@/constants/opentelemetry_hub.json'
 import {
   fetchAllGuidesForPage,
   fetchAllBlogsForPage,
   fetchAllComparisonsForPage,
+  fetchAllFaqsForPage,
 } from '@/utils/cachedData'
 import { getAuthorDirectory, type AuthorDirectory } from '@/utils/contentRepository'
 import { getAuthorKey } from '@/utils/contentHelpers'
@@ -57,6 +58,7 @@ export type ResourceCenterBlog = ResourceCenterCard
 export type ResourceCenterGuide = ResourceCenterCard
 export type ResourceCenterComparison = ResourceCenterCard
 export type ResourceCenterOpenTelemetryArticle = ResourceCenterCard
+export type ResourceCenterFaq = ResourceCenterCard
 
 function resolveResourceCenterAuthors(
   source: ResourceCenterCardSource,
@@ -155,6 +157,13 @@ export async function getResourceCenterComparisons(): Promise<ResourceCenterComp
   return sortPosts(comparisons).map((comparison) =>
     pickResourceCenterCardFields(comparison, authorDirectory)
   )
+}
+
+export async function getResourceCenterFaqs(): Promise<ResourceCenterFaq[]> {
+  const [faqs, authorDirectory] = await Promise.all([fetchAllFaqsForPage(), getAuthorDirectory()])
+  return faqs
+    .map((faq) => pickResourceCenterCardFields(faq, authorDirectory))
+    .sort((a, b) => dateSortDesc(a.date, b.date))
 }
 
 type HubConfigNode = {

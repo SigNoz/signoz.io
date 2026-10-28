@@ -59,6 +59,9 @@ export default function TopNav() {
     } else if (pathname.startsWith(`${TAB_PATHNAMES.OPENTELEMETRY}/page/`)) {
       setActiveTab(TABS.OPENTELEMETRY)
       setShouldShowTabs(true)
+    } else if (isListingOrPagination(TAB_PATHNAMES.FAQS)) {
+      setActiveTab(TABS.FAQS)
+      setShouldShowTabs(true)
     } else {
       setShouldShowTabs(false)
     }

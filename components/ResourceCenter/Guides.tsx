@@ -81,6 +81,7 @@ export default function Guides({
             initialDisplayPosts={isFiltering ? blogs : initialDisplayPosts}
             pagination={isFiltering ? undefined : pagination}
             title="All Guides"
+            emptyMessage="No guides found"
             isDarkMode={true}
           />
         </div>

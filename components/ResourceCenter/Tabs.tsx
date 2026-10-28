@@ -1,5 +1,7 @@
+'use client'
+
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 
 const TAB_STYLE =
   'inline-flex h-full shrink-0 items-center whitespace-nowrap rounded-t-lg px-1 py-1.5 pb-3.5'
@@ -29,9 +31,25 @@ function TabLink({
 }
 
 export default function Tabs({ activeTab }: { activeTab: string }) {
+  const scrollerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    const active = scroller?.querySelector<HTMLElement>('[aria-selected="true"]')
+    if (!scroller || !active) return
+
+    const scrollerRect = scroller.getBoundingClientRect()
+    const activeRect = active.getBoundingClientRect()
+    if (activeRect.right > scrollerRect.right) {
+      scroller.scrollLeft += activeRect.right - scrollerRect.right
+    } else if (activeRect.left < scrollerRect.left) {
+      scroller.scrollLeft -= scrollerRect.left - activeRect.left
+    }
+  }, [activeTab])
+
   return (
     <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-[var(--l1-border)] text-[var(--l1-foreground)] backdrop-blur-[20px]">
-      <div className="mx-auto h-fit max-w-8xl overflow-x-auto md:px-8">
+      <div ref={scrollerRef} className="mx-auto h-fit max-w-8xl overflow-x-auto md:px-8">
         <ul
           className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-[var(--l2-foreground)] sm:gap-6"
           id="default-tab"
@@ -49,6 +67,9 @@ export default function Tabs({ activeTab }: { activeTab: string }) {
           </TabLink>
           <TabLink href="/opentelemetry/" tabId="openTelemetry-tab" activeTab={activeTab}>
             OpenTelemetry
+          </TabLink>
+          <TabLink href="/faqs/" tabId="faqs-tab" activeTab={activeTab}>
+            Product FAQs
           </TabLink>
           <Link
             href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"

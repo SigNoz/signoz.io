@@ -22,6 +22,7 @@ export enum TABS {
   COMPARISONS = 'comparisons-tab',
   GUIDES = 'guides-tab',
   OPENTELEMETRY = 'openTelemetry-tab',
+  FAQS = 'faqs-tab',
 }
 
 export enum TAB_PATHNAMES {
@@ -29,6 +30,7 @@ export enum TAB_PATHNAMES {
   COMPARISONS = '/comparisons',
   GUIDES = '/guides',
   OPENTELEMETRY = '/opentelemetry',
+  FAQS = '/faqs',
 }
 
 export interface ProductItem {

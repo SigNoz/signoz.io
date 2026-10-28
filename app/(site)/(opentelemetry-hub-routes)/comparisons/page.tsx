@@ -24,6 +24,7 @@ export default async function ComparisonsHome() {
           description="Stay informed about the latest tools in the observability domain with in-depth comparisons of popular options to determine the best fit for your needs."
           searchPlaceholder="Search for a comparison..."
           gridTitle="All Comparisons"
+          emptyMessage="No comparisons found"
         />
       </ListingPageLayout>
     </>

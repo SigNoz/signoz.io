@@ -1,7 +1,10 @@
+import { notFound } from 'next/navigation'
 import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { buildListingMetadata } from '../../../metadata'
 import { getResourceCenterComparisons } from '../../../content'
+import { POSTS_PER_PAGE } from '../../../constants'
+import { getListingPageNumber } from '@/utils/paginationPages'
 import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
 
@@ -15,6 +18,8 @@ export async function generateMetadata(props: { params: Promise<{ page: string }
 export default async function Page(props: { params: Promise<{ page: string }> }) {
   const params = await props.params
   const posts = await getResourceCenterComparisons()
+  const pageNumber = getListingPageNumber(params.page, posts.length, POSTS_PER_PAGE)
+  if (!pageNumber) notFound()
   const breadcrumbJsonLd = generateSectionHubBreadcrumb('comparisons', params.page)
 
   return (
@@ -23,12 +28,13 @@ export default async function Page(props: { params: Promise<{ page: string }> })
       <ListingPageLayout>
         <ListingWithSearch
           posts={posts}
-          pageNumber={parseInt(params.page)}
+          pageNumber={pageNumber}
           pageRoute="comparisons"
           title="Comparisons"
           description="Stay informed about the latest tools in the observability domain with in-depth comparisons of popular options to determine the best fit for your needs."
           searchPlaceholder="Search for a comparison..."
           gridTitle="All Comparisons"
+          emptyMessage="No comparisons found"
         />
       </ListingPageLayout>
     </>

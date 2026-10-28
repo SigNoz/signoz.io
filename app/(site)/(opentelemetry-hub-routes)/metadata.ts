@@ -2,11 +2,14 @@ import type { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { POSTS_PER_PAGE } from './constants'
 
-export function buildListingMetadata(section: string, page?: string): Metadata {
+export function buildListingMetadata(
+  section: string,
+  page?: string,
+  slug = section.toLowerCase()
+): Metadata {
   const title = page ? `${section} - Page ${page}` : section
   const fullTitle = `${title} | SigNoz`
   const description = `${siteMetadata.description} | ${title} | SigNoz`
-  const slug = section.toLowerCase()
   const url = page
     ? `${siteMetadata.siteUrl}/${slug}/page/${page}`
     : `${siteMetadata.siteUrl}/${slug}`

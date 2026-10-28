@@ -15,6 +15,7 @@ export default function ListingWithSearch({
   description,
   searchPlaceholder,
   gridTitle = 'All posts',
+  emptyMessage,
 }: {
   posts?: ResourceCenterCard[]
   pageNumber?: number
@@ -23,6 +24,7 @@ export default function ListingWithSearch({
   description: string
   searchPlaceholder: string
   gridTitle?: string
+  emptyMessage: string
 }) {
   const [filteredPosts, setFilteredPosts] = React.useState(posts)
   const [searchValue, setSearchValue] = React.useState('')
@@ -57,6 +59,7 @@ export default function ListingWithSearch({
         initialDisplayPosts={searchValue ? filteredPosts : initialDisplayPosts}
         pagination={searchValue ? undefined : pagination}
         title={gridTitle}
+        emptyMessage={emptyMessage}
         isDarkMode={true}
       />
     </div>
