@@ -1,17 +1,17 @@
 ---
 
 title: How to Filter Prometheus Metrics by Value - A Guide
-date: 2024-10-30
-tags: [grafana]
-authors: [nitin_gouda]
+date: 2026-10-28
+tags: [prometheus, monitoring]
+authors: [saurabh_patil]
 description: Learn how to filter Prometheus metrics by value for precise monitoring. This guide covers advanced techniques, practical examples, and optimization strategies.
 keywords: [Prometheus metrics, value-based filtering, PromQL, metric analysis, monitoring, observability, SigNoz]
 related_articles:
   - '/guides/how-to-get-all-the-metrics-of-an-instance-with-prometheus-api'
   - '/guides/what-are-prometheus-labels'
   - '/guides/how-to-write-a-prometheus-query-that-returns-the-value-of-the-label'
-  - '/guides/prometheus-exclude-0-values-from-query-result'
   - '/guides/what-is-prometheus-target'
+
 ---
 
 Prometheus, a powerful open-source monitoring system, collects and stores time series data as metrics. While label-based filtering is common, there are scenarios where filtering by metric value becomes crucial for precise analysis. This guide explores the ins and outs of filtering Prometheus results by metric value, providing you with the knowledge to enhance your monitoring capabilities.
@@ -20,11 +20,11 @@ Prometheus, a powerful open-source monitoring system, collects and stores time s
 
 Prometheus is a powerful monitoring and alerting toolkit used to collect metrics about your system. Prometheus metrics represent numerical measurements of various aspects of your system's state over time. Each metric comprises three key components:
 
-1. Metric Name: This identifies what is being measured. For example, `http_requests_total` tracks the total number of HTTP requests made to your application.
-2. Labels: Labels are key-value pairs that provide additional context about the metric. They help categorize and filter metrics based on specific attributes. For example:
+1. **Metric Name:** This identifies what is being measured. For example, `http_requests_total` tracks the total number of HTTP requests made to your application.
+2. **Labels:** Labels are key-value pairs that provide additional context about the metric. They help categorize and filter metrics based on specific attributes. For example:
     - `method="GET"`: Indicates the HTTP method used.
     - `status="200"`: Represents the HTTP response status code.
-3. Metric Value: This is the actual numerical value associated with the metric. For instance, in the example below, `1234` is the metric value. It indicates that 1,234 HTTP GET requests resulted in a 200 (OK) status code.
+3. **Metric Value:** This is the actual numerical value associated with the metric. For instance, in the example below, `1234` is the metric value. It indicates that 1,234 HTTP GET requests resulted in a 200 (OK) status code.
     
     ```
     http_requests_total{method="GET", status="200"} 1234
@@ -35,7 +35,7 @@ Prometheus is a powerful monitoring and alerting toolkit used to collect metrics
 
 Filtering in Prometheus allows you to refine your queries to focus on specific metrics of interest. Traditionally, Prometheus filtering emphasizes labels. Here’s an overview of some of the most common filtering techniques in Prometheus:
 
-1. Label-Based Filtering: Labels in Prometheus are key-value pairs attached to metrics that provide additional context. They help categorize and filter metrics for granular insights. Label-based filtering allows you to narrow down your query by specifying the labels and their values.
+1. **Label-Based Filtering:** Labels in Prometheus are key-value pairs attached to metrics that provide additional context. They help categorize and filter metrics for granular insights. Label-based filtering allows you to narrow down your query by specifying the labels and their values.
 
 Example:
 
@@ -51,7 +51,7 @@ http_requests_total{method="GET", status="200"}
 
 Here, the query filters HTTP GET requests that returned a 200 status code, allowing more detailed tracking of successful requests.
 
-2. Regex Filtering: Sometimes, you may need to filter multiple label values at once. Prometheus supports regular expressions (regex) for flexible filtering of label values. This technique is particularly useful when querying for multiple matching values.
+2. **Regex Filtering:** Sometimes, you may need to filter multiple label values at once. Prometheus supports regular expressions (regex) for flexible filtering of label values. This technique is particularly useful when querying for multiple matching values.
 
 Example:
 
@@ -71,7 +71,7 @@ http_requests_total[5m]
 
 This query retrieves the count of HTTP requests within the last 5 minutes. You can apply additional filters to focus on specific requests within this time window.
 
-4. Aggregation and Grouping: Aggregation functions like `sum`, `avg`, `min`, `max`, and `rate` allow you to filter and [aggregate metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/) for analysis. By combining these functions with filters, you can gain valuable insights into high-level system behavior or detect anomalies in specific parts of the system.
+4. **Aggregation and Grouping:** You can use `sum`, `avg`, `min`, and `max` to [aggregate metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/) across instances or other labels. By combining these functions with filters, you can gain valuable insights into high-level system behavior or detect anomalies in specific parts of the system.
 
 Example:
 
@@ -100,7 +100,7 @@ In modern monitoring, traditional label-based filtering can overwhelm users with
 
 While label-based filtering is effective for segmenting metrics, it has some limitations:
 
-- Inability to Filter by Value: You cannot filter based on the actual metric values. For example, if you want to analyze only those HTTP GET requests that resulted in a certain status code or those exceeding a specific count, label-based filtering alone cannot achieve this.
+- Inability to Filter by Value: Label filters cannot check the numerical value of a metric. For example, you can select CPU metrics for a particular server by its label, but label filtering alone cannot show whether its CPU usage exceeds 80%.
 - Advanced Analysis: For performance analysis and alerting based on thresholds, value-based filtering becomes essential. This means you need to combine your understanding of metrics with the ability to filter based on numerical values.
 
 ### Benefits of Value-Based Filtering for Performance Analysis
@@ -115,34 +115,42 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     jvm_memory_used_bytes > 10000000
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.08.06_PM.webp" alt="JVM memory usage query showing dynamic analysis" caption="" />2. Dynamic Analysis
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.08.06_PM.webp" alt="JVM memory usage query showing dynamic analysis" caption="" />
+
+2. Dynamic Analysis
     
-    Adapt your queries to reflect changing system behaviors without modifying label structures. For example, if you want to monitor the JVM memory usage and focus on instances where the committed memory exceeds 50 MB, you can use:
+    Adapt your queries to reflect changing system behaviors without modifying label structures. For example, if you want to monitor the JVM memory usage and focus on instances where the committed memory exceeds 50 MiB, you can use:
     
     ```
     jvm_memory_committed_bytes > 50 * 1024 * 1024
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.10.29_PM.webp" alt="JVM memory usage query showing complex conditions" caption="" />3. Complex Conditions
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.10.29_PM.webp" alt="JVM memory usage query showing complex conditions" caption="" />
+
+3. Complex Conditions
     
     Value-based filtering allows you to create sophisticated queries that combine multiple conditions. This capability is particularly useful for analyzing several metrics simultaneously. For example, you might want to identify instances where both the live threads and CPU usage are above certain thresholds:
     
     ```
-    jvm_threads_live_threads > 20 and system_cpu_usage > 0.04
+    (jvm_threads_live_threads > 20) and on(job, instance) (system_cpu_usage > 0.04)
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.54.21_PM.webp" alt="Prometheus query result showing an empty result when conditions are not met" caption="" />This query provides a comprehensive view of resource utilization, allowing you to pinpoint potential issues that could affect system performance. However, if the values do not meet the conditions during the time of the query, it may return an `Empty Query result`.
-    
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.54.21_PM.webp" alt="Prometheus graph showing live thread counts where thread count exceeds 20 and CPU usage exceeds 4%" caption="" />
+
+    This query finds targets with more than 20 live threads and CPU usage above 4%. It matches the metrics by `job` and `instance`, so both must use these labels for the same target.
+
 4. Efficient Alerting
     
     Setting up alerts based on actual metric values rather than predefined label categories leads to more effective monitoring. By using value-based conditions, you can ensure that alerts are triggered only when specific performance thresholds are breached. For example, to alert when the number of HTTP 500 errors exceeds a certain count within a defined time frame, you could use:
     
     ```
-    increase(jvm_gc_pause_seconds_count[5m]) >= 0
+    sum by (job, instance) (increase(http_requests_total{status="500"}[5m])) > 10
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.57.53_PM.webp" alt="Prometheus alert rule for HTTP 500 errors" caption="" />This alert will only activate if there are more than 10 HTTP 500 errors in the last 5 minutes, allowing for a focused response to real issues.
-    
+    This query finds targets with more than ten HTTP 500 errors in the last five minutes.
+
+    To receive notifications, use this query in a [Prometheus alerting rule](https://signoz.io/guides/what-is-a-prometheus-rule/) and configure Alertmanager.
+
 5. Monitoring CPU Usage
     
     Consider a scenario where you need to identify all servers with CPU usage above 13%. Label-based filtering can't achieve this directly, but value-based filtering makes it straightforward:
@@ -151,7 +159,7 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     system_cpu_usage > 0.13
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.39.50_PM.webp" alt="Prometheus query showing value-based CPU utilization filtering" caption="" />This query directly retrieves all instances where CPU utilization exceeds 80%, providing immediate insights into servers that may require scaling or optimization.
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-09-30_at_7.39.50_PM.webp" alt="Prometheus query showing value-based CPU utilization filtering" caption="" />This query finds instances where CPU usage exceeds 13%. Here, CPU usage is measured from 0 to 1.
     
 
 ### Comparison Between Label-Based and Value-Based Filtering
@@ -182,7 +190,7 @@ To filter Prometheus results by metric value, use PromQL (Prometheus Query Langu
     
 2. Add a Comparison Operator to Filter by Value
     
-    To filter the results by a specific value, use comparison operators like `>`, `<`, `=`, etc. For instance, if you're interested in CPU utilization that exceeds 80%, you can modify the query as follows:
+    To filter the results by a specific value, use comparison operators like `>`, `<`, `==`, and `!=`. For instance, if you're interested in CPU utilization that exceeds 80%, you can modify the query as follows:
     
     ```
     node_cpu_utilization > 0.8
@@ -205,10 +213,10 @@ To filter Prometheus results by metric value, use PromQL (Prometheus Query Langu
     To build more complex queries, you can combine multiple conditions using logical operators like `and`, `or`, and `unless`. For example, if you want to monitor both high CPU and memory utilization, you can combine the two conditions as follows:
     
     ```
-    node_cpu_utilization > 0.8 and node_memory_utilization > 0.7
+    (node_cpu_utilization > 0.8) and on(job, instance) (node_memory_utilization > 0.7)
     ```
     
-    This query finds instances where both the CPU utilization is greater than 80% and the memory utilization is greater than 70%, helping you pinpoint systems under high load.
+    This query returns CPU readings for instances where CPU usage is above 80% and memory usage is above 70%. Both metrics must use `job` and `instance` to identify the same target.
     
     ### Best Practices for Writing Efficient Value-Based Queries
     
@@ -254,7 +262,7 @@ To filter Prometheus results by metric value, use PromQL (Prometheus Query Langu
         cpu_usage > 0.8
         ```
         
-        This approach retrieves only the instances where CPU usage exceeds 80%, reducing the number of series processed.
+        This query shows only CPU readings above 80%. Use label filters to reduce how much data Prometheus reads.
         
     5. Utilize Functions Wisely
         
@@ -283,18 +291,20 @@ Leveraging Prometheus' built-in functions allows for more sophisticated analysis
     - Average Request Duration:
     
     ```
-    avg(rate(http_request_duration_seconds[5m])) > 0.1
+    (sum by (job) (rate(http_request_duration_seconds_sum[5m]))
+    / sum by (job) (rate(http_request_duration_seconds_count[5m]))) > 0.1
     ```
     
-    This query identifies services where the average request duration exceeds 100 milliseconds over the last 5 minutes. It helps to pinpoint slow services that may affect user experience.
+    This query finds jobs where the average request duration exceeds 100 milliseconds over the last five minutes. It uses the `_sum` and `_count` metrics from a classic histogram or summary.
+
     
-    - Sum of CPU Utilization:
+    - Average CPU Utilization Across Cores:
     
     ```
-    sum by (instance) (node_cpu_utilization) > 0.8
+    (1 - avg by (job, instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) > 0.8
     ```
     
-    This query calculates the total CPU utilization across all cores for each instance, filtering for instances where the total exceeds 80%. This helps in identifying heavily loaded systems.
+    This query finds [Node Exporter](https://signoz.io/guides/prometheus-node-exporter-metrics/) targets with average CPU usage above 80% across their cores.
     
 2. Combining Label and Value Filters for Precise Results:
 Combining label filters with value filters allows you to refine your queries and target specific instances or jobs more effectively.
@@ -319,6 +329,42 @@ When using value-based filtering, you may encounter common challenges that can a
     - No Results: If your query returns no results, double-check that the metric name and labels match correctly. Also, ensure your value conditions aren't too restrictive.
     - Unexpected Results: If the results seem off, verify that you're using the correct aggregation functions. For example, if summing values, confirm that you’re summing the right labels.
 
+## How to Exclude Zero Values in PromQL
+
+You can also use value comparisons to remove zero values from your results. For example, if you want to display only nonzero request counts, add `!= 0` to the metric:
+
+```promql
+prometheus_http_requests_total != 0
+```
+
+This query keeps the nonzero request counts. For metrics that can have negative values, such as temperature, `!= 0` keeps those readings too. Use `> 0` if you want to keep only positive values.
+
+Both comparisons filter the results by default. Adding `bool` changes that behavior: `metric != bool 0` returns 1 or 0 rather than removing the zero readings.
+
+### Filtering Request Rates
+
+If you want to show only endpoints receiving traffic, filtering the request count is not enough. A counter can stay above zero after requests stop, so use `rate()` to check activity over a recent period:
+
+```promql
+rate(http_requests_total[5m]) > 0
+```
+
+This query shows series with a positive average request rate over the last five minutes. You can narrow the results further by adding a label filter. For example, to show only HTTP 500 errors during that period:
+
+```promql
+rate(http_requests_total{status="500"}[5m]) > 0
+```
+
+The query now excludes both inactive series and other status codes. Use your application's status-code label in place of `status` if it differs.
+
+### When to Keep Zero Values
+
+Excluding inactive series is useful for a traffic dashboard, but it can hide problems in an availability dashboard. For example, a zero in the `up` metric means a scrape failed. Filtering it out would remove the failure you need to see.
+
+Zeros can also be part of the result you want to calculate. If two instances report 0 and 10 requests per second, their average is 5. Excluding the idle instance raises that average to 10. Keep the zero if you want the average across both instances.
+
+Also, a recorded zero is different from a missing reading. Removing zeros will not fill gaps in your data. See [how to handle missing values in Prometheus](https://signoz.io/guides/time-series-from-prometheus-source-how-to-set-nulls-as-zero/) if that is your goal.
+
 ## Practical Examples of Value-Based Filtering in Prometheus
 
 Let's explore some real-world scenarios where value-based filtering shines:
@@ -328,40 +374,42 @@ Let's explore some real-world scenarios where value-based filtering shines:
     To identify instances where CPU utilization exceeds 80%, use the following query:
     
     ```
-    node_cpu_utilization > 80
+    node_cpu_utilization > 0.8
     ```
     
     This helps in monitoring and addressing performance bottlenecks in your applications.
     
 2. Identifying Slow HTTP Requests:
     
-    To track HTTP requests that take longer than 5 seconds, you can use:
+    To find jobs where the estimated 95th-percentile request duration exceeds five seconds, use this query with a classic histogram:
     
     ```
-    http_request_duration_seconds > 5
+    histogram_quantile(0.95,
+      sum by (job, le) (rate(http_request_duration_seconds_bucket[5m]))
+    ) > 5
     ```
     
-    This query helps in pinpointing slow requests that may affect user experience.
+    This query returns the estimated p95 duration for jobs above the threshold. Keep `le` when grouping the histogram buckets.
     
 3. High Memory Usage Detection: 
     
-    To monitor Java applications, you can filter by memory usage to catch potential memory leaks or performance degradation. The following query identifies instances where non-heap memory usage in the Metaspace area exceeds 1 byte:
+    To monitor Java applications, you can filter for high memory usage. For example, this query finds instances where Metaspace uses more than 100 MiB:
     
     ```
-    jvm_memory_used_bytes{area="nonheap", id="Metaspace", instance="host.docker.internal:8090", job="spring-petclinic-job"} > 1
+    jvm_memory_used_bytes{area="nonheap", id="Metaspace"} > 100 * 1024 * 1024
     ```
     
-    This query finds services where the 95th percentile of request durations exceeds 1 second.
+    Adjust the threshold to suit your JVM's limits. High usage alone does not confirm a memory leak.
     
 4. Disk Space Alerts:
     
-    To monitor disk space usage, use this query to alert when any filesystem is more than 90% full:
+    To find filesystems with less than 10% of disk space available to regular users, use:
     
     ```
     (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
     ```
     
-    This alerts you when any filesystem is more than 90% full.
+    Exclude irrelevant filesystem types and zero-sized filesystems before using this query in an alert.
     
 5. Unusual Network Traffic:
     
@@ -382,8 +430,8 @@ While value-based filters in Prometheus offer significant analytical capabilitie
 When formulating your queries, limit the time range to only what is necessary. Narrowing the time frame helps reduce the amount of data Prometheus needs to process, leading to faster query execution. For instance, instead of querying for data over an entire month, consider specifying a range of a few hours or days if that suffices for your analysis.
 - Leverage Label Pre-Filtering: 
 Combine label filters with value-based filters to narrow down the dataset before applying more complex queries. By first filtering with labels, you can significantly reduce the volume of data that the subsequent value-based filtering needs to process. This method enhances performance by minimizing the data set size upfront.
-- Avoid Unnecessary Precision: 
-In some cases, the exact precision of values may not be essential for your analysis. When it is acceptable, consider rounding values or simplifying comparisons. This approach can help to streamline your queries and reduce the computational load on Prometheus.
+- Check Query Performance:
+Returning fewer results does not always make a query faster. Check its execution time, and consider a recording rule for expensive queries you run often.
 - Use Subqueries sparingly: 
 Subqueries enable complex inquiries by nesting questions within others, but they may be resource-intensive, particularly when working with huge datasets. Use subqueries only when absolutely necessary, and examine alternatives that may get identical results without adding complexity or costs.
 
@@ -395,7 +443,9 @@ Grafana, a popular visualization tool for Prometheus, supports value-based filte
 
 1. Design Your Dashboard Layout: Start by outlining the layout of your dashboard. Identify the key metrics you want to visualize, such as CPU usage, memory consumption, or request latency. A well-organized layout enhances readability and makes it easier to spot trends.
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-bf9f3868-dab0-4127-b9e2-eedec9c9662e.webp" alt="Grafana dashboard panel showing value-based CPU usage" caption="" />2. Add Panels for Key Metrics: Use Grafana panels to display different metrics. Each panel can represent a specific value-based query. For instance, a panel showing high CPU usage might use the query:
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-bf9f3868-dab0-4127-b9e2-eedec9c9662e.webp" alt="Grafana dashboard panel showing value-based CPU usage" caption="" />
+
+2. Add Panels for Key Metrics: Use Grafana panels to display different metrics. Each panel can represent a specific value-based query. For instance, a panel showing high CPU usage might use the query:
     
     ```
     process_cpu_usage > 0.002
@@ -405,7 +455,9 @@ Grafana, a popular visualization tool for Prometheus, supports value-based filte
     
 3. Utilize Graphs and Alerts: Choose appropriate visualization types for your metrics. Use time-series graphs for metrics that change over time, such as CPU and memory utilization. Set up alerts for any value-based filters you define. For example, configure alerts for CPU utilization exceeding a certain threshold, ensuring your team can respond proactively.
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_11.39.18_PM.webp" alt="Grafana dashboard with interactive value threshold controls" caption="" />4. Interactive Controls: Grafana allows for interactive controls, such as sliders or dropdown menus, to adjust filter values dynamically. This interactivity enables users to tweak thresholds on the fly, facilitating real-time analysis without needing to modify queries manually.
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_11.39.18_PM.webp" alt="Grafana dashboard with interactive value threshold controls" caption="" />
+
+4. Threshold Variables: If viewers need to change a threshold, create a dashboard variable and use it in the panel query, as shown below.
 
 ### Using Template Variables for Flexible Value Thresholds
 
@@ -445,8 +497,7 @@ Grafana, a popular visualization tool for Prometheus, supports value-based filte
 
 To effectively monitor your applications and systems, leveraging an advanced observability platform like [SigNoz](https://signoz.io/) can elevate your monitoring strategy. [SigNoz](https://signoz.io/) is an open-source observability tool that provides [end-to-end monitoring](https://signoz.io/comparisons/end-to-end-monitoring-tools/), troubleshooting, and alerting capabilities across your entire application stack.
 
-Built on [OpenTelemetry](https://signoz.io/opentelemetry/)—the emerging industry standard for telemetry data—SigNoz integrates seamlessly with your existing Prometheus and Grafana setup. This [unified observability](https://signoz.io/unified-observability/) solution enhances your ability to monitor HTTP requests per minute alongside deep traces, giving you a comprehensive view of your application's performance. 
-SigNoz complements this setup by offering additional monitoring features:
+You can collect Prometheus metrics in SigNoz using the [OpenTelemetry Collector Prometheus receiver](https://signoz.io/docs/userguide/prometheus-metrics/).
 
 - User-Friendly Interface: Easily build complex queries without in-depth PromQL knowledge, making insights accessible for all skill levels.
 - Advanced Filtering & Aggregations: Perform detailed analysis using functions for averages, sums, and rate calculations to optimize performance insights.
@@ -476,10 +527,10 @@ Filtering by label allows you to select time series based on their metadata (lab
 You can combine multiple value-based filters using logical operators such as `and`, `or`, and `unless`. For example:
 
 ```lua
-node_cpu_utilization > 0.8 and node_memory_utilization > 0.7
+(node_cpu_utilization > 0.8) and on(job, instance) (node_memory_utilization > 0.7)
 ```
 
-This query identifies instances that are experiencing both high CPU and high memory usage, allowing you to monitor performance more comprehensively.
+This query returns CPU readings for instances with CPU usage above 80% and memory usage above 70%. The `on(job, instance)` clause matches the metrics by target.
 
 ### Are there any performance considerations when using complex value-based filters?
 
@@ -487,8 +538,8 @@ Yes, complex value-based filters can consume more resources than simpler label f
 
 - Use label pre-filtering when possible to narrow down the data set first.
 - Limit the time ranges in your queries to reduce the amount of data processed.
-- Avoid unnecessary high-precision comparisons, as they can increase computational load.
-- Employ aggregation functions to condense the data set before applying value filters, making the queries more efficient.
+- Check query execution time and the number of samples processed.
+- Use recording rules for expensive queries you run often.
 
 ### Can I use value-based filtering with PromQL functions like rate() or increase()?
 
@@ -498,4 +549,4 @@ Absolutely! You can apply value-based filters to the results of [PromQL function
 rate(http_requests_total[5m]) > 100
 ```
 
-This query identifies services that are handling more than 100 requests per second over the last 5 minutes, allowing you to focus on high-traffic services and potential performance issues.
+This query finds individual series with an average rate above 100 requests per second over the last five minutes.
