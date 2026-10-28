@@ -1,7 +1,8 @@
 ---
-date: 2026-10-19
-title: Monitor GCP Compute Engine VM Metrics and Logs in SigNoz
-description: Collect Compute Engine VM metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
+published_date: 2026-10-19
+updated_date: 2026-10-23
+title: Monitor GCP Compute Engine Instance Metrics and Logs
+description: Collect Compute Engine VM metrics and logs in SigNoz with One-Click Integration or Manual Setup, then view them on a pre-built dashboard.
 doc_type: howto
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
@@ -17,23 +18,63 @@ This page reads what Compute Engine already sends to Cloud Monitoring and Cloud 
 ## Choose a setup method
 
 <Tabs entityName="setup">
-<TabItem value="manual" label="Manual setup" default>
+<TabItem value="one-click" label="One-Click Integration" default>
 
-**Available now.** You run the OpenTelemetry Collector in your own GCP project and add Compute Engine metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics**, and **logs** if you set up the [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/).
+## One-Click Integration
+
+SigNoz deploys and manages the Collector for you. You turn the service on in SigNoz, and the SigNoz agent sets up metrics and logs collection in the background. Collects **metrics and logs**.
+
+### Prerequisites
+
+- Your GCP project is connected with [One-Click Integration](https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/).
+- Your VM instances run in that same project. The agent monitors only the project it's deployed in.
+
+### Step 1: Turn on the service in SigNoz
+
+1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
+2. Select **GCP Compute Engine** from the service list.
+3. Turn on **Metric Collection**, **Log Collection**, or both.
+4. Click **Save**.
+
+The agent picks up the change within about 30 seconds and updates the Collector and the log sink for you. There's no Collector config to edit.
+
+### Step 2: Turn on the optional data in GCP
+
+Most data starts flowing with no extra work. Two kinds of data need a setting on the GCP side first:
+
+- **Memory panels.** GCP can't see inside a VM on its own, so memory metrics need help from the VM:
+  - **% Memory Utilization via Ops Agent** needs the <a href="https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent" target="_blank" rel="noopener noreferrer nofollow">Ops Agent</a> installed on the VM.
+  - **% Memory Utilization** and **Memory Used in Bytes** are only reported by GKE nodes and by VMs running Container-Optimized OS. GKE nodes report them by default. Standalone Container-Optimized OS VMs need <a href="https://cloud.google.com/container-optimized-os/docs/how-to/monitoring" target="_blank" rel="noopener noreferrer nofollow">health monitoring</a> turned on first: set the `google-monitoring-enabled` metadata key to `true` on the VM or project. It's off by default.
+- **Logs from inside the VM**, such as syslog and application logs, also need the Ops Agent. Without it, SigNoz still collects the Compute Engine audit logs.
+
+Skip this step if you only need CPU, disk, and network metrics and audit logs.
+
+### Validate
+
+1. Wait about 10 minutes for the first metrics to arrive.
+2. In SigNoz, go to **Dashboards** and open **GCP Compute Engine Overview**. Panels should start filling in.
+3. If you turned on **Log Collection**, open **Logs** in SigNoz and start with this filter to find your project's logs:
+
+   ```text
+   gcp.project = '<deployment-project-id>' AND gcp.resource_type = 'gce_instance'
+   ```
+
+   Log entries appear within a few minutes of the next VM change or, with the Ops Agent installed, the next log line from the VM. Audit logs for disks, firewall rules, and other Compute Engine resources use other resource types, so drop the `gcp.resource_type` part to see them too.
+
+   **Verify these values:**
+
+   - `<deployment-project-id>`: the GCP project you connected with One-Click Integration.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup
+
+You run the OpenTelemetry Collector in your own GCP project and add Compute Engine metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics**, and **logs** if you set up the [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/).
 
 Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps below for each project that hosts the VMs you want to monitor.
 
-</TabItem>
-<TabItem value="agent" label="SigNoz agent (coming soon)">
-
-**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers and log routing in the background. No Collector configuration to maintain.
-
-Until then, use the **Manual setup** tab.
-
-</TabItem>
-</Tabs>
-
-## Prerequisites
+### Prerequisites
 
 Before configuring this service, complete the shared GCP integration setup:
 
@@ -43,7 +84,7 @@ Before configuring this service, complete the shared GCP integration setup:
 - The **Cloud Monitoring API** is enabled in that project.
 - For logs only: the **Cloud Logging API** is enabled in that project, and you have finished steps 1 to 5 of [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
 
-## Step 1: Enable the service in SigNoz
+### Step 1: Enable the service in SigNoz
 
 1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
 2. Select **GCP Compute Engine** from the service list.
@@ -54,7 +95,7 @@ Before configuring this service, complete the shared GCP integration setup:
 Enabling the toggle does not start collection on its own. The metrics that reach SigNoz are exactly the ones in your Collector's `metrics_list`. If you skip a metric in step 2, its dashboard panel stays empty.
 </Admonition>
 
-## Step 2: Add the metrics to your Collector config
+### Step 2: Add the metrics to your Collector config
 
 Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Compute Engine metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your VMs run in. Only the `metrics_list` shown below changes; leave the rest of the file as is:
 
@@ -98,7 +139,7 @@ The memory metrics need help from the VM: `agent.googleapis.com/memory/percent_u
 
 The receiver polls every metric in the list once per `collection_interval`, and the Monitoring API bills per read call, so keep the list to the metrics your dashboards and alerts actually use. See [Cost and tuning](https://signoz.io/docs/integrations/gcp/collect-metrics/#cost-and-tuning).
 
-## Step 3: Apply the configuration
+### Step 3: Apply the configuration
 
 The Collector loads its config from the `signoz-integration-collector-config` secret, so a config change needs a new secret version and a redeploy:
 
@@ -106,7 +147,7 @@ The Collector loads its config from the `signoz-integration-collector-config` se
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
 3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
 
-## Step 4: Send logs (optional)
+### Step 4: Send logs (optional)
 
 To also send Compute Engine logs to SigNoz, follow [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/) to set up the Pub/Sub topic, the push subscription, and the logs receiver. In [step 6, Create a log sink](https://signoz.io/docs/integrations/gcp/collect-logs/#step-6-create-a-log-sink-in-each-monitored-project), use this filter:
 
@@ -120,12 +161,15 @@ See **Logs** under [What's collected](#whats-collected) for what this filter pic
 Add the same filter as an **exclusion filter** on the project's `_Default` sink, or you pay to store these logs in both Cloud Logging and SigNoz. See [Avoid paying twice for logs](https://signoz.io/docs/integrations/gcp/collect-logs/#step-8-avoid-paying-twice-for-logs).
 </Admonition>
 
-## Validate
+### Validate
 
 1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
 2. In SigNoz, go to **Dashboards** and open the **GCP Compute Engine Overview** dashboard. Panels should start filling in.
 3. To check a single metric, open **Metrics Explorer** and query `compute.googleapis.com/instance/cpu/utilization`.
 4. For logs, open **Logs** and filter on `gcp.resource_type = 'gce_instance'`.
+
+</TabItem>
+</Tabs>
 
 ## What's collected
 
@@ -179,7 +223,7 @@ With **Log Collection** turned on, SigNoz collects these logs for your VMs:
 The audit log part of the filter matches every Compute Engine resource in the project, not only VMs. With Data Access audit logs turned on, routine list and get calls can add a lot of log volume.
 </Admonition>
 
-Use this filter for your log sink:
+With One-Click Integration, SigNoz applies this log sink filter for you. With Manual Setup, use it when you create your log sink:
 
 ```text
 resource.type="gce_instance" OR protoPayload.serviceName="compute.googleapis.com"
@@ -196,11 +240,13 @@ resource.type="gce_instance" OR protoPayload.serviceName="compute.googleapis.com
 
 **No logs after turning on Log Collection.** Audit logs only appear when a VM or other Compute Engine resource changes, so a quiet project may show nothing at first. For logs from inside the VM, confirm the Ops Agent is installed and running. Open **Logs Explorer** in the GCP Console and filter on `resource.type="gce_instance"` to see what GCP has written.
 
-**Logs don't arrive.** If Logs Explorer in GCP shows the logs but SigNoz doesn't, work back through the log pipeline: the push subscription must reach the Collector, and the sink's writer identity needs `roles/pubsub.publisher` on the topic. See [Collect logs troubleshooting](https://signoz.io/docs/integrations/gcp/collect-logs/#troubleshooting).
+**No metrics at all (One-Click).** Confirm the VMs run in the project the agent is deployed in, and that **Metric Collection** is on and saved. See the [One-Click troubleshooting](https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/#troubleshooting) for agent and Collector checks.
 
-**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+**Logs don't arrive (Manual).** If Logs Explorer in GCP shows the logs but SigNoz doesn't, work back through the log pipeline: the push subscription must reach the Collector, and the sink's writer identity needs `roles/pubsub.publisher` on the topic. See [Collect logs troubleshooting](https://signoz.io/docs/integrations/gcp/collect-logs/#troubleshooting).
 
-**No Compute Engine metrics at all.** Confirm the `signoz-integration-collector` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
+**A dashboard panel is empty (Manual).** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+
+**No Compute Engine metrics at all (Manual).** Confirm the `signoz-integration-collector` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
 
 **Dropped packets stays at zero.** That's the healthy state. The panel only shows incoming packets that a firewall rule dropped.
 
