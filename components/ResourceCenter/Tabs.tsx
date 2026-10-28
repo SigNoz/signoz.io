@@ -50,6 +50,9 @@ export default function Tabs({ activeTab }: { activeTab: string }) {
           <TabLink href="/opentelemetry/" tabId="openTelemetry-tab" activeTab={activeTab}>
             OpenTelemetry
           </TabLink>
+          <TabLink href="/faqs/" tabId="faqs-tab" activeTab={activeTab}>
+            Product FAQs
+          </TabLink>
           <Link
             href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
             className={`${TAB_STYLE} text-[var(--l2-foreground)] transition-colors hover:text-[var(--accent-cherry)]`}
