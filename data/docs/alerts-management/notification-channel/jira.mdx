@@ -1,5 +1,5 @@
 ---
-date: 2026-08-19
+date: 2026-10-27
 doc_type: howto
 title: 'Jira Cloud: Create and Manage Issues from Alerts'
 description: Set up Jira Cloud as a notification channel in SigNoz to open, update, and resolve Jira issues automatically as alerts fire and resolve.
@@ -218,7 +218,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `jira_configs` | `array` | List of Jira configurations. |
-| `jira_configs[].site` | `string` | Jira Cloud base URL, `https://<site>.atlassian.net`. **Required**. |
+| `jira_configs[].site` | `string` | Jira Cloud base URL, `https://<site>.atlassian.net`. **Required**. The API accepts any non-empty URL, including a proxy or relay in front of Jira Cloud. The SigNoz form still requires an `https` URL on an `atlassian.net` domain. |
 | `jira_configs[].project` | `string` | Project key, e.g. `OPS`. **Required**. |
 | `jira_configs[].issue_type` | `string` | An issue type that exists in the project, e.g. `Task`. **Required**. |
 | `jira_configs[].http_config.basic_auth.username` | `string` | Atlassian account email. **Required**. |
@@ -233,6 +233,8 @@ curl '<your-signoz-url>/api/v1/channels' \
 | `jira_configs[].reopen_duration` | `string` | Reopen window as a duration (e.g. `72h`, `3d`). Minimum `1m`, default `3d`. |
 | `jira_configs[].custom_fields` | `object` | Optional Jira custom field values (field id → value). API only (not available in the UI). |
 
+With a service account, SigNoz uses the `site` URL only to look up the site's cloud ID at `<site>/_edge/tenant_info`. It then sends issue requests directly to `api.atlassian.com`, so they skip a proxy or relay. To send all requests through a relay, use a personal API token.
+
 ## Troubleshooting
 
 If you encounter issues:
@@ -241,7 +243,7 @@ If you encounter issues:
 - **401 / 403 with a service account** → confirm you used the service account's `…@serviceaccount.atlassian.com` email, added the account to the project, and gave the token the `read:jira-work` and `write:jira-work` scopes.
 - **400 on create** → a field required by that project's issue type is missing, or the project / issue type / priority is invalid. Check the project's create screen.
 - **"can't find transition"** → only relevant when a transition-name override is set and doesn't match the workflow. Clear the override to fall back to auto-detection.
-- **Invalid Site URL** → the URL must be an `https` URL on an `atlassian.net` domain.
+- **Site URL must be an https URL on an atlassian.net domain** → the SigNoz form shows this error for any other URL. To use a proxy or relay, create the channel through the API.
 - **Invalid Reopen window** → use a duration like `30m`, `72h`, or `3d` (minimum `1m`).
 - **Test the setup**: use the **Test** button in SigNoz to create an issue end-to-end. If it fails, the error identifies the misconfigured field.
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-21
+date: 2026-10-27
 doc_type: howto
 title: incident.io Notification Channel Setup for Alerts
 description: Set up incident.io as a notification channel in SigNoz to fire and resolve incident.io alerts automatically, and turn them into incidents with alert routes.
@@ -138,7 +138,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `incidentio_configs` | `array` | List of incident.io configurations. |
-| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`. **Required**. |
+| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`. **Required**. The API accepts any non-empty URL, including a proxy or relay endpoint. The SigNoz form still requires an `https` URL with the `/v2/alert_events/http/<source_config_id>` path. |
 | `incidentio_configs[].token` | `string` | The alert source's secret token. **Required**. A leading `Bearer ` prefix is stripped. |
 | `incidentio_configs[].send_resolved` | `boolean` | Whether to resolve the incident.io alert when the SigNoz alert resolves. |
 | `incidentio_configs[].title` | `string` | Templated alert title. Go templates are supported. A default is applied if omitted. |
