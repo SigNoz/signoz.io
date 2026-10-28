@@ -1,128 +1,128 @@
 ---
-date: 2026-08-26
+date: 2026-10-13
 title: Ingestion Keys
-meta_title: Ingestion Keys - Create & Manage API Tokens
-tags: [SigNoz Cloud]
+meta_title: Ingestion Keys - Create, Manage & Limit Telemetry Ingestion
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
 description: Learn how to create and manage SigNoz Cloud ingestion keys for authenticating telemetry data. Covers key creation, expiration, tags, limits, and access control.
 doc_type: howto
 ---
 
 <Admonition type="info">
-You don't need ingestion keys for self-hosted/community edition of SigNoz. Ingestion keys are only applicable for cloud account of SigNoz.
+Ingestion keys apply to SigNoz Cloud and Self-Hosted Enterprise. The Community Edition of Self-Hosted SigNoz does not need them.
 </Admonition>
 
 ## Overview
 
-Ingestion Keys are secure tokens used to authenticate your telemetry Ingestion requests. These keys are unique to your account and should be kept confidential.
+Ingestion keys are tokens that authenticate the telemetry you send to SigNoz. Each key is unique to your account. Keep your keys private.
 
-Ingestion keys are **write-only**. They can only send telemetry data (traces, logs, metrics) into your account. They cannot be used to query, read, or delete any data. This is in contrast to **API keys**, which allow querying and reading data from your account and should never be exposed in client-side code.
+Ingestion keys are **write-only**. They can only send telemetry data (traces, logs, metrics) into your account. You cannot use them to query, read, or delete data. **API keys** are different: they can query and read data from your account, so never put them in client-side code.
 
-All ingestion key and limit operations described on this page can also be performed programmatically via the <a href="https://signoz.io/api-reference/#/operations/CreateIngestionKey" target="_blank" rel="noopener noreferrer nofollow">SigNoz API</a>.
+You can also do every ingestion key and limit operation on this page through the <a href="https://signoz.io/api-reference/#/operations/CreateIngestionKey" target="_blank" rel="noopener noreferrer nofollow">SigNoz API</a>.
 
 ## Using Ingestion Keys in Frontend/Browser Applications
 
-Because ingestion keys are write-only, they can be used in frontend applications where the key is visible in browser code. The primary risk of an exposed ingestion key is that a third party could send unwanted telemetry data to your account, increasing ingestion volume and costs.
+Because ingestion keys are write-only, you can use them in frontend applications, where anyone can see the key in browser code. If someone copies the key, they can send unwanted telemetry to your account. This raises your ingestion volume and your costs.
 
 To limit this risk, create a dedicated ingestion key for frontend use with the following safeguards:
 
-- **Ingestion limits**: Set daily size and count caps per signal type (see [Add Limits to a Key](#add-limits-to-a-key)) to bound the impact of misuse.
-- **Expiration date**: Set an expiration so the key automatically becomes invalid after a defined period.
+- **Ingestion limits**: Set daily and per-second caps per signal type (see [Add Limits to a Key](#add-limits-to-a-key)) to cap the cost of misuse.
+- **Expiration date**: Set an expiration date so the key stops working after that date.
 
 <Admonition type="warning">
 API keys allow querying and reading data from your account. Never expose API keys in frontend or client-side code.
 </Admonition>
 
-## Pre-requisite
+## Prerequisites
 
-- [SigNoz Cloud](https://signoz.io/teams/) account with Editor or Admin access
+- A [SigNoz Cloud](https://signoz.io/teams/) or Self-Hosted Enterprise account with Editor or Admin access
 
 ## Add an Ingestion Key
 To add a SigNoz Ingestion key:
 
-1. Navigate to **Settings** in the sidebar, then select the **Ingestion Settings** tab.
+1. Go to **Settings > Identity & Access > Ingestion**.
 2. Click the **New Ingestion Key** button.
-3. Enter a name for your key.
-4. (**Optional**) Set an expiration date for the key.
+3. Enter a name for your key. Use at least 6 characters: letters, numbers, underscores, or hyphens.
+4. Set an expiration date for the key.
 5. (**Optional**) Add tags to categorize or organize your key.
 6. Click **Create new Ingestion key**.
 
 <Figure
-  src="/img/docs/ingestion/keys.png"
-  alt="Ingestion Settings in SigNoz Settings"
-  caption="Ingestion Settings in SigNoz Settings"
+  src="/img/docs/ingestion/ingestion-keys.webp"
+  alt="Create new ingestion key dialog on the Ingestion page under Settings > Identity & Access"
+  caption="Create a new ingestion key"
 />
 
-Limits and Restrictions:
-- Only Editors and Admins can manage Ingestion keys.
-- There is a maximum limit of 50 Ingestion keys per account.
-- Key names must be unique within your account.
+Only Editors and Admins can manage ingestion keys. An account can have up to 50 ingestion keys, and each key name must be unique.
 
 ## Modify Ingestion Keys
-To modify an existing SigNoz Ingestion key, navigate to Settings > Ingestion Settings and click the edit icon next to the relevant key. Only the expiry date and tags can be modified.
+To modify an existing SigNoz Ingestion key, go to **Settings > Identity & Access > Ingestion** and click the edit icon next to the key. You can change only the expiry date and tags.
 
 ## Remove Ingestion Keys
-To remove a SigNoz Ingestion key, go to **Settings > Ingestion Settings**. Users with the appropriate permissions can click the Trash icon next to the key they wish to remove. A confirmation prompt will appear before the key is deleted. Please be aware that this action is irreversible and will immediately revoke the Ingestion key.
+To remove a SigNoz Ingestion key, go to **Settings > Identity & Access > Ingestion**, click the Trash icon next to the key, and confirm. You need the Editor or Admin role. SigNoz revokes the key at once, and you cannot undo this.
 
 ## Add Limits to a Key
-SigNoz offers the flexibility to set limits on your Ingestion keys. To add a limit to an existing key:
+To add a limit to an existing key:
 
-1. Click on the target key to open its dropdown menu.
-2. In the dropdown, select the **signal** to which you want to apply the limit.
-3. Click on **+ Limits**.
-4. Specify an appropriate limit value.
-5. Click on **Save**.
+1. Go to **Settings > Identity & Access > Ingestion**.
+2. Click the arrow at the left of the key to expand it.
+3. In the **LIMITS** section, click **+ Limits** next to the signal (logs, traces, or metrics).
+4. Turn on **Daily limit**, **Per Second limit**, or both, and enter the values.
+5. Click **Save**.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/ingestion/limits.png" alt="Limits for an Ingestion Key"/>
-    <figcaption><i>Limits for an Ingestion Key</i></figcaption>
-</figure>
+Limits apply per key and per signal. SigNoz Cloud has no limit for the whole workspace and no limit in dollars. To get an alert when your spend reaches a dollar amount, set up a [Cost Meter alert](https://signoz.io/docs/cost-meter/alert-configuration-guide/).
+
+<Figure
+  src="/img/docs/ingestion/ingestion-key-limits.webp"
+  alt="Expanded ingestion key with the LIMITS section open for logs, showing Daily limit and Per Second limit toggles"
+  caption="Daily and per-second limits for logs on an ingestion key"
+/>
 
 <Admonition type="warning">
-When an ingestion key reaches its configured limit for a signal, data ingestion for that signal is stopped and any incoming data is dropped until the limit resets. This can result in gaps in your logs, traces, or metrics. To avoid unexpected data loss, you can set up alerts to be notified when an ingestion key is nearing its daily quota. See [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) for details.
+When a key reaches its limit for a signal, SigNoz drops new data for that signal until the limit resets, which leaves gaps in your data. To get a warning before a key reaches its daily limit, set up a [Meter Alert](https://signoz.io/docs/cost-meter/alerts/).
 </Admonition>
 
 If you're missing data entirely rather than seeing gaps, see [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) to narrow down the cause.
 
 ## Modify a Limit
-To modify an existing limit, navigate to the Ingestion key and click the edit option corresponding to the limit in question. Modifying a limit does not reset the accumulated values. For example, if the initial limit was 20GB/day and you've used 15GB before increasing the limit to 25GB/day, the usage count will continue from 15GB.
+To modify a limit, expand the key and click the edit icon next to the limit. Changing a limit does not reset the usage counted so far. For example, if you used 15 GB of a 20 GB/day limit and raise it to 25 GB/day, the count continues from 15 GB.
 
 ## Remove a Limit
-To remove a limit, navigate to the Ingestion key and click the delete option next to the relevant limit. Deleting a limit will reset all accumulated values. For instance, if the limit was set to 20GB/day and you've used 15GB before deleting the limit, the counter will be reset to 0. Any new limit created thereafter will start from 0.
+To remove a limit, expand the key and click the delete icon next to the limit. Deleting a limit resets the usage count to 0. For example, if you used 15 GB of a 20 GB/day limit and delete it, the count goes back to 0, and any new limit starts from 0.
 
 ## Filter Logs and Traces by Ingestion Key
 
-You can filter logs and traces by ingestion key to view only the telemetry data ingested through a specific key. This is useful for:
-- Identifying which data is coming from a specific integration or source
-- Troubleshooting data ingestion from particular environments or services
-- Analyzing usage patterns by ingestion key
+You can filter logs and traces by ingestion key to see only the data sent with that key. Use this to:
+- Find which integration or source sends the data.
+- Troubleshoot ingestion from one environment or service.
+- Compare usage across ingestion keys.
 
 ### View Logs by Ingestion Key
 
 To filter logs by a specific ingestion key:
 
-1. Navigate to the **Logs** tab in your SigNoz dashboard
-2. In the filter section, add a new filter for `signoz.workspace.key.id`
-3. Set the operator to `IN` or `=`
-4. Enter your specific ingestion key ID as the value
-5. Apply the filter to view logs ingested using that key
+1. Go to **Logs**.
+2. In the filter section, add a filter for `signoz.workspace.key.id`.
+3. Set the operator to `IN` or `=`.
+4. Enter the ingestion key ID as the value.
+5. Apply the filter to see the logs sent with that key.
 
 ### View Traces by Ingestion Key
 
 To filter traces by a specific ingestion key:
 
-1. Navigate to the **Traces** tab in your SigNoz dashboard
-2. In the filter section, add a new filter for `signoz.workspace.key.id`
-3. Set the operator to `IN` or `=`
-4. Enter your specific ingestion key ID as the value
-5. Apply the filter to view traces ingested using that key
+1. Go to **Traces**.
+2. In the filter section, add a filter for `signoz.workspace.key.id`.
+3. Set the operator to `IN` or `=`.
+4. Enter the ingestion key ID as the value.
+5. Apply the filter to see the traces sent with that key.
 
 ### Finding Your Ingestion Key ID
 
 To find the ID of a specific ingestion key:
 
-1. Go to **Settings** > **Ingestion Settings**
-2. The key ID is displayed in the ingestion keys list
-3. You can copy the key ID for use in filters
+1. Go to **Settings > Identity & Access > Ingestion**.
+2. Click the arrow at the left of the key to expand it.
+3. Copy the value in the **ID** row.
 
 ## Next Steps
 
