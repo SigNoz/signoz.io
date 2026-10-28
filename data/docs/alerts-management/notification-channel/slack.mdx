@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-11
-updated_date: 2026-10-21
+updated_date: 2026-10-28
 title: Slack Alerts - Configure a Slack Notification Channel
 description: Learn how to send SigNoz alerts to Slack. Set up an Incoming Webhook, create the notification channel, test it, and mention Slack user groups.
 doc_type: howto
@@ -87,6 +87,10 @@ Fields are a small table inside the attachment. Each one has a **title**, which 
 
 **Short** controls the layout. With it on, Slack places the field in a narrow column and can sit two of them side by side. With it off, the field takes the full width of the attachment. Use short for things like a severity or an environment, and leave it off for anything long.
 
+<Admonition type="info">
+Each field needs both a title and a value. If you add a field with a title but no value, SigNoz flags it inline under that row when you save, so you can fix the row without hunting for a form-wide error.
+</Admonition>
+
 ### Actions
 
 Actions are buttons Slack renders under the message. There are two kinds.
@@ -96,6 +100,10 @@ A **link button** needs only **text** and a **URL**. Slack shows the text and op
 A **callback button** is handled by a Slack app rather than opening a link. It uses **name** and **value** so the app can tell which button was pressed, and it needs an app configured to receive Slack's interactivity payload. Without one, the button does nothing.
 
 Either kind can set **style**, which is `default`, `primary` or `danger` and decides the button's colour, and **confirm**, which is the text of a prompt Slack shows before the action runs. Leave confirm empty for no prompt.
+
+<Admonition type="info">
+Each action needs its target: a URL for a link button, or a name for a callback button. If you add an action with display text but no URL or name, SigNoz flags it inline under that row's URL column when you save.
+</Admonition>
 
 <Admonition type="info">
 Slack renders at most five actions per attachment. For the full rules, see <a href="https://docs.slack.dev/messaging/formatting-message-text" target="_blank" rel="noopener noreferrer nofollow">Slack: formatting message text</a>.

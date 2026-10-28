@@ -1,5 +1,5 @@
 ---
-date: 2026-08-21
+date: 2026-10-28
 doc_type: howto
 title: incident.io Notification Channel Setup for Alerts
 description: Set up incident.io as a notification channel in SigNoz to fire and resolve incident.io alerts automatically, and turn them into incidents with alert routes.
@@ -31,14 +31,18 @@ To create a new incident.io notification channel in SigNoz:
 
 | Field | Description |
 | :--- | :--- |
-| **Alert source URL** | The alert events URL copied above. **Required**. |
-| **Token** | The alert source's secret token. **Required**. Pasting it with a leading `Bearer ` prefix is fine; SigNoz strips it. |
+| **Alert source URL** | The alert events URL copied above. **Required**. The field accepts any URL, so a proxy or relay in front of incident.io also works. |
+| **Token** | The alert source's secret token. **Required**. Paste the token value only, without a `Bearer ` prefix and without leading or trailing whitespace. |
 | **Send resolved alerts** | On by default. When on, SigNoz resolves the incident.io alert when the SigNoz alert resolves. |
 | **Title** | Template for the alert title. Prefilled with a sensible default. |
 | **Description** | Template for the alert body. Markdown, rendered natively by incident.io. Prefilled with a default that includes the alert summary, description, and deep links back to SigNoz. |
 | **Additional metadata** | Optional key-value pairs added to every alert's metadata. See [Send metadata to incident.io](#send-metadata-to-incidentio). |
 
 <Figure src="/img/docs/incident-io-channel-form.webp" alt="SigNoz incident.io channel form with URL, token, templates and additional metadata." caption="The incident.io channel form in SigNoz." />
+
+<Admonition type="warning">
+Paste the **token value only**. A leading `Bearer ` prefix or any leading or trailing whitespace triggers an inline error on the field, each with its own message asking you to paste the token on its own. SigNoz does not strip these for you, so copy just the token from the alert source's setup page.
+</Admonition>
 
 - Click **Test** to send a test alert, then **Save**.
 
@@ -138,8 +142,8 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `incidentio_configs` | `array` | List of incident.io configurations. |
-| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`. **Required**. |
-| `incidentio_configs[].token` | `string` | The alert source's secret token. **Required**. A leading `Bearer ` prefix is stripped. |
+| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`, or a proxy or relay URL in front of it. **Required**. |
+| `incidentio_configs[].token` | `string` | The alert source's secret token. **Required**. Provide the token value only, without a `Bearer ` prefix. |
 | `incidentio_configs[].send_resolved` | `boolean` | Whether to resolve the incident.io alert when the SigNoz alert resolves. |
 | `incidentio_configs[].title` | `string` | Templated alert title. Go templates are supported. A default is applied if omitted. |
 | `incidentio_configs[].description` | `string` | Templated alert body in markdown. Go templates are supported. A default is applied if omitted. |
@@ -149,7 +153,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 
 If you encounter issues:
 
-- **401** → the token is wrong. Re-copy it from the alert source's setup page (with or without the `Bearer ` prefix; both work).
+- **401** → the token is wrong. Re-copy it from the alert source's setup page and paste the token value only. A `Bearer ` prefix or surrounding whitespace is rejected with an inline error on the field.
 - **404** → the URL is wrong, usually a bad or missing `<source_config_id>`. Re-copy the full alert events URL.
 - **Test succeeded but no alert appears** → check the source's **Requests** tab in incident.io. Each event shows an outcome: `Alert ingested`, `No update to existing alert` (a repeat of an already-firing alert), or `No alert to resolve` (a resolve for an alert incident.io doesn't have; harmless).
 - **Metadata not visible on alerts** → metadata must be mapped to attributes on the incident.io source; see [Send metadata to incident.io](#send-metadata-to-incidentio).
