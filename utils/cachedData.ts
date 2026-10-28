@@ -7,10 +7,73 @@ import {
   transformGuide,
 } from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
-import { getAllContent, getContentBySlug, isLocalContentOverlayEnabled } from './contentRepository'
+import {
+  getAllContent,
+  getContentBySlug,
+  getDeploymentStatus,
+  isLocalContentOverlayEnabled,
+} from './contentRepository'
 import { getTagValues } from './contentHelpers'
 import type { MDXContent } from './strapi'
 import type { CustomerStory } from '@/components/Customers/Customers.types'
+
+// --- Shared fallbacks ---
+
+function throwIfEmpty<T>(result: T[], cacheKey: string): T[] {
+  if (!result || result.length === 0) {
+    throw new Error(`Empty content received for ${cacheKey}, skipping cache`)
+  }
+  return result
+}
+
+async function getListWithFallback<T>(
+  label: string,
+  getCached: (deploymentStatus: string) => Promise<T[]>,
+  fetchDirect: (deploymentStatus: string) => Promise<T[]>
+): Promise<T[]> {
+  const deploymentStatus = getDeploymentStatus()
+
+  try {
+    return await getCached(deploymentStatus)
+  } catch (cacheError) {
+    console.warn(`Cached ${label} fetch failed, retrying without cache:`, cacheError)
+
+    try {
+      return await fetchDirect(deploymentStatus)
+    } catch (directError) {
+      console.error(`Direct ${label} fetch also failed:`, directError)
+      return []
+    }
+  }
+}
+
+async function getBySlugWithFallback<T>(
+  label: string,
+  slug: string,
+  getCached: (slug: string, deploymentStatus: string) => Promise<T | null>,
+  fetchDirect: (slug: string, deploymentStatus: string) => Promise<T | null>
+): Promise<T | null> {
+  const deploymentStatus = getDeploymentStatus()
+
+  try {
+    const result = await getCached(slug, deploymentStatus)
+    if (result) return result
+  } catch (cacheError) {
+    console.warn(
+      `Cached single ${label} fetch failed for "${slug}", retrying without cache:`,
+      cacheError
+    )
+  }
+
+  const directResult = await fetchDirect(slug, deploymentStatus)
+  if (!directResult) {
+    const contentLabel = label.charAt(0).toUpperCase() + label.slice(1)
+    console.warn(
+      `${contentLabel} content not found for slug: "${slug}" (deployment: ${deploymentStatus})`
+    )
+  }
+  return directResult
+}
 
 // --- Comparisons ---
 
@@ -23,11 +86,7 @@ async function cachedFetchComparisons(deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', 'comparisons-list')
-  const result = await fetchComparisons(deploymentStatus)
-  if (!result || result.length === 0) {
-    throw new Error('Empty content received for cached-comparisons-list, skipping cache')
-  }
-  return result
+  return throwIfEmpty(await fetchComparisons(deploymentStatus), 'cached-comparisons-list')
 }
 
 export function getCachedComparisons(deploymentStatus: string) {
@@ -35,22 +94,8 @@ export function getCachedComparisons(deploymentStatus: string) {
   return cachedFetchComparisons(deploymentStatus)
 }
 
-export async function fetchAllComparisonsForPage() {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedComparisons(deploymentStatus)
-  } catch (cacheError) {
-    console.warn('Cached comparisons fetch failed, retrying without cache:', cacheError)
-
-    try {
-      return await fetchComparisons(deploymentStatus)
-    } catch (directError) {
-      console.error('Direct comparisons fetch also failed:', directError)
-      return []
-    }
-  }
+export function fetchAllComparisonsForPage() {
+  return getListWithFallback('comparisons', getCachedComparisons, fetchComparisons)
 }
 
 async function fetchSingleComparison(slug: string, deploymentStatus: string) {
@@ -74,27 +119,8 @@ export function getCachedSingleComparison(slug: string, deploymentStatus: string
   return cachedFetchSingleComparison(slug, deploymentStatus)
 }
 
-export async function fetchComparisonBySlug(slug: string) {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    const result = await getCachedSingleComparison(slug, deploymentStatus)
-    if (result) return result
-  } catch (cacheError) {
-    console.warn(
-      `Cached single comparison fetch failed for "${slug}", retrying without cache:`,
-      cacheError
-    )
-  }
-
-  const directResult = await fetchSingleComparison(slug, deploymentStatus)
-  if (!directResult) {
-    console.warn(
-      `Comparison content not found for slug: "${slug}" (deployment: ${deploymentStatus})`
-    )
-  }
-  return directResult
+export function fetchComparisonBySlug(slug: string) {
+  return getBySlugWithFallback('comparison', slug, getCachedSingleComparison, fetchSingleComparison)
 }
 
 // --- Guides ---
@@ -108,11 +134,7 @@ async function cachedFetchGuides(deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', 'guides-list')
-  const result = await fetchGuides(deploymentStatus)
-  if (!result || result.length === 0) {
-    throw new Error('Empty content received for cached-guides-list, skipping cache')
-  }
-  return result
+  return throwIfEmpty(await fetchGuides(deploymentStatus), 'cached-guides-list')
 }
 
 export function getCachedGuides(deploymentStatus: string) {
@@ -120,22 +142,8 @@ export function getCachedGuides(deploymentStatus: string) {
   return cachedFetchGuides(deploymentStatus)
 }
 
-export async function fetchAllGuidesForPage() {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedGuides(deploymentStatus)
-  } catch (cacheError) {
-    console.warn('Cached guides fetch failed, retrying without cache:', cacheError)
-
-    try {
-      return await fetchGuides(deploymentStatus)
-    } catch (directError) {
-      console.error('Direct guides fetch also failed:', directError)
-      return []
-    }
-  }
+export function fetchAllGuidesForPage() {
+  return getListWithFallback('guides', getCachedGuides, fetchGuides)
 }
 
 async function fetchSingleGuide(slug: string, deploymentStatus: string) {
@@ -159,25 +167,8 @@ export function getCachedSingleGuide(slug: string, deploymentStatus: string) {
   return cachedFetchSingleGuide(slug, deploymentStatus)
 }
 
-export async function fetchGuideBySlug(slug: string) {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    const result = await getCachedSingleGuide(slug, deploymentStatus)
-    if (result) return result
-  } catch (cacheError) {
-    console.warn(
-      `Cached single guide fetch failed for "${slug}", retrying without cache:`,
-      cacheError
-    )
-  }
-
-  const directResult = await fetchSingleGuide(slug, deploymentStatus)
-  if (!directResult) {
-    console.warn(`Guide content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
-  }
-  return directResult
+export function fetchGuideBySlug(slug: string) {
+  return getBySlugWithFallback('guide', slug, getCachedSingleGuide, fetchSingleGuide)
 }
 
 // --- Blogs ---
@@ -191,11 +182,7 @@ async function cachedFetchBlogs(deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', 'blogs-list')
-  const result = await fetchBlogs(deploymentStatus)
-  if (!result || result.length === 0) {
-    throw new Error('Empty content received for cached-blogs-list, skipping cache')
-  }
-  return result
+  return throwIfEmpty(await fetchBlogs(deploymentStatus), 'cached-blogs-list')
 }
 
 export function getCachedBlogs(deploymentStatus: string) {
@@ -203,22 +190,8 @@ export function getCachedBlogs(deploymentStatus: string) {
   return cachedFetchBlogs(deploymentStatus)
 }
 
-export async function fetchAllBlogsForPage() {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedBlogs(deploymentStatus)
-  } catch (cacheError) {
-    console.warn('Cached blogs fetch failed, retrying without cache:', cacheError)
-
-    try {
-      return await fetchBlogs(deploymentStatus)
-    } catch (directError) {
-      console.error('Direct blogs fetch also failed:', directError)
-      return []
-    }
-  }
+export function fetchAllBlogsForPage() {
+  return getListWithFallback('blogs', getCachedBlogs, fetchBlogs)
 }
 
 async function fetchSingleBlog(slug: string, deploymentStatus: string) {
@@ -242,25 +215,8 @@ export function getCachedSingleBlog(slug: string, deploymentStatus: string) {
   return cachedFetchSingleBlog(slug, deploymentStatus)
 }
 
-export async function fetchBlogBySlug(slug: string) {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    const result = await getCachedSingleBlog(slug, deploymentStatus)
-    if (result) return result
-  } catch (cacheError) {
-    console.warn(
-      `Cached single blog fetch failed for "${slug}", retrying without cache:`,
-      cacheError
-    )
-  }
-
-  const directResult = await fetchSingleBlog(slug, deploymentStatus)
-  if (!directResult) {
-    console.warn(`Blog content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
-  }
-  return directResult
+export function fetchBlogBySlug(slug: string) {
+  return getBySlugWithFallback('blog', slug, getCachedSingleBlog, fetchSingleBlog)
 }
 
 // --- FAQs ---
@@ -274,11 +230,7 @@ async function cachedFetchFaqs(deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', 'faqs-list')
-  const result = await fetchFaqs(deploymentStatus)
-  if (!result || result.length === 0) {
-    throw new Error('Empty content received for cached-faqs-list, skipping cache')
-  }
-  return result
+  return throwIfEmpty(await fetchFaqs(deploymentStatus), 'cached-faqs-list')
 }
 
 export function getCachedFaqs(deploymentStatus: string) {
@@ -286,22 +238,8 @@ export function getCachedFaqs(deploymentStatus: string) {
   return cachedFetchFaqs(deploymentStatus)
 }
 
-export async function fetchAllFaqsForPage() {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedFaqs(deploymentStatus)
-  } catch (cacheError) {
-    console.warn('Cached FAQs fetch failed, retrying without cache:', cacheError)
-
-    try {
-      return await fetchFaqs(deploymentStatus)
-    } catch (directError) {
-      console.error('Direct FAQs fetch also failed:', directError)
-      return []
-    }
-  }
+export function fetchAllFaqsForPage() {
+  return getListWithFallback('FAQs', getCachedFaqs, fetchFaqs)
 }
 
 async function fetchSingleFaq(slug: string, deploymentStatus: string) {
@@ -322,25 +260,8 @@ export function getCachedSingleFaq(slug: string, deploymentStatus: string) {
   return cachedFetchSingleFaq(slug, deploymentStatus)
 }
 
-export async function fetchFaqBySlug(slug: string) {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    const result = await getCachedSingleFaq(slug, deploymentStatus)
-    if (result) return result
-  } catch (cacheError) {
-    console.warn(
-      `Cached single FAQ fetch failed for "${slug}", retrying without cache:`,
-      cacheError
-    )
-  }
-
-  const directResult = await fetchSingleFaq(slug, deploymentStatus)
-  if (!directResult) {
-    console.warn(`FAQ content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
-  }
-  return directResult
+export function fetchFaqBySlug(slug: string) {
+  return getBySlugWithFallback('FAQ', slug, getCachedSingleFaq, fetchSingleFaq)
 }
 
 // --- Case studies (customer stories) ---
@@ -395,11 +316,7 @@ async function cachedFetchCaseStudies(deploymentStatus: string): Promise<Custome
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', 'case-studies-list')
-  const result = await fetchCaseStudies(deploymentStatus)
-  if (!result || result.length === 0) {
-    throw new Error('Empty content received for cached-case-studies-list, skipping cache')
-  }
-  return result
+  return throwIfEmpty(await fetchCaseStudies(deploymentStatus), 'cached-case-studies-list')
 }
 
 export function getCachedCaseStudies(deploymentStatus: string) {
@@ -407,22 +324,8 @@ export function getCachedCaseStudies(deploymentStatus: string) {
   return cachedFetchCaseStudies(deploymentStatus)
 }
 
-export async function fetchAllCaseStudiesForPage(): Promise<CustomerStory[]> {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedCaseStudies(deploymentStatus)
-  } catch (cacheError) {
-    console.warn('Cached case studies fetch failed, retrying without cache:', cacheError)
-
-    try {
-      return await fetchCaseStudies(deploymentStatus)
-    } catch (directError) {
-      console.error('Direct case studies fetch also failed:', directError)
-      return []
-    }
-  }
+export function fetchAllCaseStudiesForPage(): Promise<CustomerStory[]> {
+  return getListWithFallback('case studies', getCachedCaseStudies, fetchCaseStudies)
 }
 
 // --- Docs ---
@@ -436,11 +339,7 @@ async function cachedFetchDocs(deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', 'docs-list')
-  const result = await fetchDocs(deploymentStatus)
-  if (!result || result.length === 0) {
-    throw new Error('Empty content received for cached-docs-list, skipping cache')
-  }
-  return result
+  return throwIfEmpty(await fetchDocs(deploymentStatus), 'cached-docs-list')
 }
 
 export function getCachedDocs(deploymentStatus: string) {
@@ -448,22 +347,8 @@ export function getCachedDocs(deploymentStatus: string) {
   return cachedFetchDocs(deploymentStatus)
 }
 
-export async function fetchAllDocsForPage() {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedDocs(deploymentStatus)
-  } catch (cacheError) {
-    console.warn('Cached docs fetch failed, retrying without cache:', cacheError)
-
-    try {
-      return await fetchDocs(deploymentStatus)
-    } catch (directError) {
-      console.error('Direct docs fetch also failed:', directError)
-      return []
-    }
-  }
+export function fetchAllDocsForPage() {
+  return getListWithFallback('docs', getCachedDocs, fetchDocs)
 }
 
 // Fields only; no `content`. The full docs list serializes to ~16MB, which is
@@ -505,11 +390,7 @@ async function cachedFetchDocsIndex(deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', 'docs-list')
-  const result = await fetchDocsIndex(deploymentStatus)
-  if (!result || result.length === 0) {
-    throw new Error('Empty content received for cached-docs-index, skipping cache')
-  }
-  return result
+  return throwIfEmpty(await fetchDocsIndex(deploymentStatus), 'cached-docs-index')
 }
 
 export function getCachedDocsIndex(deploymentStatus: string) {
@@ -517,22 +398,8 @@ export function getCachedDocsIndex(deploymentStatus: string) {
   return cachedFetchDocsIndex(deploymentStatus)
 }
 
-export async function fetchAllDocsIndex(): Promise<DocsIndexEntry[]> {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    return await getCachedDocsIndex(deploymentStatus)
-  } catch (cacheError) {
-    console.warn('Cached docs index fetch failed, retrying without cache:', cacheError)
-
-    try {
-      return await fetchDocsIndex(deploymentStatus)
-    } catch (directError) {
-      console.error('Direct docs index fetch also failed:', directError)
-      return []
-    }
-  }
+export function fetchAllDocsIndex(): Promise<DocsIndexEntry[]> {
+  return getListWithFallback('docs index', getCachedDocsIndex, fetchDocsIndex)
 }
 
 async function fetchSingleDoc(slug: string, deploymentStatus: string) {
@@ -556,23 +423,6 @@ export function getCachedSingleDoc(slug: string, deploymentStatus: string) {
   return cachedFetchSingleDoc(slug, deploymentStatus)
 }
 
-export async function fetchDocBySlug(slug: string) {
-  const isProduction = process.env.VERCEL_ENV === 'production'
-  const deploymentStatus = isProduction ? 'live' : 'staging'
-
-  try {
-    const result = await getCachedSingleDoc(slug, deploymentStatus)
-    if (result) return result
-  } catch (cacheError) {
-    console.warn(
-      `Cached single doc fetch failed for "${slug}", retrying without cache:`,
-      cacheError
-    )
-  }
-
-  const directResult = await fetchSingleDoc(slug, deploymentStatus)
-  if (!directResult) {
-    console.warn(`Doc content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
-  }
-  return directResult
+export function fetchDocBySlug(slug: string) {
+  return getBySlugWithFallback('doc', slug, getCachedSingleDoc, fetchSingleDoc)
 }
