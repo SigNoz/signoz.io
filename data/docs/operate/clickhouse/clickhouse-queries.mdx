@@ -1,7 +1,8 @@
 ---
-date: 2026-05-13
+date: 2026-08-07
 title: ClickHouse Queries for Dashboards and Alerts
-description: Write ClickHouse SQL queries in SigNoz to build custom dashboard panels and alerts for metrics, logs, and traces data.
+description: Write ClickHouse SQL queries in SigNoz to build custom dashboard panels and alerts, and learn which SQL functions are supported or restricted.
+doc_type: reference
 ---
 
 SigNoz stores all observability data in ClickHouse. You can write ClickHouse SQL queries directly to build custom dashboard panels and alerts when the visual Query Builder does not cover your use case.
@@ -31,3 +32,30 @@ Each signal type has its own schema and query patterns. Refer to the guide for t
   href="https://signoz.io/docs/userguide/writing-clickhouse-traces-query/"
   description="Query traces data stored in ClickHouse, including the spans schema and examples for latency analysis, error tracking, and service dependency queries."
 />
+
+## Query Validation and Restrictions
+
+SigNoz validates every custom ClickHouse query before it runs. The validator blocks functions and patterns that read data outside SigNoz's observability tables or that bypass its access controls. If a query fails validation, the query editor shows an error and the panel or alert does not run. This validation is always on. No setting or feature flag turns it off.
+
+### Restricted functions and patterns
+
+The following are rejected during validation:
+
+| Category | Blocked | Why |
+|---|---|---|
+| Dictionary accessors | `dictGet`, `dictGetString`, and any function whose name starts with `dict` | These read from ClickHouse dictionaries and bypass row-level data access controls. |
+| File and introspection functions | `file()`, `catboostEvaluate()`, `demangle()`, `addressToLine()`, `addressToLineWithInlines()`, `addressToSymbol()` | These read from the local filesystem or server internals rather than observability data. |
+| Internal-table references in `IN` clauses | `x IN system.<table>` and other internal-schema references on the right side of `IN`, `GLOBAL IN`, or `NOT IN` | These read from ClickHouse system and internal schemas that are not part of your observability data. |
+
+<Admonition type="warning">
+If you previously saved a dashboard panel or alert that uses a `dict*` function or any other pattern in the table above, it now shows a validation error when you open or run it. Rewrite the query without the blocked function to restore the panel or alert.
+</Admonition>
+
+### Supported patterns
+
+These patterns are valid and pass validation:
+
+- **Reserved SQL keywords as column names.** Names such as `limit`, `offset`, `format`, and `settings` are accepted as bare column names or operands. For example, `SELECT sum(limit) FROM t` and `SELECT offset + 1 FROM metrics` both pass.
+- **Complex expressions inside row-generator functions.** Nested calls that compute a dynamic row count, such as `numbers(greatest(1, intDiv(end_ns - start_ns, step_ns) + 1))`, are supported.
+- **Quoted generator function names.** Backtick-quoted or double-quoted forms such as `` `numbers`(31) `` and `"numbers"(31)` are accepted.
+- **`CAST()` inside generator function arguments.** Expressions such as `numbers(CAST(10 AS UInt64))` are supported.
