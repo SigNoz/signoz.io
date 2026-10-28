@@ -1,111 +1,48 @@
 ---
 
-title: What is a Prometheus rule? - A Comprehensive Guide
-date: 2024-08-01
-tags: [faq, prometheus]
+title: "What is a Prometheus rule? - A Comprehensive Guide"
+date: 2026-10-27
+tags: [prometheus, monitoring]
 authors: [yuvraj]
-description: Discover Prometheus rules - essential for efficient monitoring and alerting. Learn about recording and alerting rules, configuration, and best practices.
+description: "A Prometheus rule runs a PromQL expression on a schedule. Learn how to configure recording rules, alerting rules, and notifications."
 keywords: [Prometheus rules, recording rules, alerting rules, monitoring, PromQL, Prometheus configuration, alert management]
 related_articles:
-  - '/guides/how-do-i-add-alerts-to-prometheus'
-  - '/guides/what-is-the-alert-lifecycle-of-prometheus'
   - '/guides/what-are-prometheus-labels'
   - '/guides/what-is-prometheus-target'
   - '/guides/filter-prometheus-results-by-metric-value-not-by-label-value'
 ---
 
-Prometheus rules are powerful configuration elements that enhance the capabilities of the [Prometheus monitoring system](https://signoz.io/guides/what-is-prometheus-for-monitoring/). These rules allow you to precompute complex queries and define alert conditions, making your monitoring more efficient and responsive. In this comprehensive guide, you'll learn about the two main types of Prometheus rules: recording rules and alerting rules. We'll explore their importance, configuration, and best practices to help you optimize your monitoring setup.
+A Prometheus rule tells the [Prometheus monitoring system](https://signoz.io/guides/what-is-prometheus-for-monitoring/) to evaluate a PromQL expression at regular intervals. These rules help you put frequently used calculations and alert conditions into your monitoring configuration, so you don't have to run the same queries by hand.
 
-## What are Prometheus Rules and Why are They Important?
+There are two types of rules. Recording rules save the results of a query as new time series, which can reduce repeated query work on dashboards. Alerting rules detect conditions that need attention and trigger alerts when those conditions are met. Together, they help you keep dashboards responsive and find problems without watching them constantly.
 
-Prometheus rules are configuration elements that extend the functionality of the Prometheus monitoring system. They come in two main flavors: recording rules and alerting rules. Each type serves a distinct purpose in enhancing your monitoring capabilities.
+This guide covers how to configure and test both types of rules, how Prometheus alerts move through their lifecycle, and how to connect Prometheus to Alertmanager for notifications. It also covers ways to reduce alert noise and manage rules over time.
 
-Recording rules allow you to precompute frequently used or complex queries and save their results as new time series. This precomputation significantly improves query performance, especially for dashboards that need to load quickly.
+## Understanding recording rules in Prometheus
 
-Alerting rules, on the other hand, define conditions that trigger alerts when met. These rules automate the process of detecting critical issues in your systems, enabling faster response times to potential problems.
+Recording rules in Prometheus are designed to precompute frequently used or resource-intensive queries. They save the results as new time series, so you can query those results instead of repeatedly running the original complex query.
 
-The importance of Prometheus rules lies in their ability to:
-
-1. Optimize query performance by precomputing expensive calculations
-2. Automate alert generation for critical conditions
-3. Improve the efficiency of time series data management
-4. Enhance the scalability of your monitoring system
-
-## Understanding Recording Rules in Prometheus
-
-Recording rules in Prometheus are designed to precompute frequently used or resource-intensive queries. They save the results as new time series, which can be queried much faster than repeatedly executing the original complex query.
-
-The syntax of a recording rule is straightforward:
-
-```yaml
-- record: <new_metric_name>
-  expr: <PromQL_expression>
-
-```
-
-Here's an example of a recording rule that calculates the average CPU usage across all instances:
-
-```yaml
-- record: job:node_cpu_utilization:avg_rate5m
-  expr: avg(rate(node_cpu_seconds_total{mode="user"}[5m])) by (job)
-
-```
-
-This rule computes the 5-minute average CPU utilization rate and stores it under a new metric name.
-
-Benefits of using recording rules include:
-
-- Faster query execution for frequently accessed metrics
-- Reduced load on the Prometheus server
-- Simplified PromQL queries in dashboards and alerts
-
-Best practices for naming and organizing recording rules:
-
-1. Use a consistent naming convention (e.g., `level:metric:operations`)
-2. Group related rules together
-3. Add comments to explain complex calculations
-4. Avoid creating too many recording rules — focus on the most valuable ones
-
-### Configuring Recording Rules: A Step-by-Step Guide
-
-To set up recording rules in Prometheus, follow these steps:
-
-1. Create a YAML file for your rules (e.g., `recording_rules.yml`):
+For example, create a file named `rules.yml` with this recording rule to calculate the request rate for each service:
 
 ```yaml
 groups:
-  - name: cpu_utilization
+  - name: service_requests
     rules:
-    - record: job:node_cpu_utilization:avg_rate5m
-      expr: avg(rate(node_cpu_seconds_total{mode="user"}[5m])) by (job)
-
+      - record: service:http_requests:rate5m
+        expr: sum by (service) (rate(http_requests_total[5m]))
 ```
 
-1. Add the rule file to your [Prometheus configuration](https://signoz.io/guides/what-is-prometheus-target/):
+In this example, `rate()` calculates the average per-second increase in `http_requests_total` over five minutes for each input series. `sum by (service)` adds those rates across instances and other labels, leaving one result per service.
 
-```yaml
-rule_files:
-  - "recording_rules.yml"
+The recording rule saves that result as `service:http_requests:rate5m`. You can query this metric instead of repeating the full expression. If your metrics use different names or labels, update the expression accordingly.
 
-```
+The name `service:http_requests:rate5m` follows the `level:metric:operations` convention: `service` is the grouping level, `http_requests` identifies the source metric, and `rate5m` describes the calculation.
 
-1. Restart Prometheus to apply the changes.
-2. Test your rules using the Prometheus expression browser or PromQL API.
+## Alerting rules in Prometheus
 
-To validate your rules before applying them, use the `promtool` command:
+An alerting rule defines a condition that Prometheus checks at regular intervals. When the condition is met, Prometheus creates an alert for each matching time series. If the condition remains active for the configured duration, the alert fires.
 
-```bash
-promtool check rules recording_rules.yml
-
-```
-
-This tool will catch syntax errors and other issues before you deploy your rules.
-
-## Mastering Alerting Rules in Prometheus
-
-Alerting rules in Prometheus define conditions that, when met, trigger alerts. These rules allow you to automatically detect and respond to critical issues in your systems.
-
-The anatomy of an alerting rule includes:
+An alerting rule can include the following fields:
 
 ```yaml
 - alert: <alert_name>
@@ -115,106 +52,201 @@ The anatomy of an alerting rule includes:
     <label_key>: <label_value>
   annotations:
     <annotation_key>: <annotation_value>
-
 ```
 
-Here's an example of an alerting rule that triggers when CPU usage is above 90% for 5 minutes:
+### Example: Alert on high CPU usage
+
+Add the following `cpu_alerts` group to `rules.yml`, below the `service_requests` group from the recording rule example. The rule alerts when an instance's average CPU usage stays above 90% for five minutes:
 
 ```yaml
-- alert: HighCPUUsage
-  expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
-  for: 5m
-  labels:
-    severity: critical
-  annotations:
-    summary: "High CPU usage detected on {{ $labels.instance }}"
-    description: "CPU usage is above 90% for 5 minutes on {{ $labels.instance }}"
-
+  - name: cpu_alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage has been above 90% for five minutes on {{ $labels.instance }}."
 ```
 
-Prometheus evaluates alerting rules at regular intervals. When an alert condition is met, it generates an alert and sends it to configured notification systems like Alertmanager.
+The expression calculates the five-minute rate of idle CPU time, averages it across CPU cores for each instance, and subtracts that percentage from 100. The result represents non-idle CPU usage. If it remains above 90% across evaluations for five minutes, the alert fires for that instance. This example uses `node_cpu_seconds_total`, a metric exposed by [Node Exporter](https://signoz.io/guides/prometheus-node-exporter/).
 
-### Advanced Alerting Rule Techniques
+Prometheus sends firing alerts to configured Alertmanager instances. Alertmanager can then group and route notifications. An alert can fire without a notification being sent immediately.
 
-To create more sophisticated alerting rules:
+### Use label matching to select services
 
-1. Use label matching and regex:
+You can use a regular expression in a label selector to check more than one job. For example, this expression finds failed scrapes for targets in either job:
+
+```promql
+up{job=~"important-service|critical-app"} == 0
+```
+
+A failed scrape tells you that Prometheus could not collect metrics from a [target](https://signoz.io/guides/what-is-prometheus-target/), but it does not reveal the cause. A target that disappears from service discovery may no longer have an `up` series, so this expression does not detect every missing target.
+
+### Combine alert conditions
+
+You can combine conditions when an alert should fire only if both are true. For example, the following expression selects services with a 5xx error rate above 5% and a 90th-percentile request duration above one second:
+
+```promql
+(
+  sum by (service) (rate(http_requests_total{status=~"5.."}[5m]))
+  /
+  sum by (service) (rate(http_requests_total[5m]))
+  > 0.05
+)
+and on (service)
+max by (service) (http_request_duration_seconds{quantile="0.9"}) > 1
+```
+
+The error-rate calculation uses `http_requests_total` with `service` and `status` labels. The duration expression uses a summary metric with a `service` label, that takes the highest reported 90th percentile among instances, rather than calculating a service-wide percentile.`and on (service)` matches these two conditions by service.
+
+Before using the expression in your own setup, check the metric names and labels and make adjustments accordingly. To quickly become familiar with PromQL query syntax, check out our [PromQL cheat sheet](https://signoz.io/guides/promql-cheat-sheet/).
+
+Use a `for` duration to avoid firing on brief spikes. For example, changing the CPU rule to `for: 15m` requires the condition to remain active for 15 minutes. Alertmanager can also group related alerts to reduce notification noise.
+
+## Load, validate, and reload your rules
+
+To make Prometheus evaluate the recording and alerting rules, add `rules.yml` to the `rule_files` list in `prometheus.yml`:
 
 ```yaml
-- alert: ServiceDown
-  expr: up{job=~"important-service|critical-app"} == 0
+global:
+  evaluation_interval: 30s
 
+rule_files:
+  - rules.yml
 ```
 
-1. Implement multi-condition alerts:
+In this example, `evaluation_interval: 30s` tells Prometheus to evaluate rules every 30 seconds. If you don't set it, the default is one minute. An individual rule group can set its own `interval`; rule evaluation and scraping run on separate schedules.
+
+Before loading the rules, check both files with `promtool`:
+
+```bash
+promtool check rules rules.yml
+promtool check config prometheus.yml
+```
+
+Run these commands with paths to your files. The checks can catch syntax and configuration errors, but they cannot tell you whether the metrics exist or whether your alert threshold is appropriate.
+
+Next, reload the configuration by sending `SIGHUP` to the Prometheus process. If Prometheus was started with `--web.enable-lifecycle`, you can instead send a reload request:
+
+```bash
+curl -fsS -X POST http://localhost:9090/-/reload
+```
+
+Use your Prometheus address and authentication settings if they differ from the example. After the reload, open `http://localhost:9090/rules` and check that the `service_requests` and `cpu_alerts` groups are loaded without evaluation errors. Query `service:http_requests:rate5m` to inspect the recording rule's output. You can also check `http://localhost:9090/alerts` for pending or firing `HighCPUUsage` alerts.
+
+## Connect Prometheus to Alertmanager
+
+Prometheus evaluates alerting rules, but it needs Alertmanager to route notifications. To send a notification when the `HighCPUUsage` alert fires, configure Prometheus to send alerts to Alertmanager, then configure Alertmanager with a notification receiver.
+
+If Alertmanager is not installed, get it from the [Prometheus downloads page](https://prometheus.io/download/). Add its address to your existing `prometheus.yml` configuration:
 
 ```yaml
-- alert: HighErrorRateAndLatency
-  expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) > 0.05 and http_request_duration_seconds{quantile="0.9"} > 1
-
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']
 ```
 
-1. Reduce alert noise by using the `for` clause and grouping related alerts:
+In this example, `localhost:9093` points to an Alertmanager running on the same host as Prometheus. If they run in separate containers or on different machines, use an address that Prometheus can reach. Check and reload the Prometheus configuration after adding the address, as described in the previous section.
+
+## Configure a notification receiver
+
+Alertmanager needs a route to decide where to send alerts and a receiver to deliver the notifications. For example, create an `alertmanager.yml` file with a webhook receiver:
 
 ```yaml
-- alert: PersistentHighCPU
-  expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
-  for: 15m
+route:
+  receiver: platform-webhook
+  group_by: ['alertname', 'job']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
 
+receivers:
+  - name: platform-webhook
+    webhook_configs:
+      - url: 'https://alerts.example.com/prometheus'
+        send_resolved: true
 ```
 
-1. Integrate with Alertmanager for advanced notification routing and grouping.
+The route sends alerts to `platform-webhook` and groups them by alert name and job. It waits 30 seconds before sending the first notification for a new group. Later notification updates are checked every five minutes, and unchanged firing alerts can be repeated after four hours. With `send_resolved: true`, the receiver can also send notifications when alerts resolve.
 
-## Best Practices for Prometheus Rule Management
+Replace the example URL with an endpoint that accepts Alertmanager's webhook payload. For Slack, email, or PagerDuty, use the corresponding receiver configuration instead. Check the configuration, then start Alertmanager with it:
 
-To effectively manage your Prometheus rules:
+```bash
+amtool check-config alertmanager.yml
+alertmanager --config.file=alertmanager.yml
+```
 
-1. Organize rules into logical groups based on service or function.
-2. Use version control (e.g., Git) to track changes to rule files.
-3. Document your rules with clear comments explaining their purpose and any complex logic.
-4. Regularly review and update rules to ensure they remain relevant and effective.
-5. Use `promtool` to validate rules before deployment.
-6. Consider using a CI/CD pipeline to automate rule testing and deployment.
+If Alertmanager is already running, reload its configuration with `SIGHUP` or an HTTP POST to its `/-/reload` endpoint. Open the Alertmanager UI, usually on port 9093, to check that firing alerts arrive. Then test delivery with a controlled alert and confirm that the receiver gets the notification. An alert appearing in the UI alone does not confirm delivery.
 
-## Troubleshooting Common Prometheus Rule Issues
+## How the Prometheus alert lifecycle works
 
-When working with Prometheus rules, you might encounter these common issues:
+Prometheus tracks each alert by its labels and evaluates its state at regular intervals. For the `HighCPUUsage` rule, each instance moves through these states:
 
-1. Syntax errors: Use `promtool` to catch and fix syntax problems in your rule definitions.
-2. Performance issues: Optimize inefficient rules by simplifying PromQL expressions or using recording rules for complex calculations.
-3. Rule evaluation timeouts: Adjust the `evaluation_interval` in Prometheus configuration or optimize the rule expression.
-4. Resource constraints: [Monitor Prometheus](https://signoz.io/guides/how-do-i-monitor-api-in-prometheus/) itself and consider scaling your monitoring infrastructure if needed.
+| State | What it means |
+| --- | --- |
+| Inactive | The instance does not match the alert expression. |
+| Pending | CPU usage is above 90%, but the condition has not remained active for five minutes. |
+| Firing | CPU usage has remained above 90% across evaluations for five minutes. |
 
-To optimize rule evaluation frequency, balance between timely alerts and system load. Start with longer intervals (e.g., 1 minute) and adjust based on your specific needs and resource availability.
+If the condition clears while the alert is pending, the alert returns to inactive. Without a `for` duration, an alert can fire on the first matching evaluation. A firing alert becomes inactive when it stops matching, unless `keep_firing_for` extends it. Alertmanager may then send a resolved notification, depending on the receiver configuration.
 
-## Key Takeaways
+Once an alert fires, notification timing depends on Alertmanager as well. For example, if `HighCPUUsage` becomes pending at 12:00 and stays active through each 30-second evaluation, it can fire at 12:05. With `group_wait: 30s` for a new alert group, Alertmanager can send the first notification around 12:05:30, plus delivery time. If the alert resolves before `group_wait` ends, no initial notification is sent for it.
 
-- Prometheus rules enhance monitoring efficiency through precomputation and automated alerting.
-- Recording rules improve query performance by precomputing expensive calculations.
-- Alerting rules automate the detection of critical conditions in your systems.
-- Proper rule management — including organization, version control, and regular review — is crucial for maintaining a robust monitoring system.
+For an existing group, `group_interval` controls when Alertmanager checks for changes, and `repeat_interval` controls when an unchanged firing alert is eligible for another notification. In the configuration above, those values are five minutes and four hours. Scrape timing, routing, and delivery can also affect when a notification arrives.
+
+## Reduce alert noise and flapping
+
+An alert can repeatedly fire and resolve when a metric moves back and forth across a threshold. This is called flapping. The `for: 5m` setting in the CPU rule helps by waiting for high CPU usage to persist before firing.
+
+You can also add `keep_firing_for` to the `HighCPUUsage` rule, alongside `for`:
+
+```yaml
+for: 5m
+keep_firing_for: 2m
+```
+
+With this setting, the alert keeps firing for two minutes after the condition was last met. This can prevent repeated resolutions during brief recoveries or gaps in data, but it also delays resolution.
+
+Alertmanager provides other ways to manage notifications. `Grouping` combines related alerts into a notification, while `Silences` temporarily mute alerts that match selected labels. `Inhibition` suppresses matching notifications while another alert is active, such as an alert for a dependency failure. `Silences` and `Inhibition` do not stop Prometheus from evaluating rules.
+
+Choose delays based on how quickly your team needs to respond. Review noisy alerts before increasing thresholds or wait times, and include enough context in annotations for the recipient to investigate.
+
+## Test and troubleshoot Prometheus rules
+
+Use `promtool test rules tests.yml` to test rules against synthetic input series and expected results. Include the pending period, threshold boundaries, and recovery in your tests.
+
+| Problem | What to check |
+| --- | --- |
+| Rule missing from the Rules page | Check `rule_files`, file paths, permissions, and reload errors. |
+| Recording rule returns no data | Run its expression directly and check metric names, label selectors, and recent samples. |
+| Alert stays pending | Check whether it has remained active for the full `for` duration and whether changing labels keep creating new alert instances. |
+| Alert does not fire | Check the expression's returned series, missing data, thresholds, and evaluation errors. |
+| Alert fires but no notification arrives | Check the Prometheus-to-Alertmanager connection, matching routes, receiver errors, grouping delays, silences, and inhibition. |
+| Rule evaluations are slow or fail | Inspect the expression's cost, cardinality, query timeout, and Prometheus resources. Reuse recording rules where they avoid repeated work. |
+
+Monitor `prometheus_rule_evaluation_failures_total` for evaluation failures. Increasing the evaluation interval reduces how often rules run; it does not itself increase the query execution timeout.
 
 ## FAQs
 
-### What's the difference between recording rules and alerting rules?
-
-Recording rules precompute and store query results as new time series, while alerting rules define conditions that trigger alerts when met.
-
-### How often does Prometheus evaluate rules?
-
-Prometheus evaluates rules at intervals specified by the `evaluation_interval` in the Prometheus configuration. The default is usually 1 minute.
-
-### Can I use PromQL functions in Prometheus rules?
+### Can I use PromQL functions in rules?
 
 Yes, you can use any valid PromQL expression in both recording and alerting rules, including functions.
 
-### How do I ensure my Prometheus rules are working correctly?
+### Does a pending alert send a notification?
 
-Use the Prometheus expression browser to test your rules, monitor the `prometheus_rule_evaluation_failures_total` metric, and regularly review your alerting and recording rule effectiveness.
+Prometheus does not send pending alerts to Alertmanager for notification. The alert must fire first. Alertmanager can then apply routing, grouping delays, silences, and inhibition before delivering a notification.
 
-## Monitoring Made Easy with SigNoz
+### Do I need Alertmanager for recording rules?
 
-While Prometheus offers powerful monitoring capabilities, setting up and managing rules can be complex. [SigNoz](https://signoz.io/docs/introduction/) provides a user-friendly alternative that simplifies monitoring and alerting for your applications and infrastructure.
+No. Prometheus evaluates and stores recording rule results itself. Alertmanager handles alert notifications, not recording rule evaluation.
+
+## Monitor and alert on metrics with SigNoz
+
+While Prometheus offers powerful monitoring capabilities, setting up and managing rules can be complex. SigNoz Cloud provides a user-friendly alternative that simplifies monitoring and alerting for your applications and infrastructure.
 
 With SigNoz, you can:
 
@@ -223,8 +255,4 @@ With SigNoz, you can:
 - Correlate metrics, traces, and logs in a single platform
 - Scale your monitoring effortlessly with cloud-native architecture
 
-To get started with SigNoz:
-
 <GetStartedSigNoz />
-
-SigNoz offers both cloud and open-source versions, giving you flexibility in your monitoring setup. Experience the ease of modern observability with SigNoz and take your monitoring to the next level.
