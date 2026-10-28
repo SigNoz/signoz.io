@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-03
-updated_date: 2026-10-19
+updated_date: 2026-10-23
 title: Monitor GCP Memorystore for Redis Metrics and Logs
 description: Collect Memorystore for Redis metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
 doc_type: howto
@@ -157,6 +157,15 @@ With **Log Collection** turned on, SigNoz collects these logs for your Memorysto
 | Admin Activity audit logs | Changes to instances, such as create, update, delete, failover, upgrade, import, and export | None. GCP always writes these. |
 | Maintenance logs | When Google starts and finishes a maintenance update on an instance | None |
 | Data Access audit logs | Reads of instance details, such as getting or listing instances and fetching the AUTH string | Turn on <a href="https://cloud.google.com/memorystore/docs/redis/audit-logging" target="_blank" rel="noopener noreferrer nofollow">Data Access audit logs</a> for Memorystore for Redis |
+
+Every log SigNoz collects carries these attributes you can filter on, listed under **GCP Memorystore Redis** > **Data Collected** in the integration:
+
+| Attribute | Description |
+| --- | --- |
+| `gcp.project` | The GCP project the log came from. |
+| `gcp.resource_type` | The GCP resource type, such as `redis_instance`. |
+
+GCP resource labels also arrive as `gcp.label.<label-key>` attributes.
 
 Use this filter for your log sink:
 

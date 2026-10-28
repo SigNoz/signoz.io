@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-18
-updated_date: 2026-10-19
+updated_date: 2026-10-23
 title: Monitor GCP Kubernetes Engine (GKE) Metrics and Logs
 description: Collect GKE metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
 doc_type: howto
@@ -208,6 +208,15 @@ With **Log Collection** turned on, SigNoz collects the <a href="https://docs.clo
 | Kubernetes events | Events such as pod scheduling, image pulls, and restarts | Collected with system logs, on a best-effort basis |
 | Audit logs | Calls to the Kubernetes API and GKE cluster and node pool operations | None. Always on. |
 | Control plane logs | Logs from the API server, scheduler, and controller manager | Turn them on in the cluster's **Observability** settings |
+
+Every log SigNoz collects carries these attributes you can filter on, listed under **GCP Kubernetes Engine** > **Data Collected** in the integration:
+
+| Attribute | Description |
+| --- | --- |
+| `gcp.project` | The GCP project the log came from. |
+| `gcp.resource_type` | The GCP resource type, such as `k8s_container`, `k8s_pod`, or `k8s_node`. |
+
+GCP resource labels also arrive as `gcp.label.<label-key>` attributes.
 
 Use this filter for your log sink:
 
