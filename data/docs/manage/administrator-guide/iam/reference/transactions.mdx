@@ -1,5 +1,5 @@
 ---
-date: 2026-10-12
+date: 2026-10-26
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,11 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, dashboards, the subscription, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
+This page covers roles, service accounts, API keys, users, password reset tokens, dashboards, the subscription, licenses, cloud integrations, auth domains, quick filters, saved views, notification channels, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
+</Admonition>
+
+<Admonition type="info">
+The custom role editor does not list users, password reset tokens, cloud integrations, or auth domains. To grant their transactions to a custom role, use the roles API. The role's page in SigNoz does not show these transactions.
 </Admonition>
 
 ## Resources
@@ -66,6 +70,40 @@ This page currently covers roles, service accounts, API keys, dashboards, the su
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
 
+### User
+
+**Resource:** `user` · **Kind:** `user` · **Selector:** user ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Invite a new user to the organization. | signoz-admin |
+| `list` | List all users in the organization. | signoz-admin |
+| `read` | View a user's details and their assigned roles. | signoz-admin |
+| `update` | Modify a user's display name. The email cannot be changed. | signoz-admin |
+| `delete` | Remove a user from the organization. | signoz-admin |
+| `attach` | Create a relationship with the user: assign a role to it, or create a password reset token for it. | signoz-admin |
+| `detach` | Remove a relationship from the user: unassign a role from it. | signoz-admin |
+
+Granting these relations on a custom role delegates user management without the full `signoz-admin` role. For example, a helpdesk role can hold `user:create`, `user:attach`, `role:attach` on `signoz-viewer`, and `factor-password:create` to invite Viewers and trigger password resets, while leaving role and service account management to admins.
+
+<Admonition type="info">
+`create` and `list` cover the organization rather than a single user, so both can only be granted as **All** or **None**. `read`, `update`, `delete`, `attach`, and `detach` accept **Only selected**, with the user ID as the selector.
+</Admonition>
+
+<div id="factor-password" />
+
+### Password Reset Token
+
+**Resource:** `metaresource` · **Kind:** `factor-password` · **Selector:** `*`
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create or regenerate a password reset token for a user. | signoz-admin |
+| `list` | Retrieve the password reset token for a user. | signoz-admin |
+| `read` | Not used by any current endpoint. | signoz-admin |
+
+Changing your own password does not use these relations. Any authenticated user can update their own password from account settings without admin privileges.
+
 ### Dashboard
 
 **Resource:** `metaresource` · **Kind:** `dashboard` · **Selector:** dashboard ID (the UUID in the dashboard URL, `/dashboard/<dashboard-id>`)
@@ -99,6 +137,58 @@ Publishing a dashboard requires `update` on it. Readers who open the resulting p
 
 A workspace has a single subscription, so each relation can only be granted as **All** or **None**. Granting these relations on a custom role scopes billing access to that role without granting any other administrative access.
 
+### License
+
+**Resource:** `metaresource` · **Kind:** `license` · **Selector:** license ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Activate a license by key. | signoz-admin |
+| `list` | List all licenses in the organization. | signoz-admin |
+| `read` | View a license's details, including the license key shown in Settings. | signoz-admin |
+| `update` | Refresh the active license from the SigNoz licensing server. | signoz-admin |
+| `delete` | Delete a self-hosted license. | signoz-admin |
+
+<Admonition type="info">
+`license:read` controls where the license key is exposed in the UI. Users with `license:read` see the masked license key and its copy button on the **Settings > Workspace** and **Settings > Account** pages. Users without it see a "not authorized" message in place of the key. On upgrade to v0.141.0, existing admin roles receive all five license relations automatically (see the [v0.141.0 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-141/)); the signoz-editor and signoz-viewer managed roles do not receive license relations by default.
+</Admonition>
+
+### Cloud Integration
+
+**Resource:** `metaresource` · **Kind:** `cloud-integration` · **Selector:** cloud integration account ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Connect a new cloud provider account. | signoz-admin |
+| `list` | List connected accounts for a cloud provider. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | View a connected account's details and its enabled services. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Update a connected account, including its enabled services. | signoz-admin |
+| `delete` | Disconnect a connected account. | signoz-admin |
+
+`list` covers the workspace, so it can only be granted as **All** or **None**. `read`, `update`, and `delete` accept **Only selected**, with the account ID as the selector.
+
+<Admonition type="info">
+Editors and viewers can view connected cloud accounts and their services but cannot connect, update, or disconnect them. The cloud provider catalog endpoints (list available services and get a service definition without account context) require no authorization.
+</Admonition>
+
+### Auth Domain
+
+**Resource:** `metaresource` · **Kind:** `auth-domain` · **Selector:** auth domain ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Register a new authenticated domain and its SSO configuration. | signoz-admin |
+| `list` | List all authenticated domains. | signoz-admin |
+| `read` | View a domain's SSO configuration and role mapping. | signoz-admin |
+| `update` | Modify a domain's SSO configuration or role mapping. | signoz-admin |
+| `delete` | Remove an authenticated domain. | signoz-admin |
+| `attach` | Create a relationship with the domain. Used when a domain's role mapping assigns roles at SSO login. | signoz-admin |
+| `detach` | Remove a relationship from the domain. Used when replacing a domain's role mapping. | signoz-admin |
+
+<Admonition type="info">
+Auth domain transactions are enforced with fine-grained scopes on enterprise deployments. Community deployments keep the existing admin-only gate. Configuring a domain with a role mapping also requires transactions on the mapped roles (see [Compound Transactions](#compound-transactions)).
+</Admonition>
+
 ### Logs
 
 **Resource:** `telemetryresource` · **Kind:** `logs` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
@@ -121,7 +211,9 @@ A workspace has a single subscription, so each relation can only be granted as *
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
-| `read` | Query metric data in the Metrics Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | Query metric data in the Metrics Explorer, dashboards, alerts, Infrastructure Monitoring, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+
+Infrastructure Monitoring views and endpoints (hosts, pods, containers, nodes, namespaces, clusters, volumes, deployments, statefulsets, jobs, daemonsets, and checks) are authorized against this resource. List views accept a key-scoped `metrics:read` when the request pins a granted ingestion key, while the Checks view requires a wildcard `metrics:read`. See [Infrastructure Monitoring Access](https://signoz.io/docs/manage/administrator-guide/iam/reference/telemetry/#infrastructure-monitoring-access).
 
 ### Meter Metrics
 
@@ -131,9 +223,45 @@ A workspace has a single subscription, so each relation can only be granted as *
 |----------|-------------|---------------------|
 | `read` | Query usage metering data for the workspace. | signoz-admin, signoz-editor, signoz-viewer |
 
+### Quick Filters
+
+**Resource:** `metaresource` · **Kind:** `quick-filter` · **Selector:** quick filter ID (use `*` for all quick filters)
+
+Controls the quick filters panel in the Logs, Traces, Exceptions, API Monitoring, Meter, and AI Observability explorers. Quick filters on the infrastructure pages are not gated by these transactions.
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `list` | List the quick filter configurations in the workspace. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | View the quick filters panel in the explorers. Without it, the panel shows a permission-denied callout. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Edit quick filters (add, remove, or reorder them) from the settings panel. Requires `read` as well. | signoz-admin |
+
+### Saved View
+
+**Resource:** `metaresource` · **Kind:** `saved-view` · **Selector:** saved view ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Save a view in an explorer. | signoz-admin, signoz-editor |
+| `list` | List the saved views in the workspace. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | Open a saved view. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Edit a saved view. | signoz-admin, signoz-editor |
+| `delete` | Delete a saved view. | signoz-admin, signoz-editor |
+
+### Notification Channel
+
+**Resource:** `metaresource` · **Kind:** `notification-channel` · **Selector:** notification channel ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a notification channel, or send a test notification. | signoz-admin |
+| `list` | List the notification channels in the workspace. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | View a notification channel's configuration. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Edit or repair a notification channel. | signoz-admin |
+| `delete` | Delete a notification channel. | signoz-admin |
+
 ## Selectors
 
-Roles, service accounts, API keys, and dashboards are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead. The subscription is workspace-wide and can only be granted as **All** or **None**.
+Most resources are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead. The subscription and password reset tokens (`factor-password`) take only `*`, so they can only be granted as **All** or **None**.
 
 ### Telemetry Selectors
 
@@ -172,3 +300,14 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
 | Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
 | Open Manage billing | `subscription:list` AND `subscription:update` |
+| Invite a user with no roles | `user:create` |
+| Invite a user with one or more roles | `user:create` AND `user:attach` AND `role:attach` on each requested role |
+| Assign a role to a user | `user:attach` AND `role:attach` |
+| Remove a role from a user | `user:detach` AND `role:detach` |
+| Create a password reset token for a user | `factor-password:create` AND `user:attach` |
+| Create an auth domain with a role mapping | `auth-domain:create` AND `auth-domain:attach` AND `role:attach` on each mapped role |
+| Update an auth domain's role mapping | `auth-domain:update` AND `auth-domain:attach` AND `auth-domain:detach` AND `role:attach` on each new mapped role AND `role:detach` on each replaced role |
+
+Changing your own role assignments requires the same transactions. Removing your own admin role takes effect immediately; another admin or the root admin can restore it.
+
+An update replaces the full role mapping, so the caller must be able to detach the roles the stored mapping grants and attach the roles the new mapping grants. When a mapping has no explicit default role, SSO users fall back to `signoz-viewer`, so the caller needs `role:attach` on `signoz-viewer`. When the mapping trusts the IdP role attribute (`useRoleAttribute`), any role can be granted at login, so the caller needs `role:attach` on the wildcard role selector (`*`).
