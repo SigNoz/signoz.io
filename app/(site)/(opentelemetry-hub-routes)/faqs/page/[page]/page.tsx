@@ -1,7 +1,10 @@
+import { notFound } from 'next/navigation'
 import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import { buildListingMetadata } from '../../../metadata'
 import { getResourceCenterFaqs } from '../../../content'
+import { POSTS_PER_PAGE } from '../../../constants'
+import { getListingPageNumber } from '@/utils/paginationPages'
 import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
 import { FAQS_LISTING } from '../../constants'
@@ -20,6 +23,8 @@ export async function generateMetadata(props: { params: Promise<{ page: string }
 export default async function Page(props: { params: Promise<{ page: string }> }) {
   const params = await props.params
   const posts = await getResourceCenterFaqs()
+  const pageNumber = getListingPageNumber(params.page, posts.length, POSTS_PER_PAGE)
+  if (!pageNumber) notFound()
   const breadcrumbJsonLd = generateSectionHubBreadcrumb('faqs', params.page)
 
   return (
@@ -28,7 +33,7 @@ export default async function Page(props: { params: Promise<{ page: string }> })
       <ListingPageLayout>
         <ListingWithSearch
           posts={posts}
-          pageNumber={parseInt(params.page)}
+          pageNumber={pageNumber}
           pageRoute="faqs"
           {...FAQS_LISTING}
         />
