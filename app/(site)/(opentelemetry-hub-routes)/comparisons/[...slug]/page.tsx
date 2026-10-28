@@ -18,6 +18,7 @@ import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/bre
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { buildMetadataImages } from '@/utils/metadataImages'
+import { withMarkdownAlternate } from '@/utils/markdownAlternate'
 
 const defaultLayout = 'ComparisonsLayout'
 const layouts = {
@@ -58,6 +59,7 @@ export async function generateMetadata(props: {
   return {
     title: seoTitle,
     description: post?.description,
+    alternates: withMarkdownAlternate(`/comparisons/${slug}`),
     openGraph: {
       title: seoTitle,
       description: post?.description,

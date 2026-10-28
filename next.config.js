@@ -20,6 +20,55 @@ function withDocsOnboardingRedirects(redirects) {
   return [...redirects, ...docsOnboardingRedirects]
 }
 
+// Paths that never serve a `.md` markdown alternate (see utils/agentMarkdownRouting.ts).
+const NON_MARKDOWN_PREFIXES = ['/api/', '/api-reference/', '/.well-known/', '/docs-onboarding/']
+
+const toMarkdownPath = (route) => {
+  const pathname = route.split('#')[0].split('?')[0].replace(/\/+$/, '')
+  if (
+    !pathname.startsWith('/') ||
+    NON_MARKDOWN_PREFIXES.some((p) => `${pathname}/`.startsWith(p))
+  ) {
+    return null
+  }
+  const lastSegment = pathname.split('/').pop() || ''
+  // Skip the home page and file-like paths (e.g. /feed.xml).
+  if (!lastSegment || lastSegment.includes('.')) {
+    return null
+  }
+  return pathname
+}
+
+/**
+ * Generate `.md` versions of exact-path redirects so agents fetching an old
+ * page's markdown (e.g. /docs/old-page.md or /docs/old-page/.md) land on the
+ * new page's markdown instead of a 404.
+ */
+function withMarkdownRedirects(redirects) {
+  const seenSources = new Set()
+  const markdownRedirects = redirects.flatMap((r) => {
+    // Only exact paths; patterns and regex sources have no safe `.md` form.
+    if (/[:(*\\+?{}]/.test(r.source) || r.has || r.missing) {
+      return []
+    }
+    const source = toMarkdownPath(r.source)
+    const destination = toMarkdownPath(r.destination)
+    // The list has a few duplicate sources; keep the first, as Next does.
+    if (!source || !destination || seenSources.has(source)) {
+      return []
+    }
+    seenSources.add(source)
+    // `{/}?` matches both the /old.md and /old/.md forms agents use.
+    return [
+      { source: `${source}{/}?.md`, destination: `${destination}.md`, permanent: r.permanent },
+    ]
+  })
+  return [...redirects, ...markdownRedirects]
+}
+
+const withAgentAwareRedirects = (redirects) =>
+  withMarkdownRedirects(withDocsOnboardingRedirects(redirects))
+
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
@@ -142,7 +191,7 @@ module.exports = () => {
       }
     },
     async redirects() {
-      return withDocsOnboardingRedirects([
+      return withAgentAwareRedirects([
         {
           source: '/guides/how-do-i-add-alerts-to-prometheus/',
           destination: '/guides/what-is-a-prometheus-rule/',

@@ -20,6 +20,7 @@ import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { buildMetadataImages } from '@/utils/metadataImages'
+import { withMarkdownAlternate } from '@/utils/markdownAlternate'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -56,6 +57,7 @@ export async function generateMetadata(props: {
       return {
         title: seoTitle,
         description: content.description,
+        alternates: withMarkdownAlternate(`/opentelemetry/${path}`),
         openGraph: {
           title: seoTitle,
           description: content.description,
