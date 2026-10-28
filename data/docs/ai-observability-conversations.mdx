@@ -1,0 +1,79 @@
+---
+date: 2026-10-16
+title: AI Observability - Read LLM Conversations in Traces
+description: See how SigNoz renders LLM spans as readable conversation threads in trace detail, including messages, reasoning, tool calls, images, and finish reasons.
+doc_type: explanation
+---
+
+When you open an LLM span in [Trace Details](https://signoz.io/docs/userguide/span-details/), SigNoz renders the request and response as a human-readable conversation thread instead of raw JSON. The thread shows each message in order, with its role, any reasoning the model returned, tool calls and their results, and multi-modal parts such as images and files.
+
+SigNoz builds this thread from the span body automatically. You do not configure anything. The thread appears whenever a span carries message content in a format that SigNoz recognizes, from either an instrumentation library or a gateway that records the raw provider body.
+
+## How SigNoz builds the conversation thread
+
+SigNoz reads message content from a span in one of two ways:
+
+- **Instrumented spans.** Spans from <a href="https://github.com/Arize-ai/openinference" target="_blank" rel="noopener noreferrer nofollow">OpenInference</a> or <a href="https://github.com/traceloop/openllmetry" target="_blank" rel="noopener noreferrer nofollow">OpenLLMetry</a> carry message content on their standard attributes. SigNoz reads those attributes directly.
+- **Raw-body gateway spans.** Some gateways write the raw provider request and response body onto span attributes instead of using instrumentation attributes. SigNoz detects the body format (Anthropic Messages, Gemini `generateContent`, OpenAI Responses, or OpenRouter) and formats it into the same conversation thread.
+
+<Admonition type="info">
+Instrumented spans take precedence. When a span carries both OpenInference or OpenLLMetry attributes and a raw provider body, SigNoz uses the instrumentation attributes. The raw-body formatters only run when the OpenInference attributes are absent.
+</Admonition>
+
+The raw-body path depends on your gateway writing the provider body onto the span. It needs no setup in SigNoz beyond sending such spans.
+
+## Supported providers and SDKs
+
+SigNoz renders a formatted conversation thread for spans from these providers and SDKs:
+
+| Provider or SDK | Detected from | Notes |
+| --- | --- | --- |
+| OpenAI Responses API | Raw Responses body (gateway or Agents SDK fallback) | Input messages, output messages, reasoning, and server-side tools (web search, computer use, MCP). |
+| Anthropic Messages API | Raw Messages body | System prompt, user and assistant turns, tool calls, tool results, and thinking blocks. |
+| Gemini `generateContent` API | Raw body (REST camelCase or Python SDK snake_case) | System instructions, user and model turns, function calls, and function responses. Both attribute spellings are recognized. |
+| OpenRouter | Raw OpenRouter broadcast body | Completions, reasoning, and tool calls. An OpenAI chat-format request paired with an OpenRouter-format response is handled as one exchange. |
+| Vercel AI SDK (v4 and v5) | `ai.*` telemetry attributes | Prompts, response text, tool calls, and multi-modal content. Both v4 and v5 attribute shapes are recognized. |
+| Mastra | `ai.*` telemetry attributes | Uses the same format as the Vercel AI SDK and renders identically. |
+
+## What the conversation thread shows
+
+SigNoz surfaces each part of a message as a typed, labeled block in the thread.
+
+- **Messages and roles.** Each turn is shown with its role, such as system, user, assistant, or model, in the order the model received and produced it.
+- **Reasoning and thinking.** Reasoning summaries (OpenAI Responses), thinking blocks (Anthropic), Gemini `thought` parts, and OpenRouter reasoning fields appear as a distinct reasoning section.
+- **Tool calls and tool responses.** Function and tool calls and their results appear as labeled tool-call and tool-response blocks. Server-side tools from the OpenAI Responses API, such as web search, computer use, and MCP, appear as typed server-tool parts.
+- **Images.** Images render inline whether they are passed as URLs, bare base64, or serialized Node.js Buffers (Vercel AI SDK). Images referenced by file ID (OpenAI Responses) appear as file parts with an image type.
+- **Files and documents.** File attachments (OpenAI Responses `input_file` and Vercel AI SDK file parts) are resolved to a document, image, or audio type by their MIME type and rendered accordingly.
+- **Finish reason labels.** SigNoz maps each provider's finish reason to one of these labels:
+
+| Label | Example provider values |
+| --- | --- |
+| Stop | OpenAI Responses `completed`, Anthropic `end_turn`, Gemini `STOP` |
+| Length | OpenAI Responses `max_output_tokens`, Anthropic `model_context_window_exceeded`, Gemini `MAX_TOKENS` |
+| Content filter | Anthropic `refusal`, Gemini `SAFETY` / `RECITATION` / `BLOCKLIST` / `PROHIBITED_CONTENT` / `IMAGE_SAFETY`, Vercel `content-filter` |
+| Error | OpenAI Responses `failed` / `cancelled` / `incomplete` |
+
+## Embedding spans
+
+Spans from embedding operations, such as `text-embedding-3-small`, show empty input and output message sections. SigNoz suppresses embedding spans from the conversation thread on purpose, because an embedding response is a vector, not a message.
+
+<Admonition type="info">
+If an embedding span previously showed raw vector data as garbled content, empty message sections are the expected behavior now.
+</Admonition>
+
+## Open the conversation view
+
+1. Open a trace. Use the [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/) to find LLM and agent traces, or open any trace from the [Traces explorer](https://signoz.io/docs/userguide/traces/).
+2. In [Trace Details](https://signoz.io/docs/userguide/span-details/), select an LLM span. To show only LLM spans, select the **LLM** [quick filter](https://signoz.io/docs/userguide/span-details/#quick-filters).
+3. In the span details, read the conversation thread. SigNoz renders the formatted thread for any supported span; spans it does not recognize keep the standard attribute view.
+
+## Next steps
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [Explorer](https://signoz.io/docs/ai-observability-explorer/): query your LLM and agent traces.
+- [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/): check the attributes that each panel and filter needs.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+
+## Get Help
+
+<GetHelp />
