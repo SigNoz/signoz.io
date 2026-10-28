@@ -1,5 +1,11 @@
 import { cacheLife, cacheTag } from 'next/cache'
-import { transformBlog, transformComparison, transformDoc, transformGuide } from './mdxUtils'
+import {
+  transformBlog,
+  transformComparison,
+  transformDoc,
+  transformFaq,
+  transformGuide,
+} from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { getAllContent, getContentBySlug, isLocalContentOverlayEnabled } from './contentRepository'
 import { getTagValues } from './contentHelpers'
@@ -253,6 +259,86 @@ export async function fetchBlogBySlug(slug: string) {
   const directResult = await fetchSingleBlog(slug, deploymentStatus)
   if (!directResult) {
     console.warn(`Blog content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
+  }
+  return directResult
+}
+
+// --- FAQs ---
+
+async function fetchFaqs(deploymentStatus: string) {
+  const faqs = await getAllContent('faqs', deploymentStatus)
+  return faqs.map((faq) => transformFaq(faq))
+}
+
+async function cachedFetchFaqs(deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'faqs-list')
+  const result = await fetchFaqs(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-faqs-list, skipping cache')
+  }
+  return result
+}
+
+export function getCachedFaqs(deploymentStatus: string) {
+  if (isLocalContentOverlayEnabled()) return fetchFaqs(deploymentStatus)
+  return cachedFetchFaqs(deploymentStatus)
+}
+
+export async function fetchAllFaqsForPage() {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedFaqs(deploymentStatus)
+  } catch (cacheError) {
+    console.warn('Cached FAQs fetch failed, retrying without cache:', cacheError)
+
+    try {
+      return await fetchFaqs(deploymentStatus)
+    } catch (directError) {
+      console.error('Direct FAQs fetch also failed:', directError)
+      return []
+    }
+  }
+}
+
+async function fetchSingleFaq(slug: string, deploymentStatus: string) {
+  const content = await getContentBySlug('faqs', slug, deploymentStatus)
+  if (!content || !content.title || !content.content) return null
+  return content
+}
+
+async function cachedFetchSingleFaq(slug: string, deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', `faqs-${slug}`, `mdx-content-${slug}`)
+  return await fetchSingleFaq(slug, deploymentStatus)
+}
+
+export function getCachedSingleFaq(slug: string, deploymentStatus: string) {
+  if (isLocalContentOverlayEnabled()) return fetchSingleFaq(slug, deploymentStatus)
+  return cachedFetchSingleFaq(slug, deploymentStatus)
+}
+
+export async function fetchFaqBySlug(slug: string) {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    const result = await getCachedSingleFaq(slug, deploymentStatus)
+    if (result) return result
+  } catch (cacheError) {
+    console.warn(
+      `Cached single FAQ fetch failed for "${slug}", retrying without cache:`,
+      cacheError
+    )
+  }
+
+  const directResult = await fetchSingleFaq(slug, deploymentStatus)
+  if (!directResult) {
+    console.warn(`FAQ content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
   }
   return directResult
 }

@@ -316,6 +316,36 @@ export const transformGuide = (guide: MDXContent) => {
   }
 }
 
+export const transformFaq = (faq: MDXContent) => {
+  const slug = faq.path?.split('/').pop() || ''
+  const { publishedDate, updatedDate, sortDate } = deriveDates(faq)
+
+  const authors = Array.isArray(faq.authors)
+    ? faq.authors.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      )
+    : []
+
+  const tags = Array.isArray(faq.tags)
+    ? faq.tags.map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
+    : []
+
+  return {
+    type: 'FAQ',
+    title: faq.title,
+    description: faq.description,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    date: sortDate,
+    tags,
+    authors,
+    authorObjects: extractAuthorObjects(faq.authors),
+    slug,
+    path: `faqs/${slug}`,
+    readingTime: readingTime(faq.content || ''),
+  }
+}
+
 export const transformDoc = (doc: MDXContent) => {
   const slug = (doc.path || '').replace(/^\/+|\/+$/g, '')
   const docPath = `docs/${slug}`
