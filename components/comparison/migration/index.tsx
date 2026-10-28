@@ -1,8 +1,8 @@
-import React from "react";
-import styles from "./styles.module.css";
+import React from 'react'
+import styles from './styles.module.css'
 
 const Migration = (props) => {
-  const { title, desc } = props;
+  const { title, desc } = props
   return (
     <div className={styles.svsdMigrationContainer}>
       <div className="container">
@@ -10,7 +10,7 @@ const Migration = (props) => {
         <p className={styles.desc}>{desc}</p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Migration;
+export default Migration
