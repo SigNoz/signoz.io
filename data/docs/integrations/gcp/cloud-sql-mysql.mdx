@@ -1,8 +1,8 @@
 ---
 published_date: 2026-08-20
-updated_date: 2026-10-19
-title: Monitor GCP Cloud SQL for MySQL Metrics and Logs in SigNoz
-description: Collect Cloud SQL for MySQL metrics and logs in SigNoz with the OpenTelemetry Collector, then view them on a pre-built dashboard.
+updated_date: 2026-10-23
+title: Monitor GCP Cloud SQL for MySQL Instance Metrics and Logs
+description: Collect Cloud SQL for MySQL metrics and logs in SigNoz with One-Click Integration or Manual Setup, then view them on a pre-built dashboard.
 doc_type: howto
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
@@ -14,23 +14,61 @@ Cloud SQL publishes its metrics to **Cloud Monitoring** and its logs to **Cloud 
 ## Choose a setup method
 
 <Tabs entityName="setup">
-<TabItem value="manual" label="Manual setup" default>
+<TabItem value="one-click" label="One-Click Integration" default>
 
-**Available now.** You run the OpenTelemetry Collector in your own GCP project and add Cloud SQL metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics**, and **logs** if you set up the [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/).
+## One-Click Integration
+
+SigNoz deploys and manages the Collector for you. You turn the service on in SigNoz, and the SigNoz agent sets up metrics and logs collection in the background. Collects **metrics and logs**.
+
+### Prerequisites
+
+- Your GCP project is connected with [One-Click Integration](https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/).
+- Your Cloud SQL for MySQL instances run in that same project. The agent monitors only the project it's deployed in.
+
+### Step 1: Turn on the service in SigNoz
+
+1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
+2. Select **GCP Cloud SQL for MySQL** from the service list.
+3. Turn on **Metric Collection**, **Log Collection**, or both.
+4. Click **Save**.
+
+The agent picks up the change within about 30 seconds and updates the Collector and the log sink for you. There's no Collector config to edit.
+
+### Step 2: Turn on the optional logs in GCP
+
+The MySQL error log flows with no extra work. Other MySQL logs are off by default and need a setting on the GCP side first:
+
+- **Slow query and general query logs** need the `slow_query_log` or `general_log` <a href="https://cloud.google.com/sql/docs/mysql/flags" target="_blank" rel="noopener noreferrer nofollow">database flag</a> turned on, with `log_output` set to `FILE`.
+- **Audit logs**, which record who ran which SQL statements, need the Cloud SQL audit plugin set up on the instance and Data Access audit logs turned on for the project. See <a href="https://cloud.google.com/sql/docs/mysql/db-audit" target="_blank" rel="noopener noreferrer nofollow">MySQL database auditing</a>.
+
+Skip this step if you only need metrics and error logs.
+
+### Validate
+
+1. Wait about 10 minutes for the first metrics to arrive.
+2. In SigNoz, go to **Dashboards** and open **GCP Cloud SQL for MySQL Overview**. Panels should start filling in.
+3. If you turned on **Log Collection**, open **Logs** in SigNoz and start with this filter to find your project's logs:
+
+   ```text
+   gcp.project = '<deployment-project-id>' AND gcp.resource_type = 'cloudsql_database'
+   ```
+
+   New MySQL log lines from your instances appear within a few minutes.
+
+   **Verify these values:**
+
+   - `<deployment-project-id>`: the GCP project you connected with One-Click Integration.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup
+
+You run the OpenTelemetry Collector in your own GCP project and add Cloud SQL metrics to its configuration. You control which metrics are pulled and how often. Collects **metrics**, and **logs** if you set up the [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/).
 
 Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps below for each Cloud SQL instance you want to monitor.
 
-</TabItem>
-<TabItem value="agent" label="SigNoz agent (coming soon)">
-
-**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers and log routing in the background. No Collector configuration to maintain.
-
-Until then, use the **Manual setup** tab.
-
-</TabItem>
-</Tabs>
-
-## Prerequisites
+### Prerequisites
 
 Before configuring this service, complete the shared GCP integration setup:
 
@@ -40,7 +78,7 @@ Before configuring this service, complete the shared GCP integration setup:
 - The **Cloud Monitoring API** is enabled in that project.
 - For logs only: the **Cloud Logging API** is enabled in that project, and you have finished steps 1 to 5 of [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/).
 
-## Step 1: Enable the service in SigNoz
+### Step 1: Enable the service in SigNoz
 
 1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
 2. Select **GCP Cloud SQL for MySQL** from the service list.
@@ -51,7 +89,7 @@ Before configuring this service, complete the shared GCP integration setup:
 Enabling the toggle does not start collection on its own. The metrics that reach SigNoz are exactly the ones in your Collector's `metrics_list`. If you skip a metric in step 2, its dashboard panel stays empty.
 </Admonition>
 
-## Step 2: Add the metrics to your Collector config
+### Step 2: Add the metrics to your Collector config
 
 Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Cloud SQL metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in. Only the `metrics_list` shown below changes; leave the rest of the file as is:
 
@@ -101,7 +139,7 @@ The **InnoDB buffer pool miss ratio** panel derives its value from two metrics, 
 
 The receiver polls every metric in the list once per `collection_interval`, and the Monitoring API bills per read call, so keep the list to the metrics your dashboards and alerts actually use. See [Cost and tuning](https://signoz.io/docs/integrations/gcp/collect-metrics/#cost-and-tuning).
 
-## Step 3: Apply the configuration
+### Step 3: Apply the configuration
 
 The Collector loads its config from the `signoz-integration-collector-config` secret, so a config change needs a new secret version and a redeploy:
 
@@ -109,7 +147,7 @@ The Collector loads its config from the `signoz-integration-collector-config` se
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
 3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
 
-## Step 4: Send logs (optional)
+### Step 4: Send logs (optional)
 
 To also send MySQL logs to SigNoz, follow [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/) to set up the Pub/Sub topic, the push subscription, and the logs receiver. In [step 6, Create a log sink](https://signoz.io/docs/integrations/gcp/collect-logs/#step-6-create-a-log-sink-in-each-monitored-project), use this filter:
 
@@ -127,12 +165,15 @@ See **Logs** under [What's collected](#whats-collected) for what this filter pic
 Add the same filter as an **exclusion filter** on the project's `_Default` sink, or you pay to store these logs in both Cloud Logging and SigNoz. See [Avoid paying twice for logs](https://signoz.io/docs/integrations/gcp/collect-logs/#step-8-avoid-paying-twice-for-logs).
 </Admonition>
 
-## Validate
+### Validate
 
 1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
 2. In SigNoz, go to **Dashboards** and open the **GCP Cloud SQL for MySQL Overview** dashboard. Panels should start filling in.
 3. To check a single metric, open **Metrics Explorer** and query `cloudsql.googleapis.com/database/cpu/utilization`.
 4. For logs, open **Logs** and filter on `gcp.resource_type = 'cloudsql_database'`.
+
+</TabItem>
+</Tabs>
 
 ## What's collected
 
@@ -187,7 +228,7 @@ With **Log Collection** turned on, SigNoz collects these logs from your Cloud SQ
 The general query log records every statement, so it can grow large quickly and raise your Cloud Logging, Pub/Sub, and SigNoz ingestion costs. Turn it on only while you need it.
 </Admonition>
 
-Use this filter for your log sink:
+With One-Click Integration, SigNoz applies this log sink filter for you. With Manual Setup, use it when you create your log sink:
 
 ```text
 resource.type="cloudsql_database" AND (
@@ -206,13 +247,15 @@ resource.type="cloudsql_database" AND (
 
 **No logs after turning on Log Collection.** SigNoz can only forward logs that Cloud SQL writes to Cloud Logging. Open **Logs Explorer** in the GCP Console and filter on `resource.type="cloudsql_database"`. If the slow or general query log is missing there, check its database flag and that `log_output` is `FILE`. For audit logs, confirm the audit plugin is set up and Data Access audit logs are on for the project.
 
-**Logs don't arrive.** If Logs Explorer in GCP shows the logs but SigNoz doesn't, work back through the log pipeline: the push subscription must reach the Collector, and the sink's writer identity needs `roles/pubsub.publisher` on the topic. See [Collect logs troubleshooting](https://signoz.io/docs/integrations/gcp/collect-logs/#troubleshooting).
+**No metrics at all (One-Click).** Confirm the instances run in the project the agent is deployed in, and that **Metric Collection** is on and saved. See the [One-Click troubleshooting](https://signoz.io/docs/integrations/gcp/one-click-gcp-integrations/#troubleshooting) for agent and Collector checks.
 
-**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+**Logs don't arrive (Manual).** If Logs Explorer in GCP shows the logs but SigNoz doesn't, work back through the log pipeline: the push subscription must reach the Collector, and the sink's writer identity needs `roles/pubsub.publisher` on the topic. See [Collect logs troubleshooting](https://signoz.io/docs/integrations/gcp/collect-logs/#troubleshooting).
 
-**The InnoDB buffer pool miss ratio panel is empty.** This panel needs both `buffer_pool_reads_count` and `buffer_pool_read_requests_count`. Add whichever is missing and repeat step 3.
+**A dashboard panel is empty (Manual).** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
 
-**No Cloud SQL metrics at all.** Confirm the `signoz-integration-collector` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
+**The InnoDB buffer pool miss ratio panel is empty (Manual).** This panel needs both `buffer_pool_reads_count` and `buffer_pool_read_requests_count`. Add whichever is missing and repeat step 3.
+
+**No Cloud SQL metrics at all (Manual).** Confirm the `signoz-integration-collector` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
 
 **Metrics appear but are stale.** The receiver polls on `collection_interval` (default `300s`) and Cloud SQL itself samples most metrics no faster than every 60 seconds. Lower the interval only if you need the resolution, and expect a higher Monitoring API bill.
 
