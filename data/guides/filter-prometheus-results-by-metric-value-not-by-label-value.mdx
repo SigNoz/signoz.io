@@ -115,7 +115,7 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     jvm_memory_used_bytes > 10000000
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.08.06_PM.webp" alt="JVM memory usage query showing dynamic analysis" caption="" />
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.08.06_PM.webp" alt="JVM memory usage query showing dynamic analysis" caption="JVM memory usage query showing dynamic analysis" />
 
 2. Dynamic Analysis
     
@@ -132,12 +132,12 @@ Filtering Prometheus results by metric value is a powerful feature that enhances
     Value-based filtering allows you to create sophisticated queries that combine multiple conditions. This capability is particularly useful for analyzing several metrics simultaneously. For example, you might want to identify instances where both the live threads and CPU usage are above certain thresholds:
     
     ```
-    (jvm_threads_live_threads > 20) and on(job, instance) (system_cpu_usage > 0.04)
+    jvm_threads_live_threads > 20 and system_cpu_usage > 0.04
     ```
     
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.54.21_PM.webp" alt="Prometheus graph showing live thread counts where thread count exceeds 20 and CPU usage exceeds 4%" caption="" />
+    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_10.54.21_PM.webp" alt="Prometheus graph showing live thread counts where thread count exceeds 20 and CPU usage exceeds 4%" caption="Live thread counts for instances with more than 20 threads and CPU usage above 4%." />
 
-    This query finds targets with more than 20 live threads and CPU usage above 4%. It matches the metrics by `job` and `instance`, so both must use these labels for the same target.
+    This query returns live thread counts for instances where both conditions are met. The two metrics must have matching labels and label values, apart from their metric names.
 
 4. Efficient Alerting
     
@@ -437,73 +437,17 @@ Subqueries enable complex inquiries by nesting questions within others, but they
 
 By following these optimization strategies, you can enhance the performance of your Prometheus queries with value-based filters. This not only improves response times but also ensures that you derive actionable insights without placing undue strain on your monitoring system.
 
-## Integrating Value-Based Filtering with Grafana Dashboards
-
-Grafana, a popular visualization tool for Prometheus, supports value-based filtering in dashboards:
-
-1. Design Your Dashboard Layout: Start by outlining the layout of your dashboard. Identify the key metrics you want to visualize, such as CPU usage, memory consumption, or request latency. A well-organized layout enhances readability and makes it easier to spot trends.
-    
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-bf9f3868-dab0-4127-b9e2-eedec9c9662e.webp" alt="Grafana dashboard panel showing value-based CPU usage" caption="" />
-
-2. Add Panels for Key Metrics: Use Grafana panels to display different metrics. Each panel can represent a specific value-based query. For instance, a panel showing high CPU usage might use the query:
-    
-    ```
-    process_cpu_usage > 0.002
-    ```
-    
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-2b99dc90-14c7-48a6-9bfe-c83b2d2e2c68.webp" alt="Grafana dashboard panels comparing key metrics side by side" caption="" />By displaying these metrics side-by-side, you can quickly assess the overall system health.
-    
-3. Utilize Graphs and Alerts: Choose appropriate visualization types for your metrics. Use time-series graphs for metrics that change over time, such as CPU and memory utilization. Set up alerts for any value-based filters you define. For example, configure alerts for CPU utilization exceeding a certain threshold, ensuring your team can respond proactively.
-    
-    <Figure src="/img/guides/2024/10/filter-prometheus-results-by-metric-value-not-by-label-value-Screenshot_2024-10-25_at_11.39.18_PM.webp" alt="Grafana dashboard with interactive value threshold controls" caption="" />
-
-4. Threshold Variables: If viewers need to change a threshold, create a dashboard variable and use it in the panel query, as shown below.
-
-### Using Template Variables for Flexible Value Thresholds
-
-1. Defining Template Variables: Create template variables in Grafana to make your dashboards more dynamic. For instance, you can define a variable for CPU thresholds:
-    
-    ```
-    $cpu_threshold
-    ```
-    
-    This variable allows users to input a custom threshold for CPU utilization directly from the dashboard.
-    
-2. Integrating Variables into Queries: Modify your queries to incorporate these template variables. For example:
-    
-    ```
-    node_cpu_utilization > $cpu_threshold
-    ```
-    
-    This integration provides flexibility, allowing users to experiment with different threshold values without editing the query itself.
-    
-3. Dynamic Dropdowns: You can also create dropdown menus for users to select from predefined values. For instance, you might allow users to choose between different services or regions, making it easier to tailor the dashboard to their specific needs.
-
-### Best Practices for Visualizing Value-Filtered Metrics
-
-1. Choose the Right Visualization Type: Selecting the appropriate visualization type is crucial. For metrics that vary over time, time-series graphs work best. For categorical data, consider using bar charts. The right choice helps convey the data's story effectively.
-2. Color Coding for Clarity: Utilize color coding to indicate performance states. For example, use green for healthy metrics, yellow for warning states, and red for critical alerts. This visual differentiation allows users to quickly identify areas requiring attention.
-3. Annotations for Context: Use annotations in Grafana to mark important events or changes in your system. This provides context for spikes or drops in metrics, helping users understand the underlying reasons for changes.
-4. Limit Panel Clutter: Avoid overcrowding your dashboard with too many panels. Focus on key metrics that provide actionable insights. A clean, well-organized dashboard helps users quickly identify performance issues without feeling overwhelmed.
-
-### Troubleshooting Common Grafana-Prometheus Integration Issues
-
-1. Data Source Configuration: Ensure that your [Prometheus data](https://signoz.io/guides/how-does-grafana-get-data-from-prometheus/) source is correctly configured in Grafana. Check the URL, access permissions, and authentication settings to prevent connection issues.
-2. Query Errors: If queries return unexpected results or errors, verify the syntax and logic of your PromQL queries. Using the Prometheus expression browser can help you test queries before implementing them in Grafana.
-3. Performance Optimization: If dashboards load slowly, consider optimizing your queries. High cardinality or complex queries can slow down performance. Limit the data points retrieved and use aggregation functions wisely to enhance performance.
-4. Alerts Not Triggering: If alerts aren’t firing as expected, check the alert rules and conditions. Ensure that thresholds are set correctly and that the alerting mechanism (like email or Slack notifications) is properly configured.
-
 ## Enhancing Observability with SigNoz
 
 To effectively monitor your applications and systems, leveraging an advanced observability platform like [SigNoz](https://signoz.io/) can elevate your monitoring strategy. [SigNoz](https://signoz.io/) is an open-source observability tool that provides [end-to-end monitoring](https://signoz.io/comparisons/end-to-end-monitoring-tools/), troubleshooting, and alerting capabilities across your entire application stack.
 
 You can collect Prometheus metrics in SigNoz using the [OpenTelemetry Collector Prometheus receiver](https://signoz.io/docs/userguide/prometheus-metrics/).
 
+SigNoz also offers:
+
 - User-Friendly Interface: Easily build complex queries without in-depth PromQL knowledge, making insights accessible for all skill levels.
 - Advanced Filtering & Aggregations: Perform detailed analysis using functions for averages, sums, and rate calculations to optimize performance insights.
 - Comprehensive Insights: Gain a unified view of system health by correlating metrics, traces, and logs, simplifying issue diagnosis and enhancing system understanding.
-
-To enhance your observability with SigNoz, you can follow the [OpenTelemetry Collector Prometheus Receiver](https://signoz.io/docs/userguide/prometheus-metrics/) guide for seamless integration with Prometheus metrics.
 
 <GetStartedSigNoz />
 
@@ -513,7 +457,6 @@ To enhance your observability with SigNoz, you can follow the [OpenTelemetry Col
 - PromQL Flexibility: The Prometheus Query Language (PromQL) provides a wide range of comparison and logical operators, allowing you to write sophisticated queries that assess several criteria at the same time. This adaptability is essential for extensive examination of system performance.
 - Combining Filters: For optimal query performance and accuracy, you can combine both label and value filters in your queries. This approach helps you refine your results, ensuring you capture only the most relevant metrics for your monitoring needs.
 - Advanced Techniques: Techniques such as subqueries and vector matching further enhance your filtering capabilities. These advanced methods enable you to perform more sophisticated analyses, allowing for better insights into the relationships between different metrics.
-- Utilizing Visualization Tools: Tools like Grafana and SigNoz integrate seamlessly with Prometheus, simplifying the implementation of value-based filtering in your monitoring workflows. These platforms provide visual representations of your data, making it easier to interpret and respond to insights.
 - By mastering value-based filtering in Prometheus, you unlock a new level of insight into your system's performance. Whether you are using native Prometheus queries or leveraging advanced platforms like SigNoz, these techniques empower you to develop more effective, precise, and actionable monitoring solutions. This mastery can lead to improved system reliability, enhanced performance, and proactive incident management.
 
 ## FAQs
