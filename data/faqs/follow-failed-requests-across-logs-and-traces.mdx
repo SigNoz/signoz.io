@@ -13,7 +13,7 @@ An error log’s `trace_id` link opens the matching request trace in SigNoz Clou
 
 For example, take a checkout service called `checkout-api` that calls `payment-service` to charge a card. Both services send traces to SigNoz Cloud and pass tracing information between them, so their operations share the request’s trace ID. When the payment times out, checkout logs **Checkout returned 500 after payment timeout**.
 
-Open that error log in **Logs Explorer** and select its **Trace ID** link. The ID connects the log to the request, even when many requests use the same service at the same time.
+Open that error log in **Logs Explorer** and select its **Trace ID** link. The ID connects the log to a particular request, even when many requests use the same service at the same time.
 
 ![The checkout error log shows its service, severity, clickable trace ID, and span ID.](/img/faqs/follow-failed-requests-across-logs-and-traces/error-log-trace-link.webp)
 
@@ -21,11 +21,11 @@ The trace shows the checkout operation, its call to the payment service, and the
 
 ![The matching trace shows three connected spans across checkout-api and payment-service.](/img/faqs/follow-failed-requests-across-logs-and-traces/matching-request-trace.webp)
 
-You can then select the failed payment span and open its **Logs** tab to read logs for the same trace. Select **Payment provider timed out** to open that error in **Logs Explorer**, where its `span_id` matches the payment operation.
+You can select the failed payment span and open its **Logs** tab to find related logs. In this example, opening **Payment provider timed out** takes you back to **Logs Explorer**. The result below shows the error record with its trace ID and payment span ID.
 
 ![Logs Explorer shows the payment error opened from the span’s Logs tab, with the payment span ID and shared trace ID.](/img/faqs/follow-failed-requests-across-logs-and-traces/payment-error-from-trace.webp)
 
-Use the [logs and traces correlation guide](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) for your language to configure your logging library to record the current request’s trace ID. This workflow uses logs and traces collected in SigNoz Cloud; it does not join records kept only in separate tools.
+Use the [logs and traces correlation guide](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) for your language to configure your logging library to record the current request’s trace ID. The logs and traces must be collected in SigNoz Cloud for this workflow; it does not join records kept only in separate tools.
 
 ## If the trace does not open
 
@@ -33,4 +33,4 @@ If the log has no trace ID link, check whether the ID is stored in its message o
 
 If the ID is present, search the same `trace_id` in [Traces Explorer](https://signoz.io/docs/userguide/traces/) with a time range that includes the request. Use **List View** with **All Spans** to check for collected spans.
 
-If no trace is available, check whether your application sent it. Sampling rules can keep only some request traces and exclude the one you need. Also check your [trace retention period](https://signoz.io/docs/userguide/retention-period/). A log can keep its trace ID after the trace is no longer available; the ID alone cannot recreate that trace.
+If no trace is available, check whether your application successfully exported it. Sampling rules can keep only some request traces and exclude the one you need. Also check your [trace retention period](https://signoz.io/docs/userguide/retention-period/). A log can keep its trace ID after the trace is no longer available; the ID alone cannot recreate that trace.
