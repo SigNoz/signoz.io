@@ -8,6 +8,8 @@
 // lists hrefs to drop; an entry that ends in "/*" drops every card under that path.
 // With `uniqueAcrossSections: true` on the listicle, each card stays only in the
 // first section that claims it. Sections claim in `claimOrder` (default: their order).
+// Included sections sort cards by name; a section's `pinned` lists hrefs to show first,
+// in the listed order.
 
 const normalizeHref = (href) => href.replace(/^https:\/\/signoz\.io/, '').replace(/\/+$/, '')
 
@@ -81,7 +83,7 @@ function resolveListicleIncludes(config, getConfig) {
     .sort((a, b) => (a.section.claimOrder ?? a.index) - (b.section.claimOrder ?? b.index))
 
   for (const { section, index } of claimOrder) {
-    const { include = [], exclude = [], claimOrder: _claimOrder, ...rest } = section
+    const { include = [], exclude = [], pinned = [], claimOrder: _claimOrder, ...rest } = section
     const seen = new Set()
     const items = []
     for (const item of [
@@ -96,7 +98,14 @@ function resolveListicleIncludes(config, getConfig) {
       items.push({ ...item })
     }
     if (section.include) {
-      items.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }))
+      const pinRank = (item) => {
+        const rank = pinned.findIndex((href) => normalizeHref(href) === normalizeHref(item.href))
+        return rank === -1 ? pinned.length : rank
+      }
+      items.sort(
+        (a, b) =>
+          pinRank(a) - pinRank(b) || a.name.localeCompare(b.name, 'en', { sensitivity: 'base' })
+      )
     }
     resolved.set(
       index,

@@ -355,6 +355,30 @@ test('resolveListicleIncludes applies href filters, exclude, nameSuffix, and cla
   )
 })
 
+test('pinned cards come first in an included section', () => {
+  const configs = {
+    source: {
+      pattern: 'flat',
+      items: [
+        { name: 'Alpha', href: '/docs/alpha' },
+        { name: 'Beta', href: '/docs/beta' },
+        { name: 'Zeta', href: '/docs/zeta' },
+      ],
+    },
+  }
+  const config = {
+    pattern: 'sectioned',
+    sections: [{ id: 'all', include: ['source'], pinned: ['/docs/zeta/', '/docs/beta'] }],
+  }
+
+  const [section] = resolveListicleIncludes(config, (name) => configs[name] ?? null).sections
+  assert.deepEqual(
+    section.items.map((item) => item.name),
+    ['Zeta', 'Beta', 'Alpha']
+  )
+  assert.ok(!('pinned' in section))
+})
+
 test('integrations catalog keeps each card in one tab and each name once per tab', () => {
   const integrations = loadAllListicleConfigs().find(({ name }) => name === 'integrations').config
   const seenHrefs = new Map()

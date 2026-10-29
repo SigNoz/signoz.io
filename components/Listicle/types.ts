@@ -31,6 +31,8 @@ export interface SectionConfig {
   exclude?: string[]
   /** With `uniqueAcrossSections`, sections claim cards in this order (default: section order) */
   claimOrder?: number
+  /** Hrefs to show first, in this order, before the name-sorted cards of an included section */
+  pinned?: string[]
 }
 
 export interface ListicleConfig {
