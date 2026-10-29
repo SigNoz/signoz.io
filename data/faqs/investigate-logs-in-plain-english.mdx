@@ -13,13 +13,11 @@ You can investigate logs in plain English through Noz, the assistant inside SigN
 
 With [Noz](https://signoz.io/docs/ai/noz/), open **Noz** in your workspace and enter a question in **Ask anything**. This route works inside SigNoz Cloud, so you do not need a separate assistant or MCP configuration. Your services must already [send their logs](https://signoz.io/docs/logs-management/send-logs-to-signoz/) to the workspace.
 
-For an external assistant, the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) provides tools to search those logs. MCP stands for Model Context Protocol, which lets the assistant call tools connected to your data. Configure a compatible client, such as Claude Code or Cursor, with the hosted MCP address for your SigNoz Cloud region. Complete authentication with your workspace URL and an API key from a separate [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) with read access. The setup guide covers each client.
-
-Use a read-only service account role for an investigation. MCP also exposes tools that change resources, so a prompt asking for read-only work does not replace access controls. For Self-Hosted SigNoz, run the MCP server and check compatibility with your SigNoz release; the hosted Cloud connection is a different setup.
+For an external assistant, the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) provides tools to search your logs. Model Context Protocol (MCP) lets a compatible assistant call those tools. Connect your client to the hosted server for your SigNoz Cloud region and authenticate with your workspace URL and a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key. For a read-only investigation, use a read-only role because MCP also exposes tools that can change resources. The setup guide covers compatible clients and the separate Self-Hosted SigNoz setup.
 
 ## Ask about one failure
 
-For example, take a checkout service called `checkout-plain-english` that logs successful payments and payment failures. When a payment times out, it writes an ERROR log with the message **Payment timeout**. We sent example logs for this service to SigNoz Cloud and gave Noz the service name and a fixed time range.
+For example, we created logs for an example checkout service called `checkout-plain-english`, including successful payments and payment failures. Its timeout records have ERROR severity and the message **Payment timeout**. After sending these example logs to SigNoz Cloud, we gave Noz the service name and a fixed time range, then asked it to find the timeouts.
 
 We added `event.id` to identify each example log. In your question, request an identifier already present in your logs, or omit that part.
 
@@ -28,7 +26,7 @@ Show ERROR logs whose message contains "Payment timeout".
 Return timestamps, messages, event.id values and the exact query or tool filters used.
 ```
 
-Noz ran its log-search tool and returned two matching records. Its visible query used the service, time range, severity and message we requested.
+Noz returned two matching records with their timestamps, messages and event IDs, as shown below.
 
 <Figure
   src="/img/faqs/investigate-logs-in-plain-english/noz-timeout-results.webp"
