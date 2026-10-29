@@ -8,11 +8,11 @@ authors: [yuvraj]
 
 Claude Code can investigate a failure using logs and historical metrics already stored in [SigNoz Cloud](https://signoz.io/log-management/) through its Model Context Protocol (MCP) connection. MCP gives the agent query tools, so it can compare that evidence with the application code it is reading.
 
-Connect the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) with a read-only service account, and make the relevant application source available to Claude Code. For Claude Code on the web, use a repository available to its cloud session; a folder on your laptop does not carry into that session.
+Connect the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) with a read-only service account, and make the relevant application source available to Claude Code. For Claude Code on the web, see the <a href="https://code.claude.com/docs/en/claude-code-on-the-web/" target="_blank" rel="noopener noreferrer nofollow">cloud setup guide</a> for repository options.
 
 ## Give Claude the context for one failure
 
-For example, we ran a <a href="https://github.com/SigNoz/examples/tree/b811d26ab91208d6c3ef884b9497e4f38489737d/fastapi/opentelemetry-fastapi-demo" target="_blank" rel="noopener noreferrer nofollow">public Python app</a> that deliberately returns a server error (HTTP 500) when called at `/exception`. We sent its logs and metrics to SigNoz Cloud as `claude-code-faq-demo`.
+For example, we ran a <a href="https://github.com/SigNoz/examples/tree/b811d26ab91208d6c3ef884b9497e4f38489737d/fastapi/opentelemetry-fastapi-demo" target="_blank" rel="noopener noreferrer nofollow">public Python app</a> that deliberately returns a server error (HTTP 500) when called at `/exception`. We sent its logs, traces and metrics to SigNoz Cloud as `claude-code-faq-demo`.
 
 To investigate, we gave Claude the service name, source commit and two time windows in UTC. One covered earlier requests that succeeded; the other included requests to `/exception`. We asked for the error logs, a failed trace and earlier request metrics, with evidence for the explanation.
 
@@ -28,7 +28,7 @@ To check how often requests failed, Claude compared the stored request metrics. 
 
 ![Claude Code compares the stored request counts across the earlier and failure windows.](/img/faqs/claude-code-production-logs-debugging/claude-metric-report.webp)
 
-*Claude Code’s report compares request totals across the two windows. The earlier total appears twice because it was sent again; it still represents 10 requests.*
+*Claude Code’s report compares request totals across the two windows. The earlier cumulative total was exported again, so it appears twice but still represents 10 requests.*
 
 For your own incident, check that the source version matches the deployment and that the relevant telemetry is still available. Claude cannot retrieve logs or metrics that were never collected or have expired. If a deployment change or dependency is missing from the evidence, ask Claude to state that gap before you act on its explanation.
 
