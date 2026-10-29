@@ -11,7 +11,9 @@ In SigNoz Cloud, search the customer’s user ID in Logs Explorer, then use the 
 
 ## Find the failed request
 
-For example, a customer reports that a payment failed. The checkout service records the customer’s ID as `user.id`, the request ID as `request.id`, and error details inside `logerror.stack`. Search for the customer’s ID in Logs Explorer and set the time range around the reported failure. The field names in your logs may differ from this example.
+For example, a customer reports that a payment failed. The checkout service records the customer’s ID as `user.id`, the request ID as `request.id`, and error details inside `logerror.stack`.
+
+Search for the customer’s ID in Logs Explorer and set the time range around the reported failure. The field names in your logs may differ from this example.
 
 <Figure
   src="/img/faqs/find-failed-requests-with-user-ids-and-json/run-user-query.webp"
@@ -33,11 +35,11 @@ The results include successful and failed requests. Open a failure near the repo
   themeInvert={false}
 />
 
-The screenshots show field paths from this example workspace. If your JSON fields are not available as filters, use the [JSON parsing guide](https://signoz.io/docs/logs-pipelines/guides/json/) to extract them into log attributes, then select the fields stored in your logs.
+If your JSON fields are not available as filters, use the [JSON parsing guide](https://signoz.io/docs/logs-pipelines/guides/json/) to extract them into log attributes, then select the fields stored in your logs.
 
 ## Follow the request ID
 
-Open the failed record and copy its request ID. Unlike the user ID, which can appear in many requests, this ID helps you isolate the individual payment.
+Open the failed record and copy its request ID. Unlike the user ID, which can appear in many requests, this ID helps you isolate the log records for the individual payment.
 
 <Figure
   src="/img/faqs/find-failed-requests-with-user-ids-and-json/copy-request-id.webp"
@@ -59,12 +61,12 @@ Search for that request ID, remove error or service filters that could hide rela
   themeInvert={false}
 />
 
-The trail contains only logs SigNoz Cloud collected and still retains. If records are missing, check the time range, collection, retention, and whether the application recorded the IDs. Records with the same timestamp do not establish the order in which events caused one another.
+The trail contains only logs SigNoz Cloud collected and still retains. If records are missing, check the time range, collection, retention, and whether the application recorded the IDs.
 
-You can download the results from Logs Explorer. Compare the number of exported records with the query count because the export has a row limit. For larger results, see the [Logs API pagination guide](https://signoz.io/docs/logs-management/logs-api/search-logs/).
+You can download up to 50,000 rows at a time from Logs Explorer. Compare the number of exported records with the query count to check whether your download is complete. If more than 50,000 logs match, use the [Logs API](https://signoz.io/docs/logs-management/logs-api/search-logs/) to retrieve them in pages.
 
 ## Ask an agent
 
 You can also ask an agent connected to [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/) to investigate the customer ID, find the request ID, and retrieve the related logs. Use a separate [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) with only the read access needed for the investigation; an ingestion key does not provide query access. Check the agent’s filters, time range, and returned records before relying on its conclusion.
 
-If Noz is available in your workspace, its [customer log triage guide](https://signoz.io/docs/ai/use-cases/noz-triage-customer-issue/) also explains how to investigate using a recorded user or tenant ID.
+If Noz is available in your SigNoz Cloud workspace, its [customer log triage guide](https://signoz.io/docs/ai/use-cases/noz-triage-customer-issue/) also explains how to investigate using a recorded user or tenant ID.
