@@ -10,6 +10,7 @@ import { FileIcon } from './icons'
 import type { CodeBlockProps } from './types'
 import {
   DEFAULT_COLLAPSE_THRESHOLD,
+  LONG_BLOCK_THRESHOLD,
   collectMinimapLines,
   countCodeLines,
   getTextContent,
@@ -47,6 +48,7 @@ export const CodeBlock = forwardRef<HTMLDivElement, CodeBlockProps>(function Cod
       className={cn(
         styles.root,
         canCollapse && !expanded && styles.collapsed,
+        canCollapse && !expanded && lineCount > LONG_BLOCK_THRESHOLD && styles.collapsedLong,
         insideTabs && styles.nested,
         className
       )}
