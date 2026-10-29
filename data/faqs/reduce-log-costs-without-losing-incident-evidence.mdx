@@ -1,0 +1,49 @@
+---
+title: How can I reduce log costs without losing incident evidence?
+meta_title: Reduce log costs without losing incident evidence
+description: Compare platform pricing, remove unwanted logs before ingestion, and keep the context needed to investigate failed requests.
+date: 2026-10-19
+authors: [yuvraj]
+tags: [logs, cost-management, opentelemetry]
+---
+
+If you use another logging platform, moving your logs to SigNoz Cloud can lower costs without reducing the volume you collect. Savings depend on your workload, retention, features and contract. To reduce volume further, filter unwanted events before ingestion while retaining the context you need for failures and important business flows.
+
+The [SigNoz Cloud–Datadog cost comparison](https://signoz.io/blog/cost-effective-datadog-alternative/) illustrates the first option. It models lower log costs at the same monthly volume and 15-day retention, with no separate log indexing fee in SigNoz Cloud. Log usage is based on ingested volume; compare [current pricing](https://signoz.io/pricing/), retention and plan terms for your workload.
+
+If you already use OpenTelemetry, you can keep that instrumentation and begin sending telemetry to SigNoz Cloud by changing the export destination and credentials. The [migration guide](https://signoz.io/docs/migration/migrate-from-opentelemetry-to-signoz/) covers the configuration changes and checks that data arrives.
+
+## Choose the events you can remove
+
+For example, a checkout service called `checkout-api` writes logs for payment requests and for health checks at `/healthz`. If your team does not need a record of every successful health check, you can filter those records out before they reach SigNoz Cloud. Keep failed health checks and payment logs so you can still investigate problems.
+
+In our example, we filtered out successful health checks and kept the logs for a failed payment. The screenshot shows the retained request, from checkout starting to the HTTP 500 response.
+
+<Figure
+  src="/img/faqs/2026-10/reduce-log-costs/incident-trail.webp"
+  alt="Six retained checkout records in SigNoz Cloud, ordered from request start to HTTP 500."
+  caption="The retained logs show the gateway attempt, retry, timeouts and failed response."
+  width={1100}
+  height={337}
+  themeInvert={false}
+/>
+
+Log level alone does not tell you whether a record is useful. A DEBUG message can name the payment gateway, while an INFO message can show when the request started. Keep the error bodies, request identifiers and surrounding records that your team uses to investigate failures.
+
+## Filter before ingestion
+
+An OpenTelemetry Collector receives logs and forwards them to a backend. Its <a href="https://opentelemetry.io/docs/collector/transforming-telemetry/#basic-filtering" target="_blank" rel="noopener noreferrer nofollow">filter processor</a> can remove a chosen event before export to SigNoz Cloud or another backend. The billing effect depends on the destination's pricing.
+
+In the checkout example, our filter rule removed successful `/healthz` checks from `checkout-api` while keeping failed checks. The [log filtering guide](https://signoz.io/docs/logs-management/guides/drop-logs/) explains how to configure and enable a filter for your pipeline.
+
+In SigNoz Cloud, remove unwanted records before ingestion to reduce billed log volume. [Logs Pipelines in the SigNoz Cloud UI run after ingestion](https://signoz.io/docs/cost-control/optimize-logs/), so their parsing and enrichment do not reduce that volume.
+
+## Check that the incident still makes sense
+
+When we tested this example, removing 20 successful health-check logs reduced a 32-record sample to 12 records. All six failed-payment records remained, with their error bodies and request identifiers intact.
+
+The DEBUG message still names the payment gateway involved in the failed request. With that context intact, measured ingestion fell from 10,158 to 3,798 bytes. These results apply to this sample and do not predict your production bill.
+
+For your service, compare a known failed request before and after filtering, and check that failed health checks still arrive. Use [Cost Meter](https://signoz.io/docs/cost-meter/overview/) to compare ingested bytes under comparable traffic, because record counts alone can mislead. Meter data updates hourly.
+
+Keep the previous configuration so you can resume collection if needed. Also note that removing a filter cannot recover logs you have already dropped.
