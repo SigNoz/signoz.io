@@ -70,12 +70,14 @@ function collectSourceItems(source, entry, getConfig) {
 
 /**
  * Returns a copy of `config` in which each section with `include` holds its own
- * items plus the included cards, without duplicate hrefs, sorted by name.
+ * items plus the included cards, without duplicate hrefs. Pinned cards come first,
+ * and the rest are sorted by name.
  * `getConfig(name)` returns the raw config of another listicle, or null.
  */
 function resolveListicleIncludes(config, getConfig) {
   const sections = config.sections || []
-  if (!sections.some((section) => section.include) && !config.uniqueAcrossSections) return config
+  const resolves = (section) => section.include || config.uniqueAcrossSections || config.exclude
+  if (!sections.some(resolves)) return config
 
   const sharedExclude = config.exclude || []
   const claimed = new Set()
@@ -121,10 +123,7 @@ function resolveListicleIncludes(config, getConfig) {
           pinRank(a) - pinRank(b) || a.name.localeCompare(b.name, 'en', { sensitivity: 'base' })
       )
     }
-    resolved.set(
-      index,
-      section.include || config.uniqueAcrossSections ? { ...rest, items } : section
-    )
+    resolved.set(index, resolves(section) ? { ...rest, items } : section)
   }
 
   const { uniqueAcrossSections: _unique, exclude: _exclude, ...rest } = config

@@ -383,6 +383,29 @@ test('a listicle-level exclude applies to every section', () => {
   assert.ok(!('exclude' in resolved))
 })
 
+test('a listicle-level exclude also filters sections without include', () => {
+  const config = {
+    pattern: 'sectioned',
+    exclude: ['/docs/drop'],
+    sections: [
+      {
+        id: 'plain',
+        items: [
+          { name: 'Keep', href: '/docs/keep' },
+          { name: 'Drop', href: '/docs/drop' },
+        ],
+      },
+    ],
+  }
+
+  const resolved = resolveListicleIncludes(config, () => null)
+  assert.deepEqual(
+    resolved.sections[0].items.map((item) => item.name),
+    ['Keep']
+  )
+  assert.ok(!('exclude' in resolved))
+})
+
 test('a section with subsections cannot use include', () => {
   const config = {
     pattern: 'sectioned',
