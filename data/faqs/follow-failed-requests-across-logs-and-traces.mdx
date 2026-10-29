@@ -11,7 +11,7 @@ An error log’s `trace_id` link opens the matching request trace in SigNoz Clou
 
 ## Follow the request into its trace
 
-For example, take a checkout service called `checkout-api` that calls `payment-service` to charge a card. Both services send traces to SigNoz Cloud and pass tracing information between them, so their operations share the request’s trace ID. When the payment times out, checkout logs **Checkout returned 500 after payment timeout**.
+For this example, we sent sample logs and spans for a checkout service called `checkout-api` that calls `payment-service` to charge a card. The services share the request’s trace ID, which connects their operations. When the payment times out, checkout logs **Checkout returned 500 after payment timeout**.
 
 Open that error log in **Logs Explorer** and select its **Trace ID** link. The ID connects the log to a particular request, even when many requests use the same service at the same time.
 
@@ -21,7 +21,18 @@ The trace shows the checkout operation, its call to the payment service, and the
 
 ![The matching trace shows three connected spans across checkout-api and payment-service.](/img/faqs/follow-failed-requests-across-logs-and-traces/matching-request-trace.webp)
 
-You can select the failed payment span and open its **Logs** tab to find related logs. In this example, opening **Payment provider timed out** takes you back to **Logs Explorer**. The result below shows the error record with its trace ID and payment span ID.
+Select the failed payment span and open its **Logs** tab to find related logs. The tab shows the checkout error and highlights **Payment provider timed out** for the selected span.
+
+<Figure
+  src="/img/faqs/follow-failed-requests-across-logs-and-traces/failed-payment-span-logs.webp"
+  alt="The payment span's Logs tab shows the payment timeout and checkout error from the same trace."
+  caption="The selected payment span's Logs tab highlights its timeout log."
+  width={1280}
+  height={800}
+  themeInvert={false}
+/>
+
+Select **Payment provider timed out** to open it in **Logs Explorer**. The result shows the error record with its trace ID and payment span ID.
 
 ![Logs Explorer shows the payment error opened from the span’s Logs tab, with the payment span ID and shared trace ID.](/img/faqs/follow-failed-requests-across-logs-and-traces/payment-error-from-trace.webp)
 
