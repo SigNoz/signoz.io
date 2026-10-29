@@ -27,10 +27,14 @@ async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
   const config = await readRawLocalListicle(name)
   if (!config) return null
 
-  const included = new Map<string, ListicleConfig | null>()
-  for (const includedName of includedListicleNames(config)) {
-    included.set(includedName, await readRawLocalListicle(includedName))
-  }
+  const included = new Map<string, ListicleConfig | null>(
+    await Promise.all(
+      includedListicleNames(config).map(
+        async (includedName: string) =>
+          [includedName, await readRawLocalListicle(includedName)] as const
+      )
+    )
+  )
   return resolveListicleIncludes(
     config,
     (includedName: string) => included.get(includedName) ?? null

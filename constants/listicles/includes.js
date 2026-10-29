@@ -2,10 +2,11 @@
 
 // A section's `include` lists other listicles whose cards the section shows:
 // "<listicle>" takes every card, "<listicle>#<sectionId>" takes one section, and a
-// trailing "@<href prefix>" keeps only the cards under that path. An entry can also be
+// trailing "@<href prefix>" keeps only the cards under that path. An entry can be
 // { "from": "<listicle>[#<sectionId>][@<href prefix>]", "nameSuffix": " (Manual)" } to
 // tell the included cards apart from others with the same name. A section's `exclude`
 // lists hrefs to drop; an entry that ends in "/*" drops every card under that path.
+// An `exclude` on the listicle applies to every section, on top of the section's own.
 // With `uniqueAcrossSections: true` on the listicle, each card stays only in the
 // first section that claims it. Sections claim in `claimOrder` (default: their order).
 // Included sections sort cards by name; a section's `pinned` lists hrefs to show first,
@@ -76,6 +77,7 @@ function resolveListicleIncludes(config, getConfig) {
   const sections = config.sections || []
   if (!sections.some((section) => section.include) && !config.uniqueAcrossSections) return config
 
+  const sharedExclude = config.exclude || []
   const claimed = new Set()
   const resolved = new Map()
   const claimOrder = sections
@@ -83,7 +85,19 @@ function resolveListicleIncludes(config, getConfig) {
     .sort((a, b) => (a.section.claimOrder ?? a.index) - (b.section.claimOrder ?? b.index))
 
   for (const { section, index } of claimOrder) {
-    const { include = [], exclude = [], pinned = [], claimOrder: _claimOrder, ...rest } = section
+    if (section.subsections?.length) {
+      throw new Error(
+        `Listicle section "${section.id}" cannot combine subsections with include or uniqueAcrossSections`
+      )
+    }
+    const {
+      include = [],
+      exclude: ownExclude = [],
+      pinned = [],
+      claimOrder: _claimOrder,
+      ...rest
+    } = section
+    const exclude = [...sharedExclude, ...ownExclude]
     const seen = new Set()
     const items = []
     for (const item of [
@@ -113,7 +127,7 @@ function resolveListicleIncludes(config, getConfig) {
     )
   }
 
-  const { uniqueAcrossSections: _unique, ...rest } = config
+  const { uniqueAcrossSections: _unique, exclude: _exclude, ...rest } = config
   return { ...rest, sections: sections.map((_section, index) => resolved.get(index)) }
 }
 

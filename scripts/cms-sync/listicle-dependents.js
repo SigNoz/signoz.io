@@ -13,8 +13,8 @@ function readListicle(listiclesDir, name) {
 }
 
 /**
- * Returns `changedFiles` plus every listicle that includes one of them, so that
- * the CMS sync and the cache revalidation also cover the listicles whose cards changed.
+ * Returns `changedFiles` plus every listicle that includes one of them. The CMS sync
+ * and the cache revalidation use it to cover listicles whose included cards changed.
  */
 function withDependentListicles(changedFiles, listiclesDir = LISTICLES_DIR) {
   const changed = new Set(changedFiles.map((file) => path.basename(file, '.json')))

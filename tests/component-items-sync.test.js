@@ -355,6 +355,42 @@ test('resolveListicleIncludes applies href filters, exclude, nameSuffix, and cla
   )
 })
 
+test('a listicle-level exclude applies to every section', () => {
+  const configs = {
+    source: {
+      pattern: 'flat',
+      items: [
+        { name: 'Keep', href: '/docs/keep' },
+        { name: 'Shared', href: '/docs/shared/page' },
+        { name: 'Own', href: '/docs/own' },
+      ],
+    },
+  }
+  const config = {
+    pattern: 'sectioned',
+    exclude: ['/docs/shared/*'],
+    sections: [
+      { id: 'one', include: ['source'], exclude: ['/docs/own'] },
+      { id: 'two', include: ['source'] },
+    ],
+  }
+
+  const resolved = resolveListicleIncludes(config, (name) => configs[name] ?? null)
+  assert.deepEqual(
+    resolved.sections.map((section) => section.items.map((item) => item.name)),
+    [['Keep'], ['Keep', 'Own']]
+  )
+  assert.ok(!('exclude' in resolved))
+})
+
+test('a section with subsections cannot use include', () => {
+  const config = {
+    pattern: 'sectioned',
+    sections: [{ id: 'mixed', include: ['source'], subsections: [{ items: [] }] }],
+  }
+  assert.throws(() => resolveListicleIncludes(config, () => null), /cannot combine subsections/)
+})
+
 test('pinned cards come first in an included section', () => {
   const configs = {
     source: {
