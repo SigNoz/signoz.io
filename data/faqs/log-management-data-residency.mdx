@@ -23,9 +23,9 @@ The [deployment options](https://signoz.io/enterprise/) describe SigNoz Cloud, e
 
 ## Follow one log through the boundary
 
-For example, take a checkout service that records successful payments and payment failures. Its company requires those logs to stay in its data center. A suitable design sends logs to a local OpenTelemetry Collector, which receives and forwards them to self-hosted SigNoz.
+For example, take a checkout service that records successful payments and payment failures. Its company requires those logs to stay in its data center. The service can send logs to a local OpenTelemetry Collector, which forwards them to the SigNoz Collector in the same data center. The SigNoz Collector writes them to ClickHouse, the database used to store telemetry. The [architecture guide](https://signoz.io/docs/architecture/) explains these components, and the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/) covers their connections.
 
-SigNoz stores the logs in ClickHouse, its telemetry database. When an engineer runs a query, SigNoz returns matching data to their browser or API client. The [architecture guide](https://signoz.io/docs/architecture/) explains these components, and the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/) covers their connections.
+When an engineer queries those logs, SigNoz returns the results to their browser or API client. That means the location of the client matters as well as the location of the database.
 
 For this design to meet the checkout service's policy, check the paths beyond the database too.
 
@@ -35,10 +35,10 @@ For this design to meet the checkout service's policy, check the paths beyond th
 
 ## Check separate statistics reporting
 
-Self-hosted SigNoz also sends deployment and usage statistics by default. Disabling the collection of user details, such as email addresses, leaves that reporting enabled. If your policy excludes statistics reporting, set `statsreporter.enabled` to `false` as described in the [statistics reporting guide](https://signoz.io/docs/telemetry/).
+Self-hosted SigNoz also reports deployment and usage statistics separately from your logs. In v0.88.0 and later, this reporting is enabled by default; disabling the collection of user details, such as email addresses, leaves the rest of the reporting enabled. The [statistics reporting guide](https://signoz.io/docs/telemetry/) explains what is reported and how to disable it for your version.
 
 ## Apply stricter rules to sensitive fields
 
-Within the checkout deployment, some fields may need stricter handling than the rest of a log. If SigNoz must not receive email addresses, remove or mask them before export. Check for email addresses in the log body and log attributes. The [PII scrubbing guide](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) explains Collector processing.
+Within the checkout deployment, some fields may need stricter handling than the rest of a log. If SigNoz must not receive email addresses, remove the full addresses before export. Check both log bodies and attributes, and test representative records to make sure the addresses are gone. The [PII scrubbing guide](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) explains Collector processing; adapt its partial email masking example if you need to remove the whole address.
 
 If you choose SigNoz Cloud, remove protected fields before sending logs there. Cloud [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) cannot prevent that transfer because the pipelines process logs after the logs reach SigNoz Cloud.
