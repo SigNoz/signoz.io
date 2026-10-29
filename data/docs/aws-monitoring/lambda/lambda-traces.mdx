@@ -1,5 +1,5 @@
 ---
-date: 2026-08-31
+date: 2026-10-27
 title: Send your AWS Lambda Traces to SigNoz
 meta_title: AWS Lambda Traces - OpenTelemetry Auto-Instrumentation
 description: Learn to send Lambda traces using OpenTelemetry auto-instrumentation layers for Python, Node.js, Java, and Ruby to track serverless performance.
@@ -8,15 +8,22 @@ doc_type: howto
 
 ## Overview
 
-<Admonition type="warning" title="Running Lambda MicroVMs?">
-The auto-instrumentation layers on this page attach to the invocation lifecycle, which a MicroVM
-does not have. Run an OpenTelemetry Collector inside the MicroVM image instead. See
-[Monitor AWS Lambda MicroVMs](https://signoz.io/docs/aws-monitoring/lambda-microvms/).
-</Admonition>
-
 Add an OpenTelemetry auto-instrumentation layer to your Lambda function to send traces to SigNoz.
 The layer records each invocation and the outbound calls that it instruments. Your function code
 does not change.
+
+<Admonition type="info" title="Using Go, a container image, or Lambda MicroVMs?">
+The layers on this page cover Python, Node.js, Java, and Ruby functions packaged as a zip. For
+other setups, use these guides:
+
+- **Go:** Go has no layer. Instrument Go functions with the SDK as shown in
+  [Monitor Go AWS Lambda Traces with OpenTelemetry SDK](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/).
+- **Container image:** Layers do not attach to container images. Follow
+  [Instrument AWS Lambda Container Images](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-container-image/).
+- **Lambda MicroVMs:** A MicroVM has no invocation lifecycle for a layer to attach to. Run an
+  OpenTelemetry Collector inside the MicroVM image, as shown in
+  [Monitor AWS Lambda MicroVMs](https://signoz.io/docs/aws-monitoring/lambda-microvms/).
+</Admonition>
 
 <Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).

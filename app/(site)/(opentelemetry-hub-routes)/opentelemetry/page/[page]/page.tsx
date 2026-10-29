@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import ListingWithSearch from '@/components/ResourceCenter/ListingWithSearch'
 import ListingPageLayout from '@/components/ResourceCenter/ListingPageLayout'
 import {
@@ -7,6 +8,8 @@ import {
 } from '../../../content'
 import { buildListingMetadata } from '../../../metadata'
 import { getAllContent, getAuthorDirectory } from '@/utils/contentRepository'
+import { POSTS_PER_PAGE } from '../../../constants'
+import { getListingPageNumber } from '@/utils/paginationPages'
 import { generateSectionHubBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
 
@@ -58,6 +61,9 @@ export default async function Page(props: { params: Promise<{ page: string }> })
 
   allArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
+  const pageNumber = getListingPageNumber(params.page, allArticles.length, POSTS_PER_PAGE)
+  if (!pageNumber) notFound()
+
   const breadcrumbJsonLd = generateSectionHubBreadcrumb('opentelemetry', params.page)
 
   return (
@@ -66,12 +72,13 @@ export default async function Page(props: { params: Promise<{ page: string }> })
       <ListingPageLayout>
         <ListingWithSearch
           posts={allArticles}
-          pageNumber={parseInt(params.page)}
+          pageNumber={pageNumber}
           pageRoute="opentelemetry"
           title="OpenTelemetry"
           description="Articles on OpenTelemetry concepts, implementation, and its use cases."
           searchPlaceholder="Search for an article..."
           gridTitle="All Articles"
+          emptyMessage="No articles found"
         />
       </ListingPageLayout>
     </>

@@ -221,8 +221,8 @@ export const SUPPORT_STATS: SupportStat[] = [
       'Our logs, metrics, and traces work on an innovative co-related architecture so you find the needle in the haystack, faster.',
   },
   {
-    value: '10 TB+/day',
-    title: 'Daily ingest for a single deployment',
+    value: '2 PB+/month',
+    title: 'Monthly ingest for a single deployment',
     description:
       'ClickHouse core handles high scalability Kubernetes and AI workloads at scale. 50% higher throughput guaranteed.',
   },

@@ -34,7 +34,7 @@ export default function CustomersHero({ title, metrics, ctas }: CustomersHeroPro
       <div className="grid gap-4 border-y border-[var(--l2-border)] py-5 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-[var(--l2-border)] lg:col-start-2 lg:row-start-1">
         {metrics.map((metric) => (
           <div className="sm:px-4 sm:first:pl-0" key={metric.value}>
-            <div className="text-lg font-semibold tracking-[-0.02em] text-[var(--l1-foreground)] sm:text-2xl">
+            <div className="text-lg font-semibold tracking-[-0.02em] text-[var(--l1-foreground)] sm:whitespace-pre-line sm:text-2xl">
               {metric.value}
             </div>
             <p className="mt-2 text-xs leading-4 text-[var(--l2-foreground)] sm:max-w-36 sm:text-sm sm:leading-5">

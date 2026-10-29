@@ -33,7 +33,7 @@ const SECTION_CONFIG: Record<string, BreadcrumbCrumb> = {
   comparisons: { name: 'Comparisons', url: `${BASE_URL}/comparisons/` },
   opentelemetry: { name: 'OpenTelemetry', url: `${BASE_URL}/opentelemetry/` },
   customers: { name: 'Customers', url: `${BASE_URL}/customers/` },
-  faqs: { name: 'FAQs', url: `${BASE_URL}/faqs/` },
+  faqs: { name: 'Product FAQs', url: `${BASE_URL}/faqs/` },
 }
 
 const HOME_CRUMB: BreadcrumbCrumb = { name: 'SigNoz', url: `${BASE_URL}/` }

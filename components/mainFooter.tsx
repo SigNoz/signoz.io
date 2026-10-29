@@ -188,8 +188,8 @@ function Footer({ inDocsShell = false }: FooterProps) {
                 <FooterPillLink href="https://newsletter.signoz.io/" newTab>
                   Newsletter
                 </FooterPillLink>
-                <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2025/" newTab>
-                  KubeCon, Atlanta 2025
+                <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2026/" newTab>
+                  KubeCon, Salt Lake City 2026
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
               </div>

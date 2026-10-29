@@ -23,11 +23,11 @@ export function HomepageHeroRedesign() {
             <div className="mb-6">
               <HalfBadge
                 badge="NEW"
-                href="/launch-week/"
+                href="/events/kubecon-cloudnativecon-north-america-2026/"
                 clickLocation="Hero Section"
-                clickName="Launch Week 6.0 Link"
+                clickName="KubeCon NA 2026 Link"
               >
-                SigNoz Launch Week 6.0
+                Meet us at KubeCon NA 2026
               </HalfBadge>
             </div>
           </HeroCopyMotion>

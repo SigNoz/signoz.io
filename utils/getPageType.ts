@@ -65,6 +65,7 @@ export const getPageType = (pathname: string): string => {
 
   // FAQ pages
   if (normalizedPath === '/faqs') return 'Product FAQ Listing Page'
+  if (normalizedPath.match(/^\/faqs\/page\/\d+$/)) return 'Product FAQ Listing Page'
   if (normalizedPath.startsWith('/faqs/')) return 'Product FAQ Page' // Match /faqs/*
 
   // Other specific pages

@@ -144,6 +144,36 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/guides/how-do-i-add-alerts-to-prometheus/',
+          destination: '/guides/what-is-a-prometheus-rule/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-the-alert-lifecycle-of-prometheus/',
+          destination: '/guides/what-is-a-prometheus-rule/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-specify-custom-http-headers-in-prometheus/',
+          destination: '/guides/what-is-prometheus-target/',
+          permanent: true,
+        },
+        {
+          source: '/guides/prometheus-metrics-endpoint/',
+          destination: '/guides/what-is-prometheus-target/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-add-target-specific-label-in-prometheus/',
+          destination: '/guides/what-is-prometheus-target/',
+          permanent: true,
+        },
+        {
+          source: '/guides/relabel-instance-to-hostname-in-prometheus/',
+          destination: '/guides/what-is-prometheus-target/',
+          permanent: true,
+        },
+        {
           source: '/guides/how-does-prometheus-work/',
           destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,

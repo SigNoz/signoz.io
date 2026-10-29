@@ -2,8 +2,14 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
-const { ensureTrailingSlash, transformBlog, transformComparison, transformDoc, transformGuide } =
-  loadTsModule('utils/mdxUtils.ts')
+const {
+  ensureTrailingSlash,
+  transformBlog,
+  transformComparison,
+  transformDoc,
+  transformFaq,
+  transformGuide,
+} = loadTsModule('utils/mdxUtils.ts')
 
 const baseContent = {
   id: 42,
@@ -188,6 +194,27 @@ test('transformGuide and transformComparison use their route prefixes', () => {
   assert.equal(comparison.path, 'comparisons/my-comparison')
   assert.equal(comparison.filePath, 'comparisons/my-comparison.mdx')
   assert.equal(comparison.structuredData['@type'], 'BlogPosting')
+})
+
+test('transformFaq maps card fields under the faqs route prefix without the body', () => {
+  const faq = transformFaq({
+    ...baseContent,
+    path: '/my-faq',
+    authors: [{ key: 'yuvraj', name: 'Yuvraj', image_url: 'https://example.com/y.png' }],
+    tags: [{ value: 'features' }, 'security'],
+  })
+
+  assert.equal(faq.type, 'FAQ')
+  assert.equal(faq.slug, 'my-faq')
+  assert.equal(faq.path, 'faqs/my-faq')
+  assert.equal(faq.date, '2026-02-01')
+  assert.deepEqual(faq.tags, ['features', 'security'])
+  assert.deepEqual(faq.authors, ['yuvraj'])
+  assert.deepEqual(faq.authorObjects, [
+    { key: 'yuvraj', name: 'Yuvraj', image_url: 'https://example.com/y.png' },
+  ])
+  assert.match(faq.readingTime.text, /min read/)
+  assert.equal('content' in faq, false)
 })
 
 test('transformDoc strips path slashes, defaults tags, and sets docs path', () => {
