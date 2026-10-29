@@ -10,12 +10,14 @@
 // widget is rejected on domains not allow-listed in Decimal.
 export const DECIMAL_WIDGET_ID = process.env.NEXT_PUBLIC_DECIMAL_WIDGET_ID
 export const DECIMAL_PUBLIC_CONFIG = process.env.NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG
+export const isDecimalConfigured = Boolean(DECIMAL_WIDGET_ID && DECIMAL_PUBLIC_CONFIG)
+export const DECIMAL_PRIMARY_COLOR = 'rgb(255, 68, 32)'
 
 // Theme applied once the widget script loads (values from the Decimal dashboard).
 // The widget renders outside the site's token cascade, so both palettes are
 // spelled out and re-applied whenever html.dark toggles.
 const DECIMAL_THEME_BASE = {
-  primaryColor: 'rgb(255, 68, 32)',
+  primaryColor: DECIMAL_PRIMARY_COLOR,
   headerTitle: 'SigNoz Support',
   greeting: "👋 Hey! I'm SigNoz AI. Ask me about docs, pricing, or anything else!",
   suggestedMessages: [
@@ -69,6 +71,25 @@ export const DECIMAL_DISPLAY_MODE: 'floating' | 'push-sidebar' | 'overlay-sideba
 const DECIMAL_SCRIPT_SRC = 'https://app.getdecimal.ai/widget/v1/widget.js'
 const DECIMAL_SCRIPT_ID = 'decimal-widget'
 
+type DecimalStatus = 'idle' | 'loading' | 'loaded' | 'failed'
+
+let decimalStatus: DecimalStatus = 'idle'
+const statusListeners = new Set<() => void>()
+
+function setDecimalStatus(next: DecimalStatus): void {
+  decimalStatus = next
+  statusListeners.forEach((listener) => listener())
+}
+
+export const getDecimalStatus = (): DecimalStatus => decimalStatus
+
+export function subscribeDecimalStatus(listener: () => void): () => void {
+  statusListeners.add(listener)
+  return () => {
+    statusListeners.delete(listener)
+  }
+}
+
 /**
  * Injects the Decimal widget script once. Safe to call repeatedly and from any
  * page — subsequent calls are no-ops.
@@ -93,7 +114,14 @@ export function ensureDecimalScript(): void {
   script.onload = () => {
     // Apply SigNoz branding once the widget API is available.
     applyDecimalTheme()
+    setDecimalStatus('loaded')
   }
+  // Removed on failure so a later call can try again.
+  script.onerror = () => {
+    script.remove()
+    setDecimalStatus('failed')
+  }
+  setDecimalStatus('loading')
   document.head.appendChild(script)
 }
 
@@ -122,6 +150,13 @@ export function openDecimalChat(options?: { presentation?: 'modal' | 'sidebar' }
   }
 
   tryShow(0)
+}
+
+// Decimal adds its launcher hidden and shows it once the chat frame is ready.
+export function isDecimalLauncherShown(): boolean {
+  if (typeof document === 'undefined') return false
+  const launcher = document.querySelector('.decimal-widget-button')
+  return !!launcher && launcher.getClientRects().length > 0
 }
 
 export function isDecimalChatOpen(): boolean {

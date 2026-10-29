@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { ensureDecimalScript } from '@/utils/decimal'
 import { useConsent } from '@/hooks/useConsent'
+import DecimalLauncher from './DecimalLauncher'
 
 const IDLE_INJECT_TIMEOUT_MS = 4000
 const FALLBACK_INJECT_DELAY_MS = 2500
@@ -12,10 +13,11 @@ const FALLBACK_INJECT_DELAY_MS = 2500
 export default function DecimalClient() {
   const pathname = usePathname()
   const hasFunctionalConsent = useConsent().categories.functional
+  const enabled = !isDocsOnboardingPathname(pathname)
 
   useEffect(() => {
     // Don't load the chat widget inside the docs onboarding flow, or before functional consent.
-    if (isDocsOnboardingPathname(pathname) || !hasFunctionalConsent) return
+    if (!enabled || !hasFunctionalConsent) return
 
     // Idle-deferred; openDecimalChat() loads the script on demand regardless.
     let idleId: number | null = null
@@ -31,7 +33,7 @@ export default function DecimalClient() {
       if (idleId !== null) window.cancelIdleCallback(idleId)
       if (timeoutId !== null) clearTimeout(timeoutId)
     }
-  }, [pathname, hasFunctionalConsent])
+  }, [enabled, hasFunctionalConsent])
 
-  return null
+  return enabled ? <DecimalLauncher /> : null
 }
