@@ -1,0 +1,72 @@
+---
+title: How do I find a customer’s failed request using user IDs and nested JSON fields?
+meta_title: Find failed requests by user ID and nested JSON
+description: Find a customer's failed request in SigNoz Cloud using a user ID, nested JSON fields, and a request ID.
+date: 2026-10-19
+authors: [yuvraj]
+tags: [logs]
+---
+
+In SigNoz Cloud, search the customer’s user ID in Logs Explorer, then use the request ID from a failed log to find the other records for that request. This works when your application records both IDs and the relevant logs have been collected and retained.
+
+## Find the failed request
+
+For example, a customer reports that a payment failed. The checkout service records the customer’s ID as `user.id`, the request ID as `request.id`, and error details inside `logerror.stack`.
+
+Search for the customer’s ID in Logs Explorer and set the time range around the reported failure. The field names in your logs may differ from this example.
+
+<Figure
+  src="/img/faqs/find-failed-requests-with-user-ids-and-json/run-user-query.webp"
+  alt="A user ID query in Logs Explorer returns nine checkout records."
+  caption="The customer ID narrows the search to this customer's checkout records."
+  width={1226}
+  height={535}
+  themeInvert={false}
+/>
+
+The results include successful and failed requests. Open a failure near the reported time and inspect its nested error. In this example, the stack contains `MongooseError`, so adding that error text to the filter narrows the results to one failed payment.
+
+<Figure
+  src="/img/faqs/find-failed-requests-with-user-ids-and-json/nested-error-query.webp"
+  alt="A customer ID and nested error filter return one payment failure."
+  caption="The nested error helps identify the failed payment among the customer's logs."
+  width={1226}
+  height={285}
+  themeInvert={false}
+/>
+
+If your JSON fields are not available as filters, use the [JSON parsing guide](https://signoz.io/docs/logs-pipelines/guides/json/) to extract them into log attributes, then select the fields stored in your logs.
+
+## Follow the request ID
+
+Open the failed record and copy its request ID. Unlike the user ID, which can appear in many requests, this ID helps you isolate the log records for the individual payment.
+
+<Figure
+  src="/img/faqs/find-failed-requests-with-user-ids-and-json/copy-request-id.webp"
+  alt="The failed payment record shows its request ID."
+  caption="Copy the request ID from the failed payment record."
+  width={768}
+  height={480}
+  themeInvert={false}
+/>
+
+Search for that request ID, remove error or service filters that could hide related records, and widen the time range to cover the whole request. Order the results by timestamp. In this example, seven collected records show the checkout, payment attempts, and final HTTP 500 response.
+
+<Figure
+  src="/img/faqs/find-failed-requests-with-user-ids-and-json/request-trail.webp"
+  alt="A request ID filter returns seven checkout and payment records in timestamp order."
+  caption="The request ID brings together the collected records for the failed payment."
+  width={1226}
+  height={465}
+  themeInvert={false}
+/>
+
+The trail contains only logs SigNoz Cloud collected and still retains. If records are missing, check the time range, collection, retention, and whether the application recorded the IDs.
+
+You can download up to 50,000 rows at a time from Logs Explorer. Compare the number of exported records with the query count to check whether your download is complete. If more than 50,000 logs match, use the [Logs API](https://signoz.io/docs/logs-management/logs-api/search-logs/) to retrieve them in pages.
+
+## Ask an agent
+
+You can also ask an agent connected to [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/) to investigate the customer ID, find the request ID, and retrieve the related logs. Use a separate [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) with only the read access needed for the investigation; an ingestion key does not provide query access. Check the agent’s filters, time range, and returned records before relying on its conclusion.
+
+If Noz is available in your SigNoz Cloud workspace, its [customer log triage guide](https://signoz.io/docs/ai/use-cases/noz-triage-customer-issue/) also explains how to investigate using a recorded user or tenant ID.
