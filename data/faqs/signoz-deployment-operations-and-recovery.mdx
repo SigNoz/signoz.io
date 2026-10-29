@@ -26,16 +26,16 @@ Your team still controls what the application records, any collectors it runs, a
 
 ## What work stays with a self-hosted team?
 
-Plan capacity from expected log volume, retention and query load, with spare capacity for bursts and growth. Size the Collector that receives logs as well as ClickHouse, the database that stores them. The [resource planning guide](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/) gives component guidance; its table is not a workload-specific sizing guarantee.
+Plan capacity from expected log volume, retention and query load, with spare capacity for bursts and growth. Size the OpenTelemetry Collector that receives logs as well as ClickHouse, the database that stores them. The [Self-Hosted Community resource planning guide](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/) gives component guidance, but its table is not a workload-specific sizing guarantee.
 
 The [production readiness checklist](https://signoz.io/docs/production-readiness/) covers deployment isolation, storage, security and scaling. Your team also schedules upgrades and follows the [required version stops](https://signoz.io/docs/operate/upgrade/), including migrations and pre-upgrade backups.
 
 ## What must recovery cover?
 
-For example, take a checkout team that keeps payment logs, a saved view for failed payments and an error alert. If its self-hosted storage fails, recovering the logs alone will not restore the team's saved investigation setup.
+For example, a checkout team might use payment logs, a saved view for failed payments and an error alert to investigate failures. If a disaster affects both its log storage and its Metastore, restoring the logs alone will not bring back the saved view or alert.
 
 The logs live in ClickHouse. Saved views, dashboards and alert definitions live in the **Metastore**, a separate SQLite or PostgreSQL database. The [ClickHouse upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-131/) calls for a data snapshot, while the [saved-view upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-137/) calls for a Metastore backup.
 
 Those guides identify data to protect; they do not establish a complete tested restore for your deployment or a recovery time. Keep deployment configuration with your recovery plan, and verify that a restore recovers both log records and the configuration your team needs.
 
-Retention controls how long logs stay available for queries. The [S3 exporter guide](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/) describes forwarding telemetry copies to S3, which does not back up the Metastore or deployment configuration. Treat that copy separately from a recoverable SigNoz deployment.
+Retention controls how long logs stay available for queries in SigNoz. The [S3 exporter guide](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/) describes sending telemetry to S3 alongside SigNoz. These exports are independent, and S3 data cannot be queried in the SigNoz UI. The S3 export also does not back up the Metastore or deployment configuration, so it is not a complete deployment backup.
