@@ -1,10 +1,10 @@
 ---
 
 title: What is the Difference Between Prometheus Vectors - Instant vs Range Explained
-date: 2024-10-14
-tags: [Prometheus, Monitoring, Time Series Data, PromQL]
-authors: [simran_kumari]
-description: Explore the key differences between Prometheus instant vectors and range vectors, their use cases, and how to effectively utilize them in monitoring and querying time series data.
+date: 2026-10-28
+tags: [prometheus, monitoring]
+authors: [saurabh_patil]
+description: Instant vectors show one value per series, while range vectors show values over a time window. Learn when to use each with PromQL examples.
 keywords: [Prometheus vectors, instant vector, range vector, PromQL, time series data, monitoring, data analysis]
 related_articles:
   - '/blog/opentelemetry-vs-prometheus'
@@ -53,7 +53,7 @@ Key Characteristics of Instant Vectors:
 
 - Single Point in Time: Instant vectors capture the value of a metric at a particular point in time.
 - Simplicity: Instant vectors provide a quick snapshot, making them ideal for real-time monitoring.
-- Static Use: They work best for situations where you don’t need historical data.
+- Calculated Values: Functions such as `rate()` can return an instant vector even though they use historical samples.
 
 To query instant vectors in PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)), you simply use the metric name and optional label selectors. For example:
 
@@ -122,7 +122,7 @@ app_requests_total{endpoint="/"}[2m]
 
 <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 4.webp" alt="Range Vectors in Prometheus" caption="Range Vectors in Prometheus" />
 
-This query returns the values of the `app_requests_total` metric with an `endpoint` of "/" over the last 2 minutes.
+This query returns the recorded values of `app_requests_total` for the `/` endpoint over the last two minutes. Change `[2m]` to `[30s]`, `[1h]`, or `[1d]` to look at a different period. You can also combine units, such as `[1h30m]` for an hour and a half.
 
 Practical Applications of Range Vectors
 
@@ -138,17 +138,19 @@ Range vectors excel in scenarios that require historical context:
     
     <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 5.webp" alt="Calculating rates using range vector" caption="Calculating rates using range vector" />
     
-2. Detecting anomalies:
+2. Averaging samples over time:
     
     ```
     avg_over_time(app_requests_total[1h]) > 90
     ```
     
-    This checks if the average value of `app_requests_total` over the past hour is greater than 90.
+    This checks whether the average of the stored counter readings over the past hour exceeds 90. For request activity, use `rate()` as shown above; averaging a cumulative counter does not give the number of new requests.
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 6.webp" alt="Detecting anomalies using range vector" caption="Detecting anomalies using range vector" />
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 6.webp" alt="Average of stored request-counter readings over one hour" caption="Averaging stored counter readings over one hour" />
     
-    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 7.webp" alt="Prometheus range vector example showing aggregated request rate by method" caption="" />3. Aggregating data:
+    <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 7.webp" caption="" />
+
+3. Aggregating data:
     
     ```
     sum by (method) (rate(app_requests_total[1h]))
@@ -159,7 +161,13 @@ Range vectors excel in scenarios that require historical context:
     <Figure src="/img/guides/2024/10/prometheus-instant-vector-vs-range-vector-image 8.webp" alt="Aggregating data using range vector" caption="Aggregating data using range vector" />
     
 
-Best practice: Choose an appropriate time range for your range vector queries. Too short, and you may miss important trends; too long, and you risk performance issues.
+### Choosing a Time Range
+
+The range you choose determines which samples a function can use. For example, `rate(app_requests_total[5m])` calculates the request rate from five minutes of data. A longer window smooths out brief changes, while a shorter one responds more quickly to them.
+
+Choose a window that includes several scrapes. With a 15-second scrape interval, `[1m]` normally includes four samples. Functions such as `rate()` need at least two samples, so a window that is too short can return no result if a scrape is missed. Longer windows also mean more data to process, so use one that fits the question you are asking.
+
+If you want the number of new requests during the window rather than requests per second, use `increase()`. See our [guide to rate and increase](https://signoz.io/guides/understanding-prometheus-rate-vs-increase-functions-correctly/) for examples.
 
 ## Instant Vector vs Range Vector: Key Differences
 
@@ -191,38 +199,58 @@ Use Range Vectors When:
 
 ## Advanced PromQL Techniques with Vectors
 
-Mastering vector manipulation in PromQL unlocks powerful querying capabilities:
+Functions such as `rate()` take a range vector and return an instant vector. That means you can use the calculated rate in another operation, or look at how that rate changed over time.
 
-1. Combining instant and range vectors:
-    
-    ```
-    sum(rate(app_requests_total[5m])) / sum(up)
-    ```
-    
-    This query calculates the average request rate per active instance.
-    
-2. Subqueries
-    
-    Subqueries allow you to extract intermediate data, making it easier to combine instant and range vectors for more complex analysis.
-    
-    For example, to calculate the average request rate over 5 minutes, within the last hour window:
-    
-    ```
-    avg_over_time(rate(app_requests_total[5m])[1h:])
-    ```
-    
-    This query calculates the average rate of requests (`app_requests_total`) over a 5-minute window, for the past 1 hour. It helps track trends in request rates over time.
-    
-3. Vector Arithmetic
-    
-    You can also perform arithmetic operations between vectors for customized metrics. For instance, to compute the ratio of requests to CPU usage over a 5-minute window:
-    
-    ```
-    (app_requests_total[5m]) / (node_cpu_seconds_total[5m])
-    ```
-    
-    This query divides the number of requests (`app_requests_total`) by the CPU time (`node_cpu_seconds_total`), giving you a ratio of requests per CPU second over the last 5 minutes. This can help you understand how efficiently your application is utilizing CPU resources relative to the incoming traffic.
-    
+### Creating Range Vectors from Query Results
+
+Suppose you want the average request rate over the past hour. You already know how to calculate a five-minute rate:
+
+```promql
+rate(app_requests_total[5m])
+```
+
+This returns one rate per series at the time the query is evaluated. To collect those calculated rates over an hour, add a subquery:
+
+```promql
+rate(app_requests_total[5m])[1h:1m]
+```
+
+The `[1h:1m]` part evaluates the five-minute rate every minute over the last hour. Those results form a range vector, which you can pass to `avg_over_time()`:
+
+```promql
+avg_over_time(rate(app_requests_total[5m])[1h:1m])
+```
+
+This gives the average of the calculated rates for each series over that hour. The colon is what makes this a subquery: `[1h]` selects stored samples from a metric, while `[1h:1m]` lets you collect the results of an expression. You can also write `[1h:]` to use Prometheus's configured evaluation interval instead of specifying a step.
+
+Subqueries repeat the inner calculation, so a long range with a small step can be expensive. If you use the same calculation often, consider saving it with a [recording rule](https://signoz.io/guides/what-is-a-prometheus-rule/).
+
+### Comparing Current and Earlier Values
+
+The subquery above looks at a series of calculated rates. If you only need the rate from an earlier time, use `offset` to move the window back. For example, to compare the current five-minute request rate with the rate an hour ago, run:
+
+```promql
+rate(app_requests_total[5m])
+```
+
+```promql
+rate(app_requests_total[5m] offset 1h)
+```
+
+The second query uses the five-minute window ending one hour before the query time. Keep `offset` next to the selector inside `rate()` so it shifts the data used for the calculation.
+
+### Using Calculated Values in Vector Arithmetic
+
+You can also combine calculated rates directly. For example, to find the share of requests that returned HTTP 500 errors:
+
+```promql
+sum by (job) (rate(app_requests_total{status="500"}[5m]))
+/ sum by (job) (rate(app_requests_total[5m]))
+```
+
+Both sides return one rate per `job`, so Prometheus can match them for division. The result is an error ratio, where `0.05` means 5%. Use your application's status-code label if it differs from `status`.
+
+Apply `rate()` before dividing. Arithmetic works on instant vectors, not directly on range vectors such as `app_requests_total[5m]`. For more examples of matching and dividing results, see [how to divide metrics in Prometheus](https://signoz.io/guides/divide-two-metrics-in-prometheus/).
 
 ## Optimizing Prometheus Queries with SigNoz
 
@@ -276,7 +304,7 @@ In Prometheus, there isn't an explicit hard limit for the maximum time range for
 
 ### Can I convert an instant vector to a range vector in PromQL?
 
-You can’t directly convert an instant vector to a range vector, but you can approximate the behavior using functions like rate() or avg_over_time() with a range vector.
+Yes. Use a subquery to evaluate an instant-vector expression over time. For example, `rate(app_requests_total[5m])[1h:1m]` collects five-minute rates at one-minute steps over the last hour. You can then apply a function such as `avg_over_time()` to those results.
 
 ### How do vector selectors affect query performance?
 

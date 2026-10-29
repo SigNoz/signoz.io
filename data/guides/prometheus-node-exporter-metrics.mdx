@@ -4,31 +4,148 @@ title: Prometheus Node Exporter - Metrics Configuration & Alerting
 date: 2025-12-17
 tags: [prometheus, node-exporter] 
 authors: [saurabh_patil] 
-description: A production-ready guide to install, configure, and secure Prometheus Node Exporter on Linux/Unix systems, including setting up dashboards and alerts.
+description: Node Exporter exposes host metrics for Prometheus. Learn to install it, configure scraping, tune collectors, and set up dashboards and alerts.
 keywords: [prometheus node exporter, linux monitoring, node exporter, kubernetes, node exporter dashboard, node exporter alerts]
 related_articles:
   - '/guides/opentelemetry-collector-vs-exporter'
   - '/guides/what-is-prometheus-for-monitoring'
-  - '/guides/prometheus-node-exporter'
+  - '/guides/what-is-prometheus-target'
 
 ---
 
-<ArticleSeriesTop
-  seriesName="Prometheus Node Exporter Tutorial"
-  seriesOverviewHref="/guides/prometheus-node-exporter"
-  currentPart="2"
-  totalParts="2"
-  previousTitle="Prometheus Node Exporter - Install, Run & Visualize"
-  previousHref="/guides/prometheus-node-exporter"
+Prometheus Node Exporter collects host-level metrics such as CPU time, available memory, disk activity, and network traffic. Prometheus scrapes these metrics so you can query them and set up alerts when a host needs attention.
+
+This guide takes you through that setup, then shows how to tune collectors, add custom metrics, and configure common host alerts. You’ll also see how to send Node Exporter metrics to [SigNoz Cloud](https://signoz.io/) using [OpenTelemetry](https://signoz.io/opentelemetry/).
+
+## Prerequisites
+
+- **Prometheus** - A monitoring and alerting toolkit that collects and stores metrics as time series data. Download and install Prometheus from the <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">official website</a>.
+
+
+## Install & Run the Prometheus Node Exporter
+
+The easiest way to install Node Exporter is to download the precompiled binary from the Prometheus <a href="https://prometheus.io/download/#node_exporter" rel="noopener noreferrer nofollow" target="_blank">official downloads page</a>. The tarball contains a single static executable that can be extracted and run directly on any Linux/Unix-based system.
+
+If you prefer not to leave the terminal, you can also use the following commands to download and extract Node Exporter:
+
+```bash
+# Download the latest version (adjust version number, OS, and ARCH).
+wget https://github.com/prometheus/node_exporter/releases/download/v<VERSION>/node_exporter-<VERSION>.<OS>-<ARCH>.tar.gz
+
+# Extract binary
+tar xvfz node_exporter-<VERSION>.<OS>-<ARCH>.tar.gz
+
+# Change directory to the extracted folder
+cd node_exporter-<VERSION>.<OS>-<ARCH>
+
+# Start the node exporter
+./node_exporter
+```
+
+Once Node Exporter is running, your terminal output should look similar to the screenshot below:
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporte-cli-output.webp"
+  alt="Command-line output after starting Node Exporter"
+  caption="Command-line output after starting Node Exporter"
 />
 
-In earlier part, [Prometheus Node Exporter: Install, Run & Visualize](/guides/prometheus-node-exporter/), you set up Prometheus Node Exporter, configured Prometheus to scrape host-level metrics, and verified that your system was emitting and collecting data correctly. While this setup works well for learning and small environments, production systems demand a more deliberate approach.
+<KeyPointCallout title="Exporter for Windows OS." defaultCollapsed="true">
+  For Windows-based systems, host metrics can be collected using the <a href="https://github.com/prometheus-community/windows_exporter" rel="noopener noreferrer nofollow" target="_blank">Windows Exporter</a>.
 
-As infrastructure scales, Node Exporter can quickly become a high-volume, high-cardinality signal source. Running it effectively in production isn’t about collecting every available metric, it’s about reducing noise, focusing on the signals that matter, and turning raw metrics into actionable insights. In this part, we’ll dive into tuning collectors, identifying critical host metrics, exposing custom signals, and configuring alerting rules that reflect real-world operational risks.
+  It is a Prometheus community-maintained exporter that provides functionality similar to Node Exporter, but is specifically designed for Windows environments.
+</KeyPointCallout>
+
+Once Node Exporter is running, it begins exposing host-level metrics on `port 9100` by default. You can verify this by hitting the `/metrics` endpoint.
+
+```bash
+# Verify that Node Exporter is exposing metrics on port 9100
+curl http://localhost:9100/metrics | grep node_
+```
+
+All host and system metrics exposed by Node Exporter are prefixed with `node_`, which makes them easy to identify and filter.
+
+You should now see output similar to the screenshot below, confirming that Node Exporter is successfully exposing your machine's CPU, memory, disk, network, and other system metrics.
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporter-host-metrics.webp"
+  alt="Hostmetrics exported by Node Exporter"
+  caption="Hostmetrics exported by Node Exporter"
+/>
+
+## Configure Prometheus to Scrape Node Exporter
+
+Prometheus reads all scrape targets from its main configuration file: `prometheus.yml`. If you don’t already have one, you can create it now and update it with the below configs.
+
+<KeyPointCallout title="Do you already have a prometheus.yml file?" defaultCollapsed="true">
+
+Do not replace your existing `prometheus.yml` with the example shown below. Overwriting it will remove your current Prometheus settings, which is not intended.
+
+Instead, simply add the Node Exporter configuration block under the `scrape_configs` section and set the appropriate `static_configs` target.
+
+</KeyPointCallout>
+
+```yaml
+global:
+  # How frequently Prometheus scrapes all targets unless overridden
+  scrape_interval: 15s
+
+scrape_configs:
+  # === Scrape Node Exporter Metrics ===
+  - job_name: 'node' # A name to identify this scrape job
+    static_configs:
+      - targets: ['localhost:9100']
+        # Node Exporter exposes metrics on port 9100 by default
+        # Replace 'localhost' with the server IP if scraping remotely
+```
+
+<KeyPointCallout title="Breakdown of Prometheus.yml file" defaultCollapsed="true">
+
+`global` : Defines default settings that apply to all scrape jobs unless a job overrides them.
+
+`scrape_interval: 15s`: Tells Prometheus to collect metrics from each target every 15 seconds.
+
+`scrape_configs`: This section defines what Prometheus should scrape. Each entry under scrape_configs is a scrape job (a logical group of targets).
+
+`static_configs`: Tells Prometheus, "These targets are manually defined and fixed."
+
+</KeyPointCallout>
+
+Once your `prometheus.yml` file is updated, start Prometheus using the command below:
+
+```bash
+prometheus --config.file=./prometheus.yml --web.enable-lifecycle
+```
+
+This will load your scrape targets. Now that Prometheus is running, let’s move on to visualizing the metrics using the Prometheus Expression Browser.
+
+## Check the Metrics in Prometheus
+
+Open `http://localhost:9090/targets` and check that the `node` target is `UP`. You can also run:
+
+```promql
+up{job="node"}
+```
+
+A value of `1` confirms the scrape succeeded. To explore the CPU metrics, enter the following query in the Prometheus expression browser and switch to the graph view:
+
+```promql
+rate(node_cpu_seconds_total{mode="system"}[1m])
+```
+
+This shows the fraction of time each CPU core spent in system mode over the last minute.
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporter-cpu-usage.webp"
+  alt="CPU usage calculated from `node_cpu_seconds_total` over a 1-minute window"
+  caption="CPU usage calculated from `node_cpu_seconds_total` over a 1-minute window"
+/>
+
+With metrics flowing into Prometheus, you can decide which collectors and metric families you need for your hosts.
 
 ## Limitations of Default Node Exporter Configurations
 
-Node Exporter enables dozens of collectors by default, exposing hundreds of metrics. While this is great for exploration, it’s rarely ideal in production.
+Node Exporter enables many collectors by default. Start with these defaults, then review which metrics your dashboards and alerts actually use before changing the collector set.
 
 Common issues teams run into:
 
@@ -45,11 +162,11 @@ Collectors determine which categories of system metrics Node Exporter exposes, s
 
 Node Exporter ships numerous collectors, most of which are enabled by default. You can explore the complete list of collectors and the metrics they expose in the <a href="https://github.com/prometheus/node_exporter" rel="noopener noreferrer nofollow" target="_blank">Official Node Exporter GitHub repository</a>. 
 
-You can control collectors at startup time using flags such as:
+Stop the exporter before restarting it with a different set of collectors. You can control them using these startup flags:
 
-- `-collector.<name>`: enable a collector
-- `-no-collector.<name>`: disable a default collector
-- `-collector.disable-defaults`: start with nothing and enable only what you need
+- `--collector.<name>`: enable a collector
+- `--no-collector.<name>`: disable a default collector
+- `--collector.disable-defaults`: start with nothing and enable only what you need
 
 **For Example**
 
@@ -93,10 +210,10 @@ Below are some of the most essential metric families you’ll use when building 
 | CPU Metrics     | `node_cpu_seconds_total`                                                | Total CPU time spent in different modes (idle, user, system, iowait, etc.). |
 | Memory Metrics  | `node_memory_MemAvailable_bytes`, `node_memory_MemTotal_bytes`          | Used for memory utilization and low-memory alerts. |
 | Disk Metrics    | `node_filesystem_avail_bytes`, `node_filesystem_size_bytes`             | Used for disk-space-low alerts and capacity monitoring. |
-| Disk I/O        | `node_disk_io_time_seconds_total`                                       | Indicates disk I/O saturation and time spent handling I/O operations. |
+| Disk I/O        | `node_disk_io_time_seconds_total`                                       | Time the device has spent handling I/O. Useful for monitoring disk activity. |
 | Network Metrics | `node_network_receive_bytes_total`                                      | Total number of bytes received over the network interface. |
 | Network Metrics | `node_network_transmit_bytes_total`                                     | Total number of bytes transmitted (sent) over the network interface. |
-| System Load     | `node_load1`, `node_load5`, `node_load15`                                | System load averages over 1, 5, and 15 minutes, indicating the average number of processes in the run queue. |
+| System Load     | `node_load1`, `node_load5`, `node_load15`                                | Load averages over 1, 5, and 15 minutes, including runnable tasks and tasks in uninterruptible sleep on Linux. |
 
 ## When Built-In Metrics Aren’t Enough
 
@@ -164,15 +281,15 @@ To monitor Linux hosts effectively using Node Exporter, SRE teams rely on four f
 
 Let’s set up these alerting rules.
 
-**Step 1:** Create an Alert Rules File
+**Step 1:** Create a directory for the alert rules alongside `prometheus.yml`.
 
 ```bash
-/etc/prometheus/rules/node_alerts.yml
+mkdir -p rules
 ```
 
-**Step 2:** Paste the alerting rules inside the file. 
+**Step 2:** Save the following rules as `rules/node_alerts.yml`.
 
-```yaml
+```yaml:node_alerts.yml
 groups:
   - name: node_exporter_alerts
     rules:
@@ -197,7 +314,7 @@ groups:
         annotations:
           summary: "High memory usage on {{ $labels.instance }}"
 
-      # Disk I/O Saturation
+      # Sustained disk activity
       - alert: DiskIOSaturation
         # Triggers when disk spends more than 80% of time handling I/O operations.
         expr: rate(node_disk_io_time_seconds_total[5m]) > 0.80
@@ -205,7 +322,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Disk I/O saturation detected on {{ $labels.instance }}"
+          summary: "Sustained disk activity on {{ $labels.instance }}"
 
       # Disk Fullness
       - alert: DiskSpaceLow
@@ -237,37 +354,27 @@ groups:
 Your Prometheus directory structure should now look like this:
 
 ```scss
-/etc/prometheus/
+.
   ├── prometheus.yml
   └── rules/
        └── node_alerts.yml
 ```
 
-**Step 3:** Load `node_alerts.yml` file into `Prometheus.yml`.
+**Step 3:** Add the rule file to your existing `prometheus.yml` without removing its scrape jobs:
 
 ```yaml
-global:
-  # How frequently Prometheus scrapes all targets unless overridden
-  scrape_interval: 15s
-  
-# Load alerting rules from the specified file
 rule_files:
-  - "rules/node_alerts.yml"
-
-scrape_configs:
-  # === Scrape Node Exporter Metrics ===
-  - job_name: "node"            # A name to identify this scrape job
-    static_configs:
-      - targets: ["localhost:9100"] 
-        # Node Exporter exposes metrics on port 9100 by default
-        # Replace 'localhost' with the server IP if scraping remotely
+  - 'rules/node_alerts.yml'
 ```
 
-Once your `prometheus.yml` file is updated, reload Prometheus using the command below:
+Check the rules and configuration before reloading Prometheus:
 
 ```bash
-prometheus --config.file=./prometheus.yml
+promtool check rules rules/node_alerts.yml
+promtool check config prometheus.yml
 ```
+
+Reload Prometheus to apply the changes. Because Prometheus was started with `--web.enable-lifecycle`, you can run `curl -X POST http://localhost:9090/-/reload`. You can also reload it through your service manager or by sending a `SIGHUP` signal. For the rule lifecycle and notification setup, see our [Prometheus rules guide](https://signoz.io/guides/what-is-a-prometheus-rule/).
 
 **Step 4:** Verify That Prometheus Loaded Your Configuration
 
@@ -303,18 +410,34 @@ For example, if Prometheus is running locally on `port 9090`, these pages will b
 
 When the configuration is correct, you should see:
 
-- `node_exporter` is listed as a scrape target.
-- Your Four Golden Signal alert rules are under the rules page.
+- The `node` job appears on the target health page and is `UP`.
+- The four host alerting rules appear on the rules page.
 - Alerts transitioning from inactive → pending → firing when conditions are met.
+
+## Send Node Exporter Metrics to SigNoz Cloud
+
+Once you have checked the metrics in Prometheus, you can also send them to SigNoz Cloud for dashboards alongside application metrics, logs, and traces. The [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) provides two ways to collect host metrics, depending on whether you want to keep Node Exporter.
+
+### Scrape Node Exporter with the Prometheus Receiver
+
+If Node Exporter is already running, configure the OpenTelemetry Collector's Prometheus receiver to scrape its `/metrics` endpoint. Add the host and port, such as `localhost:9100`, as a scrape target and enable the receiver in the metrics pipeline. The Collector then forwards the metrics to SigNoz through its configured exporter.
+
+Open *Metrics Explorer* in *SigNoz Cloud* and search for a metric such as `node_cpu_seconds_total` to confirm that data is arriving.
+
+<Figure src="/img/guides/2025/12/prometheus-node-exporter-metrics.webp" alt="Metrics tab in SigNoz Cloud with node_ metrics" caption="Metrics tab in SigNoz Cloud with node_ metrics" />
+
+Follow the [SigNoz Prometheus receiver guide](https://signoz.io/docs/userguide/prometheus-metrics/) for the full configuration.
+
+### Collect Host Metrics without Node Exporter
+
+If you prefer to collect host metrics directly through OpenTelemetry, use the `hostmetrics` receiver instead. It collects CPU, memory, disk, and network metrics without a separate Node Exporter process.
+
+This receiver uses different metric names, so the Node Exporter queries and alert rules in this guide will need adapting. Follow the [SigNoz host metrics guide](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) to configure it and check the hosts view.
+
+<Figure src="/img/guides/2025/12/prometheus-node-exporter-infrastructure.webp" alt="Host Level Metrics Visualized in SigNoz Cloud Dashboard" caption="Host Level Metrics Visualized in SigNoz Cloud Dashboard" />
 
 ## Conclusion
 
-In this part, you moved beyond a default Node Exporter setup and focused on running it effectively in production. You learned how to tune collectors to reduce noise, identify the host metrics that actually matter, expose custom operational signals, and configure alerting rules that reflect real-world failure modes.
+You now have a Node Exporter setup that exposes host metrics, a Prometheus scrape job to collect them, and examples for tuning collectors and configuring alerts. You can keep this Prometheus setup or use the OpenTelemetry Collector to send Node Exporter metrics to SigNoz.
 
 By being intentional about what you collect and alert on, Node Exporter becomes a reliable signal for host health rather than a source of metric sprawl and alert fatigue.
-
----
-
-Hope we answered all your questions about setting up Prometheus Node Exporter and visualization using Prometheus UI & SigNoz.
-
-You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

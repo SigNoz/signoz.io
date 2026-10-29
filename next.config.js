@@ -144,6 +144,21 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/guides/prometheus-node-exporter/',
+          destination: '/guides/prometheus-node-exporter-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/guides/generating-range-vectors-from-return-values-in-prometheus-queries/',
+          destination: '/guides/prometheus-instant-vector-vs-range-vector/',
+          permanent: true,
+        },
+        {
+          source: '/guides/prometheus-exclude-0-values-from-query-result/',
+          destination: '/guides/filter-prometheus-results-by-metric-value-not-by-label-value/',
+          permanent: true,
+        },
+        {
           source: '/guides/how-do-i-add-alerts-to-prometheus/',
           destination: '/guides/what-is-a-prometheus-rule/',
           permanent: true,
