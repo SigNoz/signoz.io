@@ -241,3 +241,24 @@ test('no duplicate hrefs within each listicle section', () => {
     }
   }
 })
+
+test('integrations AI section matches the llm-monitoring listicle', () => {
+  const configs = Object.fromEntries(
+    loadAllListicleConfigs().map(({ name, config }) => [name, config])
+  )
+  const aiSection = configs.integrations.sections.find((section) => section.id === 'ai')
+  assert.ok(aiSection, 'integrations.json should have an ai section')
+
+  const byHref = (items) =>
+    Object.fromEntries(
+      items.map(({ name, href, description, icon, clickName }) => [
+        href,
+        { name, description, icon, clickName },
+      ])
+    )
+  assert.deepEqual(
+    byHref(collectRenderedSectionItems(aiSection)),
+    byHref(collectItems(configs['llm-monitoring'])),
+    'integrations.json ai items should match llm-monitoring.json (name, href, description, icon, clickName)'
+  )
+})
