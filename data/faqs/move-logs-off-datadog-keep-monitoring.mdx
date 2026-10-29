@@ -6,15 +6,15 @@ authors: [yuvraj]
 tags: [logs]
 ---
 
-You can move a service’s logs to SigNoz Cloud while keeping metrics and application performance monitoring (APM) in Datadog or other tools. Change the log collection route and keep the components that collect your metrics and traces in place.
+You can move a service’s logs to SigNoz Cloud while keeping metrics and application performance monitoring (APM) in Datadog or other tools. By changing only the log collection route, you can leave the components that collect metrics and traces in place.
 
 ## Start with one service
 
 For example, take a checkout service that records payment results. When a payment times out, the checkout service logs the timeout and failed response. You want to search those logs in SigNoz Cloud while an inventory service keeps its current log destination.
 
-An OpenTelemetry Collector receives logs and forwards them to a backend. If your chosen source already uses a Collector, its logs pipeline can send copies to both destinations during a short comparison. A service filter selects the checkout logs for SigNoz Cloud while the current destination continues to receive both services. Sending copies to two destinations can incur charges at both.
+You can first send copies of checkout’s logs to SigNoz Cloud while the existing destination continues to receive both services. This gives you time to compare the logs before switching checkout over. If the source already uses an OpenTelemetry Collector, its log pipeline can route the copies. Sending logs to both destinations can incur charges at both.
 
-Keep the change limited to logs. Use a separate log Collector when changing a shared Collector would interrupt collection of metrics and traces. The [Datadog logs migration guide](https://signoz.io/docs/migration/migrate-from-datadog/logs/) covers collection options for your source.
+The [Datadog logs migration guide](https://signoz.io/docs/migration/migrate-from-datadog/logs/) covers collection options for different sources. If changing a shared Collector would interrupt metrics or traces, a separate log Collector can help keep those routes in place.
 
 ## Check the payment trail before you switch
 
@@ -29,13 +29,13 @@ In SigNoz Cloud, find a known failed payment in **Logs Explorer**. Search its re
   caption="Both failure records for one sample payment appear in Logs Explorer."
 />
 
-Compare the records at both destinations over the same fixed time range. Check counts, original timestamps, severity, service name and the fields your searches use. Recreate the required log searches and alerts, then check that they identify the intended failures before you rely on them. The [alert migration guide](https://signoz.io/docs/migration/migrate-from-datadog/alerts/) explains how to map Datadog monitors to SigNoz alerts.
+Compare the logs at both destinations over the same time range, including counts, timestamps and the fields your searches use. Before switching checkout’s route, recreate its needed log searches and alerts in SigNoz Cloud and test that alerts and notifications work. Datadog log monitors will no longer see new checkout logs once those logs stop arriving there. The [alert migration guide](https://signoz.io/docs/migration/migrate-from-datadog/alerts/) explains how to map and test alerts.
 
-Once those checks pass, you can remove checkout’s old log route while leaving inventory’s route and existing monitoring in place. Keep the previous configuration so you can restore checkout’s old route if needed. After restoring it, check that new checkout logs reach the original destination.
+Once those checks pass, you can remove checkout’s old log route while leaving inventory’s route and metric and trace monitoring in place. Keep the previous configuration so you can restore the old route if needed, and check that new checkout logs reach the original destination after restoration.
 
 In our example, a second Collector stood in for the original logging backend. We switched checkout's logs to SigNoz Cloud, then restored the old route. After restoration, new checkout logs reached the original Collector and no longer appeared in SigNoz Cloud.
 
-Changing the log route applies to new logs. Your historical Datadog logs stay there, and saved searches, parsing rules, dashboards and alerts need a separate migration plan. Restoring the route cannot recover logs that were never collected.
+Changing the route applies to new logs; it does not move your historical Datadog logs. Those logs remain subject to their existing retention settings. Saved searches, parsing rules, dashboards and alerts also need a separate migration plan, and restoring the route cannot recover logs that were never collected.
 
 ## Bring logs, metrics and traces together
 
