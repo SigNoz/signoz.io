@@ -34,7 +34,7 @@ Log level alone does not tell you whether a record is useful. A DEBUG message ca
 
 An OpenTelemetry Collector receives logs and forwards them to a backend. Its <a href="https://opentelemetry.io/docs/collector/transforming-telemetry/#basic-filtering" target="_blank" rel="noopener noreferrer nofollow">filter processor</a> can remove a chosen event before export to SigNoz Cloud or another backend. The billing effect depends on the destination's pricing.
 
-For the checkout example, our rule matched `checkout-api`, the `http.healthcheck` event, the `/healthz` route, status `200`, INFO severity and the message `GET /healthz 200` together. A failed health check did not meet all those conditions, so the rule kept it. The [log filtering guide](https://signoz.io/docs/logs-management/guides/drop-logs/) explains how to configure and enable a filter for your pipeline.
+In the checkout example, our filter rule removed successful `/healthz` checks from `checkout-api` while keeping failed checks. The [log filtering guide](https://signoz.io/docs/logs-management/guides/drop-logs/) explains how to configure and enable a filter for your pipeline.
 
 In SigNoz Cloud, remove unwanted records before ingestion to reduce billed log volume. [Logs Pipelines in the SigNoz Cloud UI run after ingestion](https://signoz.io/docs/cost-control/optimize-logs/), so their parsing and enrichment do not reduce that volume.
 
