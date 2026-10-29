@@ -1,47 +1,37 @@
 ---
 title: Why are my logs exported but not visible in SigNoz?
 meta_title: Find logs exported but not visible in SigNoz Cloud
-description: Follow one marked log through collection and export, then check its destination, timestamp and filters in SigNoz Cloud.
+description: Check the destination, search scope, and delivery path when exported logs do not appear in SigNoz Cloud.
 published_date: 2026-10-23
 authors: [yuvraj]
 tags: [logs]
 ---
 
-Exported logs can be missing from your SigNoz Cloud search because the destination, time range or filters do not match. Check those first, then follow one marked log through collection and export to find where it stops.
+Logs may be missing from SigNoz Cloud because they reached a different destination, fall outside your search, or were removed or rejected along the way. Start with the destination and search scope, then check the collection and export path if you still cannot find them.
 
-Your application can send logs directly to SigNoz Cloud or through an OpenTelemetry Collector that receives and forwards them. An export acknowledgement covers the next receiver in that path, so a Collector's reply does not confirm delivery to SigNoz Cloud.
+An application may send logs directly to SigNoz Cloud or through an OpenTelemetry Collector. A Collector response reports the outcome at that hop; it does not confirm that the Collector delivered the logs to SigNoz Cloud.
 
 ## Check the destination and search scope
 
-For example, take a checkout service called `checkout-api-delivery` that writes a log when it receives an order. Add a unique message such as `delivery-check-4821-86062494` and note its timestamp if available. That gives you one record to follow without sorting through all the checkout traffic.
+Check the exporter that sends to SigNoz Cloud, whether it runs in your application or in a Collector. Compare its endpoint and ingestion key with **Settings → Ingestion** in the workspace you are searching. For Self-Hosted SigNoz, check that you have opened the instance that receives the logs. The [ingestion guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) explains the Cloud settings.
 
-Check the exporter that sends to SigNoz Cloud. For a direct connection, this is the application exporter. If a Collector forwards the logs, check its outgoing exporter. Compare its endpoint and ingestion key with **Settings → Ingestion** in the workspace you have open. For Self-Hosted SigNoz, check that you are searching the instance that receives the logs. See the [ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) for the configuration.
+Next, search for one log whose message and approximate time you know. For example, a checkout service called `checkout-api-delivery` writes a log when it receives an order. In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), clear filters such as service and severity, choose a time range around the event, and search its message. Widen the range if you are unsure of the timestamp.
 
-In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), clear the current filters, including service and severity. Choose a time range around the log's timestamp and search its message, for example `body CONTAINS 'delivery-check-4821-86062494'`. Widen the range if the timestamp is uncertain.
-
-If the record appears, open it and inspect its timestamp and service fields. An older timestamp can place a newly delivered log outside a recent time range. A service filter can also hide the record if its stored service name differs from the value you expected. Use the values on the record to narrow the search again.
-
-In this example, SigNoz Cloud returned one matching record. Filtering for `checkout-api-delivery-wrong` hid it; using `checkout-api-delivery` returned the same record.
+In this example, a search for `delivery-check-4821-86062494` returned the matching log. Filtering for `checkout-api-delivery-wrong` hid it, while filtering for `checkout-api-delivery` returned it again. If you find your log, inspect its timestamp and service fields before narrowing your search. An older timestamp or an unexpected service name can put it outside the original search.
 
 <Figure
   src="/img/faqs/logs-exported-but-not-visible/marked-log.webp"
-  alt="A message search returns the marked log in SigNoz Cloud."
-  caption="The message search finds one log. The warning explains that body searches use the message field."
+  alt="A message query returns the matching log in SigNoz Cloud."
+  caption="The message query returns the matching checkout log."
   width={1280}
   height={280}
   themeInvert={false}
 />
 
-## Follow the missing record back to its source
+## Check the path to SigNoz
 
-If the broad search still returns no record, inspect the path from the checkout service to the destination. For a direct connection, inspect the application exporter's response and error logs. If you use an OpenTelemetry Collector to receive, process and forward logs, check these stages.
+If the search still returns no log, follow it from the source to SigNoz. Confirm that the application wrote it. If you use a Collector, check that it can read the source and that its processing rules do not change or drop the record. Then inspect the outgoing exporter’s errors and warnings. Receiver activity alone shows that data reached the Collector, not that it reached SigNoz Cloud.
 
-- **Collection.** Confirm that the checkout service wrote the marked message. For file collection, check the file path, read permissions and collection exclusions. Logs printed inside a container may need a different collection path from logs on your laptop.
-- **Processing.** Check whether a parsing or filtering rule changes or removes the record. A deliberate filter drop does not need to produce an export error.
-- **Export.** Check the Collector's outgoing exporter, error logs and counters. Receiver activity shows that data reached the Collector; it does not establish delivery to SigNoz Cloud.
+For OpenTelemetry Protocol (OTLP) over HTTP, a `200` response can still report rejected records in a partial-success response. Check exporter warnings as well as errors; the <a href="https://opentelemetry.io/docs/specs/otlp/#otlphttp-response" target="_blank" rel="noopener noreferrer nofollow">OTLP specification</a> explains the response. The [missing-data guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) gives checks for each hop.
 
-For the OpenTelemetry Protocol (OTLP) over HTTP, a `200` response can include rejected records. Read the response's partial-success result and the exporter's warnings as well as errors. The <a href="https://opentelemetry.io/docs/specs/otlp/#otlphttp-response" target="_blank" rel="noopener noreferrer nofollow">OTLP response specification</a> explains what the acknowledgement proves.
-
-The [missing-data troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) explains how to inspect each hop. For files, the [file collection guide](https://signoz.io/docs/userguide/collect_logs_from_file/) covers paths and read positions; the [multiline guide](https://signoz.io/docs/userguide/parse-multiline-logs/) covers messages split across lines.
-
-After a correction, send a new marked log and find that exact record in the intended workspace. If the supported setup still fails, keep the marker, UTC time, configuration and exporter error for the investigation. Those details help separate a configuration problem from a reproducible product defect.
+After a correction, send a new identifiable log and look for it in the intended workspace. If it is still missing, keep the message, UTC time, relevant configuration and exporter errors for further investigation. Redact ingestion keys and other secrets before sharing the configuration.
