@@ -70,6 +70,8 @@ const poll = (callbacks: ConsentAdapterCallbacks) => {
 
 export const cookieYesAdapter: ConsentAdapter = {
   cookieName: COOKIEYES_COOKIE,
+  // CookieYes holds back scripts matching the URL patterns in its cookie list.
+  blocksScripts: true,
   parseCookie: parseCookieYesCookie,
   readStoredConsent: readCookie,
   start: (callbacks) => {

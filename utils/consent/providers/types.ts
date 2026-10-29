@@ -9,6 +9,8 @@ export type ConsentAdapterCallbacks = {
 
 export type ConsentAdapter = {
   cookieName: string
+  // False when the scripts GTM's tags add must be held back by us until consent.
+  blocksScripts: boolean
   // Returns undecided unless the cookie records an explicit choice.
   parseCookie: (raw: string | null | undefined) => ConsentSnapshot
   // State to use before the consent manager has loaded.

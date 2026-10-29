@@ -157,6 +157,8 @@ const removeTrackersDeniedByCookie = () => {
 
 export const proboAdapter: ConsentAdapter = {
   cookieName: PROBO_COOKIE,
+  // Probo only blocks elements marked with data-cookie-consent, which GTM's tags are not.
+  blocksScripts: false,
   parseCookie: (raw) => parseProboCookie(raw),
   // Probo decides whether a stored choice is still valid (banner version, expiry), so
   // nothing counts as consent until it has loaded.
