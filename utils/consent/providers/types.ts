@@ -9,8 +9,6 @@ export type ConsentAdapterCallbacks = {
 
 export type ConsentAdapter = {
   cookieName: string
-  // False when we must send Google Consent Mode signals ourselves.
-  handlesGoogleConsentMode: boolean
   // Returns undecided unless the cookie records an explicit choice.
   parseCookie: (raw: string | null | undefined) => ConsentSnapshot
   // State to use before the consent manager has loaded.

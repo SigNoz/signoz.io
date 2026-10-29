@@ -160,7 +160,6 @@ export default function ProboBanner() {
       ref={rootRef}
       banner-id={bannerId}
       base-url={`${window.location.origin}${PROBO_PROXY_PATH}`}
-      gcm-enabled="false"
       lang="en"
     >
       {/* Without a config (wrong origin, Probo unreachable) there is nothing to show or choose. */}

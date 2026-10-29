@@ -157,8 +157,6 @@ const removeTrackersDeniedByCookie = () => {
 
 export const proboAdapter: ConsentAdapter = {
   cookieName: PROBO_COOKIE,
-  // Probo's own integration grants everything when its config request fails, so it stays off.
-  handlesGoogleConsentMode: false,
   parseCookie: (raw) => parseProboCookie(raw),
   // Probo decides whether a stored choice is still valid (banner version, expiry), so
   // nothing counts as consent until it has loaded.

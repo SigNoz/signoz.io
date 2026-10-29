@@ -70,7 +70,6 @@ const poll = (callbacks: ConsentAdapterCallbacks) => {
 
 export const cookieYesAdapter: ConsentAdapter = {
   cookieName: COOKIEYES_COOKIE,
-  handlesGoogleConsentMode: true,
   parseCookie: parseCookieYesCookie,
   readStoredConsent: readCookie,
   start: (callbacks) => {
