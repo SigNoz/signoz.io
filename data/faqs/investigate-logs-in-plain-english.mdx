@@ -7,26 +7,23 @@ authors: [yuvraj]
 tags: [logs]
 ---
 
-You can investigate logs in plain English through Noz, the assistant inside SigNoz Cloud, when it is enabled for your workspace. If you prefer your own assistant, connect it through the SigNoz MCP server so it can query logs already collected in SigNoz Cloud.
+You can investigate logs in plain English with Noz, the assistant in SigNoz Cloud, when it is enabled for your workspace. You can also connect your own assistant through the SigNoz MCP server. Both options work with logs already collected in SigNoz Cloud.
 
 ## Choose where to ask
 
-With [Noz](https://signoz.io/docs/ai/noz/), open **Noz** in your workspace and enter a question in **Ask anything**. This route works inside SigNoz Cloud, so you do not need a separate assistant or MCP configuration. Your services must already [send their logs](https://signoz.io/docs/logs-management/send-logs-to-signoz/) to the workspace.
+To ask [Noz](https://signoz.io/docs/ai/noz/), open **Noz** in your workspace and enter a question in **Ask anything**. If your services are not sending logs yet, [set up log collection](https://signoz.io/docs/logs-management/send-logs-to-signoz/) first.
 
-For an external assistant, the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) provides tools to search your logs. Model Context Protocol (MCP) lets a compatible assistant call those tools. Connect your client to the hosted server for your SigNoz Cloud region and authenticate with your workspace URL and a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key. For a read-only investigation, use a read-only role because MCP also exposes tools that can change resources. The setup guide covers compatible clients and the separate Self-Hosted SigNoz setup.
+If you prefer another assistant, connect it to the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/). Model Context Protocol (MCP) lets the assistant use tools to search your logs. For SigNoz Cloud, connect a compatible client to the hosted server for your region and authenticate with your workspace URL and a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key. Give the account a read-only role for an investigation, because the server also offers tools that can change resources. The setup guide also covers Self-Hosted SigNoz.
 
-## Ask about one failure
+## Ask Noz about a payment timeout
 
-For example, we created logs for an example checkout service called `checkout-plain-english`, including successful payments and payment failures. Its timeout records have ERROR severity and the message `Payment timeout`. After sending these example logs to SigNoz Cloud, we gave Noz the service name and a fixed time range, then asked it to find the timeouts.
-
-We added `event.id` to identify each example log. In your question, request an identifier already present in your logs, or omit that part.
+For example, we created logs for a checkout service, including successful payments and failures. The timeout records have ERROR severity and the message `Payment timeout`. After sending the example logs to SigNoz Cloud, we gave Noz the service name and a time range. Our request included:
 
 ```text
 Show ERROR logs whose message contains "Payment timeout".
-Return timestamps, messages, event.id values and the exact query or tool filters used.
 ```
 
-Noz returned two matching records with their timestamps, messages and event IDs, as shown below.
+Noz returned two matching records. The screenshot shows their timestamps and messages, along with an event ID that identifies each record.
 
 <Figure
   src="/img/faqs/investigate-logs-in-plain-english/noz-timeout-results.webp"
@@ -37,12 +34,12 @@ Noz returned two matching records with their timestamps, messages and event IDs,
   themeInvert={false}
 />
 
-You can start with a question like this without writing query syntax. Give Noz or your connected assistant the service name, failure symptom and time range, and ask for the records behind its answer.
+For your own logs, include the service name, symptom, and time range in your question. Ask for the matching records so you can check the answer.
 
 ## Check the records behind the answer
 
-We checked Noz's result in [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) using the same service, time range, severity and message filters. The two records matched Noz's timestamps and messages, and a separate count query also returned two.
+We checked the two results in [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) with the same service, time range, severity, and message filters. Their timestamps and messages matched Noz's answer.
 
-For your investigation, open a matching log and compare its timestamp and message with the assistant's answer. A timeout message shows what the application recorded; it does not establish why the payment timed out. If no records match, check collection, the stored service name and the time range. An assistant cannot retrieve logs that were never collected or are no longer retained.
+You can check your own results the same way. A timeout message tells you what was recorded, but you need more evidence to know why the payment timed out. If you cannot find a record, check that the logs were collected, the service name is correct, and the time range covers the event. Logs must also still be within their retention period.
 
 See [natural-language log exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) for more questions.
