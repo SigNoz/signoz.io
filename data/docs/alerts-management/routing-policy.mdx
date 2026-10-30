@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-10-30
 title: Routing Policies
 description: Configure routing policies in SigNoz to dynamically route alerts to different notification channels based on alert labels.
 doc_type: howto
@@ -42,6 +42,14 @@ To create a routing policy:
 - **Description**: Additional context about the policy's purpose
 
 4. Click **"Save Routing Policy"** to create the policy
+
+<Admonition type="warning" title="Channel names are validated on save">
+SigNoz checks every notification channel a policy references when you save it. If the policy names a channel that does not exist, the save is rejected immediately with a validation error, so you can fix the name before the policy goes live. Earlier versions saved such a policy and dropped the notification silently when a matching alert fired.
+</Admonition>
+
+<Admonition type="info" title="Who can manage routing policies">
+Creating, editing, and deleting routing policies is restricted to the SigNoz-Admin role or a custom role granted the matching route policy transactions. SigNoz-Editor and SigNoz-Viewer can view routing policies but cannot change them. Linking channels to a policy is governed separately by the `attach` and `detach` relations on notification channels, so a custom role can be delegated channel-linking duties without full admin access. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#route-policy).
+</Admonition>
 
 ## Types of Labels in Routing Policy Expressions
 
