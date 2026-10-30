@@ -159,6 +159,31 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/guides/what-is-the-job-label-in-prometheus/',
+          destination: '/guides/what-are-prometheus-labels/',
+          permanent: true,
+        },
+        {
+          source: '/guides/prometheus-query-to-count-unique-label-values/',
+          destination: '/guides/what-are-prometheus-labels/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-are-the-limitations-of-prometheus-labels/',
+          destination: '/guides/what-are-prometheus-labels/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-write-a-prometheus-query-that-returns-the-value-of-the-label/',
+          destination: '/guides/what-are-prometheus-labels/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-can-i-group-labels-in-a-prometheus-query/',
+          destination: '/guides/what-are-prometheus-labels/',
+          permanent: true,
+        },
+        {
           source: '/guides/how-do-i-add-alerts-to-prometheus/',
           destination: '/guides/what-is-a-prometheus-rule/',
           permanent: true,

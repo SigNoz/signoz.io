@@ -1,18 +1,18 @@
 ---
 
 title: What are Prometheus labels - Key Concepts and Best Practices
-date: 2024-07-30
-tags: [faq, prometheus]
+date: 2026-10-30
+tags: [prometheus, monitoring]
 authors: [ankit_anand]
-description: Discover Prometheus labels - key-value pairs for metric characterization. Learn their importance, best practices, and advanced concepts for effective monitoring.
+description: Prometheus labels are key-value pairs that identify time series. Learn how to use job labels, query and count label values, and manage cardinality.
 keywords: [Prometheus labels, metric characterization, monitoring, data model, cardinality, relabeling, PromQL, best practices]
 related_articles:
-  - '/guides/how-to-write-a-prometheus-query-that-returns-the-value-of-the-label'
-  - '/guides/what-are-the-limitations-of-prometheus-labels'
+  - '/guides/promql-cheat-sheet'
+  - '/guides/why-does-prometheus-consume-so-much-memory'
   - '/guides/filter-prometheus-results-by-metric-value-not-by-label-value'
   - '/guides/how-to-get-all-the-metrics-of-an-instance-with-prometheus-api'
   - '/guides/what-is-prometheus-target'
-  - '/guides/what-is-the-job-label-in-prometheus'
+  - '/guides/divide-two-metrics-in-prometheus'
 ---
 
 Prometheus labels are essential components of the [Prometheus monitoring system](https://signoz.io/guides/what-is-prometheus-for-monitoring/), playing a crucial role in how metrics are organized and queried. These key-value pairs provide context and additional information to metrics, enabling powerful and flexible data analysis. This article explores the concept of Prometheus labels, their significance in the Prometheus ecosystem, and best practices for their effective use.
@@ -55,6 +55,33 @@ cpu_usage{server="server3"} 0.80
 
 This approach simplifies metric management and enables powerful queries. For instance, you can easily find the average CPU usage across all servers or identify the server with the highest usage.
 
+## Understanding the Job and Instance Labels
+
+When monitoring several servers, you may want to look at one server or at all the servers running the same service. Prometheus adds `job` and `instance` labels to scraped metrics to help you make that distinction. By default, `job` identifies the group, while `instance` identifies an individual target by its host and port.
+
+For example, two servers running an API can belong to the same scrape job. You configure both [Prometheus targets](https://signoz.io/guides/what-is-prometheus-target/) under one `job_name`:
+
+```yaml
+scrape_configs:
+  - job_name: 'api-servers'
+    static_configs:
+      - targets: ['api1.example.com:8080', 'api2.example.com:8080']
+```
+
+Both targets receive `job="api-servers"`. Their `instance` values are `api1.example.com:8080` and `api2.example.com:8080`, so Prometheus can keep their readings separate within the job.
+
+To check whether Prometheus can scrape these targets, select the job's `up` metric:
+
+```promql
+up{job="api-servers"}
+```
+
+The result has one series per target. A value of `1` means its last scrape succeeded, while `0` means it failed. The `instance` label tells you which target each result belongs to.
+
+You can also inspect these labels on the Prometheus Targets page. The screenshot below shows a target belonging to the `java` job, with `localhost:9091` as its instance:
+
+<Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image.webp" alt="Prometheus Targets page showing job java and instance localhost:9091" caption="The target labels identify the scrape job and its instance." />
+
 ## Why Prometheus Labels Matter: Benefits and Importance
 
 Prometheus labels are not just a convenient feature — they are fundamental to the system's effectiveness. Here's why they matter:
@@ -66,21 +93,131 @@ Prometheus labels are not just a convenient feature — they are fundamental to 
 
 ## Best Practices for Using Prometheus Labels
 
-To maximize the benefits of [Prometheus labels](https://signoz.io/guides/what-is-prometheus-target/) while avoiding potential pitfalls, follow these best practices:
+To maximize the benefits of Prometheus labels while avoiding potential pitfalls, follow these best practices:
 
 1. **Choose meaningful and consistent label names**: Use clear, descriptive names that reflect the purpose of the label. Stick to a consistent naming convention across your metrics.
 2. **Manage label cardinality**: Be mindful of the number of unique label value combinations. [High cardinality](https://signoz.io/blog/high-cardinality-data/) can lead to performance issues and increased storage requirements.
 3. **Use labels to improve metric discoverability**: Implement labels that make it easier to find and understand metrics, such as `application`, `environment`, or `team`.
 4. **Standardize label usage**: Establish guidelines for label usage across your organization to ensure consistency and ease of use.
 
-### Common Pitfalls and How to Avoid Them
+## Querying Prometheus Label Values
 
-While labels are powerful, they can also introduce challenges if not used carefully:
+Label filters let you focus on a particular server, environment, or operation. For example, to examine successful GET requests, select the `method` and `status` values from the request metric:
 
-1. **High-cardinality labels**: Avoid using labels with an extremely large number of possible values (e.g., user IDs or timestamps). These can lead to an explosion in the number of time series, impacting performance.
-2. **Label explosion**: Be cautious when combining multiple high-cardinality labels, as this can exponentially increase the number of time series.
-3. **Inconsistent labeling**: Inconsistent use of labels across metrics can make querying and analysis more difficult. Establish and follow clear labeling conventions.
-4. **Overuse of labels**: While labels are useful, not every piece of information needs to be a label. Consider whether the information is necessary for querying and filtering before adding it as a label.
+```promql
+http_requests_total{method="GET", status="200"}
+```
+
+This returns the series that match both conditions, along with their labels and current counter values. You can use other matchers to exclude values or select a pattern:
+
+| Matcher | Meaning | Example |
+| --- | --- | --- |
+| `=` | Equals | `method="GET"` |
+| `!=` | Does not equal | `method!="GET"` |
+| `=~` | Matches a regular expression | `status=~"4..\|5.."` |
+| `!~` | Does not match a regular expression | `status!~"5.."` |
+
+### Grouping Metrics by Labels
+
+Filtering helps you examine a specific set of series. To compare activity across HTTP methods, you can group the series and calculate a request rate for each method:
+
+```promql
+sum by (method) (rate(http_requests_total[5m]))
+```
+
+Here, `rate()` calculates requests per second over the last five minutes. `sum by (method)` adds those rates across instances and status codes, giving you one result for each method. Only the `method` label remains in the result.
+
+To see how successful and failed requests contribute to those rates, keep the `status` label as well:
+
+```promql
+sum by (method, status) (rate(http_requests_total[5m]))
+```
+
+Each method and status combination now has its own result. For example, the rate of GET requests with status `200` is separate from the rate with status `500`.
+
+The `by` clause works well when you know which labels you want to keep. If you want to combine readings across instances while retaining all the other labels, use `without` instead:
+
+```promql
+sum without (instance) (rate(http_requests_total[5m]))
+```
+
+This removes `instance` from the result and combines the rates where the remaining labels match. Labels such as `job`, `method`, and `status` stay available for comparing the results.
+
+### Listing and Counting Unique Label Values
+
+Grouping can also help you find which label values exist in a metric. If you want to list the methods rather than calculate their request rates, use `group by`:
+
+```promql
+group by (method) (http_requests_total{method!=""})
+```
+
+This returns one series for each method, with a value of `1`. The `method!=""` filter excludes series where the method label is missing or empty.
+
+To get the number of distinct methods, count the groups:
+
+```promql
+count(group by (method) (http_requests_total{method!=""}))
+```
+
+If the metric contains GET and POST series, the result is `2`. Having several instances or status codes for the same method does not increase that count. The result reflects the methods present when the query runs.
+
+You may also want to know how many series belong to each method. For that, use `count by`:
+
+```promql
+count by (method) (http_requests_total{method!=""})
+```
+
+Three GET series and one POST series produce a count of `3` for GET and `1` for POST. These counts describe the series, not the number of requests they recorded. The similarly named `count_values()` counts sample values rather than label values.
+
+### Getting Label Values Through the HTTP API
+
+The queries above return series with labels attached. If you need label names or a list of values for a script or dashboard dropdown, use the [Prometheus HTTP API](https://signoz.io/guides/how-to-get-all-the-metrics-of-an-instance-with-prometheus-api/).
+
+To retrieve the label names:
+
+```bash
+curl 'http://localhost:9090/api/v1/labels'
+```
+
+To retrieve the method values for the request metric:
+
+```bash
+curl --get 'http://localhost:9090/api/v1/label/method/values' \
+  --data-urlencode 'match[]=http_requests_total'
+```
+
+The response's `data` field contains the values, such as `["GET", "POST"]`. The `match[]` selector restricts the lookup to `http_requests_total`. Without that selector, the endpoint lists method values across metrics.
+
+## Limitations of Prometheus Labels
+
+1. **More label combinations increase resource usage.** Each unique combination creates another time series, adding to [memory usage](https://signoz.io/guides/why-does-prometheus-consume-so-much-memory/), storage requirements, and the work needed to query a metric.
+
+   For example, a request metric with 3 methods, 5 status codes, 100 endpoints, and 2 instances can produce 3,000 series if every combination occurs. Adding a `user_id` label can increase that number as more users make requests. A metric with many unique label combinations has high cardinality.
+
+   To keep this number manageable, use route templates such as `/users/:id` instead of raw paths such as `/users/123`. Requests for different users then share the same route value. Keep details about individual users or requests in logs or traces.
+
+2. **Grouping query results does not reduce stored series.** Queries can help you identify metrics with many series, but they do not reduce the data Prometheus already stores. If resource usage is higher than expected, start by finding the metrics with the most series in the API job:
+
+   ```promql
+   topk(10, count by (__name__) ({job="api-servers"}))
+   ```
+
+   This query counts series for each metric name and returns the ten largest counts. Inspect the labels on those metrics to find values that keep growing, then review whether you need that detail.
+
+3. **Dropping unwanted samples can remove useful readings.** Adjusting labels in the application can prevent unnecessary series from being created. If you do not need readings that carry a particular label, you can exclude them before storage with `metric_relabel_configs`:
+
+   ```yaml
+   scrape_configs:
+     - job_name: 'api-servers'
+       static_configs:
+         - targets: ['api1.example.com:8080', 'api2.example.com:8080']
+       metric_relabel_configs:
+         - source_labels: [user_id]
+           regex: '.+'
+           action: drop
+   ```
+
+   This configuration drops every scraped sample with a non-empty `user_id` label. It removes the whole sample, not just that label. If you still need an overall request count, your application should expose an aggregate metric without the user ID.
 
 ## Advanced Concepts: Relabeling in Prometheus
 
@@ -107,12 +244,6 @@ scrape_configs:
 
 This configuration extracts the hostname from the `__address__` label and sets it as the `instance` label.
 
-## Key Takeaways
-
-- Prometheus labels are key-value pairs that characterize metrics and enable multi-dimensional data analysis.
-- Labels play a crucial role in Prometheus's data model and query capabilities.
-- Proper label management is essential for maintaining performance and usability.
-- Best practices include consistent naming, cardinality management, and strategic use of relabeling.
 
 ## FAQs
 
@@ -136,19 +267,19 @@ While you cannot directly modify labels on existing data points, Prometheus prov
 
 Label cardinality refers to the number of unique label value combinations for a given metric. High cardinality can lead to performance issues and increased storage requirements. It's important to balance the need for detailed metrics with the potential impact on system resources.
 
-## Monitoring with SigNoz
+## Monitoring with SigNoz Cloud
 
-While Prometheus is a powerful monitoring solution, managing labels and ensuring optimal performance can be challenging. SigNoz offers a comprehensive monitoring platform that builds upon Prometheus's strengths while addressing its limitations.
+While Prometheus is a powerful monitoring solution, managing labels and ensuring optimal performance can be challenging. SigNoz Cloud offers a comprehensive monitoring platform that builds upon Prometheus's strengths while addressing its limitations.
 
-SigNoz provides:
+SigNoz Cloud provides:
 
 - Efficient handling of high-cardinality data
 - User-friendly interface for exploring and visualizing metrics
 - Advanced querying capabilities without the complexity of PromQL
 - Integrated tracing and logging for a complete observability solution
 
-To get started with SigNoz:
+To get started with SigNoz Cloud:
 
 <GetStartedSigNoz />
 
-By using [SigNoz](https://signoz.io/docs/introduction/), you can leverage the power of Prometheus-style metrics and labels while benefiting from additional features and ease of use. Whether you're using the cloud or open-source version, SigNoz offers a robust solution for modern monitoring needs.
+By using [SigNoz Cloud](https://signoz.io/docs/introduction/), you can leverage the power of Prometheus-style metrics and labels while benefiting from additional features and ease of use. Whether you're using the cloud or open-source version, SigNoz Cloud offers a robust solution for modern monitoring needs.
