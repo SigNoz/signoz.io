@@ -9,6 +9,7 @@ import {
   logEventServerSide,
 } from './utils/logEvent'
 import { getPageType } from '@/utils/getPageType'
+import { readConsentFromRequest } from '@/utils/consent/server'
 import {
   buildDocsMarkdownRewritePath,
   hasDocsMarkdownExtension,
@@ -52,9 +53,13 @@ const getOSFromUserAgent = (userAgent: string): string => {
 }
 
 export function proxy(req: NextRequest) {
+  // Identifier and IP cookies are only set once the visitor has granted analytics consent.
+  // Without it, GrowthBook still gets a per-request ID that is never persisted.
+  const hasAnalyticsConsent = readConsentFromRequest(req).categories.analytics
+
   // Get or generate anonymous ID
-  const anonymousId = req.cookies.get('gb_anonymous_id')?.value
-  const shouldSetCookie = !anonymousId
+  const anonymousId = hasAnalyticsConsent ? req.cookies.get('gb_anonymous_id')?.value : undefined
+  const shouldSetCookie = hasAnalyticsConsent && !anonymousId
   const growthBookAnonymousId = anonymousId ?? uuidv4()
 
   // Get user agent and detect bot
@@ -185,8 +190,7 @@ export function proxy(req: NextRequest) {
             custom_content_type: 'text/markdown',
             custom_user_agent: userAgent,
             custom_os: getOSFromUserAgent(userAgent),
-            custom_ip: ip,
-            custom_vercel_ip: vercelIp,
+            ...(hasAnalyticsConsent ? { custom_ip: ip, custom_vercel_ip: vercelIp } : {}),
             custom_referrer: referer,
             custom_is_bot: false,
             custom_has_javascript: false,
@@ -217,7 +221,7 @@ export function proxy(req: NextRequest) {
     }
   }
   const currentVercelIpCookie = req.cookies.get('vercel_ip')?.value
-  if (currentVercelIpCookie !== vercelIp && vercelIp !== 'unknown') {
+  if (hasAnalyticsConsent && currentVercelIpCookie !== vercelIp && vercelIp !== 'unknown') {
     res.cookies.set('vercel_ip', vercelIp, {
       path: '/',
       httpOnly: false,
@@ -228,7 +232,7 @@ export function proxy(req: NextRequest) {
 
   // Set user IP in a cookie accessible to the client
   const currentIpCookie = req.cookies.get('user_ip')?.value
-  if (currentIpCookie !== ip && ip !== 'unknown') {
+  if (hasAnalyticsConsent && currentIpCookie !== ip && ip !== 'unknown') {
     res.cookies.set('user_ip', ip, {
       path: '/',
       httpOnly: false,
