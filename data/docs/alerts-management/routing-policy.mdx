@@ -1,7 +1,7 @@
 ---
-date: 2026-05-13
-title: Routing Policies
-description: Configure routing policies in SigNoz to dynamically route alerts to different notification channels based on alert labels.
+date: 2026-10-30
+title: Routing Policies - Route Alerts by Label Expressions
+description: Configure routing policies in SigNoz to dynamically route alerts to different notification channels based on alert labels using custom expressions.
 doc_type: howto
 ---
 
@@ -10,11 +10,7 @@ doc_type: howto
 
 Routing policies in SigNoz allow you to dynamically route alerts to different notification channels based on alert labels using custom expressions. Instead of hardcoding alert destinations, you can create flexible rules that automatically send alerts to the appropriate teams or channels based on conditions like service name, threshold, environment, or any other alert label.
 
-<Figure
-  src="/img/docs/product-features/alerts/routing-policy-page.webp"
-  alt="Routing Policies page under Alerts Configuration"
-  caption="Routing Policies page in Alerts Configuration"
-/>
+The **Routing Policies** page lists every policy in a full-width, sortable table. The default columns are **Routing Policy** (name), **Expression**, and **Channels**, and the page header shows a count pill with the total number of policies.
 
 ## Creating a New Routing Policy
 
@@ -28,7 +24,7 @@ Routing policies in SigNoz allow you to dynamically route alerts to different no
 To create a routing policy:
 
 1. Navigate to **Alerts** > **Configuration** > **Routing Policies**
-2. Click the **"+ New routing policy"** button
+2. Click the **"+ New routing policy"** button in the top-right corner
 3. Fill in the following fields:
 
 ### Required Fields
@@ -94,45 +90,49 @@ host.name IN ["prod-server-1", "prod-server-2"] AND cloud.region = "us-east-1"
 
 ## Managing Routing Policies
 
-<Figure
-  src="/img/docs/product-features/alerts/routing-policy-home.png"
-  alt="SigNoz routing policies page showing configured policies and actions"
-  caption="Routing policies page"
-  className="box-shadowed-image"
-/>
+The main routing policies page lists all configured policies in a full-width, sortable table:
 
-The main routing policies page displays all your configured policies with:
+- **Routing Policy**, **Expression**, and **Channels** columns are shown by default.
+- A count pill in the page header shows the total number of policies.
+- Sort any column by clicking its header.
+- Pagination controls at the bottom let you set the page size and show the total count.
 
-- Policy name (click to expand details)
-- Creation and update metadata
-- Expression syntax
-- Associated notification channels
-- Quick actions (edit, delete)
+Use the search field (**Search by name or description**) to filter policies.
 
-You can search policies by name using the search bar.
+### Show or hide columns
+
+Click the **column picker** button in the table header to show or hide any column without leaving the page. The picker includes the audit columns **Created By**, **Created At**, **Updated By**, and **Updated At**, which are hidden by default.
+
+### Row actions
+
+Each row has an ellipsis (**⋯**) button that opens a menu with **Edit** and **Delete** actions.
+
+<Admonition type="info">
+Users with the Viewer role see the **New routing policy** button disabled with a tooltip, rather than the button being hidden.
+</Admonition>
+
+### Empty, no-results, and error states
+
+- **Empty state**: when no routing policies exist, the page shows an icon, a short description, a **New routing policy** button, and a link to this documentation instead of an empty table.
+- **No-results state**: when a search matches nothing, a message with a **Clear Search** button is shown.
+- **Error state**: when the data fails to load, a screen with a **Refresh** button is shown.
 
 ## Editing a Routing Policy
 
-To modify an existing policy:
+To modify an existing policy, either:
 
-1. Click the edit icon (✏️) next to the policy
-2. Update any fields as needed
-3. Save your changes
+- Click anywhere on the policy's row to open the edit form directly, or
+- Click the **⋯** button on the row and select **Edit**.
+
+Update any fields as needed, then save your changes.
 
 Note: Changes take effect immediately for new alerts. Existing active alerts continue using their original routing.
 
 ## Deleting a Routing Policy
 
-<Figure
-  src="/img/docs/product-features/alerts/delete-routing-policy.png"
-  alt="SigNoz delete routing policy flow in Alerts configuration"
-  caption="Example showing routing policy deletion"
-  className="box-shadowed-image"
-/>
-
 To remove a policy:
 
-1. Click the delete icon (🗑️) next to the policy
+1. Click the **⋯** button on the policy's row and select **Delete**
 2. Confirm deletion in the dialog
 
 ## How Routing Policies Work

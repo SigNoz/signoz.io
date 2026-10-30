@@ -1,6 +1,6 @@
 ---
-date: 2026-08-06
-title: Planned Maintenance/Downtime
+date: 2026-10-30
+title: Planned Maintenance - Suppress Alerts During Downtime
 description: Schedule maintenance windows in SigNoz to suppress alert notifications during planned downtime with one-time or recurring schedules.
 doc_type: howto
 ---
@@ -10,15 +10,11 @@ doc_type: howto
 
 Use planned maintenance to schedule maintenance windows for your services. This helps you to avoid alerting during maintenance windows and to resume alerts after the maintenance window is over. The alerts continue to be evaluated, but the notifications are suppressed during the maintenance window.
 
+The **Planned Downtime** page lists every maintenance window in a full-width, sortable table. The default columns are **Downtime** (name), **Status**, **Schedule**, **Repeats**, and **Alerts Silenced**, and the page header shows a count pill with the total number of downtimes.
+
 ## Create a Maintenance Window
 
-To create a maintenance window, go to **Alerts > Configuration > Planned Downtime** and click the **+ New downtime** button.
-
-<Figure
-  src="/img/docs/alerts/planned-maintenance-navigation.webp"
-  alt="Navigate to Alerts > Configuration > Planned Downtime"
-  caption="Navigate to Configuration > Planned Downtime to create maintenance windows"
-/>
+To create a maintenance window, go to **Alerts > Configuration > Planned Downtime** and click the **+ New downtime** button in the top-right corner.
 
 ### Types of maintenance windows
 
@@ -122,6 +118,42 @@ Repeats every: Monthly
 Duration: 1 hour
 Timezone: America/New_York
 ```
+
+## Manage maintenance windows
+
+The main **Planned Downtime** page lists all maintenance windows in a full-width, sortable table:
+
+- **Downtime** (name), **Status**, **Schedule**, **Repeats**, and **Alerts Silenced** columns are shown by default.
+- A count pill in the page header shows the total number of downtimes.
+- Sort any column by clicking its header.
+- Pagination controls at the bottom let you set the page size and show the total count.
+
+Use the search field (**Search by name**) to filter downtimes. Search is case-insensitive.
+
+### Column details
+
+- **Status** shows a color-coded badge: **Active**, **Upcoming**, or **Expired**.
+- **Schedule** shows the start and end time with the timezone embedded in the cell, for example `2024-01-01 10:00 ↱ 11:00 (Asia/Kolkata)`.
+- **Repeats** shows the recurrence and per-occurrence duration together, for example `Weekly on Mon · 2h`.
+
+### Show or hide columns
+
+Click the **column picker** button in the table header to show or hide any column. **Description**, **Timezone**, **Duration**, and the audit columns (**Created By**, **Created At**, **Updated By**, **Updated At**) are hidden by default.
+
+### Row actions
+
+- Click anywhere on a downtime's row to open the edit form directly.
+- Click the ellipsis (**⋯**) button on a row to open a menu with **Edit** and **Delete** actions.
+
+<Admonition type="info">
+Users with the Viewer role see the **New downtime** button disabled with a tooltip, rather than the button being hidden.
+</Admonition>
+
+### Empty, no-results, and error states
+
+- **Empty state**: when no downtimes exist, the page shows an icon, a short description, a **New downtime** button, and a link to this documentation instead of an empty table.
+- **No-results state**: when a search matches nothing, a message with a **Clear Search** button is shown.
+- **Error state**: when the data fails to load, a screen with a **Refresh** button is shown.
 
 ## Scoping with Label Expressions
 
