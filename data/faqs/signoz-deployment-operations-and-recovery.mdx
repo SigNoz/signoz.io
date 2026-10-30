@@ -1,0 +1,41 @@
+---
+title: Do I need to manage infrastructure and recovery when using SigNoz?
+meta_title: SigNoz deployment operations and recovery responsibilities
+description: Compare SigNoz Cloud, BYOC and self-hosted operating responsibilities, including sizing, upgrades, backups and recovery coverage.
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+With self-hosted SigNoz, your team manages the infrastructure and recovery. With SigNoz Cloud, SigNoz operates the services that store and query your logs. Bring Your Own Cloud (BYOC) is also managed by SigNoz, but runs in your cloud account.
+
+## Who operates each deployment?
+
+The [deployment options](https://signoz.io/enterprise/) differ in who operates SigNoz and plans for recovery.
+
+| Deployment | Storage, scaling and upgrades | Backup and recovery |
+| --- | --- | --- |
+| [SigNoz Cloud](https://signoz.io/docs/cloud/) | SigNoz operates the services. | Confirm backup coverage and recovery commitments in your service agreement. |
+| BYOC | SigNoz operates SigNoz in your cloud account. | Agree the recovery coverage and any customer infrastructure duties for your deployment. |
+| Self-Hosted Community | Your team operates the services. | Your team plans, maintains and checks backups and restores. |
+| Enterprise Self-Hosted | Your team operates the services, with SigNoz support. | Your team owns recovery, with support covered by its contract. |
+
+For SigNoz Cloud or BYOC, confirm which failures the service covers and how long recovery can take before you rely on it.
+
+In every deployment, your team still controls what the application records, how it collects logs, access permissions, queries and alerts. For example, managed services cannot recover a log that the application never sent.
+
+## What work stays with a self-hosted team?
+
+Your team needs enough capacity for the logs it sends and queries. Plan for expected log volume, retention and query load, with spare capacity for bursts and growth. Size the OpenTelemetry Collector that receives logs as well as ClickHouse, the database that stores them. The [Self-Hosted Community resource planning guide](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/) gives component guidance, but its table is not a workload-specific sizing guarantee.
+
+Running the deployment also means managing isolation, storage, security and scaling. Use the [production readiness checklist](https://signoz.io/docs/production-readiness/) to plan that work. When you schedule upgrades, follow the [required version stops](https://signoz.io/docs/operate/upgrade/) and their guides for migrations and pre-upgrade backups.
+
+## What must recovery cover?
+
+SigNoz stores logs in ClickHouse, but keeps saved views, dashboards and alert definitions in the **Metastore**, a separate SQLite or PostgreSQL database. A saved view lets a team reuse filters and column selections when it investigates logs.
+
+For example, a checkout team might use payment logs, a saved view for failed payments and an error alert to investigate failures. If a disaster destroys both its log storage and Metastore, restoring the logs alone will not bring back the saved view or alert.
+
+Plan backups for both stores and keep deployment configuration with your recovery plan. The [ClickHouse upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-131/) calls for a data snapshot, while the [saved-view upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-137/) calls for a Metastore backup. Test your restore to verify that it recovers the log records and configuration your team needs. These guides do not establish a complete restore procedure or recovery time for your deployment.
+
+Retention controls how long logs stay available for queries in SigNoz. To keep telemetry longer, you can also send it to S3 as described in the [S3 exporter guide](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/). The exports to S3 and SigNoz are independent, and S3 data cannot be queried in the SigNoz UI. The S3 export does not back up the Metastore or deployment configuration, so it is not a complete deployment backup.
