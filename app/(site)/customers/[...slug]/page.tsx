@@ -13,7 +13,9 @@ import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import JsonLdScript from '@/components/JsonLdScript'
+import RelatedPageLinks from '@/components/RelatedPageLinks/RelatedPageLinks'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+import { getRelatedPageLinks } from '@/utils/relatedPageLinks'
 
 async function getCustomerStoryContent(path: string, deploymentStatus: string) {
   return getContentBySlug('case-studies', path, deploymentStatus)
@@ -165,10 +167,15 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   const breadcrumbs = getSectionArticleBreadcrumbs('customers', content.title, path)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
+  const relatedPageLinks = getRelatedPageLinks(
+    `/customers/${path}`,
+    content.meta_title || content.title
+  )
 
   return (
     <>
       <JsonLdScript data={breadcrumbJsonLd} />
+      <RelatedPageLinks entry={relatedPageLinks} />
       <CaseStudyLayout
         content={mainContent}
         authorDetails={authorDetails}

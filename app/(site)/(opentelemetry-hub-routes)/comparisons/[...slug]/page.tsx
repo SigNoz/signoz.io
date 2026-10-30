@@ -12,8 +12,10 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import { fetchComparisonBySlug } from '@/utils/cachedData'
 import { mdxOptions } from '@/utils/mdxUtils'
+import { getRelatedPageLinks } from '@/utils/relatedPageLinks'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import JsonLdScript from '@/components/JsonLdScript'
+import RelatedPageLinks from '@/components/RelatedPageLinks/RelatedPageLinks'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { resolveLatestDate } from '@/utils/dateUtils'
@@ -106,6 +108,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const jsonLd = post.structuredData
   const breadcrumbs = getSectionArticleBreadcrumbs('comparisons', post.title, slug)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
+  const relatedPageLinks = getRelatedPageLinks(currentRoute, post.meta_title || post.title)
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -127,6 +130,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <>
         <JsonLdScript data={jsonLd} />
         <JsonLdScript data={breadcrumbJsonLd} />
+        <RelatedPageLinks entry={relatedPageLinks} />
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -157,6 +161,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     <>
       <JsonLdScript data={jsonLd} />
       <JsonLdScript data={breadcrumbJsonLd} />
+      <RelatedPageLinks entry={relatedPageLinks} />
       <Layout
         content={mainContent}
         authorDetails={authorDetails}

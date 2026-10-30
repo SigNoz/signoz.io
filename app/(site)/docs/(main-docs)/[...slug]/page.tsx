@@ -4,10 +4,12 @@ import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 import { DOC_CONTENT_ROW_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import JsonLdScript from '@/components/JsonLdScript'
+import RelatedPageLinks from '@/components/RelatedPageLinks/RelatedPageLinks'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchDocBySlug } from '@/utils/cachedData'
 import { compileMdxSource } from '@/utils/compileMdx'
 import { slugFromParams } from '@/utils/docs/markdownRouting'
+import { getRelatedPageLinks } from '@/utils/relatedPageLinks'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -77,6 +79,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const jsonLd = post.structuredData
   const breadcrumbs = await getDocsBreadcrumbs(slug, title)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
+  const relatedPageLinks = getRelatedPageLinks(`/docs/${slug}`, post.meta_title || title)
 
   const postForClient = {
     slug: post.slug,
@@ -92,9 +95,11 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     <>
       <JsonLdScript data={jsonLd} />
       <JsonLdScript data={breadcrumbJsonLd} />
+      <RelatedPageLinks entry={relatedPageLinks} />
       <div className={DOC_CONTENT_ROW_CLASSES}>
         <DocContent
           title={title}
+          relatedPageLinks={relatedPageLinks}
           post={postForClient}
           toc={toc}
           hideTableOfContents={hide_table_of_contents || false}

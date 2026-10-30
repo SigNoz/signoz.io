@@ -11,12 +11,14 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import JsonLdScript from '@/components/JsonLdScript'
+import RelatedPageLinks from '@/components/RelatedPageLinks/RelatedPageLinks'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchBlogBySlug } from '@/utils/cachedData'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { buildMetadataImages } from '@/utils/metadataImages'
 import { mdxOptions } from '@/utils/mdxUtils'
+import { getRelatedPageLinks } from '@/utils/relatedPageLinks'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 const defaultLayout = 'BlogLayout'
 const layouts = {
@@ -104,6 +106,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const jsonLd = post.structuredData
   const breadcrumbs = getSectionArticleBreadcrumbs('blog', post.title, slug)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
+  const relatedPageLinks = getRelatedPageLinks(currentRoute, post.meta_title || post.title)
 
   let compiledContent
   try {
@@ -129,6 +132,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
             <JsonLdScript data={breadcrumbJsonLd} />
           </>
         )}
+        <RelatedPageLinks entry={relatedPageLinks} />
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -164,6 +168,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           <JsonLdScript data={breadcrumbJsonLd} />
         </>
       )}
+      <RelatedPageLinks entry={relatedPageLinks} />
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
