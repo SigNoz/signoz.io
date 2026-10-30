@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-11
-updated_date: 2026-10-21
+updated_date: 2026-10-27
 title: Slack Alerts - Configure a Slack Notification Channel
 description: Learn how to send SigNoz alerts to Slack. Set up an Incoming Webhook, create the notification channel, test it, and mention Slack user groups.
 doc_type: howto
@@ -35,25 +35,29 @@ To manage your alert channels in SigNoz:
 
 - Navigate to `Alerts > Notification Channels` within SigNoz. This tab displays a list of configured alert channels.
 
-<Admonition type="info">
-You can also reach the same tab from `Settings > Notification Channels`. Both routes open the **Notification Channels** tab on the Alerts page.
-</Admonition>
-
 <Figure
   src="/img/docs/alert-channels.webp"
-  alt="Notification Channels tab in SigNoz showing the list of configured alert channels."
+  alt="Notification Channels tab in SigNoz showing the list of configured alert channels, the Columns control, the New Channel button, and the help icon."
   caption="The Notification Channels tab lists every configured alert channel."
+/>
+
+If you pick Slack in the **All types** dropdown, the title changes to **All Slack channels** and the create button becomes **New Slack Channel**. For the other list controls, see [Notification Channels](https://signoz.io/docs/setup-alerts-notification/).
+
+<Figure
+  src="/img/docs/notification-channels/slack-channels-filtered.webp"
+  alt="SigNoz Notification Channels list filtered by Slack, titled All Slack channels with a New Slack Channel button."
+  caption="Filtering by type updates the list title and the create button."
 />
 
 ## Create a Notification Channel
 
 To create a new Slack notification channel in SigNoz, follow these steps:
 
-- Navigate to `Alerts > Notification Channels` and click on `+ New Alert Channel`.
-- Enter a **Name** for the channel and select Slack as the **Type**.
-- **Webhook URL**: Paste the Incoming Webhook URL generated in Slack.
-- **Recipient**: Optional. For an app Incoming Webhook this does not change where the alert lands (see the note below); the webhook always posts to its bound channel.
-- **Title** and **Description**: Keep the default templates, or edit them to change the message that SigNoz posts.
+1. Navigate to `Alerts > Notification Channels` and click **New Channel**. From a Slack-filtered list, click **New Slack Channel** to open the form with Slack already selected.
+2. In the **General** section, enter a **Name** and select Slack as the **Type**. Leave **Send resolved alerts** on to also get a message when an alert stops firing.
+3. In the **Connection** section, paste the Incoming Webhook URL into **Webhook URL**. **Recipient** is optional: for an app Incoming Webhook it does not change where the alert lands (see the note below); the webhook always posts to its bound channel.
+4. In the **Message** section, keep the default **Title** and **Description** templates, or edit them to change the message that SigNoz posts.
+5. Click **Save**.
 
 <Admonition type="info">
 An app Incoming Webhook is bound to the channel that was selected when the Slack app was installed. Slack does not let the request body override that destination, so the **Recipient** value cannot redirect an alert to a different channel or to a direct message. To post to another channel, create a second Incoming Webhook for that channel and a second notification channel in SigNoz. See <a href="https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks" target="_blank" rel="noopener noreferrer nofollow">Slack: sending messages using Incoming Webhooks</a>.
@@ -65,13 +69,27 @@ An app Incoming Webhook is bound to the channel that was selected when the Slack
 
 <Figure
   src="/img/docs/new-notification-channel.webp"
-  alt="New Slack notification channel form in SigNoz with name, webhook URL, and recipient fields."
+  alt="New Slack notification channel form in SigNoz with the General and Connection sections."
   caption="Create a new Slack notification channel."
+/>
+
+To leave without saving, click **Discard**. If you changed a field, SigNoz asks you to confirm in a **Discard your changes?** dialog.
+
+<Figure
+  src="/img/docs/notification-channels/discard-changes-dialog.webp"
+  alt="Discard your changes confirmation dialog in SigNoz warning that unsaved changes will be lost."
+  caption="Discarding a form with unsaved changes prompts for confirmation."
 />
 
 ## Customize the Message
 
-Beyond the title and description, a Slack channel can set the rest of what Slack calls an attachment. Every box below is optional, and all of them accept <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a>, so they can read values off the alert.
+Beyond the title and description, a Slack channel can set the rest of what Slack calls an attachment. **Title link** is in the **Message** section of the form, and the other boxes are in the **Advanced** section. Every box is optional, and all of them accept <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a>, so they can read values off the alert.
+
+<Figure
+  src="/img/docs/notification-channels/slack-form-advanced.webp"
+  alt="Advanced section of the SigNoz Slack channel form with Color, Pretext, Fallback text, Footer, Fields, and Actions."
+  caption="The Advanced section holds the optional Slack attachment boxes."
+/>
 
 | Option | What Slack does with it |
 | --- | --- |
@@ -83,13 +101,19 @@ Beyond the title and description, a Slack channel can set the rest of what Slack
 
 ### Fields
 
-Fields are a small table inside the attachment. Each one has a **title**, which Slack shows in bold, and a **value** under it.
+Fields are a small table inside the attachment. Click **Add field** to add one. Each field has a **title**, which Slack shows in bold, and a **value** under it.
 
 **Short** controls the layout. With it on, Slack places the field in a narrow column and can sit two of them side by side. With it off, the field takes the full width of the attachment. Use short for things like a severity or an environment, and leave it off for anything long.
 
+<Figure
+  src="/img/docs/notification-channels/slack-fields-cards.webp"
+  alt="Two numbered field cards, FIELD 1 and FIELD 2, in the Advanced section of the SigNoz Slack channel form, each with Title, Value, and Short inputs."
+  caption="Each field has a Title, a Value, and a Short checkbox."
+/>
+
 ### Actions
 
-Actions are buttons Slack renders under the message. There are two kinds.
+Actions are buttons Slack renders under the message. Click **Add action** to add one. There are two kinds.
 
 A **link button** needs only **text** and a **URL**. Slack shows the text and opens the URL when someone clicks it. This is the one most alerts want: a link to the runbook, the dashboard or the trace.
 
@@ -113,11 +137,12 @@ If no message reaches Slack, see [Troubleshooting](#troubleshooting).
 
 After you save the channel, select it in any alert rule. SigNoz then posts a message to the webhook's bound Slack channel each time that alert rule fires.
 
-<Figure
-  src="/img/docs/alerts-in-slack.webp"
-  alt="A SigNoz alert message delivered in a Slack channel."
-  caption="A SigNoz alert as it appears in the configured Slack channel."
-/>
+<figure align="center">
+  <img src="/img/docs/alerts-in-slack.webp" alt="A SigNoz alert message delivered in a Slack channel." />
+  <figcaption>
+    <i>A SigNoz alert as it appears in the configured Slack channel.</i>
+  </figcaption>
+</figure>
 
 ## Mention Slack Groups in Alerts
 
@@ -155,26 +180,27 @@ For more detailed information about Slack message formatting, refer to the <a hr
 
 To edit an existing Slack notification channel:
 
-- Navigate to `Alerts > Notification Channels` and click the `Edit` action for the channel.
-- You can edit the Slack webhook URL and other parameters. However, note that the channel name and type are not editable after creation.
+- Navigate to `Alerts > Notification Channels` and click the channel, or click **View** in its **Actions** menu.
+- You can edit the Slack webhook URL and other parameters. The channel **Name** and **Type** cannot change after creation.
+- To copy the channel ID, click the copy button next to the channel name.
 
 <Figure
   src="/img/docs/edit-notification-channel.webp"
-  alt="Edit notification channel form in SigNoz with the channel name and type fields disabled."
+  alt="Edit notification channel page in SigNoz with the channel name, the copy channel ID button, and the disabled Name and Type fields."
   caption="Edit a Slack notification channel. The name and type stay fixed."
 />
 
 ## Turn Off Resolved Alerts
 
-The **Send resolved alerts** toggle is switched on by default, on both the create form and the edit form. To stop receiving resolved alerts for an existing channel, follow these steps:
+The **Send resolved alerts** toggle is in the **General** section. It is on by default for a new channel, and the edit form shows the saved value. To stop receiving resolved alerts for an existing channel, follow these steps:
 
 - Navigate to `Alerts > Notification Channels`.
-- Click the `Edit` action for the channel.
-- Toggle off **Send resolved alerts** and click `Save`.
+- Click the channel to open it.
+- In the **General** section, toggle off **Send resolved alerts** and click `Save`.
 
 <Figure
   src="/img/docs/alerts/resolved-alerts.webp"
-  alt="Send resolved alerts toggle in the SigNoz notification channel edit form."
+  alt="General section of the SigNoz notification channel form with the Send resolved alerts toggle switched on."
   caption="Turn off the Send resolved alerts toggle to stop resolved notifications."
 />
 
