@@ -5,6 +5,8 @@ const fs = require('fs')
 const path = require('path')
 const { isResolvableRelatedArticle } = require('./check-cms-frontmatter')
 
+const URL_MAP_JSON_FILES = ['constants/relatedPageLinks.json']
+
 async function readRedirects() {
   const configPath = path.resolve(process.cwd(), 'next.config.js')
   try {
@@ -96,6 +98,7 @@ function findRelatedArticlesEntries(lines) {
 
 function extractUrls(content, filePath) {
   const isMdx = filePath.endsWith('.mdx')
+  const isJson = filePath.endsWith('.json')
   const scanContent = isMdx ? stripFencedCodeBlocks(content) : content
   const lines = scanContent.split('\n')
   const results = []
@@ -121,6 +124,12 @@ function extractUrls(content, filePath) {
       // Component href="..." or href='...'
       const hrefRegex = /href\s*=\s*["']([^"']+)["']/g
       while ((match = hrefRegex.exec(line)) !== null) {
+        urls.add(match[1])
+      }
+    } else if (isJson) {
+      const jsonUrlRegex = /"((?:https:\/\/signoz\.io)?\/[^"]*)"/g
+      let match
+      while ((match = jsonUrlRegex.exec(line)) !== null) {
         urls.add(match[1])
       }
     } else {
@@ -278,6 +287,7 @@ function getStagedFiles() {
 function isRelevantFile(filePath) {
   if (/\.test\.(tsx?|jsx?|js)$/.test(filePath)) return false
   if (/__tests__\//.test(filePath)) return false
+  if (URL_MAP_JSON_FILES.includes(filePath)) return true
   const codePattern = /^(components|app|constants|hooks|utils)\/.+\.(tsx?|jsx?|js)$/
   const mdxPattern = /^data\/.+\.mdx$/
   return codePattern.test(filePath) || mdxPattern.test(filePath)
@@ -321,6 +331,7 @@ function getAllFiles() {
 
   for (const dir of dirs) walkDir(dir)
   walkMdx('data')
+  files.push(...URL_MAP_JSON_FILES.filter((file) => fs.existsSync(file)))
 
   return files
 }
@@ -578,6 +589,8 @@ module.exports = {
   findRelatedArticlesEntries,
   checkUrl,
   computeReplacement,
+  fixFile,
+  isRelevantFile,
   readRedirects,
   buildRedirectMap,
   normalizeForRedirectMatch,

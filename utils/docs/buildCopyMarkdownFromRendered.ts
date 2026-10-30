@@ -1,14 +1,11 @@
 import type { Root as HastRoot, RootContent as HastContent, Element as HastElement } from 'hast'
 import { getTextContent, hastToMarkdown, normalizeWhitespace } from './markdownCore'
-import {
-  buildMarkdownDocument,
-  MORE_DOCS_POINTER,
-  type RelatedPageLinks,
-} from './buildMarkdownDocument'
+import type { RelatedPageLinksEntry } from '../relatedPageLinks'
+import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
 
 export type BuildCopyMarkdownOptions = {
   title: string
-  relatedPageLinks?: RelatedPageLinks | null
+  relatedPageLinks?: RelatedPageLinksEntry | null
   tags: string[]
   includeTagDefinitions: boolean
 }

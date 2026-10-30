@@ -1,6 +1,10 @@
 import siteMetadata from '@/data/siteMetadata'
 import RELATED_PAGE_LINKS from '@/constants/relatedPageLinks.json'
-import type { RelatedPageLinks } from './docs/buildMarkdownDocument'
+
+export type RelatedPageLinksEntry = {
+  title: string
+  links: string[]
+}
 
 const MAX_RELATED_PAGE_LINKS = 3
 
@@ -46,7 +50,7 @@ const LINKS_BY_PATH = new Map(
 export const getRelatedPageLinks = (
   pagePath: string,
   title: string | null | undefined
-): RelatedPageLinks | null => {
+): RelatedPageLinksEntry | null => {
   const pageTitle = title?.trim()
   const candidates = LINKS_BY_PATH.get(normalizePagePath(pagePath))
   if (!pageTitle || !candidates) return null

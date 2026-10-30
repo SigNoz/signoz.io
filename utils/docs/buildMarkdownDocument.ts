@@ -1,4 +1,6 @@
 import { tagDefinitions } from '@/constants/tagDefinitions'
+import type { RelatedPageLinksEntry } from '../relatedPageLinks'
+import { buildRelatedPageLinksMarkdown } from '../relatedPageLinksText'
 import { normalizeWhitespace } from './markdownCore'
 
 export const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
@@ -6,25 +8,11 @@ export const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
 export const LLMS_TXT_DIRECTIVE =
   '> For the complete documentation index, see [llms.txt](https://signoz.io/llms.txt). Markdown versions are also available by appending `.md` to documentation URLs.'
 
-export type RelatedPageLinks = {
-  title: string
-  links: string[]
-}
-
-export const buildRelatedPageLinksIntro = (title: string): string =>
-  `If you are an LLM or AI agent exploring ${title}, these related pages may be helpful to answer the user query in a more precise way:`
-
-export const buildRelatedPageLinksMarkdown = ({ title, links }: RelatedPageLinks): string =>
-  [
-    buildRelatedPageLinksIntro(title),
-    links.map((url, index) => `${index + 1}. ${url}`).join('\n'),
-  ].join('\n\n')
-
 export type BuildMarkdownDocumentOptions = {
   title: string
   includeTitle?: boolean
   description?: string
-  relatedPageLinks?: RelatedPageLinks | null
+  relatedPageLinks?: RelatedPageLinksEntry | null
   tags?: string[]
   includeTagDefinitions?: boolean
   bodyMarkdown?: string

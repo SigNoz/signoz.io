@@ -46,7 +46,7 @@ describe('selectRelatedLinks', () => {
 
 describe('getRelatedPageLinks', () => {
   it('resolves mapped pages from any path form', () => {
-    const expected = { title: 'JSON Logs', links: RELATED_PAGE_LINKS['/blog/json-logs'] }
+    const expected = { title: 'JSON Logs', links: RELATED_PAGE_LINKS['/blog/json-logs/'] }
 
     expect(getRelatedPageLinks('/blog/json-logs', 'JSON Logs')).toEqual(expected)
     expect(getRelatedPageLinks('/blog/json-logs/', 'JSON Logs')).toEqual(expected)

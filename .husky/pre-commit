@@ -26,7 +26,7 @@ fi
 if printf '%s\n' "$STAGED_FILES" | grep -qE '^next\.config\.js$'; then
   echo 'husky (pre-commit): next.config.js changed — scanning all files for stale URLs'
   node scripts/check-stale-urls.js --fix --all --stage-fixes
-elif printf '%s\n' "$STAGED_FILES" | grep -qE '^(components/|app/|constants/|hooks/|utils/|data/).*\.(tsx|ts|jsx|js|mdx)$'; then
+elif printf '%s\n' "$STAGED_FILES" | grep -qE '^((components/|app/|constants/|hooks/|utils/|data/).*\.(tsx|ts|jsx|js|mdx)|constants/relatedPageLinks\.json)$'; then
   echo 'husky (pre-commit): auto-fixing stale/redirected URLs in staged files'
   node scripts/check-stale-urls.js --fix --staged
 else
