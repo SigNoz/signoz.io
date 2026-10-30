@@ -101,6 +101,22 @@ test('buildCopyMarkdownDocument emits the llms.txt directive exactly once, near 
   assert.equal(markdown.indexOf(LLMS_TXT_DIRECTIVE) < markdown.indexOf('Body content.'), true)
 })
 
+test('buildCopyMarkdownDocument places related page links right after the directive', () => {
+  const markdown = buildCopyMarkdownDocument('Body content.', {
+    title: 'Docs Title',
+    relatedPageLinks: { title: 'Docs SEO Title', links: ['https://signoz.io/docs/a/'] },
+    tags: [],
+  })
+
+  assert.equal(
+    markdown.startsWith(
+      `# Docs Title\n\n${LLMS_TXT_DIRECTIVE}\n\nIf you are an LLM or AI agent exploring Docs SEO Title,`
+    ),
+    true
+  )
+  assert.match(markdown, /^1\. <https:\/\/signoz\.io\/docs\/a\/>$/m)
+})
+
 test('appendGlossaryDefinitionsInHast surfaces tooltip definitions in brackets', async () => {
   const { unified } = await import('unified')
   const { default: rehypeParse } = await import('rehype-parse')
