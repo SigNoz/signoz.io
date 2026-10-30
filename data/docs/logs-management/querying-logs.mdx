@@ -1,6 +1,6 @@
 ---
-date: 2026-06-25
-title: Querying Logs
+date: 2026-10-26
+title: Querying Logs in SigNoz with Query Builder and ClickHouse
 description: Query logs in SigNoz using the Query Builder in Logs Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
 doc_type: reference
 ---
@@ -27,6 +27,19 @@ Use the **Filter** field to narrow down logs using attributes, body content, and
 
 Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) guide and [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of operators and syntax details.
 
+#### Missing attribute keys
+
+If a filter, selected field, group-by, or aggregation references a key that is not in field metadata, for example because of a typo, the query still runs against the stored log data. For a filter, Logs Explorer also shows this warning with the results:
+
+```
+key `<name>` not found in metadata; querying the underlying data directly. If this is unexpected, check the key name for typos.
+```
+
+SigNoz resolves such a key as follows:
+
+- A qualified key, such as `resource.service.name` or `mykey:string`, is used exactly as written.
+- A bare key is read from the log attributes and from the JSON body path of the same name. Its data type comes from the filter value: `mykey = 'a'` reads a string, and `mykey > 5` reads a number. Without a value, for example in a group-by, SigNoz checks the string, number, and boolean attributes.
+
 You can also use [Quick Filters](https://signoz.io/docs/logs-management/features/logs-quick-filters/) in the Logs Explorer sidebar to narrow results by common attributes without writing filter expressions. See the [Default Quick Filters Reference](https://signoz.io/docs/logs-management/features/logs-quick-filters-reference/) for the full list of available filter attributes.
 
 ### Aggregation (Time Series & Table views)
@@ -40,6 +53,8 @@ Log queries support a full set of [aggregation functions](https://signoz.io/docs
 ### Group By (Time Series & Table views)
 
 Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` produces a separate series for each service. Useful in aggregate views to compare error counts across services, namespaces, or any other attribute.
+
+Logs that do not have the grouped key appear in a `null` group.
 
 ### Having
 

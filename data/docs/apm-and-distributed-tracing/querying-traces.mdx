@@ -1,6 +1,6 @@
 ---
-date: 2026-08-25
-title: Querying Traces
+date: 2026-10-26
+title: Querying Traces in SigNoz with Query Builder and ClickHouse
 description: Query traces in SigNoz using the Query Builder in Trace Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
 doc_type: reference
 ---
@@ -25,6 +25,19 @@ Use the **Filter** field to narrow down spans using attributes. Supported operat
 
 Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) guide and [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of operators and syntax details.
 
+#### Missing attribute keys
+
+If a filter, selected field, group-by, or aggregation references a key that is not in field metadata, for example because of a typo, the query still runs against the stored span data. For a filter, Traces Explorer also shows this warning with the results:
+
+```
+key `<name>` not found in metadata; querying the underlying data directly. If this is unexpected, check the key name for typos.
+```
+
+SigNoz resolves such a key as follows:
+
+- A qualified key, such as `resource.service.name` or `mykey:string`, is used exactly as written.
+- A bare key that is not a span field is read from the span attributes. Its data type comes from the filter value: `mykey = 'a'` reads a string, and `mykey > 5` reads a number. Without a value, for example in a group-by, SigNoz checks the string, number, and boolean attributes.
+
 ### Aggregation (Time Series & Table views)
 
 Trace queries support a full set of [aggregation functions](https://signoz.io/docs/querying/aggregation-grouping/) in the **Time Series** and **Table** views:
@@ -36,6 +49,8 @@ Trace queries support a full set of [aggregation functions](https://signoz.io/do
 ### Group By (Time Series & Table views)
 
 Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` and `operation` produces a separate series for each service-operation pair. Useful for comparing latency or error rates across services, endpoints, or status codes.
+
+Spans that do not have the grouped key appear in a `null` group.
 
 ### Having
 
