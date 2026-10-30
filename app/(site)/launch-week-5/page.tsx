@@ -1,7 +1,6 @@
 import React from 'react'
 import LaunchWeek5 from './LaunchWeek5'
 import type { Metadata } from 'next'
-import Script from 'next/script'
 
 const title = 'Launch Week 5.0 | September 8 - 12 | SigNoz'
 const description =
@@ -32,7 +31,6 @@ export const metadata: Metadata = {
 export default function LaunchWeek5Page() {
   return (
     <>
-      <Script id="luma-checkout" src="https://embed.lu.ma/checkout-button.js" />
       <LaunchWeek5 />
     </>
   )

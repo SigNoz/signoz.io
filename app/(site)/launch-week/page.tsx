@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Script from 'next/script'
 
 import LaunchWeek from './LaunchWeek'
 
@@ -32,7 +31,6 @@ export const metadata: Metadata = {
 export default function LaunchWeekPage() {
   return (
     <>
-      <Script id="luma-checkout" src="https://embed.lu.ma/checkout-button.js" />
       <LaunchWeek />
     </>
   )

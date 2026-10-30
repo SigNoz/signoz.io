@@ -12,6 +12,7 @@ import FooterArt from '@/components/footer/FooterArt'
 import FooterStatus from '@/components/footer/FooterStatus'
 import './footer/footer-pill-links.css'
 import footerFx from './footer/footer-fx.module.css'
+import CookieSettingsLink from '@/components/consent/CookieSettingsLink'
 
 type FooterPillLinkProps = {
   href: string
@@ -225,6 +226,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
                 <FooterPillLink href="/legal/">Legal</FooterPillLink>
                 <FooterPillLink href="/legal/terms-of-service/">Terms</FooterPillLink>
                 <FooterPillLink href="/legal/privacy/">Privacy</FooterPillLink>
+                <CookieSettingsLink />
                 <FooterPillLink href="https://trust.signoz.io/" newTab>
                   Security & Compliance
                 </FooterPillLink>

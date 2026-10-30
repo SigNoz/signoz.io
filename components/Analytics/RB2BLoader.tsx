@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
+import { useConsent } from '@/hooks/useConsent'
 
 const RB2B_ID = 'RGNLKQHLPK6Q'
 const RB2B_SCRIPT_ID = 'rb2b-script'
@@ -9,9 +10,16 @@ const IDLE_INJECT_TIMEOUT_MS = 2000
 
 export default function RB2BLoader() {
   const pathname = usePathname()
+  const hasAdvertisementConsent = useConsent().categories.advertisement
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' || !pathname) return
+    if (
+      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' ||
+      !pathname ||
+      !hasAdvertisementConsent
+    ) {
+      return
+    }
 
     let script: HTMLScriptElement | null = null
 
@@ -41,7 +49,7 @@ export default function RB2BLoader() {
       if (timeoutId !== null) clearTimeout(timeoutId)
       script?.remove()
     }
-  }, [pathname])
+  }, [pathname, hasAdvertisementConsent])
 
   return null
 }

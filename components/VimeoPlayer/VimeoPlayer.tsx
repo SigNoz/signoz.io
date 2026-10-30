@@ -12,15 +12,13 @@ const VimeoPlayer = ({ videoId }) => {
       const player = new Player(playerRef.current, {
         url: `https://vimeo.com/${videoId}`,
         autoplay: true,
+        dnt: true,
       })
       setIsPlayerReady(true)
     }
   }, [videoId, isPlayerReady])
 
-  return (
-    <div ref={playerRef} className="embed-container w-full" />
-  )
+  return <div ref={playerRef} className="embed-container w-full" />
 }
 
 export default VimeoPlayer
-

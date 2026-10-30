@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLogEvent } from './useLogEvent'
+import { setUserId } from '@/utils/userClient'
 import {
   createSubmissionRelayId,
   sendSubmissionRelayInBackground,
@@ -43,14 +44,14 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
     }
   }, [onError])
 
-  const handleGTMCustomEventTrigger = useCallback((payload: Record<string, any>) => {
+  // Only the conversion signal goes to GTM; the email and form payload stay out of third-party tags.
+  const handleGTMCustomEventTrigger = useCallback((region?: string | null) => {
     if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
       ;(window as any).dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
-        ...payload,
+        region: region || undefined,
       })
     }
-    localStorage.setItem('prevSignupEmail', payload.email)
   }, [])
 
   const validatePayload = useCallback(
@@ -136,9 +137,9 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
 
         if (response.ok) {
           setSubmitSuccess(true)
-          handleGTMCustomEventTrigger(payload)
+          handleGTMCustomEventTrigger(payload.region.name)
 
-          localStorage.setItem('app_user_id', payload.email)
+          setUserId(payload.email)
 
           logEvent({
             eventType: 'identify',
@@ -259,9 +260,9 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
 
           const data_region = localStorage.getItem('region')
           setSubmitSuccess(true)
-          handleGTMCustomEventTrigger({ ...responseData?.data, region: data_region })
+          handleGTMCustomEventTrigger(data_region)
 
-          localStorage.setItem('app_user_id', responseData.data.email)
+          setUserId(responseData.data.email)
 
           logEvent({
             eventType: 'identify',
