@@ -144,6 +144,31 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/guides/how-to-merge-zero-values-vector-0-with-metric-values-in-promql/',
+          destination: '/guides/time-series-from-prometheus-source-how-to-set-nulls-as-zero/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-can-i-join-two-metrics-in-a-prometheus-query/',
+          destination: '/guides/divide-two-metrics-in-prometheus/',
+          permanent: true,
+        },
+        {
+          source: '/guides/managed-prometheus/',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-get-total-requests-in-a-period-of-time-with-prometheus/',
+          destination: '/guides/understanding-prometheus-rate-vs-increase-functions-correctly/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-handle-counters-on-servers-in-prometheus/',
+          destination: '/guides/understanding-prometheus-rate-vs-increase-functions-correctly/',
+          permanent: true,
+        },
+        {
           source: '/guides/prometheus-node-exporter/',
           destination: '/guides/prometheus-node-exporter-metrics/',
           permanent: true,

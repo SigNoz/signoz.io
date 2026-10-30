@@ -1,13 +1,12 @@
 ---
 
 title: How to Handle Null Values in Prometheus Time Series Data
-date: 2024-10-14
+date: 2026-10-30
 tags: [prometheus,missing values, time-series]
-authors: [simran_kumari]
-description: Learn how to handle null values in Prometheus time series data. Discover methods to set nulls as zero, improve data visualization, and enhance analysis accuracy.
+authors: [saurabh_patil]
+description: Learn when to replace missing Prometheus data with zero, use vector(0) with matching labels, and detect missing metrics with PromQL.
 keywords: [Prometheus, null values, time series data, PromQL, Grafana, data visualization, SigNoz, metrics]
 related_articles:
-  - '/guides/how-to-merge-zero-values-vector-0-with-metric-values-in-promql'
   - '/guides/filter-prometheus-results-by-metric-value-not-by-label-value'
   - '/guides/what-are-prometheus-labels'
   - '/guides/how-to-get-all-the-metrics-of-an-instance-with-prometheus-api'
@@ -22,7 +21,7 @@ In this article, we’ll explore why gaps occur in [Prometheus data](https://sig
 
 In Prometheus, a "null value" doesn’t exist in the typical database sense. Instead, when we talk about missing data, we mean the absence of a data point at a specific time. This absence shows up as a gap in your time series graphs.
 
-<Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image.webp" alt="Gaps in Prometheus Data" caption="Gaps in Prometheus Data" />
+<Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image.webp" alt="A gap between recorded custom_metric samples in Grafana" caption="A gap in the recorded custom_metric samples" />
 
 ### Common Causes of Missing Data:
 
@@ -66,17 +65,17 @@ CPU %:  |  40%   |  50%   |   -    |   -    |   -    |  65%   |
 
 There are cases where filling in missing data points with zero can make sense, especially when:
 
-- You’re analyzing trends: Gaps in data can disrupt trends, making it hard to follow patterns over time. Filling them with zeros smooths out the visual, giving you a continuous line to track performance.
-- You want consistent graphs: Gaps can make your graphs hard to read. By setting these to zero, you ensure there are no breaks, improving readability.
+- You’re analyzing event activity: Some applications only create an event counter after the first event occurs. If the application is being scraped successfully and the absence means no events have occurred, a zero can make those inactive periods easier to follow.
+- You want consistent graphs: When missing values represent known inactivity, filling them with zeros helps distinguish those periods from periods with recorded activity. A collection failure should still appear as missing data.
 
 ### When Should You Avoid Setting Gaps to Zero?
 
 Filling in missing data with zero isn’t always the right solution. For certain [metric types](https://signoz.io/docs/metrics-management/types-and-aggregation/), especially counters, setting a gap to zero can suggest something that didn't actually happen:
 
 - Counter metrics: Zero might imply a reset or sudden drop, which could skew your understanding of system behavior.
-- Sporadic metrics: For metrics that are emitted only under specific conditions, setting missing points to zero can distort the truth, making it seem like nothing happened when the data should just remain absent.
+- Sporadic metrics: For metrics that are emitted only under specific conditions, check what an absent value means. For example, a missing measurement of how long a task took does not mean the task took zero seconds.
 
-For example, if you look back to the previous scenario where missing data points existed for CPU usage data.  Without proper handling, you might configure the graph to default missing data to zero. Now, your graph looks like this:
+For example, consider the missing CPU usage data in the previous scenario. You might configure the graph to default missing data to zero. Now, your graph looks like this:
 
 ```sql
 Time:   |--------|--------|--------|--------|--------|--------|
@@ -85,76 +84,72 @@ CPU %:  |  40%   |  50%   |   0%   |   0%   |   0%   |  65%   |
 
 - Impact: The graph now shows that CPU usage dropped to 0% for those missing intervals. This can lead to a misleading trend where it seems like your server experienced zero CPU activity during that period. However, the reality is that no data was collected, not that the CPU usage dropped to zero. You might falsely conclude that everything was fine or under-utilized, when in fact, the server might have been down or highly overloaded.
 
+Filling gaps can also change your calculations. If two servers report 20% and 40% CPU usage, their average is 30%. Including a third server with an assumed value of zero lowers the average to 20%, even though its CPU usage is unknown.
+
 ## Methods to Handle Missing Data in Prometheus Queries
 
-Handling missing data points in Prometheus is crucial for ensuring accurate visualizations and analyses. Below, you'll find two sections outlining basic and advanced methods for managing missing data.
+Once you know whether a gap represents inactivity or a collection problem, you can choose how to handle it. Start with a zero fallback for expected inactivity or use an absence check when the metric should be present. For metrics with several labeled series, the fallback also needs to match those labels.
 
 ### Basic Methods for Handling Missing Data
 
 1. Using `or vector(0)`
-    - This technique allows you to replace missing values with zero.
-    
-    ```
+
+    PromQL provides `vector(0)` to create a single zero-valued sample with no labels. Combining it with a metric using `or` keeps the metric's values and adds the zero if no result has the same labels:
+
+    ```promql
     custom_metric or vector(0)
     ```
-    
-    - Explanation: This query returns the value of `custom_metric`, and if it’s absent, it defaults to `0`.
-    
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 1.webp" alt="Handling missing data using vector(0)" caption="Handling missing data using vector(0)" />
-    
-    Use Case: Imagine monitoring server CPU usage. If the server goes offline, rather than seeing a confusing gap, you can treat the missing data as `0`, indicating that the server wasn’t active.
-    
+
+    If `custom_metric` has no labels, this returns its value when present and zero when absent. If the metric has labels such as `job` and `instance`, the query adds a separate unlabeled zero series. It doesn't fill each missing labeled series.
+
+    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 1.webp" alt="A labeled custom_metric series alongside the separate zero from vector(0)" caption="With a labeled metric, or vector(0) adds a separate zero series" />
+
+    For a single total across the metric's series, you can remove the labels with `sum()` before applying the fallback:
+
+    ```promql
+    sum(custom_metric) or vector(0)
+    ```
+
+    This returns the total when values are available and zero when no series is present. For example, if `custom_metric` counts events and is only created after the first event, this can show zero before any events have occurred, provided collection is working. The advanced example below covers keeping separate results for each target.
+
 2. Utilizing the `absent()` Function
-    - The `absent()` function helps identify completely missing metrics.
+    - When a metric should always be present, use `absent()` to detect when it stops reporting.
     
     ```
     absent(custom_metric)
     ```
     
-    - Explanation: This query returns a value when `custom_metric` is not present, useful for alerting on missing metrics.
+    - Explanation: This query returns `1` when no `custom_metric` series is present and no result when at least one series exists. This is useful for alerting on a metric that should always be reported.
     
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 2.webp" alt="Handling missing data using absent()" caption="Handling missing data using absent()" />
+    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 2.webp" alt="Grafana showing absent(custom_metric) returning 1 when the metric is missing" caption="absent(custom_metric) returns 1 when no matching series is present" />
     
     Use Case: In a microservices architecture, you'll want to know if a service’s health metric stops being scraped. `absent()` can alert you that the service may be down or unreachable, helping to detect system failures early.
     
-    Note: It returns an empty vector if the vector passed to it has any elements and a 1-element vector with the value 1 if the vector passed to it has no elements.
+    If several instances report this metric, the query only detects when all of them are absent. Add an instance selector when checking a particular target.
     
 
 ### Advanced PromQL Techniques for Null Handling
 
-1. Applying `group_left` and `group_right` for Label Matching
-    - Scenario: You have two metrics: one for system resource usage (e.g., CPU) and another for error rates. The second metric (`error_rate`) doesn’t always have data for every instance, leading to missing information when you attempt to join the two.
-    - Solution: Use `group_left` or `group_right` depending on the label relationship to include all relevant data, even if some metrics are missing values.
-    
-    Syntax:
-    
-    ```python
-    # for left join
-    metric_a * on(label) group_left(label_value) metric_b or vector(0) 
-    # for right join 
-    metric_a * on(label) group_right(label_value) metric_b or vector(0)   
+1. Handling Label Matching When Merging Zero Values
+
+    The basic `or vector(0)` example provides one zero without labels. To keep a separate value for each target, you need a fallback that identifies the targets you expect. Prometheus's `up` metric provides their `job` and `instance` labels.
+
+    Suppose `custom_metric` is an event counter with only `job` and `instance` labels, and an absent counter means no events have occurred. You can supply zeros for successfully scraped targets with this query:
+
+    ```promql
+    custom_metric{job="my_service"}
+    or on (job, instance)
+    (0 * (up{job="my_service"} == 1))
     ```
-    
-    Query examples:
-    
-    ```python
-    # Left join example
-    system_resource_usage * on(instance,exported_instance) group_left error_rate or vector(0) 
-    
-    # Right join example
-    error_rate * on(instance,system_resource_usage) group_right or vector(0)
-    ```
-    
-    ### Explanation:
-    
-    - `group_left`: Matches `system_resource_usage` with `error_rate` for each instance and exported instance, ensuring that missing error values are filled with `0`.
-    - `group_right`: Ensures all error rates are preserved even if the resource usage data is missing for some instances.
-    - `or vector(0)`: Fills missing values with `0` for better visualization.
-    
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 3.webp" alt="Handling missing data using group_left()" caption="Handling missing data using group_left()" />
-    
-    Use Case: You’re monitoring CPU usage per instance alongside error rates. By using `group_left`, you ensure that even if there are no errors for certain instances, the CPU usage is still included in your visualizations, and errors are treated as zero instead of missing. Alternatively, use `group_right` if you prioritize error rate data over system resource metrics.
-    
+
+    The right side selects targets with successful scrapes and multiplies their values by zero. The `or on (job, instance)` operation keeps existing counter values and adds a labeled zero for each of those targets that has no counter yet. If one target reports a count of 12 and another hasn't had an event, the result shows 12 for the first and zero for the second. A failed scrape doesn't provide a zero fallback.
+
+    This works when `job` and `instance` identify the series you need. If the event metric also has labels such as a route or error type, `up` cannot supply those missing combinations.
+
+    The `group_left` and `group_right` modifiers are useful for matching different numbers of series when combining two metrics. They don't supply missing values, so they aren't needed for this zero fallback.
+
+    When a metric is expected to be present, filling its absence with zero could hide a reporting problem. The next method checks whether that absence continues over a time window.
+
 2. Using `absent_over_time()` for Detecting Long-Term Absences
     - Scenario: You’re monitoring a critical metric over time and want to detect if it has stopped reporting for an extended period, indicating a problem with the service or the metric’s availability.
     - Solution: Use `absent_over_time()` to monitor whether a metric has been missing for a defined period.
@@ -163,9 +158,9 @@ Handling missing data points in Prometheus is crucial for ensuring accurate visu
     absent_over_time(custom_metric[1m])
     ```
     
-    Explanation: This function returns a value if `custom_metric` has been absent for the last 1 minute, useful for identifying metrics that are not being scraped over extended periods.
+    Explanation: This function returns `1` if there are no samples for `custom_metric` anywhere in the last minute. If any matching series has a sample in that window, it returns no result. Choose a window that allows for the metric’s expected reporting interval.
     
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 4.webp" alt="Handling missing data using absent_over_time()" caption="Handling missing data using absent_over_time()" />
+    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image 4.webp" alt="Grafana showing absent_over_time(custom_metric[1m]) returning 1" caption="absent_over_time(custom_metric[1m]) returns 1 when the last minute has no samples" />
     
 
 ## Best Practices for Handling Null/Missing Values in Time Series Data
@@ -173,7 +168,7 @@ Handling missing data points in Prometheus is crucial for ensuring accurate visu
 To effectively manage null values in the Prometheus time series:
 
 - Understand the Causes: Investigate why data is missing, such as network issues or service downtime, and document these findings for future reference.
-- Choose Appropriate Methods: Select handling methods based on context. For instance, set missing values to zero if no activity is expected, or use interpolation for continuous data.
+- Choose Appropriate Methods: Set missing values to zero when they represent known inactivity. Use `absent()` or `absent_over_time()` when a metric should be present, and match labels when providing a fallback for individual series.
 - Regularly Audit Data Collection: Monitor the metrics collection process to ensure it functions correctly. Adjust scrape intervals based on data volatility.
 - Document Strategies: Maintain clear documentation on how missing values are handled, and use comments in PromQL queries for clarity.
 
@@ -182,7 +177,7 @@ To effectively manage null values in the Prometheus time series:
 SigNoz is a powerful observability tool that allows you to track missing data points more effectively, helping you avoid blind spots in your monitoring. SigNoz can help you in:
 
 - Detecting Missing Data with SigNoz
-SigNoz can alert you to missing data automatically by configuring rules for your most critical metrics. This means you won’t have to rely on visually spotting gaps in your Grafana dashboards; instead, SigNoz can proactively notify you.
+SigNoz can alert you to missing data automatically by configuring rules for your most critical metrics. This means you won’t have to rely on visually spotting gaps in your Grafana dashboards. Instead, SigNoz can proactively notify you.
 - Visualizing Data Gaps in SigNoz Dashboards
 SigNoz provides advanced visualizations for analyzing patterns in missing data. This can help you see trends where certain metrics go missing frequently, helping you dig into root causes and improve data collection reliability.
 
@@ -190,9 +185,9 @@ SigNoz provides advanced visualizations for analyzing patterns in missing data. 
 
 ## Key Takeaways
 
-- Missing data points (or gaps) in the Prometheus time series can occur due to various reasons like scrape failures or counter resets.
-- While setting missing data to zero can smooth out your visualizations, it’s important to use this technique wisely to avoid skewing your analysis.
-- PromQL provides several methods like or vector(0) and absent() to handle missing data.
+- Missing data points (or gaps) in Prometheus time series can occur because of scrape failures, application restarts, or metrics that have not yet been emitted.
+- Filling missing data with zero can show expected inactivity, but it can also hide collection failures and change averages.
+- Use `or vector(0)` for an unlabeled zero fallback, a matching labeled fallback for individual series, and `absent()` to detect missing metrics.
 - Best practices involve choosing appropriate methods, documenting strategies, and regular audits of null handling approaches.
 - Tools like SigNoz can provide advanced capabilities for monitoring, alerting, and analyzing null value patterns in your time series data.
 
@@ -212,4 +207,8 @@ While setting nulls/missing values to zero can improve data continuity, it's imp
 
 ### What are the differences in handling nulls for counters vs. gauges?
 
-For counters, which only increase over time, setting nulls to zero might not be appropriate as it could indicate a reset. For gauges, which can increase or decrease, setting nulls to zero or the last known value might be more suitable. The choice depends on the specific metric and what the null value represents in your system.
+For counters, inserting zero into a gap can make the graph look as though the counter reset. For gauges such as CPU usage, zero can imply inactivity when the measurement is actually unknown. In either case, use zero only when you know the absence means no activity, such as an event counter that has not yet been created.
+
+### Why does `or vector(0)` add a separate zero series?
+
+The zero from `vector(0)` has no labels. When your metric has labels, `or` keeps both the labeled metric and the unmatched zero. To fill individual series, use a fallback with the labels you expect, as shown in the label-matching example.

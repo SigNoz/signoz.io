@@ -2,9 +2,8 @@
 
 title: What is the difference between Prometheus Rate vs Increase Functions
 meta_title: "Prometheus rate vs increase Functions Explained"
-published_date: 2024-07-25
-updated_date: 2026-06-23
-tags: [faq, prometheus]
+date: 2026-10-30
+tags: [prometheus, faq]
 authors: [ankit_anand]
 description: Discover the key differences between Prometheus rate() and increase() functions. Learn when to use each for accurate monitoring and data analysis.
 keywords: [Prometheus, rate function, increase function, monitoring, data analysis, PromQL, time series, metrics]
@@ -17,77 +16,63 @@ related_articles:
   - '/guides/what-is-a-prometheus-rule'
 ---
 
+Prometheus `rate()` tells you how quickly a counter is increasing per second. `increase()` tells you how much it increased over a time period. Use `rate()` for questions such as "How many requests per second is this service handling?" and `increase()` for "How many requests did it handle in the last hour?"
 
-Prometheus, a powerful open-source monitoring system, offers two essential functions for analyzing counter metrics: rate() and increase(). Understanding these functions correctly is crucial for effective data analysis and monitoring. This article delves into the key differences between rate() and increase(), their use cases, and best practices for implementation.
+This guide explains how the two functions relate, how to count events across instances, and how to handle counters that reset when an application restarts.
 
-## Understanding Prometheus Rate and Increase Functions
+## Understanding Prometheus rate() and increase()
 
-Prometheus serves as a robust monitoring and alerting toolkit, collecting and storing time series data as metrics. Counter metrics, which only increase over time, form a significant part of Prometheus' data collection. The rate() and increase() functions help you analyze these counter metrics effectively.
+A [counter](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/) records a running total, such as requests processed, errors encountered, or bytes sent. Its value increases as events occur and normally resets to zero when the process restarts. The current value alone doesn't tell you how much activity occurred during a particular period.
 
-Rate() calculates the per-second average rate of increase for a counter over a specified time range. It's particularly useful for determining how quickly a value is changing. Increase(), on the other hand, computes the total increase in a counter's value over a given time period. Both functions play vital roles in data analysis, offering different perspectives on metric behavior.
+Both `rate()` and `increase()` use samples from a time window to answer that question. They account for observed counter resets and extrapolate to the window's boundaries to estimate activity across the full period. The difference is the unit of the result.
 
-## How the Rate() Function Works
+| Function | Result | Example question |
+| --- | --- | --- |
+| `rate()` | Average increase per second | How many bytes per second did the server send? |
+| `increase()` | Estimated total increase over the window | How many bytes did the server send in the last hour? |
 
-The rate() function calculates the per-second average rate of increase for a counter metric. It uses the following formula:
+## How the rate() function works
 
-```
-rate(counter[time_range]) = (last_value - first_value) / (last_timestamp - first_timestamp)
+To calculate a rate, pass a counter and a time window to `rate()`:
 
-```
-
-This calculation provides a smoothed-out rate of change, which is especially useful for volatile metrics. The syntax for using rate() is straightforward:
-
-```
+```promql
 rate(metric_name[time_range])
-
 ```
 
-Rate() is ideal for analyzing metrics that change frequently, such as requests per second or CPU usage. However, it's important to note that rate() assumes the counter increases linearly between samples — which may not always be the case in real-world scenarios.
+The time window determines which samples contribute to the average. The result is still expressed per second, even if you choose a longer window.
 
 ### Real-World Examples of Rate() Usage
 
 1. **Calculating request rates in web servers**:
-    
-    ```
-    rate(http_requests_total[5m])
-    
-    ```
-    
-    This query shows the average number of HTTP requests per second over the last 5 minutes.
-    
+
+   ```promql
+   rate(http_requests_total[5m])
+   ```
+
+   This query shows the average number of HTTP requests per second over the last five minutes for each matching series. If the estimated increase for a series is 600 requests over that window, its rate is 2 requests per second.
+
 2. **Monitoring network traffic**:
-    
-    ```
-    rate(network_transmit_bytes_total[1h])
-    
-    ```
-    
-    This displays the average network transmission rate in bytes per second over the last hour.
-    
+
+   ```promql
+   rate(network_transmit_bytes_total[1h])
+   ```
+
+   This displays the average network transmission rate in bytes per second over the last hour for each series.
+
 3. **Analyzing CPU usage trends**:
-    
-    ```
-    rate(node_cpu_seconds_total{mode="user"}[10m])
-    
-    ```
-    
-    This query reveals the average CPU usage in user mode over the last 10 minutes.
-    
+
+   ```promql
+   rate(node_cpu_seconds_total{mode="user"}[10m])
+   ```
+
+   This query shows CPU seconds spent in user mode per second, averaged over ten minutes for each CPU on each instance.
 
 ## Deep Dive into the Increase() Function
 
-The increase() function calculates the total increase in a counter's value over a specified time range. It uses this formula:
+The `increase()` function calculates the estimated total increase in a counter's value over a specified time range. Its syntax is similar to `rate()`:
 
-```
-increase(counter[time_range]) = last_value - first_value
-
-```
-
-The syntax for increase() is similar to rate():
-
-```
-increase(metric_name[time_range])
-
+```promql
+increase(http_requests_total[5m])
 ```
 
 Increase() is particularly useful when you need to know the total change in a metric over time, rather than the rate of change. It's ideal for analyzing cumulative metrics or when you need to understand the absolute change in a value.
@@ -95,48 +80,107 @@ Increase() is particularly useful when you need to know the total change in a me
 ### Practical Applications of Increase()
 
 1. **Measuring total requests over a specific time period**:
-    
-    ```
-    increase(http_requests_total[24h])
-    
-    ```
-    
-    This query shows the total number of HTTP requests received in the last 24 hours.
-    
+
+   ```promql
+   increase(http_requests_total[24h])
+   ```
+
+   This query estimates the number of HTTP requests received in the last 24 hours for each matching series.
+
 2. **Analyzing cumulative errors in a system**:
-    
-    ```
-    increase(error_count_total[1h])
-    
-    ```
-    
-    This displays the total number of errors that occurred in the last hour.
-    
+
+   ```promql
+   increase(error_count_total[1h])
+   ```
+
+   This displays the estimated number of errors that occurred in the last hour for each matching series.
+
 3. **Tracking resource consumption in cloud environments**:
-    
-    ```
-    increase(cloud_cpu_usage_seconds_total[7d])
-    
-    ```
-    
-    This query reveals the total CPU time consumed over the past week.
-    
 
-## Rate vs Increase: When to Use Each
+   ```promql
+   increase(cloud_cpu_usage_seconds_total[7d])
+   ```
 
-Choosing between rate() and increase() depends on your specific monitoring needs:
+   If your application exposes a counter named `cloud_cpu_usage_seconds_total`, this query estimates the CPU time consumed over the past week for each matching series, in seconds.
 
-- Use rate() when you need to understand the speed of change or when working with metrics that are typically expressed as rates (e.g., requests per second).
-- Opt for increase() when you need to know the total change over time or when working with cumulative metrics.
+### Count total requests over a period
 
-For alerting, rate() is often more suitable for detecting sudden spikes or drops in activity. Increase() is better for setting thresholds on total values over time.
+If your application exposes a request counter named `http_requests_total`, you can use it to estimate the requests handled in the last hour:
+
+```promql
+increase(http_requests_total[1h])
+```
+
+This returns a separate result for each label combination. If the counter has `instance`, `method`, and `status` labels, you'll see a count for each combination rather than one total for the application.
+
+To combine those counts across all matching series, use `sum()`:
+
+```promql
+sum(increase(http_requests_total[1h]))
+```
+
+This returns one estimated total for the last hour. To limit it to a particular service, add a label filter such as `{job="api-server"}` to the metric selector.
+
+If you need a separate total for each instance, keep that label when aggregating:
+
+```promql
+sum by (instance) (increase(http_requests_total[1h]))
+```
+
+This combines methods and status codes within each instance, so you can compare how much traffic each instance handled. In each query, `increase()` runs before `sum()`. This lets Prometheus account for resets in individual series before combining their results.
+
+### Compare request counts with a previous period
+
+To compare the last hour with the same hour yesterday, use `offset 1d` for the earlier window:
+
+```promql
+sum(increase(http_requests_total[1h])) /
+sum(increase(http_requests_total[1h] offset 1d))
+```
+
+A result of `1.2` means the current count is 20% higher than yesterday's count. This comparison needs data for both periods and a nonzero count for the earlier period.
+
+## Handle counter resets after restarts
+
+An application restart normally resets its counters to zero. Subtracting the first value in a window from the last can therefore give a misleading result. For example, a counter might rise from 100 to 150, reset, and then reach 20. Simple subtraction gives a decrease of 80, despite activity both before and after the restart.
+
+`rate()` and `increase()` treat an observed drop in a counter as a reset. In this example, they account for the observed increases of 50 before the reset and 20 after it, then apply extrapolation for the query window. You don't need to restore the old counter value just to query activity across a restart.
+
+However, these functions can only work with the samples Prometheus collected. Events between the last scrape and a restart may go unrecorded. Reset handling doesn't make a scraped counter an exact event ledger.
+
+### Check for unexpected resets
+
+If a counter's results look unusual, check whether Prometheus detected resets during the same period:
+
+```promql
+resets(http_requests_total[1h])
+```
+
+This returns the number of detected resets in the last hour for each series. Repeated resets can be a reason to investigate application restarts or code that resets the counter unexpectedly. Use `resets()` for this check because `changes()` also counts ordinary increases.
+
+When combining request rates across instances, follow the same order as the request-total examples:
+
+```promql
+sum(rate(http_requests_total[5m]))
+```
+
+Calculating the rate for each series first preserves its reset handling. Aggregating raw counters before calculating a rate can hide a reset when another instance's counter increases at the same time.
+
+## rate() vs increase(): when to use each
+
+Use `rate()` when the result should be expressed per second, such as requests per second, errors per second, or bytes per second. Use `increase()` when the result should be a count or amount over a specified period.
+
+The same distinction applies to alerts. An alert for throughput above 100 requests per second calls for `rate()`. An alert for more than 50 errors in an hour calls for `increase()`. Choose the function that matches the threshold you want to express.
+
+For [recording rules](https://signoz.io/guides/what-is-a-prometheus-rule/), Prometheus recommends recording rates so the results stay on a consistent per-second basis. You can multiply a rate by a duration when you need an estimated total for that same window.
 
 ## Best Practices for Using Rate() and Increase()
 
-1. **Choose appropriate time ranges**: Shorter ranges provide more granular data but may be noisier. Longer ranges smooth out fluctuations but may miss short-term issues.
-2. **Handle counter resets**: Both functions automatically handle counter resets, but be aware of potential inaccuracies immediately after a reset.
-3. **Combine with other [PromQL functions](https://signoz.io/guides/promql-cheat-sheet/)**: Use functions like sum(), avg(), or max() with rate() or increase() for more complex analyses.
-4. **Optimize query performance**: Avoid using unnecessarily long time ranges, as this can impact query performance.
+1. **Choose appropriate time ranges**: Shorter windows make rates more responsive to recent activity but can be noisier. Longer windows smooth out fluctuations but may hide short-term issues.
+2. **Handle counter resets**: Both functions account for observed resets. They cannot recover events that occurred between the last scrape and a restart.
+3. **Combine with other [PromQL functions](https://signoz.io/guides/promql-cheat-sheet/)**: Use `sum()`, `avg()`, or `max()` around the rate or increase to combine results across series. Choose the aggregation that matches the total, average, or maximum you need.
+4. **Optimize query performance**: Avoid unnecessarily long windows, which require Prometheus to process more samples. Keep the window long enough to answer your monitoring question.
+
 
 ## Key Takeaways
 
@@ -165,16 +209,16 @@ Both functions automatically handle counter resets by calculating the rate or in
 
 The ideal time range depends on your specific use case. Generally, use shorter ranges (e.g., 5m) for more granular data and longer ranges (e.g., 1h) for smoother trends.
 
-## Enhance Your Monitoring with SigNoz
+## Enhance Your Monitoring with SigNoz Cloud
 
-While Prometheus offers powerful monitoring capabilities, managing retention and scaling can become challenging as your infrastructure grows. SigNoz provides a comprehensive monitoring solution that builds upon Prometheus' strengths while addressing its limitations.
+While Prometheus offers powerful monitoring capabilities, managing retention and scaling can become challenging as your infrastructure grows. SigNoz Cloud provides a comprehensive monitoring solution that builds upon Prometheus' strengths while addressing its limitations.
 
 <GetStartedSigNoz />
 
-With SigNoz, you can:
+With SigNoz Cloud, you can:
 
 - Scale your monitoring infrastructure effortlessly
 - Access advanced querying and visualization capabilities
 - Benefit from integrated tracing and logging alongside metrics.
 - Get high performance with the clickhouse database
-- Take advantage of [SigNoz](https://signoz.io/docs/introduction/)'s exceptional exception monitoring capabilities
+- Take advantage of [SigNoz Cloud](https://signoz.io/docs/introduction/)'s exceptional exception monitoring capabilities

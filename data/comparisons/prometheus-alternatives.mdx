@@ -1,44 +1,39 @@
 ---
 title: Top 11 Prometheus Alternatives in 2026 [Includes Open-Source]
 meta_title: "Prometheus Alternatives 2026: Open Source & SaaS"
-published_date: 2024-03-22
-updated_date: 2026-06-22
-tags: [tools-comparison]
+date: 2026-10-30
+tags: [prometheus, alternatives]
 authors: [debanjan]
 description: "Compare the top Prometheus alternatives for 2026 for metrics and observability, including SigNoz, VictoriaMetrics, InfluxDB, Mimir, and Zabbix."
-image: /img/blog/2024/03/prometheus-alternatives-cover.webp
-hide_table_of_contents: false
-keywords: [prometheus-alternatives,prometheus,opentelemetry,open-source,monitoring-tools,signoz]
+keywords: [prometheus-alternatives,prometheus,opentelemetry,open-source,monitoring-tools]
 related_articles:
+  - '/blog/datadog-vs-prometheus'
   - '/comparisons/newrelic-vs-prometheus'
   - '/comparisons/prometheus-vs-grafana'
   - '/guides/what-is-prometheus-for-monitoring'
-  - '/blog/api-monitoring-tools'
-  - '/blog/kubernetes-monitoring-tools'
 ---
-Prometheus has been one of the most popular open-source monitoring tools for the last few years. However, as systems become more complex, Prometheus looks like a monolithic application that just can’t match performance needs anymore. In fact, it also lacks high availability and easy scalability. In this article, we will go through the top 11 Prometheus alternatives that you can consider using.
 
-
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/prometheus-alternatives-cover.webp" alt="Prometheus alternatives cover image"/>
-</figure>
-
-
-That calls for searching for Prometheus alternatives. While your options are many, you can narrow down your search by focusing on the ones that deliver superior performance, data ingestion, compression with high availability, and scalability. Let’s take a look at the top 11 tools.
-
-## Why Look for Prometheus Alternatives?
-
-Prometheus is a popular metrics monitoring tool. But there are many use cases where it might not be the best fit. Some scenarios where people look for [Prometheus alternatives](https://signoz.io/comparisons/prometheus-alternatives/#8-victoriametrics) are:
+Prometheus is a popular metrics monitoring tool. But there are many use cases where it might not be the best fit. Some scenarios where people look for Prometheus alternatives are:
 
 - **Complex set up and issues in scaling** <br />
 Some people find it complex to set up. Also, managing its scalability for very large and dynamic environments can become complex.
 - **Not a fan of PromQL** <br />
 Some users just don’t like PromQL, the query language of Prometheus for querying metrics.
-- **More use cases than just Metrics monitoring** <br />
+- **Wanting more use cases than just Metrics monitoring** <br />
 Prometheus is limited to metrics monitoring. Some users want to do more than metrics and don’t want to use multiple tools for their monitoring set up. SigNoz, an open-source Prometheus alternative can do logs, metrics, and traces under a single pane of glass.
 
-We have created a list of 11 Prometheus alternatives that you can consider for your use-cases.
+## How to Choose the Right Prometheus Alternative
+
+Start with what you need to change about your current setup. A team that wants to keep PromQL but reduce maintenance has different needs from one that wants to investigate metrics, logs, and traces together. Compare your shortlist against these requirements:
+
+- Decide whether you need metrics alone or a platform that also handles logs and traces. Check whether its dashboards and alerting cover the tasks your team performs during an investigation.
+- Check whether you can reuse your exporters, PromQL queries, Grafana dashboards, and alert rules. Test a representative dashboard and alert before committing to a migration.
+- Evaluate ingestion and query performance with your expected number of time series and the queries your dashboards use. Check how you would add capacity as those needs grow.
+- Check retention periods and which components your team will operate. A self-hosted backend gives you control over deployment, while a managed service reduces backend maintenance but may still require local collectors.
+- Compare total costs at your expected metric volume. Depending on the provider, charges may include ingestion, storage, queries, and dashboards. For self-hosted tools, include infrastructure and the time your team spends operating them.
+- Confirm that access controls, supported regions, and support options meet your requirements.
+
+We have curated a list of the 11 best Prometheus alternatives that you can consider for your use cases.
 
 ## Top 11 Prometheus Alternatives
 
@@ -56,16 +51,16 @@ Not only that, but it uses columnar ClickHouse-based storage to generate analyti
 
 It also provides a [cloud version](https://signoz.io/teams/) where you can just sign-up and start sending your monitoring data.
 
-**Pros:** 
+**Pros:**
 
-1. Support for PromQL to help you set up trigger-based alerts with the DIY [query builder](https://signoz.io/blog/query-builder-v5/)
-2. Ingest, process, and analyze data at highly scalable levels while reducing costs
-3. Easy to migrate out of Prometheus to SigNoz as it supports [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/)
+1. Investigate metrics alongside related logs and traces in the same platform.
+2. Keep Prometheus-format metric endpoints without rewriting application instrumentation.
+3. Choose a managed cloud service or a self-hosted deployment.
 
-**Cons:** 
+**Cons:**
 
-1. Live support is unavailable 
-2. More visualization types needed
+1. Self-hosting requires your team to manage storage, upgrades, and capacity.
+2. Cloud usage and access to paid features depend on your plan. Check [pricing and support options](https://signoz.io/pricing/) against your needs.
 
 ### 2. InfluxDB + Chronograf
 
@@ -77,21 +72,19 @@ It also provides a [cloud version](https://signoz.io/teams/) where you can just 
 
 Source: <a href = "https://docs.influxdata.com/chronograf/v1/guides/create-a-dashboard" rel="noopener noreferrer nofollow" target="_blank" >Influxdata documentation</a>
 
-<a href = "https://www.influxdata.com" rel="noopener noreferrer nofollow" target="_blank" >InfluxDB</a> is a database for collecting and storing time-series data, whereas Chronograf is for visualizing that data and deriving metrics and real-time analytics. In fact, Chronograf can also help you build queries, alerts, and dashboards. 
+[InfluxDB](https://signoz.io/blog/prometheus-vs-influxdb/) is a time-series database for storing and querying measurements such as infrastructure metrics and sensor readings. InfluxDB 3 supports SQL and InfluxQL. Chronograf provides dashboards and a query interface, and current releases can connect to InfluxDB 3 when its InfluxDB 3 support is enabled.
 
-You can use 20+ pre-built dashboards, templates, and libraries to not build everything from scratch, and save yourself time. It’s ideal for all your Influx deployments. Now back to InfluxDB, it’s perfect for handling telemetry data and comes with a straightforward query language that is easy and quick to learn.
+This combination is worth considering if you want to analyze time-series data using InfluxQL instead of PromQL. For InfluxDB 3 connections, Chronograf uses InfluxQL. Its alert rule editor manages Kapacitor tasks, so using that alerting workflow adds a separate component to the stack.
 
-Its powerful integrations can make aggregating large data sets a breeze! It’s extremely resource-efficient, sometimes more than Prometheus, and when backed by Chronograf’s simple interface and customizable dashboards, it can be effective for infrastructure and alert management. 
+**Pros:**
 
-**Pros:** 
+1. InfluxDB 3 offers SQL and InfluxQL for analyzing time-series data.
+2. Chronograf provides dashboards and a visual interface for exploring InfluxDB measurements.
 
-1. InfluxDB is known for fast bulk queries, low latency, and resource efficiency, and its retention policies are top-tier for scalability
-2. Chronograf’s best at visualizing time-series data with better redundancy storage, customizable dashboards, and a user-friendly interface
+**Cons:**
 
-**Cons:** 
-
-1. InfluxDB has certain operations which are difficult to execute, and its open-source version lacks support for certain deployments
-2. Chronograf has limited data support and is less powerful than visualization alternatives
+1. PromQL queries and Prometheus alert rules need to be rewritten for this stack.
+2. Query language support and administration differ across InfluxDB versions. Choose a version before planning the migration.
 
 ### 3. Zabbix
 
@@ -103,21 +96,19 @@ Its powerful integrations can make aggregating large data sets a breeze! It’s 
 
 Source: <a href = "https://www.zabbix.com/documentation/6.0/en/manual/web_interface/frontend_sections/monitoring/dashboard" rel="noopener noreferrer nofollow" target="_blank" >Zabbix</a>
 
-An enterprise-class network monitoring solution, <a href = "https://www.zabbix.com" rel="noopener noreferrer nofollow" target="_blank" >Zabbix</a> is an excellent Prometheus alternative that’s also open-source. In fact, Zabbix is a Prometheus predecessor which provides high-performance monitoring, low resource usage, and streamlined data processing.
+[Zabbix](https://signoz.io/comparisons/zabbix-vs-prometheus/) is an open-source monitoring platform for servers, network devices, applications, and databases. It collects data through agents, SNMP, JMX, HTTP checks, and other integrations, with dashboards and alerting in its web interface.
 
-Zabbix is known for its reliability in production environments. You can take advantage of its advanced alerting features or self-healing capabilities. 
+Zabbix is useful when you need infrastructure availability checks alongside performance metrics. Templates define what to collect and when to alert, while proxies can collect data from remote locations. Its monitoring model uses items and trigger expressions, so it takes a different approach from Prometheus queries and recording rules.
 
-Zabbix offers flexibility of deployment options along with a ‘single pane of glass’ view of your entire infrastructure. It has a web interface for smooth real-time monitoring, alerting, and visualization of infrastructure performance. You can also use its APIs to integrate them into your applications and enjoy integration with numerous services like Grafana, Prometheus, Elasticsearch, and AWS.
+**Pros:**
 
-**Pros:** 
+1. Monitor network equipment and servers through several collection methods in one platform.
+2. Use built-in templates, discovery, dashboards, and configurable notification actions.
 
-1. More ready-to-use solutions with easy-to-understand performance graphs, severity charts, and customizable options
-2. Can process unstructured data, and can collect data from numerous sources like SNMP and JMX
+**Cons:**
 
-**Cons:** 
-
-1. There’s no built-in machine-learning support within the application
-2. Lack of pre-built integration options, especially for specific platforms or cloud applications 
+1. Moving from Prometheus means adapting your monitoring configuration and alert expressions.
+2. Self-hosted deployments require database maintenance and planning for server and proxy capacity.
 
 ### 4. Nagios
 
@@ -133,15 +124,15 @@ Supported by a powerful community, <a href = "https://www.nagios.org" rel="noope
 
 It has a log server for easy visualization, analysis, and archival of logs. You can use the multiple available add-ons for cross-platform monitoring, flexible data transport mechanisms, or integrating passive alerts. You can rely on Nagios for server performance monitoring, capacity planning, and snapshot configurations in addition to server, network, and application monitoring. 
 
-**Pros:** 
+**Pros:**
 
-1. Facilitates high availability of applications with a web-based interface and a vast library of plugins
-2. Multitude of graphical reports, dashboards for visualizing multiple end points with community support 
+1. Extend host and service monitoring with existing plugins or your own checks.
+2. Use Nagios Core without a software license fee.
 
-**Cons:** 
+**Cons:**
 
-1. It can be costly, despite being an open-source solution 
-2. The UI can be better in comparison to modern monitoring alternatives
+1. Configuration and plugin maintenance require ongoing work as your environment changes.
+2. Historical metric graphing and log analysis require additional components or separate products.
 
 ### 5. Icinga
 
@@ -150,22 +141,19 @@ It has a log server for easy visualization, analysis, and archival of logs. You 
     <figcaption><i>Icinga Monitoring Tool</i></figcaption>
 </figure>
 
+Icinga 2 is an open-source monitoring engine that checks host and service availability and sends notifications when checks detect problems. It supports distributed monitoring with masters, satellites, and agents, which helps teams monitor infrastructure across locations.
 
-<a href = "https://icinga.com" rel="noopener noreferrer nofollow" target="_blank" >Icinga</a> is a popular Prometheus alternative that has six core areas of focus: infrastructure monitoring, monitoring automation, cloud monitoring, outstanding integrations, meaningful visualizations, and triggered-based alerts or notifications. 
+The web interface comes from Icinga Web, with modules for working with monitoring state and history. Performance data can go to a separate metrics backend for graphing. This makes Icinga a fit for teams that need configurable service checks, though it involves assembling more components than just the monitoring engine. See our [Icinga alternatives](https://signoz.io/comparisons/icinga-alternatives/) guide for comparisons with other approaches.
 
-You can check availability, performance, and trends or combine and visualize metrics. You can also create reports, automate and synchronize monitoring objects with ease. It’s highly configurable and relies on active checks to monitor a system, as opposed to Prometheus’s pull-based model. 
+**Pros:**
 
-It stores data in external databases like MySQL or PostgreSQL and doesn’t have a dedicated query language like Prometheus. However, Icinga doesn’t have great visualization options. Prometheus, often used with Grafana, has better in-built visualization capabilities. What’s special about Icinga is its advanced alerting system with flexible notification options like email or SMS.
+1. Reuse Nagios-compatible monitoring plugins and configure custom notifications.
+2. Distribute checks across agents and satellites instead of relying on one monitoring server.
 
-**Pros:** 
+**Cons:**
 
-1. It actively collects data, thereby facilitating more real-time alerts for faster troubleshooting
-2. Compatible with a wide range of systems with multiple integrations and plugins 
-
-**Cons:** 
-
-1. High scalability depends on manual configuration entirely 
-2. It can be a steep learning curve with complicated configuration options
+1. The engine, web interface, and data storage components need configuration and maintenance.
+2. Existing PromQL queries and recording rules do not transfer directly to Icinga's check configuration.
 
 ### 6. Splunk
 
@@ -183,33 +171,31 @@ Splunk is also adept at [distributed tracing](https://signoz.io/blog/opentelemet
 
 Moreover, it can create a data source from any type of data generation. It has its own search processing language (SPL) with advanced functionalities like data search, correlation, and visualization and also more plugins and integrations than Prometheus!
 
-**Pros:** 
+**Pros:**
 
-1. Effective at automating workflows and [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) in real-time 
-2. Better scalability options with a push model that stores data in a centralized database 
+1. Collect Prometheus-format metrics through an OpenTelemetry Collector.
+2. Use a hosted service for infrastructure metrics, dashboards, alerting, and application tracing.
 
-**Cons:** 
+**Cons:**
 
-1. It is pricier with licensing costs, and deployment size considerations
-2. It requires a higher network overhead as it’s constantly pulling data
+1. You need to evaluate the specific Splunk products and subscriptions required for metrics, logs, and security monitoring.
+2. Scraping Prometheus-format data does not automatically migrate your existing PromQL dashboards and alert rules.
 
 ### 7. Logz.io
 
-<a href = "http://Logz.io" rel="noopener noreferrer nofollow" target="_blank" >Logz.io</a> isn’t a Prometheus alternative, it’s more of a wrapper that offers Prometheus as a service so that you can track logs and traces within a single platform. This implies that you’ll be able to scrape metrics using Prometheus but won’t be limited by its management, scalability, or storage, as Logz.io will take care of it.
+[Logz.io](https://signoz.io/comparisons/logz-vs-datadog/) offers managed metrics monitoring alongside log management and distributed tracing. You can keep a Prometheus server scraping your targets and configure `remote_write` to send its samples to Logz.io for storage and analysis.
 
-Perfect for cloud, hybrid, or on-premise environments, <a href = "http://Logz.io" rel="noopener noreferrer nofollow" target="_blank" >Logz.io</a> can centralize your metrics once you create an account and add a remote write to your config files. If you’re not an existing Prometheus user,you can use the Telemetry [Collector agent](https://signoz.io/blog/opentelemetry-collector-complete-guide/), which will help collect metrics for further storage and analysis.  
+This setup reduces the work of operating the remote metrics backend, while your team still manages the local scraper. Logz.io supports PromQL queries and importing existing Grafana dashboards. Its migration documentation notes that notification endpoints and dashboard annotations need to be recreated rather than imported automatically.
 
-With log management, [infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/), and distributed tracing as its main areas of strength, <a href = "http://Logz.io" rel="noopener noreferrer nofollow" target="_blank" >Logz.io</a> is replacing traditional APM as a cloud-based SIEM. You can use pre-built dashboards, create newer ones, or migrate older dashboards to correlate data easily. In fact, its data optimization hub can help you filter out low-priority data. 
+**Pros:**
 
-**Pros:** 
+1. Forward metrics from an existing Prometheus deployment to a managed backend.
+2. Investigate metrics with logs and traces within the Logz.io platform.
 
-1. Faster troubleshooting with reduced costs to improve system health, performance, and security
-2. 300+ integrations to monitor any stack, and quick and easy onboarding functionalities
+**Cons:**
 
-**Cons:** 
-
-1. Customer service isn’t exceptional 
-2. You can process a limited number of logs daily, and bypassing this requires expensive add-on purchases
+1. A remote-write setup still requires maintaining collection infrastructure.
+2. Dashboard migration includes manual work for notification endpoints and annotations.
 
 ### 8. VictoriaMetrics
 
@@ -221,37 +207,35 @@ With log management, [infrastructure monitoring](https://signoz.io/guides/infras
 
 Source: <a href = "https://docs.victoriametrics.com/operator/monitoring" rel="noopener noreferrer nofollow" target="_blank" >VictoriaMetrics</a>
 
-VictoriaMetrics is a superior Prometheus alternative that’s known for being more resource-efficient. It’s an open-source observability solution that is easy to configure and operate, ideal for long-term metrics storage and multi-tenancy support. 
+VictoriaMetrics is an open-source time-series database for metrics. You can run it as a single-node service or a cluster. It can scrape Prometheus-compatible targets directly or receive samples sent by Prometheus through `remote_write`.
 
-It offers the same features as Prometheus does, but has additional benefits like high performance, high scalability, and anomaly detection for troubleshooting. While scraping data, Prometheus uses more resources in comparison to VictoriaMetrics. Its query language MetricsQL allows you to do more than PromQL. You can use Remotewrite to configure VictoriaMetrics to read data from Prometheus. 
+Its MetricsQL query language builds on PromQL, making it an option for teams that want to keep much of their existing querying workflow. Cluster deployments support multi-tenancy. MetricsQL also has documented behavior differences from PromQL, so check your existing queries during a migration rather than assuming every result will be identical.
 
-**Pros:** 
+**Pros:**
 
-1. More effective data compression capabilities than other alternatives
-2. It can be used as a long-term storage solution for Prometheus with fast backups, and advanced data ingestion and querying
+1. Use it as a metrics backend while keeping Prometheus scraping, or configure direct scraping.
+2. Choose single-node or cluster deployments according to your storage and scaling needs.
 
-**Cons:** 
+**Cons:**
 
-1. It can be pricier, especially while dealing with large volumes of data
-2. The graphical user interface can be enhanced
+1. Operating a cluster means managing separate ingestion, storage, and query components.
+2. Query compatibility needs testing, especially where MetricsQL and PromQL differ.
 
 ### 9. TimescaleDB + Telegraf + Grafana
 
-TimescaleDB, Telegraf, and Grafana come together to make a powerful application monitoring stack. TimescaleDB helps you store time-series data in a highly scalable platform for real-time and historical analysis. 
+TimescaleDB, [Telegraf](https://signoz.io/comparisons/opentelemetry-vs-telegraf/), and [Grafana](https://signoz.io/comparisons/prometheus-vs-grafana/) form a metrics stack for teams that prefer SQL. TimescaleDB extends PostgreSQL for time-series data. Telegraf collects measurements and can write them through its PostgreSQL output plugin, which includes TimescaleDB configuration examples. Grafana queries the stored data through its PostgreSQL data source to build dashboards and alerts.
 
-Telegraf collects, aggregates, and sends metrics and events, which get stored in TimescaleDB. Then, Grafana helps you visualize this data. When you have a TimescaleDB instance running, you’ll be able to query the data and build real-time dashboards. Furthermore, TimescaleDB makes it exceptionally easy to get the data out, thereby reducing time and lessening the learning curve.
+This is an option when you want to manage metric storage and analysis in PostgreSQL. It requires designing the collection configuration and database schema for your workload. It is not a drop-in Prometheus backend, so existing PromQL queries and alert rules need to be rebuilt using SQL and Grafana's alerting configuration.
 
-Telegraf, with its data collection, is here to evaluate database performance and application response time. Grafana can help you set up alert rules and dispatch timely notifications for faster troubleshooting. 
+**Pros:**
 
-**Pros:** 
+1. Query metrics with SQL and combine them with other data in PostgreSQL.
+2. Choose collection plugins and build Grafana dashboards around your own schema.
 
-1. Purpose-built tools allow you more flexibility to collect data and visualize metrics
-2. You’re able to have an eye on all application layers to ensure a seamless and optimized user experience 
+**Cons:**
 
-**Cons:** 
-
-1. You have to use three separate tools 
-2. It might require more manual intervention to manage them
+1. Your team operates and connects three separate components.
+2. You must manage schema changes, retention, database capacity, and the migration of existing queries.
 
 ### 10. Sensu
 
@@ -267,15 +251,15 @@ Source: <a href = "https://sensu.io/blog/sensu-metrics-collection-beafdebf28bc" 
 
 It’s known for its flexible, API-rich [observability pipeline](https://signoz.io/guides/observability-pipeline/), but it doesn’t have a data storage backend. In fact, it relies on time-series databases like Prometheus or Graphite. It’s not that efficient at alerting like Prometheus. However, it’s effective for monitoring data. 
 
-**Pros:** 
+**Pros:**
 
-1. Perfect for multi-cloud monitoring, with container monitoring being the best
-2. Easy to set up this centralized monitoring management platform, and push and pull models make it flexible 
+1. Define checks and event-processing rules as code.
+2. Route monitoring events to notification services and metric storage systems through handlers.
 
-**Cons:** 
+**Cons:**
 
-1. Built-in alerting and notification triggers could be more advanced 
-2. Scalability can be difficult as it doesn’t have a native federated architecture
+1. Historical metrics dashboards require integration with a separate storage and querying system.
+2. Some capabilities require a commercial license, so check the feature set for your deployment.
 
 ### 11. Mimir by Grafana (open-source)
 
@@ -293,38 +277,20 @@ It offers durable, long-term storage capabilities and is built to handle billion
 
 **Pros:**
 
-1. Scalability
-2. Long-term storage
+1. Retain PromQL and Prometheus-compatible ingestion while expanding backend capacity.
+2. Separate tenant data and queries within a shared metrics cluster.
 
 **Cons:**
 
-1. Learning Curve
-2. Operation overhead
+1. Self-hosting requires operating Mimir and its supporting storage and infrastructure.
+2. You still need metric collection and a dashboard interface. Grafana Cloud is the managed alternative if you want a hosted service.
 
-## How to Choose the Right Prometheus Alternative
+## Frequently asked questions
 
-There are too many alternatives you’d find. While each comes with its pros and cons, here’s what you should consider before picking the right one:
+### Can I keep my existing exporters with managed Prometheus?
 
-- The underlying database should support very high write throughput as a lot of monitoring signals are generated
-- You should be able to easily visualize the data using custom graphs and charts
-- Along with visualization, you should be able to set up custom alerts and notifications
-- You should take care of the data access pattern depending on your monitoring use case
-- There should be a balance between ease of use and functionalities
-- Take care of the cost involved — this includes additional costs apart from data storage
-- Ensure that you can independently scale your data storage layer without impacting the visualizations
+Yes, you can generally keep exporters that expose Prometheus-format metrics. Configure the provider's collector to scrape them, or keep Prometheus scraping locally and forward the samples where the service supports it. For example, Grafana Cloud accepts samples through `remote_write` from an existing Prometheus server. This lets you change where metrics are stored without replacing the exporters.
 
-SigNoz can be a great [Prometheus alternative](https://signoz.io/comparisons/prometheus-alternatives/#7-logzio), provided its existing compatibility with the Prometheus ecosystem. Moreover, it can be your one-stop solution for all observability needs. Two Prometheus comparisons go deeper on specific pairings, [Loki vs Prometheus](https://signoz.io/blog/loki-vs-prometheus/) and [Jaeger vs Prometheus](https://signoz.io/blog/jaeger-vs-prometheus/), and because Datadog made this list, the [Datadog alternatives](https://signoz.io/blog/datadog-alternatives/) roundup covers that platform's competitors.
-
-Several other tools listed above also have dedicated roundups of their own: the [Zabbix alternatives](https://signoz.io/comparisons/zabbix-alternatives/), [Nagios alternatives](https://signoz.io/comparisons/nagios-alternatives/), and [Grafana alternatives](https://signoz.io/blog/grafana-alternatives/) guides go deeper on those, and the [Splunk alternatives](https://signoz.io/blog/splunk-alternatives/) roundup covers the commercial-SaaS angle.
-
-## Getting Started with SigNoz
+## Getting Started with SigNoz Cloud
 
 <GetStartedSigNoz />
-
----
-
-**Further Reading:**
-
-[Datadog vs Prometheus - Key Differences](https://signoz.io/blog/datadog-vs-prometheus/)
-
-[OpenTelemetry vs Prometheus Detailed Comparison](https://signoz.io/blog/opentelemetry-vs-prometheus/)
