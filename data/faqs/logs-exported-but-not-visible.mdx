@@ -7,17 +7,17 @@ authors: [yuvraj]
 tags: [logs]
 ---
 
-Logs may be missing from SigNoz Cloud because they reached a different destination, fall outside your search, or were removed or rejected along the way. Start with the destination and search scope, then check the collection and export path if you still cannot find them.
+Logs may be missing from SigNoz Cloud because they reached a different destination, fall outside your search, or were removed or rejected along the way. Start with the destination and search scope, then follow the log’s path from the application to SigNoz Cloud if you still cannot find it.
 
-An application may send logs directly to SigNoz Cloud or through an OpenTelemetry Collector. A Collector response reports the outcome at that hop; it does not confirm that the Collector delivered the logs to SigNoz Cloud.
+Your application may send logs directly to SigNoz Cloud, or an OpenTelemetry Collector may collect and forward them. A response from the Collector reports what happened when it received the logs, so it cannot confirm delivery to SigNoz Cloud.
 
 ## Check the destination and search scope
 
-Check the exporter that sends to SigNoz Cloud, whether it runs in your application or in a Collector. Compare its endpoint and ingestion key with **Settings → Ingestion** in the workspace you are searching. For Self-Hosted SigNoz, check that you have opened the instance that receives the logs. The [ingestion guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) explains the Cloud settings.
+An exporter is the component that sends logs onward, whether it runs in your application or in a Collector. To check that it sends logs to the Cloud workspace you have open, compare its destination address and ingestion key with **Settings → Ingestion** in that workspace. The [ingestion guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) explains these settings. If you use Self-Hosted SigNoz, check that you have opened the instance receiving the logs.
 
-Next, search for one log whose message and approximate time you know. For example, a checkout service called `checkout-api-delivery` writes a log when it receives an order. In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), clear filters such as service and severity, choose a time range around the event, and search its message. Widen the range if you are unsure of the timestamp.
+Next, search for one log whose message and approximate time you know. For example, take a checkout service called `checkout-api-delivery` that writes `delivery-check-4821-86062494` when it receives an order. In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), clear filters such as service and severity, choose a time range around the event, and search for the message. Widen the range if you are unsure of the timestamp.
 
-In this example, a search for `delivery-check-4821-86062494` returned the matching log. Filtering for `checkout-api-delivery-wrong` hid it, while filtering for `checkout-api-delivery` returned it again. If you find your log, inspect its timestamp and service fields before narrowing your search. An older timestamp or an unexpected service name can put it outside the original search.
+The message search returned the checkout log shown below. A filter for `checkout-api-delivery-wrong` hid it because that name did not match the log’s service; changing the filter to `checkout-api-delivery` returned it again. If you find your log, inspect its timestamp and service fields before narrowing your search. An older timestamp or an unexpected service name can put it outside the original search.
 
 <Figure
   src="/img/faqs/logs-exported-but-not-visible/marked-log.webp"
@@ -30,8 +30,8 @@ In this example, a search for `delivery-check-4821-86062494` returned the matchi
 
 ## Check the path to SigNoz
 
-If the search still returns no log, follow it from the source to SigNoz. Confirm that the application wrote it. If you use a Collector, check that it can read the source and that its processing rules do not change or drop the record. Then inspect the outgoing exporter’s errors and warnings. Receiver activity alone shows that data reached the Collector, not that it reached SigNoz Cloud.
+If the search still returns no log, follow it from the source to SigNoz. Confirm that the application wrote it. If you use a Collector, check that the log reaches it and that its processing rules do not change or drop the record. Whether your application or a Collector sends the log to SigNoz, check that exporter’s errors and warnings for delivery problems.
 
-For OpenTelemetry Protocol (OTLP) over HTTP, a `200` response can still report rejected records in a partial-success response. Check exporter warnings as well as errors; the <a href="https://opentelemetry.io/docs/specs/otlp/#otlphttp-response" target="_blank" rel="noopener noreferrer nofollow">OTLP specification</a> explains the response. The [missing-data guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) gives checks for each hop.
+A response that looks successful does not always mean every log was accepted. For example, an OpenTelemetry Protocol (OTLP) HTTP `200` response can include a partial-success result that reports rejected records. See the <a href="https://opentelemetry.io/docs/specs/otlp/#otlphttp-response" target="_blank" rel="noopener noreferrer nofollow">OTLP specification</a> for response details. The [missing-data guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) can help you investigate the delivery path.
 
-After a correction, send a new identifiable log and look for it in the intended workspace. If it is still missing, keep the message, UTC time, relevant configuration and exporter errors for further investigation. Redact ingestion keys and other secrets before sharing the configuration.
+If you change the configuration, send a new identifiable log and look for it in the intended workspace. If it is still missing, keep the message, UTC time, relevant configuration and exporter errors for further investigation. Redact ingestion keys and other secrets before sharing the configuration.
