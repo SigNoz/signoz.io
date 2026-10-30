@@ -78,10 +78,6 @@ up{job="api-servers"}
 
 The result has one series per target. A value of `1` means its last scrape succeeded, while `0` means it failed. The `instance` label tells you which target each result belongs to.
 
-You can also inspect these labels on the Prometheus Targets page. The screenshot below shows a target belonging to the `java` job, with `localhost:9091` as its instance:
-
-<Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image.webp" alt="Prometheus Targets page showing job java and instance localhost:9091" caption="The target labels identify the scrape job and its instance." />
-
 ## Why Prometheus Labels Matter: Benefits and Importance
 
 Prometheus labels are not just a convenient feature — they are fundamental to the system's effectiveness. Here's why they matter:
@@ -142,6 +138,21 @@ sum without (instance) (rate(http_requests_total[5m]))
 ```
 
 This removes `instance` from the result and combines the rates where the remaining labels match. Labels such as `job`, `method`, and `status` stay available for comparing the results.
+
+### Grouping by a Derived Label
+
+Sometimes the grouping you need is part of an existing label value. For example, the API job's `instance` values contain a hostname and port. Use `label_replace()` to copy the hostname into a `host` label and group request rates by it:
+
+```promql
+sum by (host) (
+  label_replace(
+    rate(http_requests_total{job="api-servers"}[5m]),
+    "host", "$1", "instance", "([^:]+):.*"
+  )
+)
+```
+
+For `instance="api1.example.com:8080"`, `$1` captures `api1.example.com` and sets it as the `host` value. The query returns one request rate per hostname, combining readings across ports, methods, and status codes. `label_replace()` changes labels in query results without changing the stored series.
 
 ### Listing and Counting Unique Label Values
 
