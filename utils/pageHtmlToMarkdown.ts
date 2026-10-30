@@ -1,6 +1,7 @@
 import type { Element as HastElement, Root as HastRoot, RootContent as HastContent } from 'hast'
 import { getTextContent, hastToMarkdown } from './docs/markdownCore'
 import { buildMarkdownDocument } from './docs/buildMarkdownDocument'
+import { getRelatedPageLinks, stripSiteTitleSuffix } from './relatedPageLinks'
 
 /**
  * Convert a server-rendered HTML page (pricing, feature pages, listings, ...)
@@ -243,6 +244,7 @@ const getCanonicalUrl = (head: HastElement | null): string | undefined => {
 export type PageAgentMarkdownOptions = {
   /** Fallback when the page head has no <link rel="canonical">. */
   fallbackCanonicalUrl?: string
+  pagePath?: string
 }
 
 export async function renderPageHtmlToAgentMarkdown(
@@ -285,6 +287,9 @@ export async function renderPageHtmlToAgentMarkdown(
     // Keep the page's own leading h1 when it already renders one.
     includeTitle: !bodyMarkdown.startsWith('# '),
     description,
+    relatedPageLinks: options.pagePath
+      ? getRelatedPageLinks(options.pagePath, stripSiteTitleSuffix(title))
+      : null,
     bodyMarkdown,
     footerLines,
   })

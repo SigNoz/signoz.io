@@ -3,10 +3,12 @@ import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
 import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
 import { mdxOptions } from '../mdx/options'
+import { getRelatedPageLinks } from '../relatedPageLinks'
 
 type DocMarkdownSource = {
   slug?: string
   title: string
+  meta_title?: string
   description?: string
   docTags?: unknown
   body: { raw: string }
@@ -38,6 +40,7 @@ const hasMatchingLeadingH1 = (markdown: string, title: string): boolean => {
 
 type RenderMarkdownOptions = {
   footerLines?: string[]
+  pagePath?: string
 }
 
 const wrapDocument = (
@@ -50,6 +53,9 @@ const wrapDocument = (
       title: doc.title,
       includeTitle: !hasMatchingLeadingH1(bodyMarkdown, doc.title),
       description: doc.description,
+      relatedPageLinks: options.pagePath
+        ? getRelatedPageLinks(options.pagePath, doc.meta_title || doc.title)
+        : null,
       tags: getDocTags(doc),
       bodyMarkdown,
       footerLines: options.footerLines ?? [MORE_DOCS_POINTER],

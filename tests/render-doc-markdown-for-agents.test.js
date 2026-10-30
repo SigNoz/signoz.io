@@ -50,6 +50,29 @@ test('renderDocMarkdownForAgents places the llms.txt directive once, after the d
   )
 })
 
+test('renderDocMarkdownForAgents adds mapped related links after the directive using the SEO title', async () => {
+  const markdown = await renderDocMarkdownForAgents(
+    createDoc({ meta_title: 'Logs Overview SEO' }),
+    { pagePath: '/docs/logs-management/overview' }
+  )
+
+  assert.equal(
+    markdown.startsWith(
+      `# Test Doc\n\nTest description.\n\n${LLMS_TXT_DIRECTIVE}\n\nIf you are an LLM or AI agent exploring Logs Overview SEO,`
+    ),
+    true
+  )
+  assert.match(
+    markdown,
+    /^1\. <https:\/\/signoz\.io\/docs\/logs-management\/send-logs\/collection-methods\/>$/m
+  )
+})
+
+test('renderDocMarkdownForAgents skips related links for unmapped docs', async () => {
+  const markdown = await renderDocMarkdownForAgents(createDoc(), { pagePath: '/docs/test-doc' })
+  assert.doesNotMatch(markdown, /If you are an LLM or AI agent/)
+})
+
 test('renderDocMarkdownForAgents avoids duplicating the leading title heading', async () => {
   const markdown = await renderDocMarkdownForAgents(
     createDoc({
