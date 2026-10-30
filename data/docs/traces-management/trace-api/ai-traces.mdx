@@ -12,7 +12,9 @@ The `builder_ai_query` query type runs queries against your AI traces, which are
 
 `builder_ai_query` uses the same endpoint, authentication, and top-level payload as the rest of the Trace API:
 
-`POST` `https://{URL}/api/v5/query_range`
+`POST` `https://<your-signoz-url>/api/v5/query_range`
+
+Replace `<your-signoz-url>` with your SigNoz instance URL, for example `example.signoz.io`.
 
 See the [Trace API overview](https://signoz.io/docs/traces-management/trace-api/overview/) for the API key and header setup, and the [payload model](https://signoz.io/docs/traces-management/trace-api/payload-model/) for the `start`, `end`, `requestType`, and `compositeQuery` fields.
 
@@ -34,7 +36,7 @@ The `spec` accepts the same fields as a [builder query](https://signoz.io/docs/t
 
 Two kinds of fields are available in AI queries.
 
-**Trace fields** hold a total for the whole trace. Use them in `filter`, in `aggregations`, and in `order`.
+**Trace fields** hold a total for the whole trace. Use them in `filter`, in `aggregations`, and in `order`. With `requestType: trace`, totals include every span of the trace, even spans outside `start` and `end`. With `raw`, `scalar`, and `time_series`, totals include only spans inside the query range.
 
 | Field | Type | Holds |
 | --- | --- | --- |
@@ -57,13 +59,13 @@ For every attribute that SigNoz reads from GenAI spans and the source keys it ma
 
 ## Examples
 
-All examples use `type: builder_ai_query` and `signal: traces`. The `start` and `end` values are epoch timestamps in milliseconds; replace them with your query range.
+All examples use `type: builder_ai_query` and `signal: traces`. The `start` and `end` values are epoch timestamps in milliseconds; replace them with your query range. `stepInterval` accepts a number of seconds (`60`) or a duration string (`"60s"`).
 
 ### Raw spans from AI traces with many tool calls
 
 Return up to 100 spans from the `ai-agent` service whose trace has more than 10 tool calls, newest first. `requestType: raw` returns individual spans.
 
-```json minimap defaultCollapsed
+```json defaultCollapsed
 {
   "schemaVersion": "v1",
   "start": 1640995200000,
@@ -157,7 +159,7 @@ The same filter as above, with explicit output columns: the span name plus the r
 
 ### Average cost by model (scalar)
 
-Compute the average estimated per-trace cost for each model, most expensive first. `requestType: scalar` returns one summary value per group.
+Compute the average estimated per-trace cost for each model, most expensive first. `requestType: scalar` returns one summary value per group. When you group by model, each model gets only the cost of its own spans, so a trace that calls two models does not count its full cost under both.
 
 ```json minimap defaultCollapsed
 {
@@ -248,7 +250,7 @@ Sum the estimated per-trace cost for each model in 60-second buckets. `requestTy
 
 Return the 10 most expensive traces that have more than 10 tool calls but fewer than 3 distinct tools. `requestType: trace` returns one row per trace.
 
-```json minimap defaultCollapsed
+```json defaultCollapsed
 {
   "schemaVersion": "v1",
   "start": 1640995200000,
