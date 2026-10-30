@@ -6,7 +6,7 @@ tags: [kubernetes, logs, metrics]
 authors: [yuvraj]
 ---
 
-In SigNoz Cloud, you can investigate a container restart by comparing the pod's logs with its CPU and memory history around the failure. The data remains available after the pod is deleted if it reached SigNoz Cloud before deletion and is still within its [retention period](https://signoz.io/docs/userguide/retention-period/). The [Kubernetes integration](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) can collect both logs and resource metrics.
+In SigNoz Cloud, you can investigate a container restart by comparing the pod's logs with its CPU and memory history around the failure. To make that comparison, use the [Kubernetes integration](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) to collect and send both logs and resource metrics before an incident. After the pod is deleted, the data will only be available if it reached SigNoz Cloud before deletion and is still within its [retention period](https://signoz.io/docs/userguide/retention-period/).
 
 ## Compare the error with resource history
 
@@ -21,9 +21,9 @@ For example, take `crashing-pod-demo`, an app that writes regular progress logs.
   themeInvert="false"
 />
 
-The selected log records the exit, and the later `app_started` log shows the app starting again. The charts provide resource samples around the failure, which you can compare with the error message.
+The selected log says the app exits with code 1, and the later `app_started` log shows the app starting again. The CPU and memory charts give you context for investigating the restart.
 
-The **Pod** view uses a time range around the selected log and matches metrics using the cluster and pod name. A replacement pod can reuse that name, so its history may also appear. To focus on one pod instance or container, use [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and filter by the pod's unique ID (`k8s.pod.uid`) and container name when those attributes are available. You can find the pod UID in the log details.
+The **Pod** view shows metrics around the selected log, matching them by cluster and pod name. A replacement pod can reuse that name, so its history may also appear. To focus on one pod instance or container, use [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) to filter by the pod's unique ID (`k8s.pod.uid`) and container name when those attributes are available. If the log includes the pod UID, you can find it in the log details.
 
 ## Check why the container stopped
 
