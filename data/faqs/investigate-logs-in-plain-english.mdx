@@ -1,0 +1,45 @@
+---
+title: Can I investigate logs in plain English, and what setup do I need?
+meta_title: Investigate logs in plain English with SigNoz Cloud
+description: Use Noz in SigNoz Cloud or connect an external assistant through MCP, then check its log results against the recorded evidence.
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+You can investigate logs in plain English with Noz, the assistant in SigNoz Cloud, when it is enabled for your workspace. You can also connect your own assistant through the SigNoz MCP server. Both options work with logs already collected in SigNoz Cloud.
+
+## Choose where to ask
+
+To ask [Noz](https://signoz.io/docs/ai/noz/), open **Noz** in your workspace and enter a question in **Ask anything**. If your services are not sending logs yet, [set up log collection](https://signoz.io/docs/logs-management/send-logs-to-signoz/) first.
+
+If you prefer another assistant, connect it to the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/). Model Context Protocol (MCP) lets the assistant use tools to search your logs. For SigNoz Cloud, connect a compatible client to the hosted server for your region and authenticate with your workspace URL and a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key. Give the account a read-only role for an investigation, because the server also offers tools that can change resources. The setup guide also covers Self-Hosted SigNoz.
+
+## Ask Noz about a payment timeout
+
+For example, we created logs for a checkout service, including successful payments and failures. The timeout records have ERROR severity and the message `Payment timeout`. After sending the example logs to SigNoz Cloud, we gave Noz the service name and a time range. Our request included:
+
+```text
+Show ERROR logs whose message contains "Payment timeout".
+```
+
+Noz returned two matching records. The screenshot shows their timestamps and messages, along with an event ID that identifies each record.
+
+<Figure
+  src="/img/faqs/investigate-logs-in-plain-english/noz-timeout-results.webp"
+  alt="Noz shows two Payment timeout records and their UTC timestamps."
+  caption="Noz returns two ERROR records with the expected message and UTC timestamps."
+  width={730}
+  height={170}
+  themeInvert={false}
+/>
+
+For your own logs, include the service name, symptom, and time range in your question. Ask for the matching records so you can check the answer.
+
+## Check the records behind the answer
+
+We checked the two results in [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) with the same service, time range, severity, and message filters. Their timestamps and messages matched Noz's answer.
+
+You can check your own results the same way. A timeout message tells you what was recorded, but you need more evidence to know why the payment timed out. If you cannot find a record, check that the logs were collected, the service name is correct, and the time range covers the event. Logs must also still be within their retention period.
+
+See [natural-language log exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) for more questions.
