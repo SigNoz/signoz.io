@@ -17,7 +17,7 @@ export const buildRelatedPageLinksIntro = (title: string): string =>
 export const buildRelatedPageLinksMarkdown = ({ title, links }: RelatedPageLinks): string =>
   [
     buildRelatedPageLinksIntro(title),
-    links.map((url, index) => `${index + 1}. <${url}>`).join('\n'),
+    links.map((url, index) => `${index + 1}. ${url}`).join('\n'),
   ].join('\n\n')
 
 export type BuildMarkdownDocumentOptions = {

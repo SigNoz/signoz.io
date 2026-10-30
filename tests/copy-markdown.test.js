@@ -114,7 +114,7 @@ test('buildCopyMarkdownDocument places related page links right after the direct
     ),
     true
   )
-  assert.match(markdown, /^1\. <https:\/\/signoz\.io\/docs\/a\/>$/m)
+  assert.match(markdown, /^1\. https:\/\/signoz\.io\/docs\/a\/$/m)
 })
 
 test('appendGlossaryDefinitionsInHast surfaces tooltip definitions in brackets', async () => {

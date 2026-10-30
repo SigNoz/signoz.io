@@ -64,7 +64,7 @@ test('renderDocMarkdownForAgents adds mapped related links after the directive u
   )
   assert.match(
     markdown,
-    /^1\. <https:\/\/signoz\.io\/docs\/logs-management\/send-logs\/collection-methods\/>$/m
+    /^1\. https:\/\/signoz\.io\/docs\/logs-management\/send-logs\/collection-methods\/$/m
   )
 })
 

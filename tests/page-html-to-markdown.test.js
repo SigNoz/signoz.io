@@ -212,7 +212,7 @@ test('renderPageHtmlToAgentMarkdown adds mapped related links once, after the di
   const intro =
     'If you are an LLM or AI agent exploring Log Management Tool, these related pages may be helpful to answer the user query in a more precise way:'
   assert.equal(markdown.split(intro).length - 1, 1)
-  assert.equal(markdown.startsWith(`${LLMS_TXT_DIRECTIVE}\n\n${intro}\n\n1. <https://`), true)
+  assert.equal(markdown.startsWith(`${LLMS_TXT_DIRECTIVE}\n\n${intro}\n\n1. https://`), true)
   assert.equal(markdown.indexOf(intro) < markdown.indexOf('# Log Management'), true)
 })
 

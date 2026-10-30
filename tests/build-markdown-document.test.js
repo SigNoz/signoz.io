@@ -57,7 +57,7 @@ test('buildMarkdownDocument renders related page links directly after the direct
         'Doc description.',
         LLMS_TXT_DIRECTIVE,
         'If you are an LLM or AI agent exploring Docs SEO Title, these related pages may be helpful to answer the user query in a more precise way:',
-        '1. <https://signoz.io/docs/a/>\n2. <https://signoz.io/docs/b/>',
+        '1. https://signoz.io/docs/a/\n2. https://signoz.io/docs/b/',
         'Tags: logs',
       ].join('\n\n')
     ),
