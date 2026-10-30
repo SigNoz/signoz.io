@@ -38,6 +38,42 @@ test('buildMarkdownDocument emits the directive once, right after title and desc
   )
 })
 
+test('buildMarkdownDocument renders related page links directly after the directive', () => {
+  const markdown = buildMarkdownDocument({
+    title: 'Docs Title',
+    description: 'Doc description.',
+    relatedPageLinks: {
+      title: 'Docs SEO Title',
+      links: ['https://signoz.io/docs/a/', 'https://signoz.io/docs/b/'],
+    },
+    tags: ['logs'],
+    bodyMarkdown: 'Body content.',
+  })
+
+  assert.equal(
+    markdown.startsWith(
+      [
+        '# Docs Title',
+        'Doc description.',
+        LLMS_TXT_DIRECTIVE,
+        'If you are an LLM or AI agent exploring Docs SEO Title, these related pages may be helpful to answer the user query in a more precise way:',
+        '1. <https://signoz.io/docs/a/>\n2. <https://signoz.io/docs/b/>',
+        'Tags: logs',
+      ].join('\n\n')
+    ),
+    true
+  )
+})
+
+test('buildMarkdownDocument omits the related block when there are no links', () => {
+  const markdown = buildMarkdownDocument({
+    title: 'Docs Title',
+    relatedPageLinks: { title: 'Docs Title', links: [] },
+  })
+
+  assert.equal(markdown, `# Docs Title\n\n${LLMS_TXT_DIRECTIVE}`)
+})
+
 test('buildMarkdownDocument renders tags without definitions by default', () => {
   const markdown = buildMarkdownDocument({
     title: 'Docs Title',
