@@ -1,0 +1,35 @@
+---
+title: Give Claude Code the production logs it needs to investigate a bug
+description: Connect Claude Code to SigNoz Cloud to investigate failures with logs, traces and historical metrics, then check its explanation against the recorded evidence.
+date: 2026-10-22
+tags: [log-management, ai, claude-code]
+authors: [yuvraj]
+---
+
+Claude Code can investigate a failure by querying logs, traces and historical metrics stored in [SigNoz Cloud](https://signoz.io/log-management/), then comparing that evidence with the application code. The connection uses Model Context Protocol (MCP), which gives Claude tools to query the data.
+
+To try this, connect Claude Code to the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) using a read-only service account. Give Claude access to the relevant application code as well, so it can relate what it finds in the logs to the code that produced them.
+
+## Investigate an example failure
+
+For example, we ran a <a href="https://github.com/SigNoz/examples/tree/b811d26ab91208d6c3ef884b9497e4f38489737d/fastapi/opentelemetry-fastapi-demo" target="_blank" rel="noopener noreferrer nofollow">public Python app</a> that deliberately returns a server error (HTTP 500) when called at `/exception`. We sent its logs, traces and metrics to SigNoz Cloud.
+
+We asked Claude to investigate the error using the logs and a failed trace, and to compare request counts before and during the failure. To help it find the right data and code, we gave it the service name, source commit and two time windows in UTC. The first window covered successful requests; the second included requests to `/exception`.
+
+## Check what the agent found
+
+Claude retrieved five error logs containing `ValueError` and linked one to a failed `GET /exception` trace. The logged stack trace pointed to `raise ValueError("sadness")` in the sample, which matched the known failure.
+
+![Claude Code searches traces in SigNoz Cloud and receives a result with HTTP status 500.](/img/faqs/claude-code-production-logs-debugging/claude-mcp-trace-call.webp)
+
+*Claude Code’s SigNoz MCP call filters for errors from the example service. The returned trace data includes HTTP status 500.*
+
+The logs and trace explain an individual failure. To see how it fit into the wider request activity, Claude also compared the request counts for the two periods. Its report showed 10 successful requests in the earlier period, and 10 successes and five failures in the later period.
+
+![Claude Code compares the stored request counts across the earlier and failure windows.](/img/faqs/claude-code-production-logs-debugging/claude-metric-report.webp)
+
+*Claude Code’s report compares request totals across the two windows. The earlier cumulative total was exported again, so it appears twice but still represents 10 requests.*
+
+For your own incident, make sure Claude can access the source version that was deployed and the logs, traces and metrics for the relevant period. Check its explanation against the evidence, and ask it to identify any missing information before you act on it.
+
+See [natural-language log exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) for more query examples.
