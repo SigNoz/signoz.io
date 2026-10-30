@@ -1,20 +1,24 @@
 ---
 
 title: How to Divide Metrics in Prometheus - A Step-by-Step Guide
-date: 2024-12-26
-tags: [faq, Prometheus]
+date: 2026-10-30
+tags: [prometheus, faq]
 authors: [adil_shaikh]
 description: Learn how to divide metrics in Prometheus with our comprehensive guide. Master PromQL, handle label matching, and optimize your monitoring workflows.
 keywords: [Prometheus metrics, PromQL, metric division, data analysis, monitoring, observability, Grafana, SigNoz]
 related_articles:
   - '/guides/what-is-prometheus-for-monitoring'
-  - '/guides/how-can-i-join-two-metrics-in-a-prometheus-query'
+  - '/guides/promql-cheat-sheet'
   - '/guides/how-to-see-prometheus-metrics-in-grafana'
   - '/blog/opentelemetry-vs-prometheus'
 
 ---
 
-Metric division is a powerful technique in Prometheus for deriving meaningful insights from time series data. It allows you to compare metrics on different scales, calculate rates and efficiency metrics, and identify trends and anomalies. This blog post will explore the concept of metric division in Prometheus, its importance for data analysis and monitoring, common use cases, step-by-step guide for performing division, advanced techniques, visualization in Grafana, and real-world examples.
+Metric division is a powerful technique in Prometheus for deriving meaningful insights from time series data. It allows you to compare metrics on different scales, calculate rates and efficiency metrics, and identify trends and anomalies.
+
+To divide two metrics in Prometheus, you use the `/` operator in PromQL. Prometheus matches time series by their labels before dividing their values. This matching is also how you join metrics for other calculations or add labels from a separate metric.
+
+This guide covers division for ratios, percentages, and average durations, then shows how to handle different label sets with `on()`, `ignoring()`, and `group_left`.
 
 ## Quick Guide: Dividing Metrics in Prometheus
 
@@ -29,16 +33,16 @@ metric_a / metric_b
 1. Error Rate Calculation
 
 ```
-sum(rate(response_status{status=~"4..|5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100
+sum(rate(http_requests_total{status=~"4..|5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100
 ```
 
-1. Resource Utilization
+2. Resource Utilization
 
 ```
 (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100
 ```
 
-1. Average Response Time
+3. Average Response Time
 
 ```
 rate(http_response_time_seconds_sum[1m]) / rate(http_response_time_seconds_count[1m])
@@ -64,10 +68,10 @@ rate(http_response_time_seconds_sum[1m]) / rate(http_response_time_seconds_count
         ```
         
 3. Avoid Common Pitfalls
-    - Prevent division by zero using `clamp_min`:
+    - Exclude zero denominators when you want to show ratios only for active series:
         
-        ```
-        metric_a / clamp_min(metric_b, 1)
+        ```promql
+        metric_a / (metric_b > 0)
         ```
         
     - Aggregate high-cardinality metrics before division:
@@ -83,7 +87,7 @@ rate(http_response_time_seconds_sum[1m]) / rate(http_response_time_seconds_count
 
 ### Best Practices
 
-- Always use `rate()` or `increase()` when dividing counter metrics
+- Use `rate()` or `increase()` when calculating ratios over a time window from counters
 - Set up recording rules for complex or frequently used divisions
 - Include appropriate time windows (e.g., [5m]) based on your needs
 - Test queries on a small scale before applying to production
@@ -95,8 +99,8 @@ If you get no data:
 
 - Verify both metrics exist
 - Check label matching
-- Ensure no division by zero
-- Confirm time ranges align
+- Check whether either side has missing series
+- Choose rate windows that contain enough samples
 
 If you get unexpected results:
 
@@ -105,7 +109,7 @@ If you get unexpected results:
 - Ensure proper rate/increase usage
 - Validate aggregation methods
 
-This quick guide covers the basics of metric division in Prometheus, but there's much more to explore! Continue reading below for in-depth explanations, advanced techniques, real-world examples, and best practices for integrating these concepts into your monitoring workflow.
+The examples below explain how to choose related metrics and match their labels before dividing them.
 
 ## Understanding Metric Division in Prometheus
 
@@ -115,8 +119,8 @@ Metric division in Prometheus refers to the operation of dividing one metric by 
 
 Metric division is essential for transforming raw metrics into more insightful data points that can be used to monitor the performance and health of systems. It helps to:
 
-- Normalize Data: Dividing one metric by another can help compare values that differ in scale, enabling apples-to-apples comparisons (e.g., requests per second or error rates).
-- Calculate Rates: Metric division is frequently used to compute rates, such as traffic rate (requests per second) or throughput.
+- Normalize Data: Dividing used capacity by total capacity gives a utilization ratio that you can compare across systems of different sizes.
+- Calculate Ratios: Divide related rates to measure a proportion, such as failed operations as a share of all operations. Use `rate()` on a request counter to calculate requests per second.
 - Measure Efficiency: Division allows you to calculate efficiency metrics, such as CPU utilization percentage, by dividing CPU time spent by the total time available.
 - Analyze Trends and Anomalies: By deriving new metrics through division, you can highlight trends, patterns, and potential anomalies that may not be visible when looking at raw metrics.
 
@@ -132,10 +136,10 @@ Dividing metrics in Prometheus provides significant advantages for system admini
     
     ```bash
     # HTTP Error Rate
-    sum(rate(response_status{status=~"4..|5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100
+    sum(rate(http_requests_total{status=~"4..|5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100
     ```
     
-    This query calculates the percentage of requests resulting in 4xx or 5xx status codes over a 5-minute window by dividing the number of error responses (status codes 4xx and 5xx) by the total number of HTTP requests.
+    This query divides the combined rate of 4xx and 5xx responses by the rate of all requests over the last five minutes, then multiplies by 100 to return the error percentage.
     
 2. Resource Utilization Insights
     
@@ -150,9 +154,9 @@ Dividing metrics in Prometheus provides significant advantages for system admini
     
     This query calculates the percentage of memory in use by subtracting available memory from total memory and then dividing by the total memory.
     
-3. Throughput Evaluation
+3. Average Response Time
     
-    Dividing metrics like request counts or response times helps measure system efficiency, assess performance bottlenecks, and ensure the system can handle traffic spikes.
+    Dividing the rate of accumulated request duration by the rate of completed requests gives the average duration per request. This helps you track whether requests are getting slower.
     
     Example: Calculate the average response time per request:
     
@@ -161,20 +165,20 @@ Dividing metrics in Prometheus provides significant advantages for system admini
     rate(http_response_time_seconds_sum[1m]) / rate(http_response_time_seconds_count[1m])
     ```
     
-    This query divides the total response time sum by the number of requests to compute the average response time per request.
+    This query divides the rate of accumulated response time by the request rate over the last minute. It returns the average response time in seconds for each matching label set.
     
 4. Service-Level Objective (SLO) Monitoring
     
     Tracking SLO compliance, such as availability or latency thresholds, often requires dividing successful operations by total operations to measure service reliability.
     
-    Example: Calculate service availability percentage:
+    Example: Calculate the request success percentage:
     
     ```bash
-    # Availability Percentage
+    # Request Success Percentage
     sum(rate(http_requests_total{status=~"2..|3.."}[5m])) / sum(rate(http_requests_total[5m])) * 100
     ```
     
-    This query calculates the percentage of requests resulting in successful 2xx or 3xx status codes over the total number of requests. This metric helps ensure your service meets uptime and reliability goals.
+    This query divides the combined rate of 2xx and 3xx responses by the total request rate over the last five minutes, then multiplies by 100 to return the request success percentage.
     
 5. Trend Analysis and Forecasting
     
@@ -190,7 +194,7 @@ Dividing metrics in Prometheus provides significant advantages for system admini
     This query computes the percentage of used storage capacity for filesystems. Monitoring this over time reveals usage patterns, enabling you to anticipate when additional capacity will be required.
     
 
-PromQL, Prometheus Query Language, enables users to manipulate and [analyze metrics](https://signoz.io/blog/metrics-explorer/) with ease. It supports operations like dividing metrics to calculate rates, percentages, and averages, as sown above. PromQL’s flexibility allows for complex computations and the creation of meaningful insights, making it a crucial tool for effective monitoring and troubleshooting.
+These examples use division to [analyze metrics](https://signoz.io/blog/metrics-explorer/) as proportions or averages. Before writing your own query, check what each metric measures and which labels identify its series.
 
 ## Prerequisites for Dividing Metrics in Prometheus
 
@@ -199,7 +203,7 @@ Before you start dividing metrics in Prometheus, it’s important to have a few 
 - Understanding of Prometheus: Familiarize yourself with Prometheus' data model and how it stores and queries time series data.
 - PromQL Basics: Have a working knowledge of PromQL syntax and operators, as these are essential for performing metric division.
 - Well-Collected Metrics: Ensure that your metrics are properly collected and include relevant labels for accurate grouping and filtering.
-- Metric Compatibility: Verify that the metrics you want to divide are compatible (e.g., they share the same labels and time series alignment) to avoid query errors or misleading results.
+- Metric Compatibility: Choose metrics whose units produce the result you need, and inspect their labels to decide which series should match.
 
 By covering these prerequisites, you’ll be better equipped to perform metric division confidently and avoid common mistakes along the way.
 
@@ -284,6 +288,42 @@ When dividing metrics with different label sets, there are several important con
     - Use `without()` to Exclude Irrelevant Labels: The `without()` modifier excludes unnecessary labels (like `instance` or `pod`) from the aggregation, which helps in reducing noise and focusing on the most critical metrics.
     - Consistent Aggregation: Ensure that the aggregation method is applied consistently across both the numerator and the denominator. For example, if you’re summing `http_requests_total`, you should apply the same aggregation to `http_request_duration_seconds_sum`.
     - Recording Rules for Complex Aggregations: When dealing with complex aggregation logic, use recording rules to pre-aggregate metrics before division. This reduces query complexity and improves performance, especially in large-scale environments.
+
+### Joining Multiple Series with group_left and group_right
+
+The aggregation examples above keep the same labels on both sides of the division. Sometimes you need to keep more detail on one side. For example, to calculate each endpoint's share of a service's traffic, you need a request rate for each endpoint and a total request rate for the service.
+
+Assuming `http_requests_total` has `service` and `endpoint` labels, you can calculate that share with:
+
+```promql
+sum by (service, endpoint) (rate(http_requests_total[5m]))
+/ on(service) group_left
+sum by (service) (rate(http_requests_total[5m]))
+```
+
+The left side keeps a separate request rate for each endpoint, while the right side has one total rate per service. `on(service)` matches the service labels, and `group_left` allows multiple endpoint series to use that service's total. The result keeps `service` and `endpoint`, with a value such as `0.25` meaning that the endpoint accounts for 25% of the service's requests over the last five minutes.
+
+The right side must have only one series for each matching service. Use `group_right` for the reverse relationship, when one series on the left matches multiple series on the right. The modifier names the side with more series.
+
+Series without a match are omitted from the result. Neither `group_left` nor `group_right` preserves unmatched series by itself, so these modifiers do not create SQL-style outer joins.
+
+### Adding Labels from Another Metric
+
+You can also join the endpoint traffic shares with a separate metric to identify the team responsible for each service. Suppose a custom `service_info` metric has a value of `1` and exactly one series per service, with a `team` label:
+
+```promql
+(
+  sum by (service, endpoint) (rate(http_requests_total[5m]))
+  / on(service) group_left
+  sum by (service) (rate(http_requests_total[5m]))
+)
+* on(service) group_left(team)
+service_info
+```
+
+This query adds the matching service's `team` label to each endpoint's traffic share. `group_left(team)` copies the label from the single-series side, and multiplying by `1` preserves the calculated share.
+
+This also shows how to combine more than two expressions in a query. Each operation matches the labels produced by the preceding calculation, so check those intermediate labels before adding another metric.
 
 ## Advanced Techniques for Metric Division
 
@@ -376,13 +416,11 @@ To retrieve data from Prometheus, Grafana must first establish a connection to t
     - In the query editor, enter your metric division expression. For example, to calculate the average request duration:
         
         ```
-        sum(rate(http_requests_total[5m])) / sum(rate(http_request_duration_seconds_sum[5m]))
+        sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m]))
         ```
         
-        The query calculates the average request duration by dividing the total number of HTTP requests over 5 minutes by the total duration of those requests over the same period.
-        
-        <Figure src="/img/guides/2024/12/divide-two-metrics-in-prometheus-image 9.webp" alt="Visualizing the 5-minute error rate." caption="Visualizing the 5-minute error rate." />
-        
+        The query returns average request duration in seconds over the last five minutes. Set the panel unit to seconds.
+
 4. Configure Visualization Options
     - Set appropriate units for divided metrics (e.g., percentages, ratios)
     - Configure panel display options (legend, axes, thresholds)
@@ -402,7 +440,7 @@ Monitoring and alerting based on divided metrics—such as error rates, request 
 
 1. Setting Up Alerting Rules Based on Divided Metric Thresholds
     
-    To set up alerting rules, start by defining a Prometheus query that calculates the divided metric you're interested in. For example, to monitor the error rate as a percentage of total requests, you can use the following PromQL query:
+    To set up alerting rules, start with a query that calculates the ratio you want to monitor. For example, if `error_count` and `total_requests` are counters with matching labels, this query returns errors as a fraction of all requests:
     
     ```jsx
     rate(error_count[5m]) / rate(total_requests[5m])
@@ -430,17 +468,17 @@ Monitoring and alerting based on divided metrics—such as error rates, request 
     
     Use recording rules in Prometheus to store pre-computed results for frequently queried divided metrics. This improves query performance and reduces computational overhead.
     
-    Below is an example of a recording rule that computes the average request duration over 5 minutes:
+    Below is an example of a recording rule that stores the overall average request duration in seconds over the last five minutes:
     
     ```jsx
     groups:  
     - name: divided_metrics  
       rules:  
       - record: job:average_request_duration:rate5m  
-        expr: sum(rate(http_requests_total[5m])) / sum(rate(http_request_duration_seconds_sum[5m]))  
+        expr: sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m]))
     ```
     
-    Once the metric is recorded, you can directly reference it in your alerting rules to trigger alerts based on pre-computed values:
+    Once the metric is recorded, an alert expression can check whether that average exceeds two seconds:
     
     ```bash
     expr: job:average_request_duration:rate5m > 2  
@@ -497,7 +535,7 @@ To improve the efficiency of queries involving divided metrics, consider the fol
         regex: (id|timestamp|session_id)
     ```
     
-- Aggregation Before Division: Use functions like `rate()`, `sum()`, or `avg()` to aggregate metrics before division.
+- Aggregation Before Division: For counter ratios over time, apply `rate()` to each series, then use `sum()` to combine series at the required level before dividing.
 - Limit Time Range: Query only the time range needed for your analysis. Longer ranges increase both computation time and memory usage.
 1. Cache Frequently Divided Metrics
     
@@ -549,27 +587,33 @@ When working with metric division in Prometheus, several issues can arise that a
         - Use recording rules to precompute frequently used queries for faster results.
         - Consider whether the operation makes sense mathematically and adjust the query accordingly
 
-## Enhancing Observability with SigNoz
+5. Multiple Series for the Same Matching Labels:
+    - Issue: A query reports a many-to-many matching error because more than one series shares the labels used in `on()` on both sides.
+    - Resolution:
+        - Query each side separately and inspect the series for each matching label combination.
+        - Aggregate to the level needed for the calculation. If you need to retain multiple series on one side, use `group_left` or `group_right` and ensure the other side has only one series per matching key.
 
-SigNoz is a comprehensive observability platform designed to enhance your system monitoring and management. It provides insights into your application’s health with visualizations, metrics, logs, and traces. Built on [OpenTelemetry](https://signoz.io/opentelemetry/), SigNoz offers a unified solution for collecting telemetry data, tracking performance, and efficiently troubleshooting issues, making it ideal for DevOps, SRE teams, and developers seeking deeper observability.
+## Enhancing Observability with SigNoz Cloud
 
-### Seamless Integration of SigNoz with Prometheus for Advanced Metric Analysis
+SigNoz Cloud is a comprehensive observability platform designed to enhance your system monitoring and management. It provides insights into your application’s health with visualizations, metrics, logs, and traces. Built on [OpenTelemetry](https://signoz.io/opentelemetry/), SigNoz Cloud offers a unified solution for collecting telemetry data, tracking performance, and efficiently troubleshooting issues, making it ideal for DevOps, SRE teams, and developers seeking deeper observability.
 
-SigNoz integrates seamlessly with Prometheus by leveraging the [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) to collect and ingest metrics from Prometheus, enhancing your existing [observability stack](https://signoz.io/guides/observability-stack/). While Prometheus is excellent at gathering and storing metrics, SigNoz takes it further by enabling advanced metric division, aggregation, and visualization, making complex data analysis simpler and more intuitive.
+### Seamless Integration of SigNoz Cloud with Prometheus for Advanced Metric Analysis
+
+SigNoz Cloud integrates seamlessly with Prometheus by leveraging the [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) to collect and ingest metrics from Prometheus, enhancing your existing [observability stack](https://signoz.io/guides/observability-stack/). While Prometheus is excellent at gathering and storing metrics, SigNoz Cloud takes it further by enabling advanced metric division, aggregation, and visualization, making complex data analysis simpler and more intuitive.
 
 Here’s how SigNoz enhances your Prometheus setup:
 
 - Native PromQL support
     
-    With SigNoz, you can leverage PromQL directly within the SigNoz platform. This feature allows you to perform metric divisions and calculations with ease. Whether you're interested in tracking error rates, resource utilization, or throughput, you can calculate these metrics directly from the [query builder](https://signoz.io/blog/query-builder-v5/) with just a few clicks.
+    Use the PromQL tab in a SigNoz dashboard panel to run metric divisions with explicit label matching. The [Query Builder](https://signoz.io/docs/metrics-management/querying-metrics/) offers a separate visual workflow for combining queries with formulas.
     
     <Figure src="/img/guides/2024/12/divide-two-metrics-in-prometheus-image 11.webp" alt="Leveraging PromQL Query for custom dashboard generation" caption="Leveraging PromQL Query for custom dashboard generation" />
     
 - Visualizing Divided Metrics
     
-    SigNoz provides an intuitive and powerful visual interface that allows you to display and analyze your divided metrics easily. Visualizing key performance indicators (KPIs) in a unified platform makes it simple to track trends, identify anomalies, and respond quickly to potential issues.
+    SigNoz Cloud provides an intuitive and powerful visual interface that allows you to display and analyze your divided metrics easily. Visualizing key performance indicators (KPIs) in a unified platform makes it simple to track trends, identify anomalies, and respond quickly to potential issues.
     
-    Example Query for Metric Division in SigNoz
+    Example Query for Metric Division in SigNoz Cloud
     
     ```jsx
     system_cpu_load_average_5m / system_cpu_load_average_1m
@@ -581,7 +625,7 @@ Here’s how SigNoz enhances your Prometheus setup:
     
 - Proactive Alerts Based on Divided Metrics
     
-    Similarly, you can create alerts based on the same query provided, enabling [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) of system performance. By setting custom thresholds on divided metrics, SigNoz ensures you’re notified of potential issues before they impact your system. For more information on configuring custom metric alerts, refer to the [Official SigNoz documentation](https://signoz.io/docs/alerts-management/metrics-based-alerts/?utm_source=product&utm_medium=alert-creation-page).
+    Similarly, you can create alerts based on the same query provided, enabling [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) of system performance. By setting custom thresholds on divided metrics, SigNoz Cloud ensures you’re notified of potential issues before they impact your system. For more information on configuring custom metric alerts, refer to the [Official SigNoz Cloud's documentation](https://signoz.io/docs/alerts-management/metrics-based-alerts/?utm_source=product&utm_medium=alert-creation-page).
     
     <Figure src="/img/guides/2024/12/divide-two-metrics-in-prometheus-image 13.webp" alt="Custom Alerts Based on PromQL Queries for CPU Load Monitoring" caption="Custom Alerts Based on PromQL Queries for CPU Load Monitoring" />
     
@@ -592,7 +636,7 @@ Here’s how SigNoz enhances your Prometheus setup:
 
 - Metric division in Prometheus helps extract valuable insights from raw metrics.
 - Accurate division relies on a solid understanding of PromQL and proper label alignment.
-- Advanced techniques like subqueries and mathematical functions enhance division capabilities.
+- Use `group_left` or `group_right` when multiple series must match a single series, and keep the matching keys unique on the single-series side.
 - Visualization and alerting based on divided metrics improve overall system observability.
 - Tools like SigNoz can complement Prometheus for a more robust monitoring experience.
 
@@ -603,7 +647,7 @@ Here’s how SigNoz enhances your Prometheus setup:
 Common pitfalls include mismatched labels, division by zero, and high cardinality. To avoid these issues:
 
 - Ensure label consistency.
-- Safeguard against zero values to prevent errors.
+- Decide how to handle undefined ratios when the denominator is zero.
 - Aggregate data when necessary to manage cardinality effectively.
 
 ### How can I ensure my divided metrics are accurate and meaningful?
@@ -612,25 +656,25 @@ To maintain accuracy:
 
 1. Confirm that the metrics being divided are logically related.
 2. Ensure consistent units and scaling factors.
-3. Use `rate()` or `increase()` for counter metrics before performing division.
+3. Use `rate()` or `increase()` for ratios calculated from counters over a time window.
 4. Cross-check results against baselines or alternative calculations.
 
 ### Is it possible to divide metrics with different time intervals or resolutions?
 
-Yes, you can divide metrics with different intervals using subqueries or by aligning the time ranges. For example:
+Yes. For example, you can compare a recent rate with a longer-term rate:
 
 ```
-rate(metric_a[5m]) / rate(metric_b[1h])
+rate(http_requests_total[5m]) / rate(http_requests_total[1h])
 ```
 
-This divides the 5-minute rate of metric_a by the 1-hour rate of metric_b.
+This divides each series' five-minute request rate by its one-hour request rate. A value above `1` means the recent rate is higher. For an error or success ratio covering one period, use the same rate window on both sides instead.
 
 ### Can I use metric division for capacity planning and forecasting?
 
-Absolutely. Metric division is valuable for capacity planning. You can:
+Utilization ratios can help you track how much capacity is in use. You can:
 
 1. Calculate resource utilization trends over time.
 2. Project future needs based on historical growth rates.
 3. Determine efficiency metrics to optimize resource allocation.
 
-For example, to forecast CPU needs, you might divide the rate of increase in CPU usage by the rate of increase in workload to estimate future requirements.
+For example, tracking used storage divided by total storage shows how close a filesystem is to capacity. The ratio describes utilization, but a forecast also needs a model of how usage is changing.
