@@ -1,7 +1,7 @@
 ---
-date: 2026-09-13
-title: Metric Types and Aggregation
-description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
+date: 2026-10-27
+title: Metric Types, Temporality, and Aggregation Explained
+description: Learn the metric types SigNoz supports (Counter, Gauge, Histogram, Exponential Histogram) and how temporal and spatial aggregation work for each.
 doc_type: explanation
 ---
 
@@ -21,8 +21,8 @@ SigNoz supports the following types of metrics:
 
 <Admonition type="info">
 Exponential histograms are supported only in self-hosted SigNoz (not SigNoz Cloud). To enable them in your OTel Collector configuration:
-1. Set `enable_exp_hist: true` in both the `clickhousemetricswrite` and `signozclickhousemetrics` exporters in your collector config.
-2. Ensure your metrics use <Tooltip text="delta temporality" content="A metric temporality in which each successive data point advances the start timestamp and reports only the change since the previous export." link="https://signoz.io/docs/glossary/#delta-temporality" />. Although OpenTelemetry supports both delta and <Tooltip text="cumulative temporality" content="A metric temporality in which each successive data point repeats the same start timestamp and reports a running total." link="https://signoz.io/docs/glossary/#cumulative-temporality" /> for exponential histograms, SigNoz currently only supports delta, so cumulative temporality metrics will not work.
+1. Set `enable_exp_hist: true` in the `signozclickhousemetrics` exporter in your collector config.
+2. Ensure your metrics use <Tooltip text="delta temporality" content="A metric temporality in which each successive data point advances the start timestamp and reports only the change since the previous export." link="https://signoz.io/docs/glossary/#delta-temporality" />. Although OpenTelemetry supports both delta and <Tooltip text="cumulative temporality" content="A metric temporality in which each successive data point repeats the same start timestamp and reports a running total." link="https://signoz.io/docs/glossary/#cumulative-temporality" /> for exponential histograms, SigNoz supports only delta. The SigNoz collector drops exponential histograms sent with cumulative temporality, and a query on one fails with an HTTP `501` error.
 For background, see <a href="https://github.com/SigNoz/signoz-otel-collector/issues/625#issuecomment-2994987941" target="_blank" rel="noopener noreferrer nofollow">the collector issue notes</a>.
 </Admonition>
 

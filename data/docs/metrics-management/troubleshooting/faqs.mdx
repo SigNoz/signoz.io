@@ -1,7 +1,7 @@
 ---
-date: 2026-08-26
-title: Metrics Management FAQs
-description: Frequently asked questions about metrics management and troubleshooting in SigNoz
+date: 2026-10-27
+title: Metrics Management FAQs - Troubleshoot Missing Metrics
+description: Answers to common SigNoz metrics questions, including how to view metrics, find missing metrics, and fix exponential histogram temporality errors.
 doc_type: reference
 ---
 
@@ -29,3 +29,21 @@ A Counter metric can send all cumulative points, all delta points, or both toget
 Metrics Explorer shows one temporality in the metric details, even when the metric carries both. This affects the display only, not your query results.
 
 For more information about metric temporality, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
+
+### Q. Why are my exponential histogram metrics missing, or failing with `only 'delta' exponential histograms are supported`?
+
+Exponential histograms work only in self-hosted SigNoz, with `enable_exp_hist: true` set in the `signozclickhousemetrics` exporter. SigNoz stores them only with delta temporality.
+
+If the metric is missing, check the collector logs. The `signozclickhousemetrics` exporter drops exponential histograms sent with cumulative temporality before they reach storage, and logs this warning:
+
+```text
+exponential histogram temporality is not delta
+```
+
+If a query fails, check the temporality it asks for. From v0.140.0, a query that requests cumulative temporality for an exponential histogram, for example a dashboard panel, alert, or API call, fails with an HTTP `501` error:
+
+```text
+metric `<metric name>` is an exponential histogram recorded with `cumulative` temporality, which cannot be queried; only `delta` exponential histograms are supported
+```
+
+To fix it, set your SDK to export delta temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for the configuration in each language. For a failing query, also remove the cumulative temporality setting from it. Regular histograms support both temporalities and are not affected. For the full support table, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
