@@ -1,7 +1,7 @@
 ---
-date: 2026-09-13
-title: Metric Types and Aggregation
-description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
+date: 2026-10-26
+title: 'Metric Types and Aggregation: Temporal, Spatial, Reduce To'
+description: Learn how metric types, temporal and spatial aggregation, and Reduce To turn time series into values for SigNoz Number and Table panels.
 doc_type: explanation
 ---
 
@@ -62,6 +62,8 @@ The aggregation of metrics is a two-step process:
 - **Temporal Aggregation**: <Tooltip text="Temporal aggregation" content="Combining the data points inside one time series into one value for each interval." link="https://signoz.io/docs/glossary/#temporal-aggregation" /> is the process of aggregating the measurements over a specific period within the same time series.
 
 - **Spatial Aggregation**: <Tooltip text="Spatial aggregation" content="Combining the values of several time series into one value for each interval, after temporal aggregation." link="https://signoz.io/docs/glossary/#spatial-aggregation" /> is the process of aggregating the measurements across multiple time series after temporal aggregation.
+
+For Number and Table dashboard panels, [Reduce To](https://signoz.io/docs/metrics-management/types-and-aggregation/#reduce-to-in-dashboard-panels) then combines the interval values in each resulting series into a single value.
 
 A table representing the different types of metrics and their temporal and spatial aggregation supported by SigNoz is shown below:
 
@@ -337,3 +339,35 @@ A Histogram metric works the same way in SigNoz's Metrics Explorer: P95 spatial 
   alt="Histogram metric query in SigNoz Metrics Explorer with P95 spatial aggregation, grouped by service"
   caption="P95 spatial aggregation on a Histogram metric in SigNoz's Metrics Explorer"
 />
+
+## Reduce To in dashboard panels
+
+[Number](https://signoz.io/docs/dashboards/panel-types/value/) panels show one value, while [Table](https://signoz.io/docs/dashboards/panel-types/table/) panels can show a value for each group. For metric queries built with the Query Builder, **Reduce To** determines how a series of interval values becomes a single value.
+
+Temporal aggregation first produces one point per interval for each input series. Spatial aggregation combines the series within each group, still leaving one point per interval. Reduce To then combines those interval points within each result group over the panel's selected time range. If your query uses functions, those functions run before Reduce To.
+
+Choose **Latest of values in timeframe** for the last returned point, **Sum of values in timeframe** to add the points, **Average of values in timeframe** for their arithmetic mean, or **Min of values in timeframe** and **Max of values in timeframe** for the smallest and largest points. The average gives each returned, non-NaN point equal weight, even when the intervals contain different numbers of raw measurements. An average of interval averages can therefore differ from the average of all the original measurements.
+
+### Example: the same query in a Number or Table panel
+
+Suppose a gauge records memory usage in MiB for two services. After temporal aggregation with **Avg**, their one-minute interval values are:
+
+| Interval | checkout | payments | Sum without grouping |
+| --- | --- | --- | --- |
+| 00:00 | 10 | 20 | 30 |
+| 00:01 | 20 | 40 | 60 |
+| 00:02 | 30 | 60 | 90 |
+
+For a Number panel, use spatial **Sum** without grouping to combine both services. The resulting series is `30, 60, 90`, and Reduce To produces one number for the whole range.
+
+For a Table panel, use spatial **Sum** grouped by `service.name`. Each service keeps its own series, so Reduce To produces a separate value for each service's row:
+
+| Reduce To | Number, no grouping | Table, checkout | Table, payments |
+| --- | --- | --- | --- |
+| Latest of values in timeframe | 90 | 30 | 60 |
+| Sum of values in timeframe | 180 | 60 | 120 |
+| Average of values in timeframe | 60 | 20 | 40 |
+| Min of values in timeframe | 30 | 10 | 20 |
+| Max of values in timeframe | 90 | 30 | 60 |
+
+For example, the average in the Number panel is `(30 + 60 + 90) / 3 = 60`. The sum is `180` across those interval points, while the latest value is the most recent combined memory usage, `90 MiB`. Choose the reduction that answers your question, since summing memory measurements over time does not describe current memory usage.
