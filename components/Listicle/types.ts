@@ -25,6 +25,14 @@ export interface SectionConfig {
   gridCols?: string
   items?: ListicleItem[]
   subsections?: SubsectionConfig[]
+  /** Listicles to pull cards from: "<listicle>[#<sectionId>][@<href prefix>]" */
+  include?: (string | { from: string; nameSuffix?: string })[]
+  /** Hrefs to drop from the section; an entry that ends in "/*" drops every card under that path */
+  exclude?: string[]
+  /** With `uniqueAcrossSections`, sections claim cards in this order (default: section order) */
+  claimOrder?: number
+  /** Hrefs to show first, in this order, before the name-sorted cards of an included section */
+  pinned?: string[]
 }
 
 export interface ListicleConfig {
@@ -47,4 +55,8 @@ export interface ListicleConfig {
     items: ListicleItem[]
   }[]
   wrapperTitle?: string
+  /** Keep each card in only the first section that claims it (see `claimOrder`) */
+  uniqueAcrossSections?: boolean
+  /** Hrefs to drop from every section, on top of each section's own `exclude` */
+  exclude?: string[]
 }

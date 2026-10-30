@@ -68,6 +68,24 @@ describe('parseArgs', () => {
 })
 
 describe('buildPayload', () => {
+  it('revalidates listicles that include a changed listicle, and ListicleDirectory pages', () => {
+    const result = buildPayload({
+      changedFiles: [],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: true,
+      changedListicles: ['constants/listicles/llm-monitoring.json'],
+      deletedListicles: [],
+    })
+
+    assert.ok(result.tags.includes('listicle-llm-monitoring'))
+    assert.ok(result.tags.includes('listicle-integrations'))
+    assert.ok(result.paths.includes('/docs/llm-observability'))
+    assert.ok(result.paths.includes('/docs/integrations/integrations-list'))
+  })
+
   it('includes restore files when building selective revalidation paths', () => {
     const result = buildPayload({
       changedFiles: [],
