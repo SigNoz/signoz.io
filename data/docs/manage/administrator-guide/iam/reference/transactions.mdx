@@ -1,5 +1,5 @@
 ---
-date: 2026-10-12
+date: 2026-10-30
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, dashboards, the subscription, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, dashboards, route policies, notification channels, the subscription, and telemetry resources (logs, traces, metrics, meter metrics). Alert resources are moving to fine-grained access control in stages, starting with route policies. Transactions for the remaining alert resources (planned downtime, rule views, rule state history, and alert rules) and for other resources such as pipelines will be documented as they become available.
 </Admonition>
 
 ## Resources
@@ -85,6 +85,40 @@ The list is not filtered by `read`. A principal holding `list` sees every dashbo
 <Admonition type="info">
 Publishing a dashboard requires `update` on it. Readers who open the resulting public link are anonymous and are authorized against the `public-dashboard` resource, which is not configurable in custom roles. See [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/).
 </Admonition>
+
+### Route Policy
+
+**Resource:** `metaresource` · **Kind:** `route-policy` · **Selector:** route policy ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a routing policy. | signoz-admin |
+| `list` | Open the routing policies list and view the configured policies. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | View a routing policy's expression and the channels it notifies. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Edit a routing policy's name, expression, description, or channel list. | signoz-admin |
+| `delete` | Delete a routing policy. | signoz-admin |
+
+SigNoz-Editor and SigNoz-Viewer can view routing policies but cannot create, update, or delete them. Creating and updating a routing policy also checks `attach` and `detach` on the notification channels the policy names (see [Notification Channel](#notification-channel) and [Compound Transactions](#compound-transactions)).
+
+<Admonition type="info">
+Route policies are the first alert resource to move to fine-grained access control. The managed roles above are applied on upgrade. Scoping route policies in the interactive custom role editor is being rolled out as the remaining alert resources migrate.
+</Admonition>
+
+### Notification Channel
+
+**Resource:** `metaresource` · **Kind:** `notification-channel` · **Selector:** notification channel ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a notification channel. | signoz-admin |
+| `list` | List the notification channels in the organization. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | View a notification channel's configuration. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Edit a notification channel's configuration. | signoz-admin |
+| `delete` | Delete a notification channel. | signoz-admin |
+| `attach` | Link a notification channel to a routing policy. | signoz-admin, signoz-editor |
+| `detach` | Unlink a notification channel from a routing policy. | signoz-admin, signoz-editor |
+
+`attach` and `detach` govern channel-to-policy links independently of `create`, `update`, and `delete`. A custom role can be granted `attach` and `detach` on notification channels (together with `create` and `update` on route policies) to delegate channel-linking duties without full administrative access.
 
 ### Subscription
 
@@ -167,6 +201,8 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Operation | Transactions Required |
 |-----------|----------------------|
 | Clone a dashboard | `dashboard:read` on the source dashboard AND `dashboard:create` |
+| Create a route policy | `route-policy:create` AND `notification-channel:attach` on each channel the policy names |
+| Update a route policy | `route-policy:update` AND `notification-channel:attach` for each added channel AND `notification-channel:detach` for each removed channel |
 | Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
