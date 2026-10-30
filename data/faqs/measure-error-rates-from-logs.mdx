@@ -1,0 +1,38 @@
+---
+title: How do I tell whether rising error logs mean more traffic or more failures?
+description: Compare failed requests with total requests in SigNoz Cloud to see whether an error spike comes from more traffic or a higher HTTP 5xx percentage.
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+Compare the number of server-error responses with the total number of requests. If traffic rises and the percentage of requests with server errors stays steady, the higher error count may reflect the extra traffic. If the percentage rises too, a greater share of requests is failing. To make that comparison from logs, you need one completion record for every request, including successful requests.
+
+## Compare failures with traffic
+
+For example, take a checkout service that returns HTTP 200 when a request succeeds and HTTP 500 when it cannot complete the request. It writes a completion log with the response status and request ID for each request.
+
+We sent requests to the service in three separate one-minute periods. In the first, 10 of 1,000 requests returned HTTP 500, so 1% failed. In the second, traffic doubled to 2,000 requests and 20 returned HTTP 500. The error count doubled, but the percentage stayed at 1%. In the third, 100 of 2,000 requests returned HTTP 500, raising the percentage to 5%.
+
+In SigNoz Cloud, we used two log queries to compare those results. Query A counted completion logs with HTTP 5xx responses, the server-error status codes from 500 to 599. Query B counted all completion logs for the same requests. The formula `100*A/B` gives the percentage of completed requests with a 5xx response; the HTTP 500 responses in our example fall in that range.
+
+The Logs Explorer table groups the three periods into rows labeled `earlier`, `more-traffic`, and `more-failures`. It shows the two counts beside the calculated percentage.
+
+<Figure
+  src="/img/faqs/measure-error-rates-from-logs/checkout-error-percentage.webp"
+  alt="SigNoz Cloud Logs Explorer table shows 10 of 1,000 and 20 of 2,000 requests at 1%, then 100 of 2,000 at 5%."
+  caption="The three checkout example phases show how request counts and HTTP 5xx percentages change."
+  width={1217}
+  height={489}
+  themeInvert={false}
+/>
+
+To compare your own service's counts, use the same service, route, time range, interval, and grouping for both queries. That way, A counts the server-error responses within the requests counted by B. The [multi-query guide](https://signoz.io/docs/querying/multi-query-analysis/) explains how to combine the queries in Logs Explorer.
+
+The result depends on a complete request count. Counting every application log can inflate the total because a request may write several messages. Missing or duplicate completion records can also distort it, and if there are no completed requests, there is no meaningful percentage. Failures that never produce a completion record need another recorded outcome.
+
+## Keep the comparison visible
+
+You can add the request count, server-error count, and percentage to a dashboard to watch how they change together. If the percentage rises, filter the completion logs to HTTP 5xx and open a failed record to inspect its status and request ID.
+
+To be notified when the percentage rises, you can select the formula as the target of a [log-based alert](https://signoz.io/docs/alerts-management/log-based-alerts/). For example, if each data point represents one minute, **At least once** above 2% in a five-minute window checks whether any of those points exceeds 2%.
