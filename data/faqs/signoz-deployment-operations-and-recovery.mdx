@@ -7,35 +7,35 @@ authors: [yuvraj]
 tags: [logs]
 ---
 
-You manage infrastructure and recovery when you self-host SigNoz; with SigNoz Cloud, SigNoz operates the backend for you. Bring Your Own Cloud (BYOC) also provides managed operation, with SigNoz running in your cloud account.
+With self-hosted SigNoz, your team manages the infrastructure and recovery. With SigNoz Cloud, SigNoz operates the services that store and query your logs. Bring Your Own Cloud (BYOC) is also managed by SigNoz, but runs in your cloud account.
 
 ## Who operates each deployment?
 
-The distinction is who runs the services that store and query your logs. The [deployment options](https://signoz.io/enterprise/) separate managed operation from support for a deployment your team runs.
+The [deployment options](https://signoz.io/enterprise/) differ in who operates SigNoz and plans for recovery.
 
 | Deployment | Storage, scaling and upgrades | Backup and recovery |
 | --- | --- | --- |
-| [SigNoz Cloud](https://signoz.io/docs/cloud/) | SigNoz operates the backend. | Confirm backup coverage and recovery commitments in your service agreement. |
+| [SigNoz Cloud](https://signoz.io/docs/cloud/) | SigNoz operates the services. | Confirm backup coverage and recovery commitments in your service agreement. |
 | BYOC | SigNoz operates SigNoz in your cloud account. | Agree the recovery coverage and any customer infrastructure duties for your deployment. |
-| Self-Hosted Community | Your team operates the backend. | Your team plans, maintains and checks backups and restores. |
-| Enterprise Self-Hosted | Your team operates the backend, with SigNoz support. | Your team owns recovery, with support covered by its contract. |
+| Self-Hosted Community | Your team operates the services. | Your team plans, maintains and checks backups and restores. |
+| Enterprise Self-Hosted | Your team operates the services, with SigNoz support. | Your team owns recovery, with support covered by its contract. |
 
-Enterprise Self-Hosted support does not turn the deployment into BYOC. For either managed option, confirm which failures the service covers and how long recovery can take before you rely on it.
+For SigNoz Cloud or BYOC, confirm which failures the service covers and how long recovery can take before you rely on it.
 
-Your team still controls what the application records, any collectors it runs, access permissions and its queries and alerts. A managed backend cannot recover a log that the application never sent.
+In every deployment, your team still controls what the application records, how it collects logs, access permissions, queries and alerts. For example, managed services cannot recover a log that the application never sent.
 
 ## What work stays with a self-hosted team?
 
-Plan capacity from expected log volume, retention and query load, with spare capacity for bursts and growth. Size the OpenTelemetry Collector that receives logs as well as ClickHouse, the database that stores them. The [Self-Hosted Community resource planning guide](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/) gives component guidance, but its table is not a workload-specific sizing guarantee.
+Your team needs enough capacity for the logs it sends and queries. Plan for expected log volume, retention and query load, with spare capacity for bursts and growth. Size the OpenTelemetry Collector that receives logs as well as ClickHouse, the database that stores them. The [Self-Hosted Community resource planning guide](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/) gives component guidance, but its table is not a workload-specific sizing guarantee.
 
-The [production readiness checklist](https://signoz.io/docs/production-readiness/) covers deployment isolation, storage, security and scaling. Your team also schedules upgrades and follows the [required version stops](https://signoz.io/docs/operate/upgrade/), including migrations and pre-upgrade backups.
+Running the deployment also means managing isolation, storage, security and scaling. Use the [production readiness checklist](https://signoz.io/docs/production-readiness/) to plan that work. When you schedule upgrades, follow the [required version stops](https://signoz.io/docs/operate/upgrade/) and their guides for migrations and pre-upgrade backups.
 
 ## What must recovery cover?
 
-For example, a checkout team might use payment logs, a saved view for failed payments and an error alert to investigate failures. If a disaster affects both its log storage and its Metastore, restoring the logs alone will not bring back the saved view or alert.
+SigNoz stores logs in ClickHouse, but keeps saved views, dashboards and alert definitions in the **Metastore**, a separate SQLite or PostgreSQL database. A saved view lets a team reuse filters and column selections when it investigates logs.
 
-The logs live in ClickHouse. Saved views, dashboards and alert definitions live in the **Metastore**, a separate SQLite or PostgreSQL database. The [ClickHouse upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-131/) calls for a data snapshot, while the [saved-view upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-137/) calls for a Metastore backup.
+For example, a checkout team might use payment logs, a saved view for failed payments and an error alert to investigate failures. If a disaster destroys both its log storage and Metastore, restoring the logs alone will not bring back the saved view or alert.
 
-Those guides identify data to protect; they do not establish a complete tested restore for your deployment or a recovery time. Keep deployment configuration with your recovery plan, and verify that a restore recovers both log records and the configuration your team needs.
+Plan backups for both stores and keep deployment configuration with your recovery plan. The [ClickHouse upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-131/) calls for a data snapshot, while the [saved-view upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-137/) calls for a Metastore backup. Test your restore to verify that it recovers the log records and configuration your team needs. These guides do not establish a complete restore procedure or recovery time for your deployment.
 
-Retention controls how long logs stay available for queries in SigNoz. The [S3 exporter guide](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/) describes sending telemetry to S3 alongside SigNoz. These exports are independent, and S3 data cannot be queried in the SigNoz UI. The S3 export also does not back up the Metastore or deployment configuration, so it is not a complete deployment backup.
+Retention controls how long logs stay available for queries in SigNoz. To keep telemetry longer, you can also send it to S3 as described in the [S3 exporter guide](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/). The exports to S3 and SigNoz are independent, and S3 data cannot be queried in the SigNoz UI. The S3 export does not back up the Metastore or deployment configuration, so it is not a complete deployment backup.
