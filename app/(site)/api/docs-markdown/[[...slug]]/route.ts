@@ -38,7 +38,7 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
     return notFoundResponse()
   }
 
-  const markdown = await renderDocMarkdownForAgents(doc)
+  const markdown = await renderDocMarkdownForAgents(doc, { pagePath: `/docs/${slug}` })
 
   return agentResponse(markdown, { varyAccept: true, cacheControlledByIsr: true })
 }

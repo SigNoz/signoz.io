@@ -1,9 +1,11 @@
 import type { Root as HastRoot, RootContent as HastContent, Element as HastElement } from 'hast'
 import { getTextContent, hastToMarkdown, normalizeWhitespace } from './markdownCore'
+import type { RelatedPageLinksEntry } from '../relatedPageLinks'
 import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
 
 export type BuildCopyMarkdownOptions = {
   title: string
+  relatedPageLinks?: RelatedPageLinksEntry | null
   tags: string[]
   includeTagDefinitions: boolean
 }
@@ -167,6 +169,7 @@ export const buildCopyMarkdownDocument = (
 ): string =>
   buildMarkdownDocument({
     title: options.title,
+    relatedPageLinks: options.relatedPageLinks,
     tags: options.tags,
     includeTagDefinitions: options.includeTagDefinitions,
     bodyMarkdown,

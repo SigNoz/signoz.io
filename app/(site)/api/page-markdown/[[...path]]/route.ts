@@ -98,6 +98,7 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
 
   const markdown = await renderPageHtmlToAgentMarkdown(await htmlResponse.text(), {
     fallbackCanonicalUrl: `${siteMetadata.siteUrl}${pathname === '/' ? '/' : `${pathname}/`}`,
+    pagePath: pathname,
   })
 
   if (!markdown) {

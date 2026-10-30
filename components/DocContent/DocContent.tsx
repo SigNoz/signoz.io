@@ -10,6 +10,7 @@ import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
 import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFromRendered'
+import type { RelatedPageLinksEntry } from '@/utils/relatedPageLinks'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { resolveLatestDate, formatDisplayDate } from '@/utils/dateUtils'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
@@ -17,13 +18,23 @@ import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 
 const DocContent: React.FC<{
   title: string
+  relatedPageLinks?: RelatedPageLinksEntry | null
   post: any
   toc: any
   hideTableOfContents: boolean
   editLink?: string
   breadcrumbs?: BreadcrumbCrumb[]
   children: React.ReactNode
-}> = ({ title, post, toc, hideTableOfContents, editLink, breadcrumbs, children }) => {
+}> = ({
+  title,
+  relatedPageLinks,
+  post,
+  toc,
+  hideTableOfContents,
+  editLink,
+  breadcrumbs,
+  children,
+}) => {
   const pathname = usePathname()
   const lastUpdatedDate = post?.lastmod || resolveLatestDate(post)
   const formattedDate = formatDisplayDate(lastUpdatedDate)
@@ -50,10 +61,11 @@ const DocContent: React.FC<{
     }
     return buildCopyMarkdownFromRendered(articleRef.current, {
       title,
+      relatedPageLinks,
       tags: docTags,
       includeTagDefinitions: true,
     })
-  }, [docTags, fallbackMarkdown, title])
+  }, [docTags, fallbackMarkdown, relatedPageLinks, title])
 
   return (
     <>

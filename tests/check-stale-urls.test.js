@@ -339,3 +339,51 @@ test('isExemptFromTrailingSlash works correctly', () => {
   assert.equal(isExemptFromTrailingSlash('/docs/install'), false)
   assert.equal(isExemptFromTrailingSlash('/docs/install/'), false)
 })
+
+const RELATED_LINKS_JSON = [
+  '{',
+  '  "/old-page/": [',
+  '    "https://signoz.io/old-page/",',
+  '    "https://signoz.io/docs/install/"',
+  '  ],',
+  '  "/blog/current-post": ["https://signoz.io/new-page/"]',
+  '}',
+].join('\n')
+
+test('extractUrls reads both keys and values from URL map JSON', () => {
+  const { extractUrls } = loadScript()
+  const results = extractUrls(RELATED_LINKS_JSON, 'constants/relatedPageLinks.json')
+  assert.deepEqual(
+    results.map(({ url, line }) => [url, line]),
+    [
+      ['/old-page/', 2],
+      ['https://signoz.io/old-page/', 3],
+      ['https://signoz.io/docs/install/', 4],
+      ['/blog/current-post', 6],
+      ['https://signoz.io/new-page/', 6],
+    ]
+  )
+})
+
+test('isRelevantFile includes the related links map but no other constants JSON', () => {
+  const { isRelevantFile } = loadScript()
+  assert.equal(isRelevantFile('constants/relatedPageLinks.json'), true)
+  assert.equal(isRelevantFile('constants/opentelemetry_hub.json'), false)
+  assert.equal(isRelevantFile('constants/listicles/integrations.json'), false)
+})
+
+test('fixFile rewrites stale keys and values in URL map JSON', async () => {
+  const { fixFile, buildRedirectMap, readRedirects } = loadScript()
+  const restoreCwd = enterFixture('stale-urls')
+  try {
+    const redirectMap = buildRedirectMap(await readRedirects())
+    const result = fixFile('constants/relatedPageLinks.json', RELATED_LINKS_JSON, redirectMap)
+    assert.equal(result.fixCount, 3)
+    assert.deepEqual(JSON.parse(result.content), {
+      '/new-page/': ['https://signoz.io/new-page/', 'https://signoz.io/docs/install/'],
+      '/blog/current-post/': ['https://signoz.io/new-page/'],
+    })
+  } finally {
+    restoreCwd()
+  }
+})

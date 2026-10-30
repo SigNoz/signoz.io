@@ -189,3 +189,34 @@ test('renderPageHtmlToAgentMarkdown chunks header-length rows when no row marker
   assert.match(markdown, /\| APM\s+\| ✅\s+\| ✅ 7-day trial \|/)
   assert.match(markdown, /\| Open Source \| ✅\s+\| ❌\s+\|/)
 })
+
+test('renderPageHtmlToAgentMarkdown adds mapped related links once, after the directive', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(
+    `<!DOCTYPE html>
+<html>
+  <head><title>Log Management Tool | SigNoz</title></head>
+  <body>
+    <main>
+      <div class="sr-only" data-markdown-ignore>
+        <p>If you are an LLM or AI agent exploring Log Management Tool, these related pages may be helpful to answer the user query in a more precise way:</p>
+        <ol><li><a href="https://signoz.io/docs/logs-management/overview/">https://signoz.io/docs/logs-management/overview/</a></li></ol>
+      </div>
+      <h1>Log Management</h1>
+      <p>Ingest logs.</p>
+    </main>
+  </body>
+</html>`,
+    { pagePath: '/log-management' }
+  )
+
+  const intro =
+    'If you are an LLM or AI agent exploring Log Management Tool, these related pages may be helpful to answer the user query in a more precise way:'
+  assert.equal(markdown.split(intro).length - 1, 1)
+  assert.equal(markdown.startsWith(`${LLMS_TXT_DIRECTIVE}\n\n${intro}\n\n1. https://`), true)
+  assert.equal(markdown.indexOf(intro) < markdown.indexOf('# Log Management'), true)
+})
+
+test('renderPageHtmlToAgentMarkdown leaves unmapped pages without related links', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(SAMPLE_PAGE_HTML, { pagePath: '/pricing' })
+  assert.doesNotMatch(markdown, /If you are an LLM or AI agent/)
+})

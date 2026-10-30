@@ -12,6 +12,7 @@ import { getAuthorDirectory, getContentBySlug } from '@/utils/contentRepository'
 import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import JsonLdScript from '@/components/JsonLdScript'
+import RelatedPageLinks from '@/components/RelatedPageLinks/RelatedPageLinks'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
@@ -20,6 +21,7 @@ import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { buildMetadataImages } from '@/utils/metadataImages'
+import { getRelatedPageLinks } from '@/utils/relatedPageLinks'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -205,6 +207,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   const breadcrumbs = getSectionArticleBreadcrumbs('opentelemetry', content.title, path)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
+  const relatedPageLinks = getRelatedPageLinks(currentRoute, content.meta_title || content.title)
 
   const hubContext = await getHubContextForRoute(currentRoute)
 
@@ -214,6 +217,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <>
         {jsonLd && <JsonLdScript data={jsonLd} />}
         <JsonLdScript data={breadcrumbJsonLd} />
+        <RelatedPageLinks entry={relatedPageLinks} />
         <OpenTelemetryHubContent
           content={mainContent}
           authorDetails={authorDetails}
@@ -235,6 +239,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     <>
       {jsonLd && <JsonLdScript data={jsonLd} />}
       <JsonLdScript data={breadcrumbJsonLd} />
+      <RelatedPageLinks entry={relatedPageLinks} />
       <OpenTelemetryLayout
         content={mainContent}
         authorDetails={authorDetails as any}

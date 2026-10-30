@@ -11,6 +11,7 @@ import { agentResponse } from '@/utils/agentResponseHeaders'
 
 type ContentRecord = {
   title?: unknown
+  meta_title?: unknown
   description?: unknown
   summary?: unknown
   tags?: unknown
@@ -74,11 +75,12 @@ export async function GET(
     {
       slug: `${params.section}/${slug}`,
       title: asString(post.title) || slug,
+      meta_title: asString(post.meta_title),
       description: asString(post.description) || asString(post.summary),
       docTags: post.tags,
       body: { raw: rawMdx },
     },
-    { footerLines: [] }
+    { footerLines: [], pagePath: `/${params.section}/${slug}` }
   )
 
   return agentResponse(markdown, { varyAccept: true })

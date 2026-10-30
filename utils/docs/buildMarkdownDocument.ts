@@ -1,4 +1,6 @@
 import { tagDefinitions } from '@/constants/tagDefinitions'
+import type { RelatedPageLinksEntry } from '../relatedPageLinks'
+import { buildRelatedPageLinksMarkdown } from '../relatedPageLinksText'
 import { normalizeWhitespace } from './markdownCore'
 
 export const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
@@ -10,6 +12,7 @@ export type BuildMarkdownDocumentOptions = {
   title: string
   includeTitle?: boolean
   description?: string
+  relatedPageLinks?: RelatedPageLinksEntry | null
   tags?: string[]
   includeTagDefinitions?: boolean
   bodyMarkdown?: string
@@ -43,6 +46,7 @@ export const buildMarkdownDocument = ({
   title,
   includeTitle = true,
   description,
+  relatedPageLinks,
   tags = [],
   includeTagDefinitions = false,
   bodyMarkdown,
@@ -59,6 +63,10 @@ export const buildMarkdownDocument = ({
   }
 
   sections.push(LLMS_TXT_DIRECTIVE)
+
+  if (relatedPageLinks && relatedPageLinks.links.length > 0) {
+    sections.push(buildRelatedPageLinksMarkdown(relatedPageLinks))
+  }
 
   const tagSection = buildTagSection(tags, includeTagDefinitions)
   if (tagSection) {
