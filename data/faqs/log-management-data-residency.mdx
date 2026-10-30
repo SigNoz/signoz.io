@@ -7,11 +7,11 @@ authors: [yuvraj]
 tags: [logs]
 ---
 
-For logs that must stay in your data center, use self-hosted SigNoz and keep the full data path inside that boundary. If the requirement is regional, consider [SigNoz Cloud](https://signoz.io/log-management/) in an available region or Bring Your Own Cloud (BYOC) in your cloud account. Check where logs travel during collection, queries, and exports, and where SigNoz stores them.
+Yes. You can use self-hosted SigNoz to keep logs in your data center, provided that collection, storage, access, and copies stay within that boundary. If your policy permits a provider in an approved region, you can consider [SigNoz Cloud](https://signoz.io/log-management/) or Bring Your Own Cloud (BYOC), where SigNoz runs in your cloud account.
 
 ## Choose a deployment for your boundary
 
-Start with what your policy permits. A requirement to keep logs in Europe differs from a requirement to keep them in your own infrastructure.
+The right deployment depends on where your policy allows logs to go. For example, keeping logs in Europe is different from keeping them in infrastructure you control.
 
 | Your requirement | Deployment to consider |
 | --- | --- |
@@ -19,26 +19,24 @@ Start with what your policy permits. A requirement to keep logs in Europe differ
 | Logs can go to a provider in an approved region | SigNoz Cloud offers regions in the United States, Europe, and India. Match the region and data-handling terms to your requirement. |
 | Logs must stay in your cloud account | BYOC lets SigNoz run the platform in your cloud. Confirm the region, management connections, and support access for your deployment. |
 
-The [deployment options](https://signoz.io/enterprise/) describe SigNoz Cloud, enterprise self-hosting, and BYOC. Self-hosting lets your team choose the infrastructure; it also leaves your team responsible for configuring its data paths.
+With self-hosting, your team chooses the infrastructure and configures the paths that logs take through it. The [deployment options](https://signoz.io/enterprise/) describe how this differs from a SigNoz-managed deployment.
 
 ## Follow one log through the boundary
 
-For example, take a checkout service that records successful payments and payment failures. Its company requires those logs to stay in its data center. The service can send logs to a local OpenTelemetry Collector, which forwards them to the SigNoz Collector in the same data center. The SigNoz Collector writes them to ClickHouse, the database used to store telemetry. The [architecture guide](https://signoz.io/docs/architecture/) explains these components, and the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/) covers their connections.
+For example, take a checkout service that records successful payments and payment failures. Its company requires those logs to stay in its data center, so it uses self-hosted SigNoz there. The service sends logs to a local OpenTelemetry Collector, which forwards them to the SigNoz Collector in the same data center. The SigNoz Collector then writes the logs to ClickHouse, the database that stores them. The [architecture guide](https://signoz.io/docs/architecture/) explains these components, and the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/) covers their connections.
 
-When an engineer queries those logs, SigNoz returns the results to their browser or API client. That means the location of the client matters as well as the location of the database.
+Storage is only part of the path. When an engineer queries the checkout logs, SigNoz returns the results to their browser or API client. To keep the logs within the data center, the company also needs to check where those results and other copies go.
 
-For this design to meet the checkout service's policy, check the paths beyond the database too.
-
-- **Collection and forwarding.** Check every application, agent, and Collector destination, including any second exporter that sends a copy elsewhere.
+- **Collection and forwarding.** Check where each application, agent, and Collector sends logs, including any additional destination that receives a copy.
 - **Storage and copies.** Keep ClickHouse storage, replicas, backups, archives, and downloaded results in approved locations.
-- **Access and sharing.** Include browser and API client locations, support access, and any log details sent through alerts or support files. A user's permission to read logs does not constrain where that user receives them.
+- **Access and sharing.** Include browser and API client locations, support access, and any log details sent through alerts or support files.
 
 ## Check separate statistics reporting
 
-Self-hosted SigNoz also reports deployment and usage statistics separately from your logs. In v0.88.0 and later, this reporting is enabled by default; disabling the collection of user details, such as email addresses, leaves the rest of the reporting enabled. The [statistics reporting guide](https://signoz.io/docs/telemetry/) explains what is reported and how to disable it for your version.
+If the company's policy also covers other information sent outside the data center, it should check statistics reporting separately from the log paths. Self-hosted SigNoz reports deployment and usage statistics. In v0.88.0 and later, this reporting is enabled by default. Disabling the collection of user details, such as email addresses, leaves the rest of the reporting enabled. The [statistics reporting guide](https://signoz.io/docs/telemetry/) explains what is reported and how to disable it for your version.
 
 ## Apply stricter rules to sensitive fields
 
-Within the checkout deployment, some fields may need stricter handling than the rest of a log. If SigNoz must not receive email addresses, remove the full addresses before export. Check both log bodies and attributes, and test representative records to make sure the addresses are gone. The [PII scrubbing guide](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) explains Collector processing; adapt its partial email masking example if you need to remove the whole address.
+The checkout logs themselves may also contain fields with stricter handling rules. If SigNoz must not receive email addresses, remove the full addresses before sending the logs to it. Check both the log message and its attached attributes, and test representative records to make sure the addresses are gone. The [PII scrubbing guide](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) explains how to process logs in a Collector. Its email example masks only part of the address, so adapt it if you need to remove the whole address.
 
-If you choose SigNoz Cloud, remove protected fields before sending logs there. Cloud [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) cannot prevent that transfer because the pipelines process logs after the logs reach SigNoz Cloud.
+If you choose SigNoz Cloud for a regional requirement, remove protected fields before sending logs there. [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) process logs after they reach SigNoz Cloud, so they cannot prevent that transfer.
