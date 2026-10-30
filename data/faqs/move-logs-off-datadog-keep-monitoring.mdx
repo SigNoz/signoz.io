@@ -1,0 +1,44 @@
+---
+title: 'Can I move logs from Datadog to SigNoz while keeping my existing monitoring?'
+description: 'Move one service’s logs to SigNoz Cloud while keeping metrics and traces in place. Compare the logs, check alerts, and keep a way to restore the old route.'
+published_date: 2026-10-23
+authors: [yuvraj]
+tags: [logs]
+---
+
+You can send a service’s logs to SigNoz Cloud while keeping its metrics and application performance monitoring (APM) in Datadog or other tools. The change is limited to where the logs go, so the components that collect metrics and traces can stay in place.
+
+## Start with one service
+
+To see how this works, we tested sample logs from a checkout service and an inventory service. The checkout logs included a payment timeout and a failed response. An OpenTelemetry Collector, which receives and forwards telemetry, sent logs from both services to a second Collector standing in for the existing log destination.
+
+We then sent copies of checkout’s logs to SigNoz Cloud while both services continued to send logs to the existing destination. This kind of overlap gives you time to compare logs before switching a service over. If your source already uses a Collector, it can route the copies. Sending logs to both destinations can incur charges at both.
+
+The [Datadog logs migration guide](https://signoz.io/docs/migration/migrate-from-datadog/logs/) covers collection options for different sources. If the same Collector also handles metrics and traces, a separate log Collector can help keep their collection in place while you change the log route.
+
+## Check the payment trail in SigNoz Cloud
+
+After switching the sample checkout logs to SigNoz Cloud, we searched for a failed payment in **Logs Explorer** using its request ID. The ID helps distinguish that payment’s logs from those of other requests. The search returned both the timeout and failed response shown below.
+
+<Figure
+  src="/img/faqs/2026-10/logs-only-migration.webp"
+  themeInvert={false}
+  width={1250}
+  height={205}
+  alt="Logs Explorer filtered by a sample request ID, showing payment.timeout and response.failed"
+  caption="Both failure records for one sample payment appear in Logs Explorer."
+/>
+
+A payment search is one useful check. Before switching your own service, compare logs at both destinations over the same time range, including counts, timestamps and the fields your searches use. Datadog log monitors will no longer see new checkout logs once those logs stop arriving there, so recreate the searches and alerts you need in SigNoz Cloud and test the alerts and notifications before switching. The [alert migration guide](https://signoz.io/docs/migration/migrate-from-datadog/alerts/) explains how to map and test them.
+
+Once those checks pass, you can remove checkout’s old log route while leaving inventory’s route and metric and trace monitoring in place. Keep the previous configuration in case you need to restore it, and check that new checkout logs reach the original destination after restoration. When we restored the checkout route in the test, new checkout logs reached the second Collector and no longer appeared in SigNoz Cloud.
+
+Plan separately for historical logs, saved searches, parsing rules, dashboards and alerts. Check your Datadog retention settings if you need to access older logs there. Restoring the route cannot recover logs that were never collected.
+
+## Bring logs, metrics and traces together
+
+Starting with logs lets you make the move gradually. If you later bring checkout’s metrics and traces into SigNoz Cloud, you can investigate a payment failure in one place. Metrics show traffic and error trends, the failed payment’s trace shows its recorded service calls, and its logs provide error details.
+
+A trace ID links a log to the corresponding request trace. To open that trace from a log, the log needs its trace ID and the trace must still be available in SigNoz Cloud. The [logs and traces correlation guide](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) covers the setup.
+
+Moving more telemetry to SigNoz Cloud could also lower your costs. The [cost comparison](https://signoz.io/blog/cost-effective-datadog-alternative/) walks through an example, and [pricing](https://signoz.io/pricing/) can help you estimate costs for your own volume, retention and required features. Compare that estimate with your Datadog costs and contract before deciding.
