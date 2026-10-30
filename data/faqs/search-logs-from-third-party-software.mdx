@@ -6,23 +6,23 @@ authors: [yuvraj]
 tags: [logs]
 ---
 
-Yes. If an OpenTelemetry Collector can read the application's existing log files, it can send them to SigNoz Cloud without changes to the application. You can search the log text in Logs Explorer and extract fields when you want to filter by a value such as a response status.
+Yes. An OpenTelemetry Collector can read the application's existing log files and send them to SigNoz Cloud without changes to the application, as long as it has access to those files. Once the logs arrive, you can search their text or extract values such as response status into fields for more precise filtering.
 
-The Collector's `filelog` receiver reads the files and forwards their records. The [file collection guide](https://signoz.io/docs/userguide/collect_logs_from_file/) explains how to set it up, including file access and container mounts.
+The Collector uses its `filelog` receiver to read the files. The [file collection guide](https://signoz.io/docs/userguide/collect_logs_from_file/) explains how to set it up, including file access and container mounts.
 
 ## Find a failed request
 
-For example, take a reporting application whose web server writes a log for each request. When a request to `/report` fails because the service is unavailable, its log records an HTTP `503` response.
+For example, take a reporting application whose web server writes a log for each request. When a request to `/report` receives an HTTP `503` response, the log records that the service was unavailable.
 
-A regular expression parser can extract the status from the text while keeping the original message. In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), filtering for the service `third-party-web-example` and status `503` finds the failed request.
+To find these failures by status, you can use a regular expression (regex) parser to match the log text and extract the status into a separate field while keeping the original message. In this example, the Collector labels the logs `third-party-web-example`, so you can narrow the search to this application. In [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/), filtering for that service and status `503` finds the failed request.
 
 <Figure
   src="/img/faqs/2026-10/third-party-status-search.webp"
   alt="Logs Explorer shows the service name and parsed status filter with the matching report request and HTTP 503 response."
-  caption="The service and status filters find the failed request to /report."
+  caption="Filtering by service and status finds the failed request to /report."
   width={1280}
   height={286}
   themeInvert={false}
 />
 
-You can parse logs in the Collector before export or use [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz Cloud to extract fields before storage. For text logs, see the [regex parser guide](https://signoz.io/docs/logs-pipelines/guides/regex-parser/). For JSON logs, use the [JSON parser](https://signoz.io/docs/logs-pipelines/guides/json/) to extract fields as attributes that you can filter.
+You can extract fields like the status in the Collector before it sends the logs, or use [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz Cloud to process them before storage. The [regex parser guide](https://signoz.io/docs/logs-pipelines/guides/regex-parser/) shows how to extract fields from text logs. If your application writes JSON logs instead, the [JSON parser guide](https://signoz.io/docs/logs-pipelines/guides/json/) shows how to extract values into attributes you can filter.
